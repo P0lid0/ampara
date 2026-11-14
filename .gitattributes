@@ -12,3 +12,7 @@ meta-data text eol=lf
 *.png binary
 *.jpg binary
 *.apk binary
+.env.example text eol=lf
+.gitignore text eol=lf
+.gitattributes text eol=lf
+*.txt text eol=lf
