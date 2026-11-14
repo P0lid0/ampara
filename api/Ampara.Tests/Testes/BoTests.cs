@@ -3,7 +3,9 @@ using System.Text.Json;
 using Ampara.Domain;
 using Ampara.Domain.Entidades;
 using Ampara.Tests.Infra;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace Ampara.Tests;
 
@@ -157,7 +159,11 @@ public class BoTests(AmparaFactory f) : IClassFixture<AmparaFactory>
         using var db = f.NovoDb();
         var cifrado = (await db.Aparelhos.SingleAsync(a => a.UsuarioId == dono.UsuarioId)).ImeiCifrado;
 
-        var texto1 = (await dono.Cliente.GetFromJsonAsync<JsonElement>($"/api/v1/ocorrencias/{id}/bo")).GetProperty("texto").GetString()!;
+        using var req = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/ocorrencias/{id}/bo");
+        req.Headers.Add("X-Correlation-Id", "corr-bo-teste-16");
+        var resp = await dono.Cliente.SendAsync(req);
+        resp.EnsureSuccessStatusCode();
+        var texto1 = (await resp.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("texto").GetString()!;
         var texto2 = (await em.GetFromJsonAsync<JsonElement>($"/api/v1/ocorrencias/{id}/bo")).GetProperty("texto").GetString()!;
 
         var chamadas = f.ImeiRevelador.Chamadas.Where(c => c.DonoId == dono.UsuarioId).ToList();
@@ -167,7 +173,24 @@ public class BoTests(AmparaFactory f) : IClassFixture<AmparaFactory>
             Assert.Equal(cifrado, c.ImeiCifrado);
             Assert.Equal(dono.UsuarioId, c.SolicitanteId);
         });
+        Assert.Equal("corr-bo-teste-16", chamadas[0].CorrelationId);   // o id da requisição chega ao revelador
+        Assert.False(string.IsNullOrWhiteSpace(chamadas[1].CorrelationId));
         Assert.Contains($"IMEI: {chamadas[0].Retorno}", texto1);
         Assert.Contains($"IMEI: {chamadas[1].Retorno}", texto2);
+    }
+
+    [Fact]
+    public async Task Sem_delegacias_carregadas_502_com_codigo()
+    {
+        var dono = await f.NovoUsuarioAsync();
+        var id = await OcorrenciaAsync(dono);
+        using var vazia = f.WithWebHostBuilder(b => b.ConfigureAppConfiguration((_, cfg) => cfg.AddInMemoryCollection(
+            new Dictionary<string, string?> { ["Delegacias:Arquivo"] = Path.Combine(AppContext.BaseDirectory, "Fixtures", "nao-existe.json") })));
+        var cliente = vazia.CreateClient();
+        cliente.DefaultRequestHeaders.Authorization = dono.Cliente.DefaultRequestHeaders.Authorization;
+
+        var r = await cliente.GetAsync($"/api/v1/ocorrencias/{id}/bo");
+        Assert.Equal(HttpStatusCode.BadGateway, r.StatusCode);
+        Assert.Equal("delegacias-indisponiveis", await CodigoDoErroAsync(r));
     }
 }

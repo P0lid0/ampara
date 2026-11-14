@@ -15,7 +15,7 @@ public sealed class BoGenerator(
     /// <summary>Conferir no dia da entrega (site oficial da Delegacia Eletrônica de SP).</summary>
     public const string LinkDelegaciaEletronica = "https://www.delegaciaeletronica.policiacivil.sp.gov.br/";
 
-    public async Task<BoDto> GerarAsync(Ator ator, Guid ocorrenciaId, CancellationToken ct)
+    public async Task<BoDto> GerarAsync(Ator ator, Guid ocorrenciaId, CancellationToken ct, string? correlationId = null)
     {
         var o = await db.Ocorrencias.AsNoTracking().FirstOrDefaultAsync(x => x.Id == ocorrenciaId, ct)
             ?? throw new NaoEncontradoException("ocorrencia-nao-encontrada");
@@ -38,7 +38,7 @@ public sealed class BoGenerator(
         // O BO nunca decifra por conta própria: o IMEI vem sempre do revelador.
         var imei = imeiCifrado is null
             ? null
-            : revelador.RevelarParaBo(imeiCifrado, donoId: o.UsuarioId, solicitanteId: ator.UsuarioId);
+            : revelador.RevelarParaBo(imeiCifrado, donoId: o.UsuarioId, solicitanteId: ator.UsuarioId, correlationId: correlationId);
 
         var texto = Montar(momento, lat, lng, aparelho, imei);
 
