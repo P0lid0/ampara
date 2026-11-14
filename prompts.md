@@ -266,4 +266,10 @@ Resultado: 14 testes novos passando; sem migration.
 
 Resultado: corpus de 357 linhas (194 positivas, 163 negativas), precisão e recall de 100 % no corpus sintético (metas: 95 % e 90 % globais); limitações conhecidas listadas na evidência; sem migration.
 
+### 42. Cyber: correção da rodada 1 da revisão da Task 3 (plano 03)
+
+> Corrigir os achados Important da revisão da Task 3: `SaudeDetector` e `Normalizador` não podem lançar com emoji nem surrogate solto (surrogate solto vira U+FFFD), e as bordas dos detectores deixam de esconder CPF, telefone, IMEI e RG em listas separadas por vírgula ou ponto sem espaço, sem voltar a casar decimais. Cobrir com testes e linhas de corpus; registrar o contrato de timeout na interface.
+
+Resultado: testes novos de "nunca lança" e de listas sem espaço; corpus com 376 linhas; sem migration.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->

@@ -30,7 +30,15 @@ public sealed class SaudeDetector : IPiiDetector
     {
         var sb = new StringBuilder(s.Length);
         foreach (var ch in s)
-            sb.Append(char.ToLowerInvariant(ch.ToString().Normalize(NormalizationForm.FormD)[0]));
+            sb.Append(char.ToLowerInvariant(DobrarChar(ch)));
         return sb.ToString();
+    }
+
+    // Metade de par substituto (emoji) não pode ser normalizada sozinha; fica como está e o tamanho se mantém.
+    private static char DobrarChar(char ch)
+    {
+        if (char.IsSurrogate(ch)) return ch;
+        try { return ch.ToString().Normalize(NormalizationForm.FormD)[0]; }
+        catch (ArgumentException) { return ch; }
     }
 }

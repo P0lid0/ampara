@@ -10,7 +10,11 @@ public interface IPiiDetector
 {
     PiiClasse Classe { get; }
 
-    /// <summary>Procura no texto já passado por <see cref="Normalizador.Normalizar"/>.</summary>
+    /// <summary>
+    /// Procura no texto já passado por <see cref="Normalizador.Normalizar"/>. Nunca lança por conteúdo do texto;
+    /// <see cref="System.Text.RegularExpressions.RegexMatchTimeoutException"/> (250 ms) é a única exceção possível e o
+    /// chamador deve tratá-la como "tem PII" (falha fechada).
+    /// </summary>
     IReadOnlyList<Deteccao> Detectar(string textoNormalizado);
 
     /// <summary>A chave já passada por <see cref="Chaves.Normalizar"/> indica esta classe?</summary>

@@ -5,9 +5,11 @@ namespace Ampara.Infrastructure.Cyber.Detectores;
 /// <summary>Bordas e conferências de dígito compartilhadas pelos detectores.</summary>
 internal static class Validacao
 {
-    // Não casa colado em letra ou dígito (GUID, JWT, hash) nem em decimal ("-23.5672490", "1.529.982.247-25").
-    public const string Ini = @"(?<![0-9A-Za-z]|[0-9][.,])";
-    public const string Fim = @"(?![0-9A-Za-z]|[.,][0-9])";
+    // Não casa colado em letra ou dígito (GUID, JWT, hash) nem em número decimal ("-23.5672490", "1.529.982.247-25").
+    // Decimal = parte inteira de 1 a 3 dígitos (sem dígito antes) + separador; a fração é só 1 a 6 dígitos sem nada de
+    // número depois. Assim "a,b" e "a.b" (listas de CPF/telefone sem espaço) continuam detectados nos dois lados.
+    public const string Ini = @"(?<![0-9A-Za-z])(?<!(?<![0-9]|[0-9]-)[0-9]{1,3}[.,])";
+    public const string Fim = @"(?![0-9A-Za-z]|[.,][0-9]{1,6}(?![0-9.\-]))";
 
     public static readonly TimeSpan Limite = TimeSpan.FromMilliseconds(250);
 

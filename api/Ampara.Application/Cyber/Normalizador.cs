@@ -13,7 +13,7 @@ public static class Normalizador
         if (string.IsNullOrEmpty(s)) return string.Empty;
 
         var sb = new StringBuilder(s.Length);
-        foreach (var ch in s.Normalize(NormalizationForm.FormKC))
+        foreach (var ch in SanearSubstitutos(s).Normalize(NormalizationForm.FormKC))
         {
             switch (ch)
             {
@@ -28,5 +28,24 @@ public static class Normalizador
             }
         }
         return sb.ToString();
+    }
+
+    /// <summary>Surrogate solto (JSON com metade de emoji) faz Normalize lançar; vira U+FFFD, que nunca casa com detector.</summary>
+    private static string SanearSubstitutos(string s)
+    {
+        StringBuilder? sb = null;
+        for (var i = 0; i < s.Length; i++)
+        {
+            var ch = s[i];
+            if (char.IsHighSurrogate(ch) && i + 1 < s.Length && char.IsLowSurrogate(s[i + 1]))
+            {
+                sb?.Append(ch).Append(s[i + 1]);
+                i++;
+                continue;
+            }
+            if (char.IsSurrogate(ch)) { sb ??= new StringBuilder(s, 0, i, s.Length); sb.Append((char)0xFFFD); continue; }
+            sb?.Append(ch);
+        }
+        return sb?.ToString() ?? s;
     }
 }

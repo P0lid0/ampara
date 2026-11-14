@@ -342,6 +342,25 @@ for v in ["Obrigado pelo atendimento", "esqueci minha senha", "Rua das Flores, 1
     add(neutra(), v)
 add("descricao", "tratamento de dados conforme a lei")
 
+# ---- rodada 1 da revisao: listas sem espaco e texto com emoji / surrogate solto -----------------------------
+EMOJI = chr(0x1F600)
+SOLTO = chr(0xD800)  # CSV nao guarda surrogate solto: o caso fica nos testes unitarios; aqui so emoji valido
+for _ in range(3):
+    a, b = cpf_valido(), cpf_valido()
+    add("cpfs", f"{a},{b}", "Cpf")
+    add("cpfs", f"{cpf_fmt(a)},{cpf_fmt(b)}", "Cpf")
+    add("lista", f"{a}.{b}", "Cpf")
+for _ in range(2):
+    t1, t2 = telefones_formatados()[0], telefones_formatados()[0]
+    add("contatos", f"{t1},{t2}", "Telefone")
+for _ in range(3):
+    add("mensagem", f"socorro {EMOJI} meu cpf {cpf_fmt(cpf_valido())}", "Cpf")
+add("mensagem", f"{EMOJI}{EMOJI} laudo do paciente", "Saude")
+add("mensagem", f"tem depressão {EMOJI}", "Saude")
+add("mensagem", f"{EMOJI} bom dia {EMOJI}")
+add("mensagem", f"{EMOJI}{EMOJI}{EMOJI}")
+add("mensagem", "a" + chr(0xFFFD) + "b")
+
 # ---- saida ---------------------------------------------------------------------------------------------------
 
 destino = Path(__file__).resolve().parent / "corpus.csv"

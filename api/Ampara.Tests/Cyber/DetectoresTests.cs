@@ -18,8 +18,13 @@ public class DetectoresTests
         Assert.Empty(new CpfDetector().Detectar("529.982.247-26"));     // DV inválido
         Assert.Empty(new CpfDetector().Detectar("111.111.111-11")); }
 
-    [Fact] public void Cpf_com_digitos_fullwidth_e_nbsp() =>   // Review Focus 3
-        Assert.Single(new CpfDetector().Detectar(Normalizador.Normalizar("５２９.９８２.２４７-２５ e 529\u00A0982\u00A0247\u00A025")).Take(1));
+    [Fact] public void Cpf_com_digitos_fullwidth() =>   // Review Focus 3
+        Assert.Single(new CpfDetector().Detectar(Normalizador.Normalizar(
+            string.Concat("529.982.247-25".Select(c => char.IsAsciiDigit(c) ? (char)(c - '0' + 0xFF10) : c)))));
+
+    [Fact] public void Cpf_com_nbsp() {
+        var nbsp = ((char)0xA0).ToString();
+        Assert.Single(new CpfDetector().Detectar(Normalizador.Normalizar("529" + nbsp + "982" + nbsp + "247" + nbsp + "25"))); }
 
     [Fact] public void Cpf_com_caractere_invisivel_no_meio() =>
         Assert.Single(new CpfDetector().Detectar(Normalizador.Normalizar("529\u200B.982.247\u2060-25")));
@@ -77,4 +82,33 @@ public class DetectoresTests
         Assert.Equal("palavrasecreta", Chaves.Normalizar("palavraSecreta"));
         Assert.Equal("diagnostico", Chaves.Normalizar("Diagnóstico"));
         Assert.False(new CpfDetector().ChaveIndica(Chaves.Normalizar("codigo"))); }
+
+    [Fact] public void Detectores_nunca_lancam_com_emoji_surrogate_solto_e_fffd() {   // Review rodada 1, Important 1
+        var emoji = char.ConvertFromUtf32(0x1F600);
+        var solto = ((char)0xD800).ToString();
+        var fffd = ((char)0xFFFD).ToString();
+        foreach (var bruto in new[] { "ola " + emoji, "laudo " + emoji + " cpf 529.982.247-25", "a" + solto + "b", solto, ((char)0xDC00) + "x",
+                                      "diagnostico" + solto + "depressao", "a" + fffd + "b", emoji + emoji + "hiv" })
+        {
+            var t = Normalizador.Normalizar(bruto);
+            foreach (var d in TodosDetectores()) Assert.NotNull(d.Detectar(t));
+        }
+        Assert.Single(new SaudeDetector().Detectar(Normalizador.Normalizar("ola " + emoji + " tem DEPRESSÃO")));
+        var t2 = Normalizador.Normalizar("laudo " + emoji);
+        var m = Assert.Single(new SaudeDetector().Detectar(t2));
+        Assert.Equal("laudo", t2.Substring(m.Inicio, m.Tamanho));
+        Assert.Single(new CpfDetector().Detectar(Normalizador.Normalizar(emoji + " 529.982.247-25 " + solto)));
+        Assert.Equal("a" + fffd + "b", Normalizador.Normalizar("a" + solto + "b")); }
+
+    [Fact] public void Listas_sem_espaco_detectam_cada_item() {   // Review rodada 1, Important 2
+        Assert.Equal(2, new CpfDetector().Detectar("52998224725,12345678909").Count);
+        Assert.Equal(2, new CpfDetector().Detectar("529.982.247-25,123.456.789-09").Count);
+        Assert.Equal(2, new CpfDetector().Detectar("cpfs=52998224725.12345678909").Count);
+        Assert.Equal(2, new CpfDetector().Detectar("529.982.247-25;123.456.789-09").Count);
+        Assert.Equal(2, new TelefoneDetector().Detectar("(11) 98765-4321,(21) 99876-5432").Count);
+        Assert.Equal(2, new TelefoneDetector().Detectar("11987654321,21998765432").Count);
+        Assert.Equal(2, new ImeiDetector().Detectar("490154203237518,490154203237518").Count);
+        Assert.Equal(2, new RgDetector().Detectar("12.345.678-9,98.765.432-1").Count);
+        Assert.Empty(new CpfDetector().Detectar("-23.56724901234"));          // decimal continua fora
+        Assert.Empty(new CpfDetector().Detectar("1.529.982.247-25")); }
 }
