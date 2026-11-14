@@ -1,0 +1,9 @@
+# T15 verificacao ao vivo 2026-11-14T19:30:43Z broker=broker.hivemq.com:1883 deviceId=chaveiro-ampara-fae8af
+api pid=11212
+GET /health -> {"status":"ok","mqtt":true,"db":true} [200]
+parear -> {"id":"71287224-516f-492a-b512-724fc70bd80b","deviceId":"chaveiro-ampara-fae8af"} [201]
+evento publicado: chaveiro-ampara-fae8af-7b4f2ff7
+ack recebido
+exit do script: 0
+GET /api/v1/ocorrencias -> [{"id":"d322ff2f-b5b0-4f8a-a58f-6e654bf19ee8","estado":"Aberta","origem":"chaveiro","iniciadaEm":"2026-11-14T19:30:49Z","momento":null,"passos":[{"passo":"Banco","concluidoEm":null},{"passo":"CelularSeguro","concluidoEm":null},{"passo":"Operadora","concluidoEm":null},{"passo":"Senhas","concluidoEm":null},{"passo":"Bo","concluidoEm":null}],"alertas":[],"contas":[]}]
+GET /health -> {"status":"ok","mqtt":true,"db":true} [200]

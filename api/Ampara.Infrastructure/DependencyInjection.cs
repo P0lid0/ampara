@@ -35,8 +35,10 @@ public static class DependencyInjection
         services.AddSingleton<IImeiRevelador, NoopImeiRevelador>();
         services.AddSingleton<ITaintGuard, NoopTaintGuard>();
         services.AddSingleton<IAcessoIndevido, NoopAcessoIndevido>();
-        // Gateway real (MQTT) entra na T15; ate la, desconectado.
-        services.AddSingleton<IChaveiroGateway, GatewayChaveiroDesconectado>();
+        services.AddSingleton<MqttChaveiroGateway>();
+        services.AddSingleton<IChaveiroGateway>(sp => sp.GetRequiredService<MqttChaveiroGateway>());
+        services.AddHostedService(sp => sp.GetRequiredService<MqttChaveiroGateway>());
+        services.AddSingleton<ISondaSaude, SondaSaude>();
         return services;
     }
 
