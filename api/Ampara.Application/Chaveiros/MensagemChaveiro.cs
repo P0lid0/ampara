@@ -18,24 +18,27 @@ public sealed record MensagemChaveiro(string EventId, string Tipo, string Device
             var r = doc.RootElement;
             if (r.ValueKind != JsonValueKind.Object) return null;
 
-            if (!Texto(r, "eventId", true, out var eventId) || !Texto(r, "type", true, out var tipo)
-                || !Texto(r, "deviceId", true, out var deviceId) || !Texto(r, "alertId", false, out var alertId)) return null;
+            if (!Texto(r, "eventId", true, 128, out var eventId) || !Texto(r, "type", true, 32, out var tipo)
+                || !Texto(r, "deviceId", true, 64, out var deviceId) || !Texto(r, "alertId", false, 128, out var alertId)) return null;
             if (!TiposValidos.Contains(tipo!)) return null;
             if (!Inteiro(r, "ts", out var ts) || !Inteiro(r, "ageMs", out var age) || !Inteiro(r, "battery", out var bat)) return null;
-            if (ts is < 0 or > 253402300799) return null;                        // fora do intervalo de DateTime
-            if (age is < 0 or > int.MaxValue) return null;
-            if (bat is < 0 or > 100) return null;
+            // Campos auxiliares fora da faixa não derrubam o evento (um pedido de socorro não pode se perder por telemetria ruim):
+            // viram "sem valor" e o evento segue. Só tipo errado ou texto grande demais descarta.
+            if (ts is < 0 or > 253402300799) ts = null;                          // fora do intervalo de DateTime
+            if (age is < 0 or > int.MaxValue) age = null;
+            if (bat is < 0 or > 100) bat = null;
             return new MensagemChaveiro(eventId!, tipo!, deviceId!, alertId, ts, (int)(age ?? 0), (int?)bat);
         }
         catch (JsonException) { return null; }
     }
 
-    private static bool Texto(JsonElement r, string nome, bool obrigatorio, out string? valor)
+    private static bool Texto(JsonElement r, string nome, bool obrigatorio, int max, out string? valor)
     {
         valor = null;
         if (!r.TryGetProperty(nome, out var e) || e.ValueKind == JsonValueKind.Null) return !obrigatorio;
         if (e.ValueKind != JsonValueKind.String) return false;
         valor = e.GetString();
+        if (valor is { } v && v.Length > max) return false;                   // maior que a coluna do banco
         return !obrigatorio || !string.IsNullOrWhiteSpace(valor);
     }
 
@@ -61,13 +64,13 @@ public sealed record StatusChaveiro(string DeviceId, bool Online, int? Battery)
             using var doc = JsonDocument.Parse(payload);
             var r = doc.RootElement;
             if (r.ValueKind != JsonValueKind.Object) return null;
-            if (!r.TryGetProperty("deviceId", out var d) || d.ValueKind != JsonValueKind.String || string.IsNullOrWhiteSpace(d.GetString())) return null;
+            if (!r.TryGetProperty("deviceId", out var d) || d.ValueKind != JsonValueKind.String || string.IsNullOrWhiteSpace(d.GetString()) || d.GetString()!.Length > 64) return null;
             if (!r.TryGetProperty("online", out var o) || o.ValueKind is not (JsonValueKind.True or JsonValueKind.False)) return null;
             int? bat = null;
             if (r.TryGetProperty("battery", out var b) && b.ValueKind != JsonValueKind.Null)
             {
-                if (b.ValueKind != JsonValueKind.Number || !b.TryGetInt32(out var n) || n is < 0 or > 100) return null;
-                bat = n;
+                if (b.ValueKind != JsonValueKind.Number || !b.TryGetInt32(out var n)) return null;
+                if (n is >= 0 and <= 100) bat = n;                              // fora da faixa: ignora a bateria, mantém o status
             }
             return new StatusChaveiro(d.GetString()!, o.GetBoolean(), bat);
         }

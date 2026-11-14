@@ -52,7 +52,10 @@ public sealed class ChaveiroEventoService(IAmparaDb db, IOcorrenciaService ocorr
                 switch (m.Tipo)
                 {
                     case "alert":
-                        var emClique = m.Ts is { } ts ? DateTimeOffset.FromUnixTimeSeconds(ts).UtcDateTime : chegadaUtc.AddMilliseconds(-m.AgeMs);
+                        // ts só vale perto da chegada (relógio sem NTP manda 0 ou data futura); fora de 1 dia cai para chegada - ageMs.
+                        var porAge = chegadaUtc.AddMilliseconds(-m.AgeMs);
+                        var emClique = m.Ts is { } ts && Math.Abs((DateTimeOffset.FromUnixTimeSeconds(ts).UtcDateTime - chegadaUtc).TotalHours) <= 24
+                            ? DateTimeOffset.FromUnixTimeSeconds(ts).UtcDateTime : porAge;
                         var r = await ocorrencias.DispararAsync(new GatilhoChaveiro(m.DeviceId, m.AlertId ?? m.EventId, emClique), c.UsuarioId, ct);
                         registro.OcorrenciaId = r.OcorrenciaId;
                         break;

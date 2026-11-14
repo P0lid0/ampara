@@ -148,6 +148,22 @@ public class ChaveiroEventoTests(AmparaFactory f) : IClassFixture<AmparaFactory>
         using var db = f.NovoDb();
         Assert.Empty(db.Ocorrencias.Where(o => o.UsuarioId == v.UsuarioId));
         Assert.Equal(0, Acks(dev)); Assert.Equal(0, Acks(deviceDoTopico));
+        Assert.Empty(db.EventosRecebidos.Where(e => e.DeviceId == dev));
+    }
+
+    [Theory]
+    [InlineData(101, 140, null)]            // battery fora de 0..100
+    [InlineData(82, -5, null)]              // ageMs negativo
+    [InlineData(82, 140, 999999999999L)]    // ts fora do intervalo de DateTime
+    [InlineData(82, 140, 0L)]               // ts de relógio sem NTP
+    public async Task Alert_com_telemetria_fora_da_faixa_nao_se_perde_e_recebe_ack(int battery, int ageMs, long? ts)
+    {
+        var (v, dev) = await ChaveiroPareadoAsync();
+        await TratarAsync(dev, Evento("alert", dev, dev + "-9", ts: ts, ageMs: ageMs, battery: battery), Chegada);
+        using var db = f.NovoDb();
+        var o = db.Ocorrencias.Single(x => x.UsuarioId == v.UsuarioId);
+        Assert.Equal(Chegada.AddMilliseconds(-Math.Max(ageMs, 0)), o.IniciadaEm);
+        Assert.Equal(1, Acks(dev));
     }
 
     public static IEnumerable<object[]> PayloadsMalformados() =>
@@ -159,6 +175,8 @@ public class ChaveiroEventoTests(AmparaFactory f) : IClassFixture<AmparaFactory>
         [Dev, new string('a', 5000)],
         [Dev, "{\"eventId\":\"x-3\",\"type\":\"alert\",\"deviceId\":\"" + Dev + "\",\"ts\":\"texto\"}"],
         [Dev, "[1,2,3]"],
+        [Dev, Evento("alert", Dev, new string('e', 200))],                                  // eventId maior que a coluna
+        [Dev, Evento("alert", Dev, "x-4", alertId: new string('a', 200))],                  // alertId maior que a coluna
         [Dev, "{\"eventId\":7,\"type\":\"alert\",\"deviceId\":\"" + Dev + "\"}"],
     ];
 
