@@ -3,6 +3,7 @@ using Ampara.Application.Chaveiros;
 using Ampara.Application.Comum;
 using Ampara.Application.Cyber;
 using Ampara.Domain.Cyber;
+using Ampara.Infrastructure.Cyber;
 using Ampara.Infrastructure.Mqtt;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -36,6 +37,8 @@ public partial class MqttGatewayTests
         var sp = new ServiceCollection()
             .AddScoped<ITaintGuard, GuardQueBloqueiaLog>()
             .AddScoped<IChaveiroEventoService>(_ => svc)
+            .AddSingleton<IMqttPiiFilter>(p => new MqttPiiFilter(p.GetRequiredService<IServiceScopeFactory>(),
+                new PiiScanner(Cyber.DetectoresTests.TodosDetectores())))
             .BuildServiceProvider();
         using var gw = new MqttChaveiroGateway(sp.GetRequiredService<IServiceScopeFactory>(), TimeProvider.System,
             new ConfigurationBuilder().Build(), NullLogger<MqttChaveiroGateway>.Instance);

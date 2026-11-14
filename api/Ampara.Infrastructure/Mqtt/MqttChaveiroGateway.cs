@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json;
 using Ampara.Application.Chaveiros;
 using Ampara.Application.Comum;
+using Ampara.Application.Cyber;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -121,11 +122,12 @@ public sealed class MqttChaveiroGateway : BackgroundService, IChaveiroGateway
 
             using var escopo = _escopos.CreateScope();
             var sp = escopo.ServiceProvider;
-            // Ponto de extensao do plano 03 (Tarefa 13): IMqttPiiFilter.Filtrar(topico, payload) entra aqui e o que ele
-            // devolve e o que se despacha (politica Banco, que preserva deviceId, eventId, type, ts e battery).
-            // Nunca despachar o texto de ITaintGuard.Sanitizar(..., Sink.Log, ...): a politica do Log bloqueia e troca
-            // cada achado por [BLOQUEADO:Classe], e o ts de 10 digitos casa o detector de Telefone, quebrando o JSON.
+            // Filtro de PII (plano 03, Tarefa 13): roda antes de logar ou persistir, e o que ele devolve e o que se
+            // despacha (politica Banco, que preserva deviceId, eventId, type, ts e battery). Nunca despachar o texto de
+            // ITaintGuard.Sanitizar(..., Sink.Log, ...): a politica do Log bloqueia e troca cada achado por
+            // [BLOQUEADO:Classe], e o ts de 10 digitos casa o detector de Telefone, quebrando o JSON.
             // O payload em si nunca vai para o log.
+            payload = sp.GetRequiredService<IMqttPiiFilter>().Filtrar(topico, payload);
             var svc = sp.GetRequiredService<IChaveiroEventoService>();
             if (tipo == "events") await svc.TratarEventoAsync(deviceId, payload, chegada, CancellationToken.None);
             else await svc.TratarStatusAsync(deviceId, payload, chegada, CancellationToken.None);

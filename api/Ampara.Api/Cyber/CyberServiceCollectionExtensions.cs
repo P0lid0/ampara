@@ -44,6 +44,8 @@ public static class CyberServiceCollectionExtensions
         // Guard real no lugar do NoopTaintGuard do plano 02 (Scoped: depende do escopo e do usuario da requisicao).
         services.RemoveAll<ITaintGuard>();
         services.AddScoped<ITaintGuard, TaintGuard>();
+        // Filtro de PII das mensagens MQTT: singleton (cria um escopo por mensagem para resolver o guard).
+        services.TryAddSingleton<IMqttPiiFilter, MqttPiiFilter>();
         services.AddHttpClient("anthropic");
         // Sinks Ponte e Claude: todo HttpClient passa pelo handler, que decide o sink pelo host do pedido.
         services.AddTransient<TaintHttpHandler>();
