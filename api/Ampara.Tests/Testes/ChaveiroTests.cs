@@ -131,7 +131,7 @@ public class ChaveiroTests(AmparaFactory f) : IClassFixture<AmparaFactory>
         foreach (var id in ids)
         {
             Assert.Equal(HttpStatusCode.Created, (await s.Cliente.PostAsJsonAsync("/api/v1/chaveiros", new { deviceId = id })).StatusCode);
-            await Task.Delay(15);
+            f.Tempo.Advance(TimeSpan.FromMinutes(1));
         }
         var l = await s.Cliente.GetFromJsonAsync<JsonElement>("/api/v1/chaveiros");
         Assert.Equal(ids, l.EnumerateArray().Select(e => e.GetProperty("deviceId").GetString()!).ToArray());
