@@ -2,9 +2,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using Ampara.Application.Chaveiros;
-using Ampara.Application.Cyber;
 using Ampara.Application.Comum;
-using Ampara.Domain.Cyber;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -110,23 +108,27 @@ public sealed class MqttChaveiroGateway : BackgroundService, IChaveiroGateway
         }
     }
 
-    private async Task AoReceberAsync(MqttApplicationMessageReceivedEventArgs a)
+    private Task AoReceberAsync(MqttApplicationMessageReceivedEventArgs a) =>
+        DespacharAsync(a.ApplicationMessage.Topic, Encoding.UTF8.GetString(a.ApplicationMessage.Payload));
+
+    /// <summary>Trata uma mensagem recebida (tópico e payload em texto). Nunca lança: falhas só vão para o log.</summary>
+    public async Task DespacharAsync(string topico, string payload)
     {
         try
         {
-            if (!TopicoChaveiro.TentarLer(a.ApplicationMessage.Topic, out var deviceId, out var tipo)) return;
-            var payload = Encoding.UTF8.GetString(a.ApplicationMessage.Payload);
+            if (!TopicoChaveiro.TentarLer(topico, out var deviceId, out var tipo)) return;
             var chegada = _tempo.GetUtcNow().UtcDateTime;
 
             using var escopo = _escopos.CreateScope();
             var sp = escopo.ServiceProvider;
-            // Ponto de extensao do plano 03: o guard sanitiza o payload antes de despachar (no-op hoje).
-            var guard = sp.GetRequiredService<ITaintGuard>();
-            var texto = guard.Sanitizar(payload, Sink.Log, new SanitizarOpcoes(OrigemDado.Mqtt, "payload")).Texto;
-
+            // Ponto de extensao do plano 03 (Tarefa 13): IMqttPiiFilter.Filtrar(topico, payload) entra aqui e o que ele
+            // devolve e o que se despacha (politica Banco, que preserva deviceId, eventId, type, ts e battery).
+            // Nunca despachar o texto de ITaintGuard.Sanitizar(..., Sink.Log, ...): a politica do Log bloqueia e troca
+            // cada achado por [BLOQUEADO:Classe], e o ts de 10 digitos casa o detector de Telefone, quebrando o JSON.
+            // O payload em si nunca vai para o log.
             var svc = sp.GetRequiredService<IChaveiroEventoService>();
-            if (tipo == "events") await svc.TratarEventoAsync(deviceId, texto, chegada, CancellationToken.None);
-            else await svc.TratarStatusAsync(deviceId, texto, chegada, CancellationToken.None);
+            if (tipo == "events") await svc.TratarEventoAsync(deviceId, payload, chegada, CancellationToken.None);
+            else await svc.TratarStatusAsync(deviceId, payload, chegada, CancellationToken.None);
         }
         catch (Exception ex)
         {
