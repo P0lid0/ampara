@@ -188,4 +188,10 @@ Resultado: 245 testes passando na suíte; `--migrar` com seed de demonstração 
 
 Resultado: corrigidos os três Important — o gateway MQTT passou a despachar o payload original em vez do texto do sink `Log` do taint (com o guard do plano 03, o `ts` de 10 dígitos casaria Telefone e quebraria o JSON; o plano 03, Tarefa 13, foi ajustado para ligar o `IMqttPiiFilter` no ponto marcado), `GET /rota` deixou de devolver ao dono a posição do aparelho depois do roubo (anti-objetivo da spec) e o alert do chaveiro que reaproveita uma ocorrência aberta pela web passou a gravar deviceId e alertId (cancel do chaveiro, resolve no cancelamento pelo app e resolve manual voltaram a funcionar). Minors corrigidos: formato do `X-Correlation-Id`, deviceId do tópico validado e fora do log, trilha da Ponte limitada à validade do token do aparelho roubado, seeder de demo sem promover conta de terceiro, retenção de 24 h das tentativas de emergência e testes de normalização do login, teto de 2048 bytes, expiração dos tokens e modelo EF × migrations. 266 testes passando na suíte; sem migration (o modelo EF não mudou).
 
+### 29. Ponte Polícia: esqueleto, domínio e área (Task 1 do plano 04)
+
+> Executar a Task 1 do plano da Ponte Polícia (`2026-11-14-04-ponte-policia`): preparar o ambiente em `ponte-policia/` (requirements, pytest.ini, .gitignore, .env.example), escrever primeiro os testes de `dominio` e `area`, ver falhar, e implementar `app/dominio.py` (enums, matriz de transições, erros de domínio, `Hotspot`) e `app/area.py` (grade de ~500 m com limites superiores exclusivos, `centro` e `area_valida`). Correção da rodada 1: registrar este prompt, travar a borda superior da grade com `min` e cobrir NaN/infinito, `TRANSICOES`, erros e `Hotspot` nos testes.
+
+Resultado: 47 testes passando na suíte da Ponte Polícia; sem migration.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->

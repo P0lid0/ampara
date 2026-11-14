@@ -31,3 +31,16 @@ def test_centro_volta_para_a_mesma_area(a):
 def test_area_valida():
     assert area_valida("g051_026") and area_valida("fora")
     assert not area_valida("g100_000") and not area_valida("g000_096") and not area_valida("lixo")
+
+
+@pytest.mark.parametrize("lat,lng", [(float("nan"), -46.6), (-23.55, float("nan")), (float("inf"), -46.6),
+                                     (-23.55, float("-inf")), (float("-inf"), float("inf"))])
+def test_nan_e_infinito_caem_em_fora(lat, lng):
+    assert area_id(lat, lng) == "fora"
+
+
+def test_logo_abaixo_do_limite_superior_nunca_sai_da_grade():
+    import math
+    from app.area import LAT_MAX, LNG_MAX
+    a = area_id(math.nextafter(LAT_MAX, -math.inf), math.nextafter(LNG_MAX, -math.inf))
+    assert a == "g099_095" and area_valida(a) and centro(a) is not None

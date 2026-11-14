@@ -13,3 +13,25 @@ def test_valores_dos_enums_seguem_os_contratos():
     assert [t.value for t in TipoOcorrencia] == ["roubo_celular", "furto_celular"]
     assert [o.value for o in OrigemGatilho] == ["chaveiro", "web", "guardiao", "impacto"]
     assert MENSAGEM_PADRAO_RECEBIDA == "Ocorrência recebida pela polícia."
+
+
+def test_transicoes_cobre_todos_os_status_e_bate_com_pode_transitar():
+    from app.dominio import TRANSICOES
+    assert set(TRANSICOES) == set(S)
+    assert {(d, p) for d, ps in TRANSICOES.items() for p in ps} == PERMITIDAS
+
+
+def test_erros_de_dominio_carregam_os_atributos_sem_dado_pessoal():
+    from app.dominio import ErroDeDominio, ErroTransicaoInvalida, OcorrenciaNaoEncontrada
+    e = ErroTransicaoInvalida(S.ATENDIDA, S.RECEBIDA)
+    assert isinstance(e, ErroDeDominio) and e.de == S.ATENDIDA and e.para == S.RECEBIDA
+    n = OcorrenciaNaoEncontrada("PP-123")
+    assert isinstance(n, ErroDeDominio) and n.protocolo == "PP-123"
+
+
+def test_hotspot_e_imutavel():
+    import dataclasses
+    from app.dominio import Hotspot
+    h = Hotspot("g051_026", -23.5, -46.7, 3, "alto")
+    with pytest.raises(dataclasses.FrozenInstanceError):
+        h.total = 4

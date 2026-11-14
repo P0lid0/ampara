@@ -15,8 +15,9 @@ def area_id(lat: float, lng: float) -> str:
     if (math.isnan(lat) or math.isnan(lng)
             or not (LAT_MIN <= lat < LAT_MAX) or not (LNG_MIN <= lng < LNG_MAX)):
         return FORA
-    linha = math.floor((lat - LAT_MIN) / PASSO_LAT)
-    coluna = math.floor((lng - LNG_MIN) / PASSO_LNG)
+    # min(): o arredondamento de ponto flutuante nao pode empurrar a borda superior para fora da grade
+    linha = min(math.floor((lat - LAT_MIN) / PASSO_LAT), LINHA_MAX)
+    coluna = min(math.floor((lng - LNG_MIN) / PASSO_LNG), COLUNA_MAX)
     return f"g{linha:03d}_{coluna:03d}"
 
 
