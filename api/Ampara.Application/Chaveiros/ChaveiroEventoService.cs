@@ -14,7 +14,8 @@ public sealed class ChaveiroEventoService(IAmparaDb db, IOcorrenciaService ocorr
         var m = MensagemChaveiro.Ler(payload);
         if (m is null || m.DeviceId != deviceIdDoTopico)
         {
-            log.LogWarning("Evento de chaveiro descartado (payload inválido ou deviceId diferente do tópico) em {Topico}", deviceIdDoTopico);
+            // Sem o valor do tópico: o broker é público e qualquer um publica ali.
+            log.LogWarning("Evento de chaveiro descartado (payload inválido ou deviceId diferente do tópico)");
             return;
         }
         chegadaUtc = DateTime.SpecifyKind(chegadaUtc, DateTimeKind.Utc);
@@ -84,7 +85,7 @@ public sealed class ChaveiroEventoService(IAmparaDb db, IOcorrenciaService ocorr
         var s = StatusChaveiro.Ler(payload);
         if (s is null || s.DeviceId != deviceIdDoTopico)
         {
-            log.LogWarning("Status de chaveiro descartado em {Topico}", deviceIdDoTopico);
+            log.LogWarning("Status de chaveiro descartado (payload inválido ou deviceId diferente do tópico)");
             return;
         }
         var c = await db.Chaveiros.FirstOrDefaultAsync(x => x.DeviceId == s.DeviceId, ct);

@@ -12,6 +12,10 @@ public class MqttTopicoTests
     [InlineData("citizentech/chaveiro//events", false, "", "")]
     [InlineData("citizentech/chaveiro/+/events", false, "", "")]
     [InlineData("citizentech/chaveiro/x/events/extra", false, "", "")]
+    [InlineData("citizentech/chaveiro/123.456.789-09/events", false, "", "")]   // SINTETICO
+    [InlineData("citizentech/chaveiro/chaveiro-ampara\nlinha-falsa/events", false, "", "")]
+    [InlineData("citizentech/chaveiro/curto/events", false, "", "")]
+    [InlineData("citizentech/chaveiro/Chaveiro-Ampara-A1/events", false, "", "")]
     public void Le_topico(string t, bool ok, string dev, string tipo)
     {
         Assert.Equal(ok, TopicoChaveiro.TentarLer(t, out var d, out var ty));
