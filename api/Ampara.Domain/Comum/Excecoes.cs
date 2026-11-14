@@ -1,3 +1,4 @@
+// Namespace mantido (Ampara.Application.Comum) para nao quebrar quem ja usa; fica no Domain porque as entidades lancam estas excecoes.
 namespace Ampara.Application.Comum;
 
 /// <summary>Base das exceções de negócio. O código é um slug estável (nunca um valor do usuário).</summary>

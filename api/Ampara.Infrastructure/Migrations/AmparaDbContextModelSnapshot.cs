@@ -218,6 +218,86 @@ namespace Ampara.Infrastructure.Migrations
                     b.ToTable("Guardioes", (string)null);
                 });
 
+            modelBuilder.Entity("Ampara.Domain.Entidades.Ocorrencia", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ChaveiroAlertId")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<string>("ChaveiroDeviceId")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<DateTime?>("EncerradaEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("IniciadaEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("MomentoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<double?>("MomentoLat")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("MomentoLng")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("Origem")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ProtocoloPolicia")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<Guid>("UsuarioId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UsuarioId")
+                        .IsUnique()
+                        .HasDatabaseName("UX_Ocorrencias_UmaAbertaPorUsuario")
+                        .HasFilter("\"Estado\" = 'Aberta'");
+
+                    b.HasIndex("ChaveiroDeviceId", "ChaveiroAlertId");
+
+                    b.ToTable("Ocorrencias", (string)null);
+                });
+
+            modelBuilder.Entity("Ampara.Domain.Entidades.PassoOcorrencia", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("ConcluidoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("OcorrenciaId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Passo")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OcorrenciaId", "Passo")
+                        .IsUnique();
+
+                    b.ToTable("PassosOcorrencia", (string)null);
+                });
+
             modelBuilder.Entity("Ampara.Domain.Entidades.PontoRota", b =>
                 {
                     b.Property<Guid>("Id")
@@ -375,6 +455,24 @@ namespace Ampara.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Ampara.Domain.Entidades.Ocorrencia", b =>
+                {
+                    b.HasOne("Ampara.Domain.Entidades.Usuario", null)
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Ampara.Domain.Entidades.PassoOcorrencia", b =>
+                {
+                    b.HasOne("Ampara.Domain.Entidades.Ocorrencia", null)
+                        .WithMany("Passos")
+                        .HasForeignKey("OcorrenciaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Ampara.Domain.Entidades.PontoRota", b =>
                 {
                     b.HasOne("Ampara.Domain.Entidades.Usuario", null)
@@ -382,6 +480,11 @@ namespace Ampara.Infrastructure.Migrations
                         .HasForeignKey("UsuarioId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Ampara.Domain.Entidades.Ocorrencia", b =>
+                {
+                    b.Navigation("Passos");
                 });
 #pragma warning restore 612, 618
         }

@@ -12,6 +12,7 @@ public static class MapAmpara
         rotas.MapGuardioes();
         rotas.MapChaveiros();
         rotas.MapRota();
+        rotas.MapOcorrencias();
         return rotas;
     }
 }

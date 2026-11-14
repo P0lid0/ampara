@@ -15,6 +15,8 @@ public interface IAmparaDb
     DbSet<Guardiao> Guardioes { get; }
     DbSet<Chaveiro> Chaveiros { get; }
     DbSet<PontoRota> Pontos { get; }
+    DbSet<Ocorrencia> Ocorrencias { get; }
+    DbSet<PassoOcorrencia> Passos { get; }
 
     Task<int> SaveChangesAsync(CancellationToken ct = default);
 

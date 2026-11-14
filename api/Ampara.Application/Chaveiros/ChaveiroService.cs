@@ -1,6 +1,7 @@
 using System.Text.RegularExpressions;
 using Ampara.Application.Comum;
 using Ampara.Application.Cyber;
+using Ampara.Domain;
 using Ampara.Domain.Entidades;
 using Microsoft.EntityFrameworkCore;
 
@@ -45,13 +46,8 @@ public sealed partial class ChaveiroService(IAmparaDb db, IChaveiroGateway gatew
 
     public async Task EnviarComandoAsync(Guid usuarioId, string deviceId, string cmd, CancellationToken ct)
     {
-        var comando = (cmd ?? "").Trim().ToLowerInvariant() switch
-        {
-            "find" => ComandoChaveiro.Find(),
-            "ping" => ComandoChaveiro.Ping(),
-            "resolve" => throw new DominioException("cmd-nao-suportado"),   // entra na T11
-            _ => throw new DominioException("cmd-invalido"),
-        };
+        var nome = (cmd ?? "").Trim().ToLowerInvariant();
+        if (nome is not ("find" or "ping" or "resolve")) throw new DominioException("cmd-invalido");
 
         var dono = await db.Chaveiros.AsNoTracking().Where(x => x.DeviceId == deviceId)
             .Select(x => (Guid?)x.UsuarioId).FirstOrDefaultAsync(ct)
@@ -61,6 +57,18 @@ public sealed partial class ChaveiroService(IAmparaDb db, IChaveiroGateway gatew
             acessoIndevido.Registrar(dono, "recurso-de-outro-usuario");
             throw new AcessoNegadoException("chaveiro-de-outro-usuario");
         }
+
+        ComandoChaveiro comando;
+        if (nome == "resolve")
+        {
+            // Resolve só vale com um alerta em curso: usa o alertId da ocorrência Aberta deste chaveiro.
+            var alerta = await db.Ocorrencias.AsNoTracking()
+                .Where(o => o.UsuarioId == usuarioId && o.ChaveiroDeviceId == deviceId && o.Estado == EstadoOcorrencia.Aberta)
+                .Select(o => o.ChaveiroAlertId).FirstOrDefaultAsync(ct);
+            if (alerta is null) throw new ConflitoException("sem-alerta-ativo");
+            comando = ComandoChaveiro.Resolve(alerta);
+        }
+        else comando = nome == "find" ? ComandoChaveiro.Find() : ComandoChaveiro.Ping();
         await gateway.PublicarComandoAsync(deviceId, comando, ct);
     }
 }

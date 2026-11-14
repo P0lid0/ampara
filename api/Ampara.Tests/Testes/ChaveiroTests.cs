@@ -69,7 +69,7 @@ public class ChaveiroTests(AmparaFactory f) : IClassFixture<AmparaFactory>
     }
 
     [Fact]
-    public async Task Comando_invalido_422_resolve_nao_suportado_e_inexistente_404()
+    public async Task Comando_invalido_422_resolve_sem_alerta_409_e_inexistente_404()
     {
         var s = await f.NovoUsuarioAsync();
         var id = NovoId();
@@ -78,8 +78,8 @@ public class ChaveiroTests(AmparaFactory f) : IClassFixture<AmparaFactory>
         var ruim = await s.Cliente.PostAsJsonAsync($"/api/v1/chaveiros/{id}/comandos", new { cmd = "explodir" });
         Assert.Equal(HttpStatusCode.UnprocessableEntity, ruim.StatusCode);
         var res = await s.Cliente.PostAsJsonAsync($"/api/v1/chaveiros/{id}/comandos", new { cmd = "resolve" });
-        Assert.Equal(HttpStatusCode.UnprocessableEntity, res.StatusCode);
-        Assert.Equal("cmd-nao-suportado", await CodigoDoErroAsync(res));
+        Assert.Equal(HttpStatusCode.Conflict, res.StatusCode);   // resolve existe desde a T11; sem alerta ativo e 409
+        Assert.Equal("sem-alerta-ativo", await CodigoDoErroAsync(res));
         Assert.Equal(HttpStatusCode.NotFound, (await s.Cliente.PostAsJsonAsync("/api/v1/chaveiros/nao-existe-123/comandos", new { cmd = "ping" })).StatusCode);
         Assert.Empty(f.Gateway.Publicados);
     }

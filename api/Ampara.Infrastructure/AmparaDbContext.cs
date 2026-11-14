@@ -16,6 +16,8 @@ public class AmparaDbContext(DbContextOptions<AmparaDbContext> options) : DbCont
     public DbSet<Guardiao> Guardioes => Set<Guardiao>();
     public DbSet<Chaveiro> Chaveiros => Set<Chaveiro>();
     public DbSet<PontoRota> Pontos => Set<PontoRota>();
+    public DbSet<Ocorrencia> Ocorrencias => Set<Ocorrencia>();
+    public DbSet<PassoOcorrencia> Passos => Set<PassoOcorrencia>();
 
     protected override void ConfigureConventions(ModelConfigurationBuilder cb)
     {

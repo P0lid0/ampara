@@ -112,4 +112,8 @@ Resultado: testes de chaveiro passando; migration `Chaveiros` aplicada com `--mi
 
 Resultado: testes de rota passando (92 na suíte); migration `Rota` aplicada com `--migrar` no PostgreSQL local (5436, ampara_dev), tabela `Pontos` e índice único `(UsuarioId, Em)` conferidos com psql.
 
+> Executar a Task 11 do plano da API (`2026-11-14-02-api`): escrever primeiro `OcorrenciaDominioTests` (cinco passos pendentes, cancelar duas vezes conflita, momento inválido, passo idempotente, gatilho do chaveiro limita o início a agora) e `OcorrenciaApiTests` (201/200 ao reaproveitar a Aberta, vítima sem guardiões, índice único parcial, 422/403 de origem, guardião sem momento, detalhe no formato do contrato, cancelar com resolve ao chaveiro, comando resolve), ver falhar, e implementar `Ocorrencia`/`PassoOcorrencia`, os gatilhos `IGatilho`, `IOcorrenciaService`/`OcorrenciaService`, `OcorrenciaEndpoints`, o `resolve` no `ChaveiroService` e a migration `Ocorrencias` com índice único parcial em `UsuarioId` onde `Estado = 'Aberta'`.
+
+Resultado: 108 testes passando; migration `Ocorrencias` aplicada com `--migrar` no PostgreSQL local (5436, ampara_dev), índice parcial `UX_Ocorrencias_UmaAbertaPorUsuario` conferido com psql.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->

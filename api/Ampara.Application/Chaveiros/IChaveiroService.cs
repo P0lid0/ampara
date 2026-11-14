@@ -7,6 +7,6 @@ public interface IChaveiroService
     Task<Guid> ParearAsync(Guid usuarioId, string deviceId, CancellationToken ct);
     Task<IReadOnlyList<ChaveiroDto>> ListarAsync(Guid usuarioId, CancellationToken ct);
 
-    /// <summary>find | ping (resolve entra na T11).</summary>
+    /// <summary>find | ping | resolve (resolve exige ocorrencia Aberta do chaveiro, senao 409 sem-alerta-ativo).</summary>
     Task EnviarComandoAsync(Guid usuarioId, string deviceId, string cmd, CancellationToken ct);
 }
