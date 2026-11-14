@@ -1,4 +1,3 @@
-import "./src/tarefaRota";
 import { useEffect } from "react";
 import { Text, View } from "react-native";
 import { iniciarRota } from "./src/tarefaRota";

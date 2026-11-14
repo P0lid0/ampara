@@ -3,12 +3,21 @@
 # Uso: bash qa/spikes/verificar-gps-background.sh
 # Rota SINTETICA: ponto inicial = estacao Pinheiros do contrato; nenhum dado pessoal.
 set -u
-ANDROID_HOME="${ANDROID_HOME:-C:/Users/pedro.martins/scoop/apps/android-clt/current}"
+# ANDROID_HOME vem do ambiente; sem ele, tenta o caminho do scoop do usuario atual.
+ANDROID_HOME="${ANDROID_HOME:-$HOME/scoop/apps/android-clt/current}"
 EMU="$ANDROID_HOME/emulator/emulator.exe"
 ADB="$ANDROID_HOME/platform-tools/adb.exe"
 AVD="${AVD:-guardiao_vitima}"
 PKG=br.fiap.ampara.spike
 
+INICIEI_EMU=0
+LOG="$(mktemp "${TMPDIR:-/tmp}/gps-logcat.XXXXXX")"
+# so encerra o emulador que este script ligou; um emulador ja aberto pelo usuario fica como esta
+limpar() {
+  rm -f "$LOG"
+  if [ "$INICIEI_EMU" = "1" ]; then "$ADB" emu kill >/dev/null 2>&1; fi
+}
+trap limpar EXIT
 falha() { echo "FALHA asserção $1: $2"; exit 1; }
 ok() { echo "OK    asserção $1: $2"; }
 
@@ -22,8 +31,8 @@ ok 1 "WHPX usable"
 # 2. o AVD sobe (reaproveita um emulador já ligado)
 if ! "$ADB" devices | grep -q "^emulator-.*device$"; then
   "$EMU" -avd "$AVD" -no-snapshot-save -no-boot-anim -accel on -gpu swiftshader_indirect >/dev/null 2>&1 &
+  INICIEI_EMU=1
 fi
-"$ADB" wait-for-device
 boot=""
 for _ in $(seq 1 90); do
   boot="$("$ADB" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')"
@@ -52,8 +61,10 @@ sleep 15
 "$ADB" shell input keyevent KEYCODE_HOME
 sleep 2
 topo="$("$ADB" shell dumpsys activity activities | grep -m1 topResumedActivity | tr -d '\r')"
+[ -n "$topo" ] || falha 5 "dumpsys não devolveu topResumedActivity; não dá para provar o segundo plano"
 case "$topo" in *"$PKG"*) falha 5 "o app continua em primeiro plano: $topo";; esac
-ok 5 "app em segundo plano ($topo)"
+case "$topo" in *[Ll]auncher*) ;; *) falha 5 "o launcher não está em primeiro plano: $topo";; esac
+ok 5 "app em segundo plano, launcher no topo ($topo)"
 
 # 6. dez fixes sinteticos, 6 s entre eles (longitude primeiro)
 "$ADB" logcat -c
@@ -67,11 +78,10 @@ sleep 8   # o ultimo fix leva alguns segundos ate virar um AMPARA_PONTO
 ok 6 "10 fixes enviados"
 
 # 7. pontos no logcat e último ponto perto do destino
-"$ADB" logcat -d > "${TMPDIR:-.}/gps-logcat.$$.txt" 2>&1
-n="$(grep -c AMPARA_PONTO "${TMPDIR:-.}/gps-logcat.$$.txt")"
-[ "$n" -ge 8 ] || { rm -f "${TMPDIR:-.}/gps-logcat.$$.txt"; falha 7 "só $n linhas AMPARA_PONTO (mínimo 8)"; }
-ultimo="$(grep AMPARA_PONTO "${TMPDIR:-.}/gps-logcat.$$.txt" | tail -1)"
-rm -f "${TMPDIR:-.}/gps-logcat.$$.txt"
+"$ADB" logcat -d > "$LOG" 2>&1
+n="$(grep -c AMPARA_PONTO "$LOG")"
+[ "$n" -ge 8 ] || falha 7 "só $n linhas AMPARA_PONTO (mínimo 8)"
+ultimo="$(grep AMPARA_PONTO "$LOG" | tail -1)"
 ulat="$(echo "$ultimo" | sed -E 's/.*"lat":(-?[0-9.]+).*/\1/')"
 ulng="$(echo "$ultimo" | sed -E 's/.*"lng":(-?[0-9.]+).*/\1/')"
 awk -v a="$ulat" -v b="$ulng" 'BEGIN{
@@ -79,7 +89,12 @@ awk -v a="$ulat" -v b="$ulng" 'BEGIN{
   exit !(da<=0.0005 && db<=0.0005)}' || falha 7 "último ponto longe do destino: lat=$ulat lng=$ulng"
 ok 7 "$n pontos; último lat=$ulat lng=$ulng"
 
-# 8. encerra só este emulador
-"$ADB" emu kill >/dev/null 2>&1
-ok 8 "emulador encerrado"
+# 8. encerra o emulador que este script ligou (o trap EXIT cobre também as falhas)
+if [ "$INICIEI_EMU" = "1" ]; then
+  "$ADB" emu kill >/dev/null 2>&1
+  INICIEI_EMU=0
+  ok 8 "emulador encerrado"
+else
+  ok 8 "emulador já estava ligado antes do script; mantido"
+fi
 echo "PASSOU: $n pontos AMPARA_PONTO"
