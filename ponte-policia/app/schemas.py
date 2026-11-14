@@ -60,3 +60,11 @@ class OcorrenciaResumo(BaseModel):
     tipo: TipoOcorrencia
     status: StatusOcorrencia
     origem_gatilho: OrigemGatilho
+
+
+class HotspotResposta(BaseModel):
+    area_id: str
+    lat: float
+    lng: float
+    total: int
+    risco_previsto: str

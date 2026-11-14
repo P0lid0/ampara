@@ -210,4 +210,8 @@ Resultado: 41 testes do detector passando; 96 passando e 1 ignorado na suíte da
 
 Resultado: 163 testes passando e 1 ignorado na suíte da Ponte Polícia; migration 0002 amplia `retornos.mensagem` de 280 para 500 caracteres.
 
+> Executar a Task 6 do plano da Ponte Polícia (`2026-11-14-04-ponte-policia`): escrever primeiro `test_hotspots`, ver falhar, e implementar `GET /hotspots?janela_min=` (chave da polícia, janela de 1 a 10080 minutos, padrão 60) com `contar_por_area` no repositório, `HotspotService`, `risco_por_total` e `HotspotResposta`.
+
+Resultado: hotspots calculados na leitura, sem tabela nova e sem migration; descartadas e área fora da grade não entram.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->

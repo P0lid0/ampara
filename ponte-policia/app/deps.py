@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.db import get_session
 from app.repositories.ocorrencia_repository import OcorrenciaRepository
+from app.services.hotspot_service import HotspotService
 from app.services.ocorrencia_service import OcorrenciaService
 
 
@@ -23,3 +24,10 @@ def get_ocorrencia_service(
     agora: Callable[[], datetime] = Depends(get_agora),
 ) -> OcorrenciaService:
     return OcorrenciaService(OcorrenciaRepository(session), agora)
+
+
+def get_hotspot_service(
+    session: Session = Depends(get_session),
+    agora: Callable[[], datetime] = Depends(get_agora),
+) -> HotspotService:
+    return HotspotService(OcorrenciaRepository(session), agora)

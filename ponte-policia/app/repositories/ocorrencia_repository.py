@@ -1,7 +1,8 @@
 """Acesso a dados da ocorrência."""
+from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.dominio import StatusOcorrencia
@@ -24,6 +25,12 @@ class OcorrenciaRepository:
             consulta = consulta.where(Ocorrencia.status == status)
         consulta = consulta.order_by(Ocorrencia.ts.desc(), Ocorrencia.id.desc()).limit(limite)
         return list(self._session.scalars(consulta))
+
+    def contar_por_area(self, desde: datetime) -> list[tuple[str, int]]:
+        consulta = (select(Ocorrencia.area_id, func.count())
+                    .where(Ocorrencia.ts >= desde, Ocorrencia.status != StatusOcorrencia.DESCARTADA)
+                    .group_by(Ocorrencia.area_id))
+        return [(area, total) for area, total in self._session.execute(consulta)]
 
     def adicionar(self, oc: Ocorrencia) -> None:
         self._session.add(oc)
