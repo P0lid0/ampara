@@ -328,4 +328,10 @@ Resultado: 17 testes do filtro `ImeiNoBoTests` e `ExceptionHandlerTests` passand
 
 Resultado: 7 testes novos passando, suíte inteira com 415 aprovados; sem migration.
 
+### 52. Cyber: Painel Risco Cidadão, base e visão do cidadão (Task 16 do plano 03)
+
+> Executar a Task 16 do plano 03 (Cyber): escrever primeiro os testes do painel (farol com palavra, ícone e `{indice}/100`, mensagens do cidadão em ordem e com rótulos em português, atualização a cada 5 s com o intervalo limpo ao desmontar, falha de rede com frase amigável mantendo os dados, 401 voltando ao login, token só em sessionStorage com try/catch); implementar `web-painel-risco` em React 18.3.1 + Vite 5.4 (`base /painel-risco/`, porta 5174, proxy `/api` para 5080) com `api.ts`, `rotulos.ts`, `Farol`, `Mensagens`, `VisaoCidadao` e `Login`.
+
+Resultado: 14 testes do painel passando e build sem erro; sem migration; tela conferida com Playwright contra uma API simulada (print em `cyber/evidencias/painel-cidadao-vermelho.png`).
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->

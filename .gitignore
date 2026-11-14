@@ -31,3 +31,7 @@ infra/vm/
 cyber/*.pdf
 # artefatos de envio (entrega/cyber/ampara-cyber.pdf, ampara-cyber-codigo.zip, entrega/testing/ampara-testing.pdf)
 entrega/
+
+# painel Risco Cidadao
+web-painel-risco/node_modules
+web-painel-risco/dist
