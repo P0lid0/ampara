@@ -4,9 +4,10 @@ from datetime import datetime, timezone
 
 from sqlalchemy.exc import IntegrityError
 
+from app.dominio import OcorrenciaNaoEncontrada, StatusOcorrencia
 from app.models import Ocorrencia
 from app.repositories.ocorrencia_repository import OcorrenciaRepository
-from app.schemas import OcorrenciaCriar
+from app.schemas import OcorrenciaCriar, OcorrenciaResumo, RetornoResposta
 
 
 def _utc(d: datetime) -> datetime:
@@ -38,3 +39,29 @@ class OcorrenciaService:
                 raise
             return vencedor, False
         return oc, True
+
+    def _buscar(self, protocolo: str) -> Ocorrencia:
+        oc = self._repo.buscar_por_protocolo(protocolo)
+        if oc is None:
+            raise OcorrenciaNaoEncontrada(protocolo)
+        return oc
+
+    @staticmethod
+    def _retorno(oc: Ocorrencia) -> RetornoResposta:
+        status, mensagem, em = oc.retorno_atual()
+        return RetornoResposta(protocolo=oc.protocolo, status=status, mensagem=mensagem,
+                               atualizado_em=_utc(em))
+
+    def obter_retorno(self, protocolo: str) -> RetornoResposta:
+        return self._retorno(self._buscar(protocolo))
+
+    def atualizar_status(self, protocolo: str, novo: StatusOcorrencia, mensagem: str) -> RetornoResposta:
+        oc = self._buscar(protocolo)
+        oc.mudar_status(novo, mensagem, self._agora())
+        self._repo.commit()
+        return self._retorno(oc)
+
+    def listar(self, status: StatusOcorrencia | None) -> list[OcorrenciaResumo]:
+        return [OcorrenciaResumo(protocolo=o.protocolo, area_id=o.area_id, ts=_utc(o.ts), tipo=o.tipo,
+                                 status=o.status, origem_gatilho=o.origem_gatilho)
+                for o in self._repo.listar(status)]

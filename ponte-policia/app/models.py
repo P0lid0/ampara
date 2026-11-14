@@ -96,7 +96,7 @@ class Retorno(Base):
     ocorrencia_id: Mapped[int] = mapped_column(
         ForeignKey("ocorrencias.id", ondelete="CASCADE"), nullable=False, index=True)
     status: Mapped[StatusOcorrencia] = mapped_column(_enum(StatusOcorrencia), nullable=False)
-    mensagem: Mapped[str] = mapped_column(String(280), nullable=False)
+    mensagem: Mapped[str] = mapped_column(String(500), nullable=False)
     criado_em: Mapped[datetime] = mapped_column(UTCDateTime, nullable=False)
 
     ocorrencia: Mapped[Ocorrencia] = relationship(back_populates="retornos")

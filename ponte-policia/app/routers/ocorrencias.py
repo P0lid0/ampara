@@ -2,9 +2,11 @@ import logging
 
 from fastapi import APIRouter, Depends, Response
 
+from app.dominio import StatusOcorrencia
 from app.deps import get_ocorrencia_service
-from app.schemas import OcorrenciaCriar, ProtocoloResposta
-from app.security import exigir_chave_servico, rejeitar_pii
+from app.schemas import (OcorrenciaCriar, OcorrenciaResumo, ProtocoloResposta, RetornoResposta,
+                         StatusAtualizar)
+from app.security import exigir_chave_policia, exigir_chave_servico, rejeitar_pii
 from app.services.ocorrencia_service import OcorrenciaService
 
 logger = logging.getLogger(__name__)
@@ -36,3 +38,49 @@ def criar_ocorrencia(
         response.status_code = 200
     logger.info("ocorrencia protocolo=%s criada=%s", oc.protocolo, criada)
     return ProtocoloResposta(protocolo=oc.protocolo, status=oc.status)
+
+
+@router.get(
+    "/ocorrencias",
+    response_model=list[OcorrenciaResumo],
+    summary="Lista ocorrências para o painel da polícia",
+    description="Mais recentes primeiro; filtro opcional por status. Não expõe device_hash nem trilha.",
+    dependencies=[Depends(exigir_chave_policia)],
+    responses={401: {"description": "Chave da polícia inválida ou ausente."},
+               422: {"description": "Status desconhecido."}},
+)
+def listar_ocorrencias(
+    status: StatusOcorrencia | None = None,
+    servico: OcorrenciaService = Depends(get_ocorrencia_service),
+) -> list[OcorrenciaResumo]:
+    return servico.listar(status)
+
+
+@router.get(
+    "/ocorrencias/{protocolo}/retorno",
+    response_model=RetornoResposta,
+    summary="Retorno atual ao cidadão",
+    dependencies=[Depends(exigir_chave_servico)],
+    responses={401: {"description": "Chave de serviço inválida ou ausente."},
+               404: {"description": "Protocolo não encontrado."}},
+)
+def obter_retorno(protocolo: str, servico: OcorrenciaService = Depends(get_ocorrencia_service)
+                  ) -> RetornoResposta:
+    return servico.obter_retorno(protocolo)
+
+
+@router.patch(
+    "/ocorrencias/{protocolo}/status",
+    response_model=RetornoResposta,
+    summary="Muda o status e registra a mensagem de retorno",
+    dependencies=[Depends(exigir_chave_policia), Depends(rejeitar_pii)],
+    responses={401: {"description": "Chave da polícia inválida ou ausente."},
+               404: {"description": "Protocolo não encontrado."},
+               409: {"description": "Transição de status não permitida."},
+               422: {"description": "Payload inválido ou com dado pessoal."}},
+)
+def atualizar_status(protocolo: str, dados: StatusAtualizar,
+                     servico: OcorrenciaService = Depends(get_ocorrencia_service)) -> RetornoResposta:
+    retorno = servico.atualizar_status(protocolo, dados.status, dados.mensagem)
+    logger.info("ocorrencia protocolo=%s status=%s", protocolo, retorno.status.value)
+    return retorno

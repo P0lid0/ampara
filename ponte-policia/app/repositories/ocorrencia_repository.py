@@ -4,6 +4,7 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.dominio import StatusOcorrencia
 from app.models import Ocorrencia
 
 
@@ -16,6 +17,13 @@ class OcorrenciaRepository:
 
     def buscar_por_protocolo(self, protocolo: str) -> Ocorrencia | None:
         return self._session.scalar(select(Ocorrencia).where(Ocorrencia.protocolo == protocolo))
+
+    def listar(self, status: StatusOcorrencia | None, limite: int = 200) -> list[Ocorrencia]:
+        consulta = select(Ocorrencia)
+        if status is not None:
+            consulta = consulta.where(Ocorrencia.status == status)
+        consulta = consulta.order_by(Ocorrencia.ts.desc(), Ocorrencia.id.desc()).limit(limite)
+        return list(self._session.scalars(consulta))
 
     def adicionar(self, oc: Ocorrencia) -> None:
         self._session.add(oc)

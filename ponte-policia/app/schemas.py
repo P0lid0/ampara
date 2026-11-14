@@ -1,5 +1,6 @@
 """Contratos de entrada e saída da Ponte Polícia (JSON em snake_case)."""
 from datetime import datetime
+from typing import Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -36,3 +37,26 @@ class OcorrenciaCriar(BaseModel):
 class ProtocoloResposta(BaseModel):
     protocolo: str
     status: StatusOcorrencia
+
+
+class RetornoResposta(BaseModel):
+    protocolo: str
+    status: StatusOcorrencia
+    mensagem: str
+    atualizado_em: datetime
+
+
+class StatusAtualizar(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    status: Literal[StatusOcorrencia.EM_ANALISE, StatusOcorrencia.ATENDIDA, StatusOcorrencia.DESCARTADA]
+    mensagem: str = Field(min_length=1, max_length=500)
+
+
+class OcorrenciaResumo(BaseModel):
+    protocolo: str
+    area_id: str
+    ts: datetime
+    tipo: TipoOcorrencia
+    status: StatusOcorrencia
+    origem_gatilho: OrigemGatilho

@@ -206,4 +206,8 @@ Resultado: testes da Ponte passando; migração 0001 aplicada no PostgreSQL loca
 
 Resultado: 41 testes do detector passando; 96 passando e 1 ignorado na suíte da Ponte Polícia; sem migration.
 
+> Executar a Task 5 do plano da Ponte Polícia (`2026-11-14-04-ponte-policia`): escrever primeiro `test_retorno_status` e `test_listagem`, ver falhar, e implementar `GET /ocorrencias/{protocolo}/retorno`, `PATCH /ocorrencias/{protocolo}/status` e `GET /ocorrencias?status=` com schemas, serviço e repositório.
+
+Resultado: 163 testes passando e 1 ignorado na suíte da Ponte Polícia; migration 0002 amplia `retornos.mensagem` de 280 para 500 caracteres.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->
