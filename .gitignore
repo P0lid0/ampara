@@ -1,0 +1,33 @@
+# segredos
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+
+# dependencias e artefatos de build
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+bin/
+obj/
+.vs/
+TestResults/
+.expo/
+app/android/
+app/ios/
+
+# spikes e dados pesados
+qa/spikes/gps-background/android/
+qa/spikes/**/saida/
+ml/dados/brutos/
+infra/vm/
+*.qcow2
+*.img
+
+# PDF de Cyber nunca entra no repositorio
+cyber/*.pdf
+# artefatos de envio (entrega/cyber/ampara-cyber.pdf, ampara-cyber-codigo.zip, entrega/testing/ampara-testing.pdf)
+entrega/
