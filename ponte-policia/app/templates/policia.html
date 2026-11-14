@@ -22,7 +22,7 @@ h2{margin:0 0 12px;font-size:1.05rem;color:var(--petroleo)}
 label{display:block;font-weight:600;font-size:.85rem;margin-bottom:4px}
 input,select,textarea,button{font:inherit}
 input,select,textarea{width:100%;padding:8px 10px;border:1px solid #9aa9a7;border-radius:6px;background:#fff;color:var(--texto)}
-button{background:var(--petroleo);color:#fff;border:0;border-radius:6px;padding:9px 16px;font-weight:600;cursor:pointer}
+button{background:var(--petroleo);color:#fff;border:0;border-radius:6px;padding:9px 16px;min-height:48px;min-width:48px;font-weight:600;cursor:pointer}
 header button{background:var(--esmeralda);color:#05302a}
 button:hover{filter:brightness(.92)}
 :focus-visible{outline:3px solid var(--esmeralda);outline-offset:2px}
@@ -219,13 +219,15 @@ async function carregarHotspots() {
     iniciarMapa();
     if (camada) camada.clearLayers();
     const tbody = $("tabela-hotspots").tBodies[0];
-    if (!dados.length) { linhaVazia(tbody, 3, "Nenhum hotspot na janela."); return; }
+    if (!dados.length) { linhaVazia(tbody, 3, "Nenhum hotspot na janela."); return true; }
     const linhas = dados.map((h) => {
       const cor = COR_RISCO[h.risco_previsto] || COR_RISCO.baixo;
       const rotulo = ROT_RISCO[h.risco_previsto] || h.risco_previsto;
       if (camada) {
+        const dica = document.createElement("span");
+        dica.textContent = h.area_id + " · " + h.total + " ocorrência(s) · risco " + rotulo.toLowerCase();
         L.circle([h.lat, h.lng], {radius: 250 + 60 * h.total, color: cor, fillColor: cor, fillOpacity: 0.35, weight: 2})
-          .bindTooltip(h.area_id + " · " + h.total + " ocorrência(s) · risco " + rotulo.toLowerCase())
+          .bindTooltip(dica)
           .addTo(camada);
       }
       const tr = document.createElement("tr");
@@ -241,7 +243,8 @@ async function carregarHotspots() {
       return tr;
     });
     tbody.replaceChildren(...linhas);
-  } catch (e) { tratarErroCarga(e); }
+    return true;
+  } catch (e) { tratarErroCarga(e); return false; }
 }
 
 async function carregarOcorrencias() {
@@ -249,7 +252,7 @@ async function carregarOcorrencias() {
     const st = $("filtro-status").value;
     const dados = await chamar("/ocorrencias" + (st === "todos" ? "" : "?status=" + encodeURIComponent(st)));
     const tbody = $("tabela-ocorrencias").tBodies[0];
-    if (!dados.length) { linhaVazia(tbody, 6, "Nenhuma ocorrência neste filtro."); return; }
+    if (!dados.length) { linhaVazia(tbody, 6, "Nenhuma ocorrência neste filtro."); return true; }
     const linhas = dados.map((o) => {
       const tr = document.createElement("tr");
       celula(tr, o.protocolo);
@@ -262,15 +265,30 @@ async function carregarOcorrencias() {
       return tr;
     });
     tbody.replaceChildren(...linhas);
-  } catch (e) { tratarErroCarga(e); }
+    return true;
+  } catch (e) { tratarErroCarga(e); return false; }
 }
+
+let erroDeCarga = false;
+let carregando = false;
 
 function tratarErroCarga(e) {
   aviso(msgErro(e), "erro");
-  if (e.status === 401) parar();
+  erroDeCarga = true;
+  if (e.status === 401) {
+    try { sessionStorage.removeItem(CHAVE_SS); } catch (x) { /* sem storage */ }
+    parar();
+  }
 }
 
-function atualizarTudo() { return Promise.all([carregarHotspots(), carregarOcorrencias()]); }
+async function atualizarTudo() {
+  if (carregando) return;
+  carregando = true;
+  try {
+    const ok = await Promise.all([carregarHotspots(), carregarOcorrencias()]);
+    if (ok.every(Boolean) && erroDeCarga) { erroDeCarga = false; aviso("", ""); }
+  } finally { carregando = false; }
+}
 
 function iniciar() {
   parar();

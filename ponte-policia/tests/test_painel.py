@@ -25,3 +25,7 @@ def test_prefixo_malicioso_e_ignorado(client):
 
 def test_painel_fora_do_openapi(client):
     assert "/policia" not in client.get("/openapi.json").json()["paths"]
+
+
+def test_botoes_com_altura_minima_de_48px(client):
+    assert "min-height:48px" in client.get("/policia").text
