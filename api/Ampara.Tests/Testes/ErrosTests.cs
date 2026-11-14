@@ -76,6 +76,19 @@ public class ErrosTests(AmparaFactory f) : IClassFixture<AmparaFactory>
         Assert.True(Guid.TryParse(r2.Headers.GetValues("X-Correlation-Id").Single(), out _));
     }
 
+    [Theory]
+    [InlineData("cpf 529.982.247-25")]   // SINTETICO
+    [InlineData("pessoa@ampara.demo")]
+    [InlineData("id;falso")]
+    public async Task Correlation_id_fora_do_formato_vira_um_guid_novo(string recebido)
+    {
+        // Mesmo formato do ICorrelacao do plano 03: ^[A-Za-z0-9-]{1,64}$. O valor vai para o log e para o rastro.
+        var req = new HttpRequestMessage(HttpMethod.Get, "/openapi/v1.json");
+        req.Headers.TryAddWithoutValidation("X-Correlation-Id", recebido);
+        var r = await f.CreateClient().SendAsync(req);
+        Assert.True(Guid.TryParse(r.Headers.GetValues("X-Correlation-Id").Single(), out _));
+    }
+
     [Fact]
     public void Taint_noop_nao_altera_o_texto_e_nao_gera_evento()
     {
