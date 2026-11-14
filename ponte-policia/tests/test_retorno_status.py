@@ -9,6 +9,7 @@ HP = {"X-Chave-Policia": CHAVE_POLICIA}
 def protocolo(client):
     return client.post("/ocorrencias", json=payload_valido(), headers=HS).json()["protocolo"]
 
+# SINTETICO: telefones e nomes deste arquivo são vetores de teste, não dados de ninguém.
 def patch(client, proto, status, msg="Equipe acionada.", headers=HP):
     return client.patch(f"/ocorrencias/{proto}/status", json={"status": status, "mensagem": msg}, headers=headers)
 

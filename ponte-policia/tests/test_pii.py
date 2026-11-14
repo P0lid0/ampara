@@ -1,17 +1,22 @@
+# SINTETICO: todos os CPFs, telefones, IMEIs, e-mails e nomes deste arquivo são vetores
+# de teste públicos (CPF de exemplo com DV válido, DDD 11 fictício), não dados de ninguém.
 import pytest
 from app.pii import detectar_pii, AchadoPii, cpf_valido, luhn_valido
 
 def A(campo, classe): return AchadoPii(campo, classe)
 
-@pytest.mark.parametrize("valor", ["529.982.247-25", "52998224725", "cpf 529.982.247-25 ok"])
+@pytest.mark.parametrize("valor", ["529.982.247-25", "52998224725", "cpf 529.982.247-25 ok"],
+                         ids=["formatado", "so-digitos", "no-texto"])
 def test_cpf_valido_e_detectado(valor):
     assert detectar_pii({"obs": valor}) == [A("obs", "Cpf")]
 
-@pytest.mark.parametrize("valor", ["111.111.111-11", "123.456.789-00", "52998224726"])
+@pytest.mark.parametrize("valor", ["111.111.111-11", "123.456.789-00", "52998224726"],
+                         ids=["repetido", "dv-errado", "dv-errado-so-digitos"])
 def test_cpf_com_digito_errado_nao_e_cpf(valor):
     assert detectar_pii({"obs": valor}) == []
 
-@pytest.mark.parametrize("valor", ["(11) 91234-5678", "11912345678", "+55 11 91234-5678", "(11) 3456-7890"])
+@pytest.mark.parametrize("valor", ["(11) 91234-5678", "11912345678", "+55 11 91234-5678", "(11) 3456-7890"],
+                         ids=["celular-formatado", "celular-so-digitos", "celular-com-ddi", "fixo"])
 def test_telefone_detectado(valor):
     assert detectar_pii({"obs": valor}) == [A("obs", "Telefone")]
 
@@ -32,7 +37,8 @@ def test_email_detectado():
 def test_nome_por_chave(chave):
     assert detectar_pii({chave: "Maria Souza"}) == [A(chave, "Nome")]
 
-@pytest.mark.parametrize("texto", ["Meu nome é Maria Souza", "me chamo Joao", "falar com Sra. Ana"])
+@pytest.mark.parametrize("texto", ["Meu nome é Maria Souza", "me chamo Joao", "falar com Sra. Ana"],
+                         ids=["meu-nome-e", "me-chamo", "sra"])
 def test_nome_em_texto_livre(texto):
     assert detectar_pii({"mensagem": texto}) == [A("mensagem", "Nome")]
 
@@ -64,7 +70,8 @@ def test_resultado_nunca_contem_o_valor():
 
 # --- correcao rodada 1 -------------------------------------------------------
 
-@pytest.mark.parametrize("chave", ["joao@x.com", "529.982.247-25", "Maria Souza 11 91234-5678"])
+@pytest.mark.parametrize("chave", ["joao@x.com", "529.982.247-25", "Maria Souza 11 91234-5678"],
+                         ids=["email", "cpf", "nome-e-telefone"])
 def test_chave_com_pii_nao_e_ecoada(chave):
     achados = detectar_pii({chave: "11 91234-5678"})
     assert achados
@@ -127,7 +134,8 @@ def test_json_muito_aninhado_levanta_valueerror():
 
 # --- correcao rodada 2 -------------------------------------------------------
 
-@pytest.mark.parametrize("chave", ["11_91234_5678", "529_982_247_25", "aaa11_91234_5678"])
+@pytest.mark.parametrize("chave", ["11_91234_5678", "529_982_247_25", "aaa11_91234_5678"],
+                         ids=["telefone", "cpf", "telefone-com-prefixo"])
 def test_chave_com_separador_underscore_nao_vaza(chave):
     achados = detectar_pii({chave: "ok"})
     assert all(a.campo == "<chave>" for a in achados)

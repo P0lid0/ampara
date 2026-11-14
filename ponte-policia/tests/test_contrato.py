@@ -59,8 +59,8 @@ def test_exemplo_do_contrato_e_aceito_e_sem_pii(client):
 def test_exemplo_gerado_pela_api_valida_no_schema(client):
     from tests.fabrica import HS
     arq = DIR / "exemplo_da_api.json"          # gravado pelo cliente da Ponte do plano 02
-    if not arq.exists():
-        pytest.skip("plano 02 ainda não gravou exemplo_da_api.json")
+    assert arq.exists(), ("exemplo_da_api.json sumiu: ele é regravado pelo teste C# "
+                          "api/Ampara.Tests/Testes/PontePoliciaClientTests.cs (plano 02)")
     ex = json.loads(arq.read_text(encoding="utf-8"))
     OcorrenciaCriar(**ex)
     assert detectar_pii(ex) == []
