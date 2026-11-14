@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.Http.Json;
 using System.Text.Json;
 using Ampara.Api.Middleware;
 using Ampara.Application.Comum;
@@ -150,8 +151,20 @@ public class ExceptionHandlerTests
         Assert.IsType<AcessoIndevido>(h.Services.GetRequiredService<IAcessoIndevido>());
     }
 
-    [Fact(Skip = "Habilitar na Tarefa 14 (CyberApiFactory): POST /api/v1/auth/emergencia com código errado gera evento com UsuarioAlvoId da vítima (peso 40).")]
-    public Task Codigo_de_emergencia_errado_gera_acesso_indevido_para_a_vitima() => Task.CompletedTask;
+    [Fact]
+    public async Task Codigo_de_emergencia_errado_gera_acesso_indevido_para_a_vitima()
+    {
+        await using var f = new CyberApiFactory();
+        var v = await CyberTestHelpers.CriarVitimaComOcorrenciaAsync(f.CreateClient());
+        var anonimo = f.CreateClient();
+        var r = await anonimo.PostAsJsonAsync("/api/v1/auth/emergencia", new { email = v.Email, codigo = "000000", palavraSecreta = "palavra-errada" });   // SINTETICO
+        Assert.Equal(HttpStatusCode.Unauthorized, r.StatusCode);
+
+        var e = Assert.Single((await f.EventosNoBancoAsync(v.UsuarioId)).Where(IndiceRisco.EhAcessoIndevido));
+        Assert.Equal(IndiceRisco.CampoCodigoEmergencia, e.Campo);
+        Assert.Equal(40, IndiceRisco.Peso(e));
+        Assert.Equal(v.UsuarioId, e.UsuarioAlvoId);
+    }
 
     private sealed class CorrelacaoFixa(string id) : ICorrelacao { public string Id { get; } = id; }
     private sealed class RastroQueLanca : IRastroSeguranca { public void Registrar(EventoSeguranca e) => throw new InvalidOperationException("x"); }

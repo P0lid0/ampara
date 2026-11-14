@@ -39,6 +39,10 @@ public static class CyberServiceCollectionExtensions
         services.RemoveAll<IAcessoIndevido>();
         services.AddSingleton<IAcessoIndevido>(sp => new AcessoIndevido(sp.GetRequiredService<IRastroSeguranca>(),
             new CorrelacaoAmbiente(sp.GetRequiredService<IHttpContextAccessor>())));
+        // Revelador real do IMEI (grava Imei/HttpAutenticada/Permitido) no lugar do no-op do plano 02. Singleton, como o no-op.
+        services.RemoveAll<IImeiRevelador>();
+        services.AddSingleton<IImeiRevelador>(sp => new ImeiRevelador(sp.GetRequiredService<IPiiProtetor>(), sp.GetRequiredService<IRastroSeguranca>(),
+            sp.GetRequiredService<IAcessoIndevido>(), new CorrelacaoAmbiente(sp.GetRequiredService<IHttpContextAccessor>()), sp.GetService<TimeProvider>()));
         // Registrado antes do ProblemaHandler (Program.cs chama AddCyber primeiro): assume só as exceções inesperadas.
         services.AddExceptionHandler<TaintExceptionHandler>();
         // Guard real no lugar do NoopTaintGuard do plano 02 (Scoped: depende do escopo e do usuario da requisicao).
