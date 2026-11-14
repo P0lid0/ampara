@@ -121,8 +121,51 @@ public class OcorrenciaApiTests(AmparaFactory f) : IClassFixture<AmparaFactory>
 
         Assert.Equal(HttpStatusCode.NotFound, (await v.Cliente.GetAsync($"/api/v1/ocorrencias/{Guid.NewGuid()}")).StatusCode);
         // guardiao nao marca momento nem cancela.
+        f.Acesso.Limpar();
         Assert.Equal(HttpStatusCode.Forbidden, (await g.Cliente.PostAsJsonAsync($"/api/v1/ocorrencias/{id}/momento", new { em = agora, lat = -23.5, lng = -46.6 })).StatusCode);
         Assert.Equal(HttpStatusCode.Forbidden, (await g.Cliente.PostAsync($"/api/v1/ocorrencias/{id}/cancelar", null)).StatusCode);
+        Assert.Empty(f.Acesso.Chamadas);   // guardiao legitimo nao e acesso indevido
+
+        // ja o estranho, ao tentar cancelar, e registrado.
+        Assert.Equal(HttpStatusCode.Forbidden, (await estranho.Cliente.PostAsync($"/api/v1/ocorrencias/{id}/cancelar", null)).StatusCode);
+        Assert.Equal("recurso-de-outro-usuario", Assert.Single(f.Acesso.Chamadas).Campo);
+    }
+
+    [Fact]
+    public async Task Cancelar_com_gateway_fora_do_ar_mantem_aberta_e_permite_repetir()
+    {
+        var v = await f.NovoUsuarioAsync();
+        using var escopo = f.Services.CreateScope();
+        var svc = escopo.ServiceProvider.GetRequiredService<IOcorrenciaService>();
+        var agora = f.Tempo.GetUtcNow().UtcDateTime;
+        var criada = await svc.DispararAsync(new GatilhoChaveiro("chaveiro-ampara-ff0011", "chaveiro-ampara-ff0011-3", agora), v.UsuarioId, CancellationToken.None);
+        f.Gateway.Limpar();
+
+        f.Gateway.Falhar = true;
+        try
+        {
+            var falha = await v.Cliente.PostAsync($"/api/v1/ocorrencias/{criada.OcorrenciaId}/cancelar", null);
+            Assert.False(falha.IsSuccessStatusCode);
+        }
+        finally { f.Gateway.Falhar = false; }
+        var aberta = await v.Cliente.GetFromJsonAsync<JsonElement>($"/api/v1/ocorrencias/{criada.OcorrenciaId}");
+        Assert.Equal("Aberta", aberta.GetProperty("estado").GetString());
+
+        Assert.Equal(HttpStatusCode.NoContent, (await v.Cliente.PostAsync($"/api/v1/ocorrencias/{criada.OcorrenciaId}/cancelar", null)).StatusCode);
+        Assert.Equal(ComandoChaveiro.Resolve("chaveiro-ampara-ff0011-3"), Assert.Single(f.Gateway.Publicados).Cmd);
+    }
+
+    [Fact]
+    public async Task Depois_de_cancelar_novo_gatilho_cria_outra_ocorrencia()
+    {
+        var v = await f.NovoUsuarioAsync();
+        var em = await EmergenciaAsync(v);
+        var id1 = await IdDoCorpoAsync(await em.PostAsJsonAsync("/api/v1/ocorrencias/gatilho", new { origem = "web" }));
+        Assert.Equal(HttpStatusCode.NoContent, (await v.Cliente.PostAsync($"/api/v1/ocorrencias/{id1}/cancelar", null)).StatusCode);
+
+        var r2 = await em.PostAsJsonAsync("/api/v1/ocorrencias/gatilho", new { origem = "web" });
+        Assert.Equal(HttpStatusCode.Created, r2.StatusCode);
+        Assert.NotEqual(id1, await IdDoCorpoAsync(r2));
     }
 
     [Fact]

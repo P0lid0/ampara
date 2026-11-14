@@ -69,7 +69,7 @@ public sealed class OcorrenciaService(
     public async Task MarcarMomentoAsync(Ator ator, Guid id, DateTime em, double lat, double lng, CancellationToken ct)
     {
         var o = await CarregarAsync(id, ct, rastrear: true);
-        ExigirDono(ator, o);
+        await ExigirDonoAsync(ator, o, ct);
         o.MarcarMomento(em, lat, lng, Agora);
         await db.SaveChangesAsync(ct);
     }
@@ -77,11 +77,13 @@ public sealed class OcorrenciaService(
     public async Task CancelarAsync(Ator ator, Guid id, CancellationToken ct)
     {
         var o = await CarregarAsync(id, ct, rastrear: true);
-        ExigirDono(ator, o);
+        await ExigirDonoAsync(ator, o, ct);
+        // Política: valida o cancelamento, publica o resolve e só então grava. Se o gateway falhar, a exceção sobe
+        // e a ocorrência continua Aberta, então o cliente pode repetir e o chaveiro ainda recebe o resolve.
         o.Cancelar(Agora);
-        await db.SaveChangesAsync(ct);
         if (o is { Origem: OrigemGatilho.Chaveiro, ChaveiroDeviceId: { } device, ChaveiroAlertId: { } alerta })
             await gateway.PublicarComandoAsync(device, ComandoChaveiro.Resolve(alerta), ct);
+        await db.SaveChangesAsync(ct);
     }
 
     public async Task CancelarPorChaveiroAsync(string deviceId, string alertId, CancellationToken ct)
@@ -104,9 +106,17 @@ public sealed class OcorrenciaService(
             ?? throw new NaoEncontradoException("ocorrencia-nao-encontrada");
     }
 
-    private void ExigirDono(Ator ator, Ocorrencia o)
+    private async Task ExigirDonoAsync(Ator ator, Ocorrencia o, CancellationToken ct)
     {
         if (ator.UsuarioId == o.UsuarioId) return;
+        // Guardião legítimo sem permissão para a ação leva 403 sem virar sinal de acesso indevido.
+        if (ator.Escopo == Escopos.Usuario && await guardioes.EhGuardiaoDeAsync(ator.UsuarioId, o.UsuarioId, ct))
+            throw new AcessoNegadoException("ocorrencia-de-outro-usuario");
+        NegarAcesso(o);
+    }
+
+    private void NegarAcesso(Ocorrencia o)
+    {
         acessoIndevido.Registrar(o.UsuarioId, "recurso-de-outro-usuario");
         throw new AcessoNegadoException("ocorrencia-de-outro-usuario");
     }
@@ -116,8 +126,8 @@ public sealed class OcorrenciaService(
     {
         if (ator.UsuarioId == o.UsuarioId) return true;
         if (ator.Escopo == Escopos.Usuario && await guardioes.EhGuardiaoDeAsync(ator.UsuarioId, o.UsuarioId, ct)) return false;
-        acessoIndevido.Registrar(o.UsuarioId, "recurso-de-outro-usuario");
-        throw new AcessoNegadoException("ocorrencia-de-outro-usuario");
+        NegarAcesso(o);
+        return false;
     }
 
     private async Task<IReadOnlyList<ContaOcorrenciaDto>> ContasDaVitimaAsync(Guid vitimaId, CancellationToken ct) =>
