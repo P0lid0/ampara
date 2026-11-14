@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using Ampara.Api.Cyber;
 
 namespace Ampara.Api.Middleware;
 
@@ -17,6 +18,8 @@ public sealed partial class CorrelacaoMiddleware(RequestDelegate next)
         var recebido = ctx.Request.Headers[Cabecalho].ToString();
         var id = Formato().IsMatch(recebido) ? recebido : Guid.NewGuid().ToString();
         ctx.Items[ItemKey] = id;
+        // Expõe o id como ICorrelacao (escopo da requisição) para quem injeta a interface.
+        if (ctx.RequestServices.GetService(typeof(Correlacao)) is Correlacao c) c.Id = id;
         ctx.Response.OnStarting(() => { ctx.Response.Headers[Cabecalho] = id; return Task.CompletedTask; });
         return next(ctx);
     }

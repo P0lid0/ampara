@@ -1,3 +1,4 @@
+using Ampara.Api.Cyber;
 using Ampara.Api.Endpoints;
 using Ampara.Api.Middleware;
 using Ampara.Application;
@@ -23,6 +24,7 @@ builder.Services.AddSignalR();
 builder.Services.AddSingleton<Ampara.Application.Alertas.IGuardiaoNotificador, Ampara.Api.Hubs.SignalRGuardiaoNotificador>();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
+builder.Services.AddCyber(builder.Configuration);
 builder.Services.AddHostedService<Ampara.Api.Workers.RetencaoWorker>();
 builder.Services.AddHostedService<Ampara.Api.Workers.EscalonamentoWorker>();
 builder.Services.AddExceptionHandler<ProblemaHandler>();
@@ -104,9 +106,7 @@ if (app.Configuration.GetValue<bool>("AMPARA_DEMO"))
     await SemearDemoAsync(escopoDemo.ServiceProvider);
 }
 
-app.UseMiddleware<CorrelacaoMiddleware>();
-app.UseExceptionHandler();
-app.UseMiddleware<PiiRequestMiddleware>();   // plano 03
+app.UseCyber();   // CorrelacaoMiddleware, UseExceptionHandler, PiiRequestMiddleware (nesta ordem)
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();

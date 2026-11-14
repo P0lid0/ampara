@@ -284,4 +284,10 @@ Resultado: teste novo `Documento_ao_lado_de_numero_curto_ou_texto_em_csv_continu
 
 Resultado: 11 testes do scanner e do taint passando; sem migration.
 
+### 45. Cyber: PiiRequestMiddleware e correlação (Task 6 do plano 03)
+
+> Executar a Task 6 do plano 03 (Cyber): escrever primeiro os testes do pipeline de entrada (JSON, form, query e header marcados com a origem certa, multipart sem ler arquivo, código de emergência como senha só nas rotas configuradas, cadastro intacto no endpoint, entrada hostil com 413/400 em problem+json, correlation id válido reaproveitado e inválido trocado); implementar `ICorrelacao`, `CyberOptions`, `AddCyber`/`UseCyber` e o `PiiRequestMiddleware` que marca no `ITaintScope`, rebobina o corpo e não bloqueia a requisição.
+
+Resultado: 8 testes novos passando, suíte inteira com 324 aprovados; sem migration.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->
