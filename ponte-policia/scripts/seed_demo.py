@@ -2,6 +2,10 @@
 
 Uso: PONTE_CHAVE_SERVICO=... python scripts/seed_demo.py --base http://localhost:8000 --n 12
 Todos os dados sao SINTETICOS (focos ficticios, hashes derivados de um rotulo fixo).
+
+Atencao: os ids sao fixos, mas o ts e relativo ao momento da execucao. Rodar de novo
+sobre o mesmo banco devolve 200 (idempotente) e mantem os ts antigos, entao os hotspots
+da janela de 60 min esvaziam. Antes da demonstracao, recrie o banco.
 """
 import argparse
 import hashlib
@@ -78,6 +82,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--base", default="http://localhost:8000")
     ap.add_argument("--n", type=int, default=12)
     args = ap.parse_args(argv)
+    if args.n < 1:
+        print("--n deve ser maior ou igual a 1.", file=sys.stderr)
+        return 2
     chave = os.environ.get("PONTE_CHAVE_SERVICO")
     if not chave:
         print("PONTE_CHAVE_SERVICO ausente no ambiente.", file=sys.stderr)
@@ -88,6 +95,9 @@ def main(argv: list[str] | None = None) -> int:
             codigo = _postar(args.base, chave, p)
         except urllib.error.URLError as e:
             print(f"Ponte inacessivel em {args.base}: {e.reason}", file=sys.stderr)
+            return 1
+        except OSError as e:  # TimeoutError e quedas de socket na leitura
+            print(f"Ponte inacessivel em {args.base}: {e}", file=sys.stderr)
             return 1
         resumo[codigo] = resumo.get(codigo, 0) + 1
     print("Resumo:", ", ".join(f"{c} x{q}" for c, q in sorted(resumo.items())))

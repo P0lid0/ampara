@@ -218,4 +218,8 @@ Resultado: hotspots calculados na leitura, sem tabela nova e sem migration; desc
 
 Resultado: painel conferido no navegador com 3 ocorrências sintéticas (2 círculos, 2 hotspots, 3 linhas, PATCH com "Status atualizado"); sem migration.
 
+> Executar a Task 9 do plano da Ponte Polícia (`2026-11-14-04-ponte-policia`): escrever primeiro `test_seed` e implementar `scripts/seed_demo.py` com `gerar_payloads` determinístico (3 focos sintéticos, `uuid5`, `device_hash` derivado, trilha de 2 pontos) e `main()` que posta na Ponte com `PONTE_CHAVE_SERVICO` e imprime o resumo por código. Correção da rodada 1: registrar este prompt, tratar timeout, validar `--n` e cobrir os campos do brief e o `main()` nos testes.
+
+Resultado: seed sintético validado contra o schema e sem PII; sem migration.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->
