@@ -69,3 +69,32 @@ def test_mensagem_de_500_caracteres_e_persistida_inteira(client, protocolo):
     msg = "y" * 500
     assert patch(client, protocolo, "em_analise", msg).status_code == 200
     assert client.get(f"/ocorrencias/{protocolo}/retorno", headers=HS).json()["mensagem"] == msg
+
+
+# --- revisao final do plano 04 ------------------------------------------------
+
+def test_patch_com_campo_extra_retorna_422(client, protocolo):
+    r = client.patch(f"/ocorrencias/{protocolo}/status", headers=HP,
+                     json={"status": "em_analise", "mensagem": "ok", "extra": 1})
+    assert r.status_code == 422
+    assert client.get(f"/ocorrencias/{protocolo}/retorno", headers=HS).json()["status"] == "recebida"
+
+
+def test_patch_sem_status_retorna_422(client, protocolo):
+    r = client.patch(f"/ocorrencias/{protocolo}/status", headers=HP, json={"mensagem": "ok"})
+    assert r.status_code == 422 and r.json()["detail"][0]["loc"] == ["body", "status"]
+
+
+@pytest.mark.parametrize("chave", ["Maria Souza", "Maria_Souza"], ids=["com-espaco", "com-sublinhado"])
+def test_chave_extra_nao_e_ecoada_no_422(client, protocolo, chave):  # SINTETICO
+    r = client.patch(f"/ocorrencias/{protocolo}/status", headers=HP,
+                     json={"status": "em_analise", "mensagem": "ok", chave: "x"})
+    assert r.status_code == 422 and "Maria" not in r.text
+    assert r.json()["detail"] == [{"loc": ["body", "<chave>"], "msg": "Extra inputs are not permitted"}]
+
+
+def test_corpo_aninhado_demais_sem_content_type_json_retorna_422(client, protocolo):
+    corpo = "[" * 200000 + "]" * 200000
+    r = client.patch(f"/ocorrencias/{protocolo}/status", content=corpo,
+                     headers={**HP, "Content-Type": "text/plain"})
+    assert r.status_code == 422

@@ -138,3 +138,20 @@ def test_chave_com_separador_underscore_nao_vaza(chave):
     assert achados2
     assert all(a.campo == "<chave>" for a in achados2)
     assert "91234" not in repr(achados2)
+
+
+# --- revisao final do plano 04 ------------------------------------------------
+
+@pytest.mark.parametrize("valor", ["CPF 529/982/247-25", "cpf 529_982_247_25", "cpf 529" + chr(92) + "982" + chr(92) + "247" + chr(92) + "25"],
+                         ids=["barra", "sublinhado", "contrabarra"])
+def test_cpf_com_separador_incomum_e_detectado(valor):  # SINTETICO
+    assert detectar_pii({"mensagem": valor}) == [A("mensagem", "Cpf")]
+
+
+@pytest.mark.parametrize("texto", ["a" * 60000, "a" * 60000 + "@", "x@" + "b" * 60000],
+                         ids=["sem-arroba", "arroba-no-fim", "dominio-sem-ponto"])
+def test_texto_longo_e_varrido_em_tempo_linear(texto):
+    import time
+    inicio = time.perf_counter()
+    assert detectar_pii({"mensagem": texto}) == []
+    assert time.perf_counter() - inicio < 1.0

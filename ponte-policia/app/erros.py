@@ -6,9 +6,11 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from app.dominio import ErroTransicaoInvalida, OcorrenciaNaoEncontrada
-from app.pii import AchadoPii
+from app.pii import AchadoPii, _chave_segura
 
 logger = logging.getLogger(__name__)
+
+_CHAVE_OCULTA = "<chave>"
 
 # Tipos de erro do pydantic cuja mensagem pode citar um trecho do valor recebido.
 _MSG_GENERICA = "Valor inválido."
@@ -20,6 +22,17 @@ class ErroPii(Exception):
     def __init__(self, achados: list[AchadoPii]):
         super().__init__("Payload contém dado pessoal.")
         self.achados = achados
+
+
+def _loc_sem_eco(erro: dict) -> list:
+    """O `loc` de um campo extra traz a chave escolhida pelo remetente: troca por <chave>.
+    Os demais segmentos são nomes do schema ou índices; os que não parecem identificador
+    curto também viram <chave>."""
+    loc = list(erro["loc"])
+    if erro["type"] == "extra_forbidden" and loc and isinstance(loc[-1], str):
+        loc[-1] = _CHAVE_OCULTA
+    return [s if not isinstance(s, str) or s == _CHAVE_OCULTA or _chave_segura(s) else _CHAVE_OCULTA
+            for s in loc]
 
 
 def registrar_handlers(app: FastAPI) -> None:
@@ -34,7 +47,7 @@ def registrar_handlers(app: FastAPI) -> None:
 
     @app.exception_handler(RequestValidationError)
     async def _validacao(request: Request, exc: RequestValidationError) -> JSONResponse:
-        detalhes = [{"loc": list(e["loc"]),
+        detalhes = [{"loc": _loc_sem_eco(e),
                      "msg": _MSG_GENERICA if e["type"] in _TIPOS_QUE_ECOAM else e["msg"]}
                     for e in exc.errors()]
         return JSONResponse(status_code=422, content={"detail": detalhes})

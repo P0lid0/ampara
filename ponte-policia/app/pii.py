@@ -37,8 +37,12 @@ _CHAVES = {
     "cidadao": "Nome",
 }
 
-_CANDIDATO = re.compile(r"(?<!\d)\d[\d.\-\s()+]{8,20}\d(?!\d)")
-_EMAIL = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
+# Separadores aceitos entre os digitos: ponto, hifen, espaco, parenteses, "+", barra,
+# sublinhado e contrabarra.
+_CANDIDATO = re.compile(r"(?<!\d)\d[\d.\-\s()+/_\\]{8,20}\d(?!\d)")
+# Um so caractere antes do "@" basta para detectar e mantem a busca linear
+# (com "+" antes do "@", um texto longo sem "@" custava tempo quadratico).
+_EMAIL = re.compile(r"[\w.+-]@[\w-]+(?:\.[\w-]+)+")
 _NOME_TEXTO = re.compile(
     r"(?i:\bmeu nome é|\bme chamo|\bsr\.|\bsra\.|\bdona\b|\bsenhor\b|\bsenhora\b)\s+[A-ZÀ-Ý]"
 )

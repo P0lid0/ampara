@@ -3,6 +3,7 @@ import hmac
 
 from fastapi import Depends, HTTPException, Request
 from fastapi.security import APIKeyHeader
+from starlette.concurrency import run_in_threadpool
 
 from app.config import get_settings
 from app.erros import ErroPii
@@ -34,11 +35,15 @@ async def rejeitar_pii(request: Request) -> None:
     """Lê o JSON bruto (antes da validação tipada) e rejeita qualquer dado pessoal."""
     try:
         dados = await request.json()
+    except RecursionError:
+        # Sem Content-Type JSON o FastAPI não faz o parse antes; o json.loads estoura aqui.
+        raise HTTPException(status_code=422, detail="Payload aninhado demais.")
     except ValueError:
         raise HTTPException(status_code=422, detail="Corpo não é um JSON válido.")
     try:
-        achados = detectar_pii(dados)
-    except ValueError:
+        # Fora do event loop: uma varredura lenta não trava as outras requisições.
+        achados = await run_in_threadpool(detectar_pii, dados)
+    except (ValueError, RecursionError):
         raise HTTPException(status_code=422, detail="Payload aninhado demais.")
     if achados:
         raise ErroPii(achados)
