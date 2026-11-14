@@ -13,7 +13,7 @@ public record Sessao(Guid UsuarioId, string Email, HttpClient Cliente);
 public class AmparaFactory : WebApplicationFactory<Program>
 {
     // 32 bytes de teste em base64 (valor falso, só para a suíte).
-    private static readonly string ChaveTeste = Convert.ToBase64String(new byte[32].Select((_, i) => (byte)(i + 1)).ToArray());
+    private static readonly string ChaveTeste = Convert.ToBase64String(Enumerable.Range(1, 32).Select(i => (byte)i).ToArray());
 
     public FakeTimeProvider Tempo { get; } = new(new DateTimeOffset(2026, 11, 14, 12, 0, 0, TimeSpan.Zero));
 

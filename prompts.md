@@ -56,4 +56,10 @@ Resultado: VM sobe com QEMU+WHPX, login em cerca de 62 s, SSH em `localhost:2222
 
 Resultado: validador e CLI em `qa/spikes/mqtt/` (4 testes passando), `e-wokwi` = PULADO com a prova real agendada para o plano 08 e seção `## Amostra real do chaveiro` criada em `docs/riscos-dia1.md`; `main` exercitado só com publicação sintética no HiveMQ público.
 
+### 7. Solution, projetos e fábrica de testes da API (Task 1 do plano da API)
+
+> Executar a Task 1 do plano da API (`2026-11-14-02-api`): escrever primeiro o `SmokeTests` (`/openapi/v1.json` responde 200 e lista `paths`), ver falhar, criar `api/` com global.json, Directory.Build.props, a solution com Domain, Application, Infrastructure, Api e Tests, `Program.cs` (OpenAPI, Scalar em `/scalar`, URL padrão `http://localhost:5080`, CORS por `Cors:Origens`) e a `AmparaFactory` (configuração falsa em memória, `FakeTimeProvider`, sem `IHostedService` de `Ampara.*`), e ver passar.
+
+Resultado: solution `api/Ampara.sln` em net11.0 com 5 projetos, EF Core 10 e Npgsql 10 (sem estável para EF 11, registrado em `api/README.md`), teste de fumaça passando; `launchSettings.json` alinhado à porta 5080 na correção da revisão.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->
