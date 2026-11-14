@@ -6,10 +6,11 @@ namespace Ampara.Infrastructure.Cyber.Detectores;
 internal static class Validacao
 {
     // Não casa colado em letra ou dígito (GUID, JWT, hash) nem em número decimal ("-23.5672490", "1.529.982.247-25").
-    // Decimal = parte inteira de 1 a 3 dígitos (sem dígito antes) + separador; a fração é só 1 a 6 dígitos sem nada de
-    // número depois. Assim "a,b" e "a.b" (listas de CPF/telefone sem espaço) continuam detectados nos dois lados.
-    public const string Ini = @"(?<![0-9A-Za-z])(?<!(?<![0-9]|[0-9]-)[0-9]{1,3}[.,])";
-    public const string Fim = @"(?![0-9A-Za-z]|[.,][0-9]{1,6}(?![0-9.\-]))";
+    // Ponto: parte inteira de 1 a 3 dígitos (sem dígito antes) + "." antes, ou ".1" a ".999999" depois, é decimal.
+    // Vírgula é separador de coluna em CSV ("id,cpf", "cpf,quantidade"): só vale como decimal pt-BR quando vem com
+    // sinal ("-23,56724901234"). Assim "7,CPF", "CPF,3", "a1,CPF" e "a,b" continuam detectados.
+    public const string Ini = @"(?<![0-9A-Za-z])(?<!(?<![0-9]|[0-9]-)[0-9]{1,3}\.)(?<!(?<![0-9])-[0-9]{1,3},)";
+    public const string Fim = @"(?![0-9A-Za-z]|\.[0-9]{1,6}(?![0-9.\-]))";
 
     public static readonly TimeSpan Limite = TimeSpan.FromMilliseconds(250);
 

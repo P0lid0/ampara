@@ -272,4 +272,10 @@ Resultado: corpus de 357 linhas (194 positivas, 163 negativas), precisão e reca
 
 Resultado: testes novos de "nunca lança" e de listas sem espaço; corpus com 376 linhas; sem migration.
 
+### 43. Cyber: correção da rodada 2 da revisão da Task 3 (plano 03)
+
+> Corrigir o achado Important da rodada 2: a guarda de decimal das bordas (`Validacao.Ini/Fim`) apagava CPF, telefone, IMEI e RG colados por vírgula a número curto ou texto curto (`id,cpf`, `cpf,quantidade`). A vírgula só vale como decimal com sinal (`-23,56724901234`); o ponto continua valendo como decimal.
+
+Resultado: teste novo `Documento_ao_lado_de_numero_curto_ou_texto_em_csv_continua_detectado`; corpus com 387 linhas (220 positivas, 167 negativas), 100 % de precisão e recall; sem migration.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->

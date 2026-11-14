@@ -110,5 +110,16 @@ public class DetectoresTests
         Assert.Equal(2, new ImeiDetector().Detectar("490154203237518,490154203237518").Count);
         Assert.Equal(2, new RgDetector().Detectar("12.345.678-9,98.765.432-1").Count);
         Assert.Empty(new CpfDetector().Detectar("-23.56724901234"));          // decimal continua fora
-        Assert.Empty(new CpfDetector().Detectar("1.529.982.247-25")); }
+        Assert.Empty(new CpfDetector().Detectar("1.529.982.247-25"));
+        Assert.Empty(new CpfDetector().Detectar("-23,56724901234")); }   // decimal pt-BR com sinal continua fora
+
+    [Fact] public void Documento_ao_lado_de_numero_curto_ou_texto_em_csv_continua_detectado() {   // Review rodada 2, Important 1
+        foreach (var s in new[]{ "7,52998224725", "52998224725,3", "a1,52998224725", "1,2,52998224725", "529.982.247-25,3", "id,52998224725" })
+            Assert.Single(new CpfDetector().Detectar(s));
+        Assert.Single(new TelefoneDetector().Detectar("7,(11) 98765-4321"));
+        Assert.Single(new TelefoneDetector().Detectar("11987654321,3"));
+        Assert.Single(new ImeiDetector().Detectar("2,490154203237518"));
+        Assert.Single(new ImeiDetector().Detectar("490154203237518,12"));
+        Assert.Single(new RgDetector().Detectar("5,12.345.678-9"));
+        Assert.Single(new RgDetector().Detectar("12.345.678-9,4")); }
 }

@@ -361,6 +361,19 @@ add("mensagem", f"{EMOJI} bom dia {EMOJI}")
 add("mensagem", f"{EMOJI}{EMOJI}{EMOJI}")
 add("mensagem", "a" + chr(0xFFFD) + "b")
 
+# ---- rodada 2 da revisao: documento ao lado de numero curto ou texto curto em linha de CSV --------------------
+for _ in range(2):
+    c = cpf_valido()
+    add("linha", f"{rng.randint(1, 99)},{c}", "Cpf")
+    add("linha", f"{cpf_fmt(c)},{rng.randint(1, 9)}", "Cpf")
+add("linha", f"a1,{cpf_valido()}", "Cpf")
+add("linha", f"1,2,{cpf_valido()}", "Cpf")
+add("linha", f"id,{cpf_valido()}", "Cpf")
+add("linha", f"7,{rng.choice(telefones_formatados())}", "Telefone")
+add("linha", f"{imei_valido()},12", "Imei")
+add("linha", f"5,{rg_fmt()}", "Rg")
+add("coordenada", "-23,56724901234")  # decimal pt-BR com sinal continua negativo
+
 # ---- saida ---------------------------------------------------------------------------------------------------
 
 destino = Path(__file__).resolve().parent / "corpus.csv"
