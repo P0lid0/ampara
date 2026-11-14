@@ -11,7 +11,7 @@ public sealed class Relato
     public string AreaId { get; private set; } = "";
     public DateTime Em { get; private set; }
     public DateTime CriadoEm { get; private set; }
-    public string? Texto { get; private set; }
+    [Ampara.Domain.Cyber.TextoLivre] public string? Texto { get; private set; }
 
     private Relato() { }
 

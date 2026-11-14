@@ -32,7 +32,10 @@ public static class DependencyInjection
         services.AddSingleton<ITokenService>(sp =>
             new TokenService(sp.GetRequiredService<IConfiguration>()["AMPARA_JWT_SECRET"], sp.GetRequiredService<TimeProvider>()));
 
-        services.AddDbContext<AmparaDbContext>((sp, o) => o.UseNpgsql(StringDeConexao(sp.GetRequiredService<IConfiguration>())));
+        services.AddScoped<TaintSaveChangesInterceptor>();   // sink Banco: mascara texto livre e cifra PII no SaveChanges
+        services.AddDbContext<AmparaDbContext>((sp, o) => o
+            .UseNpgsql(StringDeConexao(sp.GetRequiredService<IConfiguration>()))
+            .AddInterceptors(sp.GetRequiredService<TaintSaveChangesInterceptor>()));
         services.AddScoped<IAmparaDb>(sp => sp.GetRequiredService<AmparaDbContext>());
 
         services.AddSingleton<IImeiRevelador, NoopImeiRevelador>();

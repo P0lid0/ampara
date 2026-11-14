@@ -5,7 +5,7 @@ public sealed class Aparelho
 {
     public Guid Id { get; private set; }
     public Guid UsuarioId { get; private set; }
-    public string ImeiCifrado { get; private set; } = "";
+    [Ampara.Domain.Cyber.PiiCifrado(Ampara.Domain.Cyber.PiiClasse.Imei)] public string ImeiCifrado { get; private set; } = "";
     public string ImeiFinal { get; private set; } = "";
     public string Marca { get; private set; } = "";
     public string Modelo { get; private set; } = "";

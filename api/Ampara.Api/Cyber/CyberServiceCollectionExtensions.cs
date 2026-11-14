@@ -45,6 +45,9 @@ public static class CyberServiceCollectionExtensions
         services.RemoveAll<ITaintGuard>();
         services.AddScoped<ITaintGuard, TaintGuard>();
         services.AddHttpClient("anthropic");
+        // Sinks Ponte e Claude: todo HttpClient passa pelo handler, que decide o sink pelo host do pedido.
+        services.AddTransient<TaintHttpHandler>();
+        services.ConfigureHttpClientDefaults(b => b.AddHttpMessageHandler<TaintHttpHandler>());
         AddLogProtegido(services);
         services.AddMemoryCache();
         services.TryAddScoped<ITradutorRisco, ClaudeTradutorRisco>();   // Scoped: depende do guard
