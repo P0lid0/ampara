@@ -22,8 +22,11 @@ public sealed partial class ChaveiroService(IAmparaDb db, IChaveiroGateway gatew
         try { await db.SaveChangesAsync(ct); }
         catch (DbUpdateException)
         {
-            // Corrida: outro pareamento do mesmo id entrou entre a checagem e a gravação (índice único).
-            throw new ConflitoException("chaveiro-ja-pareado");
+            // Só vira 409 se o id foi de fato pareado por outro entre a checagem e a gravação (índice único).
+            // Qualquer outra falha (FK, timeout, conexão) sobe com a exceção original.
+            if (await db.Chaveiros.AsNoTracking().AnyAsync(x => x.DeviceId == deviceId, ct))
+                throw new ConflitoException("chaveiro-ja-pareado");
+            throw;
         }
         return c.Id;
     }

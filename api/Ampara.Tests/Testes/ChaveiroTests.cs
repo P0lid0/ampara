@@ -2,8 +2,11 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Ampara.Application.Chaveiros;
+using Ampara.Application.Comum;
 using Ampara.Domain.Entidades;
 using Ampara.Tests.Infra;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Ampara.Tests;
 
@@ -109,5 +112,28 @@ public class ChaveiroTests(AmparaFactory f) : IClassFixture<AmparaFactory>
         Assert.Equal("{\"cmd\":\"find\"}", JsonSerializer.Serialize(ComandoChaveiro.Find()));
         Assert.Equal("{\"cmd\":\"resolve\",\"alertId\":\"a-1\"}", JsonSerializer.Serialize(ComandoChaveiro.Resolve("a-1")));
         Assert.Equal("{\"cmd\":\"ping\"}", JsonSerializer.Serialize(ComandoChaveiro.Ping()));
+    }
+
+    [Fact]
+    public async Task Falha_de_gravacao_que_nao_e_unicidade_sobe_sem_virar_409()
+    {
+        // Usuário inexistente: viola a FK (não o índice único). Não pode ser reportado como "já pareado".
+        using var escopo = f.Services.CreateScope();
+        var svc = escopo.ServiceProvider.GetRequiredService<IChaveiroService>();
+        await Assert.ThrowsAsync<DbUpdateException>(() => svc.ParearAsync(Guid.NewGuid(), NovoId(), CancellationToken.None));
+    }
+
+    [Fact]
+    public async Task Lista_vem_na_ordem_do_pareamento()
+    {
+        var s = await f.NovoUsuarioAsync();
+        var ids = new[] { NovoId(), NovoId(), NovoId() };
+        foreach (var id in ids)
+        {
+            Assert.Equal(HttpStatusCode.Created, (await s.Cliente.PostAsJsonAsync("/api/v1/chaveiros", new { deviceId = id })).StatusCode);
+            await Task.Delay(15);
+        }
+        var l = await s.Cliente.GetFromJsonAsync<JsonElement>("/api/v1/chaveiros");
+        Assert.Equal(ids, l.EnumerateArray().Select(e => e.GetProperty("deviceId").GetString()!).ToArray());
     }
 }
