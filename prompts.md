@@ -50,4 +50,10 @@ Resultado: script e app em `qa/spikes/`, 14 pontos recebidos em segundo plano no
 
 Resultado: VM sobe com QEMU+WHPX, login em cerca de 62 s, SSH em `localhost:2222`, `VM: QEMU+WHPX`; imagem, disco e chaves ficam fora do git em `infra/vm/`.
 
+### 6. Amostra real do chaveiro e fechamento do dia 1 (Task 6 da fundação)
+
+> Executar a Task 6 do plano de fundação: escrever `qa/spikes/mqtt/chaveiro_real.py` com testes primeiro (`validar_evento` com os 8 campos do contrato e `main` que assina só o deviceId, valida o evento, manda `ack` e confere 15 s sem retransmissão), rodar contra o Wokwi do Vitor ou, se ele estiver indisponível, gravar `e-wokwi` = PULADO e agendar a prova real para o plano 08; depois rodar o fechamento do dia 1.
+
+Resultado: validador e CLI em `qa/spikes/mqtt/` (4 testes passando), `e-wokwi` = PULADO com a prova real agendada para o plano 08 e seção `## Amostra real do chaveiro` criada em `docs/riscos-dia1.md`; `main` exercitado só com publicação sintética no HiveMQ público.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->

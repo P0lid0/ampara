@@ -9,3 +9,5 @@ def test_evento_valido_nao_tem_problemas():            assert validar_evento(AMO
 def test_ts_nulo_e_aceito():                           assert validar_evento({**AMOSTRA, "ts": None}) == []
 def test_falta_event_id():                             assert validar_evento({k: v for k, v in AMOSTRA.items() if k != "eventId"}) == ["falta eventId"]
 def test_tipo_desconhecido():                          assert validar_evento({**AMOSTRA, "type": "foo"}) == ["type inválido: foo"]
+
+def test_evento_que_nao_e_objeto():                    assert validar_evento(["x"]) == ["evento não é objeto"]

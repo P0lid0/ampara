@@ -18,6 +18,8 @@ SEM_RETRANSMISSAO_S = 15  # o firmware reenvia a cada 5 s ate o ack
 
 def validar_evento(ev: dict) -> list[str]:
     """Lista de problemas do evento; vazia = valido. `ts` pode ser None."""
+    if not isinstance(ev, dict):
+        return ["evento não é objeto"]
     problemas = [f"falta {c}" for c in OBRIGATORIOS if c not in ev]
     if "type" in ev and ev["type"] not in TIPOS:
         problemas.append(f"type inválido: {ev['type']}")
@@ -26,9 +28,13 @@ def validar_evento(ev: dict) -> list[str]:
 
 def _proximo_evento(c, timeout: float):
     try:
-        return json.loads(c.mensagens.get(timeout=timeout).payload)
+        msg = c.mensagens.get(timeout=timeout)
     except queue.Empty:
         return None
+    try:
+        return json.loads(msg.payload)
+    except ValueError:
+        return ["payload não é JSON"]
 
 
 def main(device_id: str, esperar_s: int = 120) -> int:
@@ -51,7 +57,7 @@ def main(device_id: str, esperar_s: int = 120) -> int:
         fim = time.time() + SEM_RETRANSMISSAO_S
         while (restante := fim - time.time()) > 0:
             outro = _proximo_evento(c, restante)
-            if outro is not None and outro.get("eventId") == id_evento:
+            if isinstance(outro, dict) and outro.get("eventId") == id_evento:
                 print("FALHOU: o eventId voltou depois do ack", file=sys.stderr)
                 return 1
         print("OK: evento válido, ack enviado e sem retransmissão")
