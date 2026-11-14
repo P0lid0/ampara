@@ -194,4 +194,10 @@ Resultado: corrigidos os três Important — o gateway MQTT passou a despachar o
 
 Resultado: 47 testes passando na suíte da Ponte Polícia; sem migration.
 
+### 30. Ponte Polícia: modelos, comportamento e migração (Task 2 do plano 04)
+
+> Executar a Task 2 do plano da Ponte Polícia (`2026-11-14-04-ponte-policia`): escrever primeiro `test_modelos` (receber, retorno atual, mudar status, protocolo, roundtrip UTC, valor do enum no banco, origem_id único) e o teste de migração no PostgreSQL, ver falhar, e implementar `config`, `db` (`UTCDateTime`, engine, sessão), `models` (`Ocorrencia`, `TrilhaPosRoubo`, `Retorno`), Alembic e a migração `0001_inicial`.
+
+Resultado: testes da Ponte passando; migração 0001 aplicada no PostgreSQL local (5436, banco ponte) e provada em ponte_test (upgrade e downgrade).
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->
