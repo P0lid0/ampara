@@ -74,12 +74,13 @@ public static class CyberServiceCollectionExtensions
         });
     }
 
-    /// <summary>Ordem fixa: Correlacao, UseExceptionHandler, PiiRequest. Os demais passos do plano 03 entram depois.</summary>
+    /// <summary>Ordem fixa: Correlacao, UseExceptionHandler, PiiRequest, RespostaNaoAutenticada. Os demais passos do plano 03 entram depois.</summary>
     public static IApplicationBuilder UseCyber(this IApplicationBuilder app)
     {
         app.UseMiddleware<CorrelacaoMiddleware>();
         app.UseExceptionHandler();
         app.UseMiddleware<PiiRequestMiddleware>();
+        app.UseMiddleware<RespostaNaoAutenticadaMiddleware>();
         return app;
     }
 }

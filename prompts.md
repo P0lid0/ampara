@@ -308,4 +308,12 @@ Resultado: 24 testes novos passando, suíte inteira com 359 aprovados; sem migra
 
 Resultado: 8 testes novos passando, suíte inteira com 367 aprovados; sem migration.
 
+
+### 49. Cyber: sink de resposta HTTP não autenticada (Task 10 do plano 03)
+
+> Executar a Task 10 do plano 03 (Cyber): escrever primeiro os testes do sink de resposta não autenticada (CPF e senha na resposta viram `application/problem+json` com `detalheCidadao`, resposta autenticada passa, erro 400 que ecoa o valor continua 400 sem o dado, catálogo com telefone passa com evento `Permitido` e com CPF é bloqueado, login com JWT passa, binário e `/hubs` ignorados, corpo acima de 4x o limite bloqueado); implementar `RespostaNaoAutenticadaMiddleware` após o `PiiRequestMiddleware` e marcar `GET /api/v1/contas/catalogo` com `[PiiPermitida(Telefone)]`.
+
+Resultado: 8 testes novos passando, suíte inteira com 376 aprovados (os testes que ecoam a entrada passaram a rodar como usuário autenticado); sem migration.
+
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->

@@ -36,7 +36,7 @@ public sealed class CyberTestHost : IAsyncDisposable
     public HttpClient GetTestClient() => _host.GetTestClient();
 
     public static async Task<CyberTestHost> IniciarAsync(
-        Action<IEndpointRouteBuilder> mapa, Action<IServiceCollection>? servicos = null, Dictionary<string, string?>? config = null)
+        Action<IEndpointRouteBuilder> mapa, Action<IServiceCollection>? servicos = null, Dictionary<string, string?>? config = null, bool autenticado = false)
     {
         var rastro = new RastroEmMemoria();
         var host = new HostBuilder()
@@ -58,6 +58,14 @@ public sealed class CyberTestHost : IAsyncDisposable
                 });
                 web.Configure(app =>
                 {
+                    // Testes que ecoam a entrada no corpo rodam como usuário autenticado: o sink anônimo bloquearia o eco.
+                    if (autenticado)
+                        app.Use((ctx, prox) =>
+                        {
+                            ctx.User = new System.Security.Claims.ClaimsPrincipal(new System.Security.Claims.ClaimsIdentity(
+                                [new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.NameIdentifier, Guid.NewGuid().ToString())], "teste"));
+                            return prox(ctx);
+                        });
                     app.UseCyber();
                     app.UseRouting();
                     app.UseEndpoints(e => mapa(e));

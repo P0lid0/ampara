@@ -14,7 +14,7 @@ public class PiiRequestMiddlewareTests
 {
     // Todos os dados abaixo são sintéticos.
     [Fact] public async Task Json_marca_documento_e_o_endpoint_ainda_le_o_corpo() {
-        await using var h = await CyberTestHost.IniciarAsync(m => m.MapPost("/eco", async (HttpContext c, ITaintScope s) => {
+        await using var h = await CyberTestHost.IniciarAsync(autenticado: true, mapa: m => m.MapPost("/eco", async (HttpContext c, ITaintScope s) => {
             var corpo = await new StreamReader(c.Request.Body).ReadToEndAsync();
             return Results.Ok(new { corpo, marcados = s.Encontrar("123.456.789-00").Count }); }));
         var r = await h.GetTestClient().PostAsJsonAsync("/eco", new { documento = "123.456.789-00", nome = "x" });
@@ -23,7 +23,7 @@ public class PiiRequestMiddlewareTests
         Assert.Equal(1, o.GetProperty("marcados").GetInt32()); }
 
     [Fact] public async Task Form_query_e_header_sao_marcados_com_a_origem_certa() {
-        await using var h = await CyberTestHost.IniciarAsync(m => m.MapPost("/eco", async (HttpContext c, ITaintScope s) => {
+        await using var h = await CyberTestHost.IniciarAsync(autenticado: true, mapa: m => m.MapPost("/eco", async (HttpContext c, ITaintScope s) => {
             var form = await c.Request.ReadFormAsync();
             return Results.Ok(new {
                 cpf = form["cpf"].ToString(),
@@ -46,7 +46,7 @@ public class PiiRequestMiddlewareTests
         Assert.Equal("Senha", o.GetProperty("auth")[0].GetProperty("classe").GetString()); }
 
     [Fact] public async Task Multipart_le_campo_mas_nao_o_arquivo() {
-        await using var h = await CyberTestHost.IniciarAsync(m => m.MapPost("/up", async (HttpContext c, ITaintScope s) => {
+        await using var h = await CyberTestHost.IniciarAsync(autenticado: true, mapa: m => m.MapPost("/up", async (HttpContext c, ITaintScope s) => {
             var form = await c.Request.ReadFormAsync();
             var arq = form.Files["anexo"]!;
             using var leitor = new StreamReader(arq.OpenReadStream());
@@ -68,7 +68,7 @@ public class PiiRequestMiddlewareTests
         Assert.Equal("cpf 529.982.247-25 no arquivo", o.GetProperty("conteudo").GetString()); }
 
     [Fact] public async Task Codigo_de_emergencia_so_e_senha_nas_rotas_configuradas() {
-        await using var h = await CyberTestHost.IniciarAsync(m => {
+        await using var h = await CyberTestHost.IniciarAsync(autenticado: true, mapa: m => {
             m.MapPost("/api/v1/auth/emergencia", (ITaintScope s) => Results.Ok(s.Encontrar("481516").Select(x => x.Classe.ToString())));
             m.MapPost("/api/v1/guardioes/convites/{c}/aceitar", (ITaintScope s) => Results.Ok(s.Encontrar("481516").Select(x => x.Classe.ToString()))); });
         var cli = h.GetTestClient();
@@ -78,7 +78,7 @@ public class PiiRequestMiddlewareTests
         Assert.Empty(b!); }
 
     [Fact] public async Task Cadastro_chega_intacto_ao_endpoint() {
-        await using var h = await CyberTestHost.IniciarAsync(m => m.MapPost("/api/v1/auth/registrar", async (HttpContext c, ITaintScope s) => {
+        await using var h = await CyberTestHost.IniciarAsync(autenticado: true, mapa: m => m.MapPost("/api/v1/auth/registrar", async (HttpContext c, ITaintScope s) => {
             var d = await c.Request.ReadFromJsonAsync<JsonElement>();
             return Results.Ok(new {
                 nome = d.GetProperty("nome").GetString(), email = d.GetProperty("email").GetString(), senha = d.GetProperty("senha").GetString(),
@@ -93,7 +93,7 @@ public class PiiRequestMiddlewareTests
         Assert.True(o.GetProperty("senhaMarcada").GetBoolean()); }
 
     [Fact] public async Task Entrada_hostil_nao_derruba() {
-        await using var h = await CyberTestHost.IniciarAsync(m => m.MapPost("/eco", async (HttpContext c) =>
+        await using var h = await CyberTestHost.IniciarAsync(autenticado: true, mapa: m => m.MapPost("/eco", async (HttpContext c) =>
             { var corpo = await new StreamReader(c.Request.Body).ReadToEndAsync(); return Results.Ok(new { corpo }); }));
         var cli = h.GetTestClient();
 
@@ -121,7 +121,7 @@ public class PiiRequestMiddlewareTests
         Assert.Equal(HttpStatusCode.OK, (await cli.SendAsync(semTipo)).StatusCode); }
 
     [Fact] public async Task Correlation_id_valido_e_reaproveitado_invalido_e_trocado() {
-        await using var h = await CyberTestHost.IniciarAsync(m => m.MapGet("/id", (ICorrelacao c) => Results.Ok(new { c.Id })));
+        await using var h = await CyberTestHost.IniciarAsync(autenticado: true, mapa: m => m.MapGet("/id", (ICorrelacao c) => Results.Ok(new { c.Id })));
         var cli = h.GetTestClient();
 
         async Task<(string cab, string corpo)> Chamar(string id) {
@@ -145,7 +145,7 @@ public class PiiRequestMiddlewareTests
 
     [Fact] public async Task Demo_com_taint_desligado_nao_marca_mas_fora_da_demo_o_desligar_e_ignorado() {
         async Task<int> Marcados(Dictionary<string, string?> cfg) {
-            await using var h = await CyberTestHost.IniciarAsync(
+            await using var h = await CyberTestHost.IniciarAsync(autenticado: true, mapa: 
                 m => m.MapPost("/eco", (ITaintScope s) => Results.Ok(s.Encontrar("123.456.789-00").Count)), config: cfg);
             var r = await h.GetTestClient().PostAsJsonAsync("/eco", new { documento = "123.456.789-00" });
             return await r.Content.ReadFromJsonAsync<int>(); }

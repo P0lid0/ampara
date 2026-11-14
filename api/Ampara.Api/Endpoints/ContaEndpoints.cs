@@ -1,4 +1,5 @@
 using Ampara.Application.Contas;
+using Ampara.Domain.Cyber;
 
 namespace Ampara.Api.Endpoints;
 
@@ -13,7 +14,8 @@ public static class ContaEndpoints
         g.MapGet("catalogo", async (IContaService svc, CancellationToken ct) =>
             Results.Ok((await svc.ListarCatalogoAsync(ct))
                 .Select(c => new { id = c.Id, nome = c.Nome, tipo = c.Tipo, telefone = c.Telefone, link = c.Link, conferidoEm = c.ConferidoEm })))
-            .AllowAnonymous();
+            .AllowAnonymous()
+            .WithMetadata(new PiiPermitidaAttribute(PiiClasse.Telefone));   // telefone de canal oficial: dado público do catálogo
 
         g.MapPost("", async (ContaNova n, HttpContext http, IContaService svc, CancellationToken ct) =>
         {
