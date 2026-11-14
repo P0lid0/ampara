@@ -26,6 +26,9 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
+// Falha na subida se AMPARA_CRYPTO_KEY faltar ou nao tiver 32 bytes.
+_ = app.Services.GetRequiredService<Ampara.Application.Comum.ICifrador>();
+
 app.UseMiddleware<CorrelacaoMiddleware>();
 app.UseExceptionHandler();
 app.UseMiddleware<PiiRequestMiddleware>();   // plano 03

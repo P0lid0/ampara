@@ -1,0 +1,16 @@
+namespace Ampara.Domain.Comum;
+
+public static class Geo
+{
+    private const double RaioTerraM = 6_371_000;
+
+    public static double DistanciaMetros(double lat1, double lng1, double lat2, double lng2)
+    {
+        static double Rad(double g) => g * Math.PI / 180;
+        var dLat = Rad(lat2 - lat1);
+        var dLng = Rad(lng2 - lng1);
+        var a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2)
+              + Math.Cos(Rad(lat1)) * Math.Cos(Rad(lat2)) * Math.Sin(dLng / 2) * Math.Sin(dLng / 2);
+        return 2 * RaioTerraM * Math.Asin(Math.Min(1, Math.Sqrt(a)));
+    }
+}
