@@ -26,4 +26,10 @@ Claude Code (Anthropic).
 
 Resultado: firmware do ESP32, circuito do Wokwi, contrato MQTT com o app e simulador do app em Python.
 
+### 2. Risco (c): colunas reais da planilha SSP (Task 2 da fundação)
+
+> Executar a Task 2 do plano de fundação: escrever `qa/spikes/ssp/colunas.py` com testes primeiro (achar cabeçalho, validar coordenadas, classificar colunas, veredito, perfil e Markdown sem valores de célula), baixar a planilha SSP-SP de 2025 depois do ok do Pedro, rodar sobre o arquivo real e registrar `SSP_VEREDITO` e `SSP_CELULAR` em `docs/riscos-dia1.md`.
+
+Resultado: módulo e testes em `qa/spikes/ssp/`, `docs/dados-ssp-colunas.md` gerado, veredito `GRADE_500M` (76,9% de coordenadas válidas numa amostra de 20000 linhas) e `SSP_CELULAR: PROXY`.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->

@@ -141,8 +141,8 @@ def perfil_planilha(caminho: Path, max_linhas: int = 20000) -> dict[str, list[di
     return perfil
 
 
-def coordenadas_da_planilha(caminho: Path, mapa_por_aba: dict, max_linhas: int = 20000) -> dict:
-    """Valida lat/lng da aba que tem as duas colunas (a de maior volume)."""
+def coordenadas_da_planilha(caminho: Path, max_linhas: int = 20000) -> dict:
+    """Valida lat/lng da primeira aba que tem as duas colunas (amostra de ate max_linhas linhas)."""
     melhor = None
     for aba, nomes, dados in _abrir_perfil(Path(caminho), max_linhas):
         m = classificar_colunas(nomes)
@@ -183,7 +183,7 @@ def main(argv=None) -> int:
     ap.add_argument("--max-linhas", type=int, default=20000)
     a = ap.parse_args(argv)
     perfil = perfil_planilha(a.entrada, a.max_linhas)
-    coords = coordenadas_da_planilha(a.entrada, {}, a.max_linhas)
+    coords = coordenadas_da_planilha(a.entrada, a.max_linhas)
     aba = coords.get("aba") or next(iter(perfil), None)
     nomes = [c["nome"] for c in perfil.get(aba, [])] if aba else []
     mapa = classificar_colunas(nomes)
