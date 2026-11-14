@@ -4,8 +4,8 @@ from fastapi import APIRouter, Depends, Response
 
 from app.dominio import StatusOcorrencia
 from app.deps import get_ocorrencia_service
-from app.schemas import (OcorrenciaCriar, OcorrenciaResumo, ProtocoloResposta, RetornoResposta,
-                         StatusAtualizar)
+from app.schemas import (ERRO_422_CORPO, ErroSimples, ErroValidacao, OcorrenciaCriar, OcorrenciaResumo,
+                         ProtocoloResposta, RetornoResposta, StatusAtualizar)
 from app.security import exigir_chave_policia, exigir_chave_servico, rejeitar_pii
 from app.services.ocorrencia_service import OcorrenciaService
 
@@ -23,9 +23,10 @@ router = APIRouter(tags=["ocorrencias"])
                  "200 com o protocolo já existente. Payload com dado pessoal é rejeitado com 422."),
     dependencies=[Depends(exigir_chave_servico), Depends(rejeitar_pii)],
     responses={
-        200: {"description": "origem_id já registrado: devolve o protocolo existente."},
-        401: {"description": "Chave de serviço inválida ou ausente."},
-        422: {"description": "Payload inválido ou com dado pessoal."},
+        200: {"model": ProtocoloResposta, "description": "origem_id já registrado: devolve o protocolo existente."},
+        401: {"model": ErroSimples, "description": "Chave de serviço inválida ou ausente."},
+        422: {**ERRO_422_CORPO, "description": "Payload inválido (ErroValidacao), com dado pessoal (ErroPii) "
+                                               "ou corpo que não é JSON (ErroSimples)."},
     },
 )
 def criar_ocorrencia(
@@ -46,8 +47,8 @@ def criar_ocorrencia(
     summary="Lista ocorrências para o painel da polícia",
     description="Mais recentes primeiro; filtro opcional por status. Não expõe device_hash nem trilha.",
     dependencies=[Depends(exigir_chave_policia)],
-    responses={401: {"description": "Chave da polícia inválida ou ausente."},
-               422: {"description": "Status desconhecido."}},
+    responses={401: {"model": ErroSimples, "description": "Chave da polícia inválida ou ausente."},
+               422: {"model": ErroValidacao, "description": "Status desconhecido."}},
 )
 def listar_ocorrencias(
     status: StatusOcorrencia | None = None,
@@ -63,8 +64,9 @@ def listar_ocorrencias(
     description=("Devolve o status e a mensagem mais recentes da ocorrência, para a API da Ampara "
                  "repassar ao cidadão pelo protocolo."),
     dependencies=[Depends(exigir_chave_servico)],
-    responses={401: {"description": "Chave de serviço inválida ou ausente."},
-               404: {"description": "Protocolo não encontrado."}},
+    responses={401: {"model": ErroSimples, "description": "Chave de serviço inválida ou ausente."},
+               404: {"model": ErroSimples, "description": "Protocolo não encontrado."},
+               422: {"model": ErroValidacao, "description": "Parâmetro inválido."}},
 )
 def obter_retorno(protocolo: str, servico: OcorrenciaService = Depends(get_ocorrencia_service)
                   ) -> RetornoResposta:
@@ -78,10 +80,11 @@ def obter_retorno(protocolo: str, servico: OcorrenciaService = Depends(get_ocorr
     description=("Usado pela polícia: aceita em_analise, atendida ou descartada, respeitando as transições "
                  "permitidas. A mensagem não pode conter dado pessoal."),
     dependencies=[Depends(exigir_chave_policia), Depends(rejeitar_pii)],
-    responses={401: {"description": "Chave da polícia inválida ou ausente."},
-               404: {"description": "Protocolo não encontrado."},
-               409: {"description": "Transição de status não permitida."},
-               422: {"description": "Payload inválido ou com dado pessoal."}},
+    responses={401: {"model": ErroSimples, "description": "Chave da polícia inválida ou ausente."},
+               404: {"model": ErroSimples, "description": "Protocolo não encontrado."},
+               409: {"model": ErroSimples, "description": "Transição de status não permitida."},
+               422: {**ERRO_422_CORPO, "description": "Payload inválido (ErroValidacao), com dado pessoal "
+                                                      "(ErroPii) ou corpo que não é JSON (ErroSimples)."}},
 )
 def atualizar_status(protocolo: str, dados: StatusAtualizar,
                      servico: OcorrenciaService = Depends(get_ocorrencia_service)) -> RetornoResposta:

@@ -67,4 +67,35 @@ class HotspotResposta(BaseModel):
     lat: float
     lng: float
     total: int
-    risco_previsto: str
+    risco_previsto: Literal["baixo", "medio", "alto"]
+
+
+# --- Corpos de erro (só documentação: os handlers de app/erros.py montam o JSON) ---
+
+class ErroSimples(BaseModel):
+    """401, 404, 409 e os 422 de corpo que não é JSON ou aninhado demais."""
+    detail: str
+
+
+class AchadoPiiResposta(BaseModel):
+    campo: str = Field(description="Caminho do campo no payload; chave do remetente vira <chave>.")
+    classe: Literal["Cpf", "Email", "Telefone", "Imei", "Nome"]
+
+
+class ErroPii(BaseModel):
+    """422 de payload com dado pessoal: diz onde e de que classe, nunca o valor."""
+    detail: str
+    achados: list[AchadoPiiResposta]
+
+
+class ErroValidacaoItem(BaseModel):
+    loc: list[str | int]
+    msg: str
+
+
+class ErroValidacao(BaseModel):
+    """422 de validação: sem o valor enviado (o handler descarta input e ctx)."""
+    detail: list[ErroValidacaoItem]
+
+
+ERRO_422_CORPO = {"model": ErroValidacao | ErroPii | ErroSimples}

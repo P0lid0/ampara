@@ -82,3 +82,42 @@ def test_documentacao_automatica_completa(client):
             if caminho != "/health":
                 assert "401" in op["responses"], f"{metodo} {caminho} sem resposta 401 documentada"
     assert client.get("/docs").status_code == 200
+
+
+# --- revisao final do plano 04: corpos de erro documentados -------------------
+
+def _schema_da_resposta(doc, caminho, metodo, codigo):
+    conteudo = doc["paths"][caminho][metodo]["responses"][codigo].get("content", {})
+    return conteudo.get("application/json", {}).get("schema")
+
+
+def _nomes_referenciados(schema):
+    alvo = [schema] + schema.get("anyOf", []) + schema.get("oneOf", [])
+    return {s["$ref"].rsplit("/", 1)[-1] for s in alvo if "$ref" in s}
+
+
+def test_openapi_documenta_os_corpos_de_erro_reais(client):
+    doc = client.get("/openapi.json").json()
+    esquemas = doc["components"]["schemas"]
+    assert "HTTPValidationError" not in esquemas          # o handler não devolve esse formato
+    assert set(esquemas["ErroPii"]["properties"]) == {"detail", "achados"}
+    assert set(esquemas["AchadoPiiResposta"]["properties"]) == {"campo", "classe"}
+    assert set(esquemas["ErroValidacaoItem"]["properties"]) == {"loc", "msg"}
+    for caminho, metodo in (("/ocorrencias", "post"), ("/ocorrencias/{protocolo}/status", "patch")):
+        assert _nomes_referenciados(_schema_da_resposta(doc, caminho, metodo, "422")) >= {"ErroPii", "ErroValidacao"}
+    for caminho, ops in doc["paths"].items():
+        for metodo, op in ops.items():
+            for codigo in set(op["responses"]) & {"401", "404", "409"}:
+                assert _nomes_referenciados(_schema_da_resposta(doc, caminho, metodo, codigo)) == {"ErroSimples"}
+    assert _nomes_referenciados(_schema_da_resposta(doc, "/ocorrencias", "post", "200")) == {"ProtocoloResposta"}
+    assert esquemas["HotspotResposta"]["properties"]["risco_previsto"]["enum"] == C["risco_previsto"]
+
+
+def test_corpos_de_erro_reais_validam_nos_modelos_documentados(client):
+    from app.schemas import ErroPii, ErroSimples, ErroValidacao
+    from tests.fabrica import HS, payload_valido
+    r = client.post("/ocorrencias", json=payload_valido(observacao="CPF 529.982.247-25"), headers=HS)  # SINTETICO
+    ErroPii.model_validate(r.json())
+    r = client.post("/ocorrencias", json=payload_valido(tipo="outro"), headers=HS)
+    ErroValidacao.model_validate(r.json())
+    ErroSimples.model_validate(client.post("/ocorrencias", json=payload_valido()).json())

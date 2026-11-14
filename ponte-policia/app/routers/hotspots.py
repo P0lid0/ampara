@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Query
 
 from app.deps import get_hotspot_service
-from app.schemas import HotspotResposta
+from app.schemas import ErroSimples, ErroValidacao, HotspotResposta
 from app.security import exigir_chave_policia
 from app.services.hotspot_service import HotspotService
 
@@ -15,8 +15,8 @@ router = APIRouter(tags=["hotspots"])
     description=("Ocorrências não descartadas agrupadas por área (grade de ~500 m) nos últimos "
                  "janela_min minutos, da área mais ativa para a menos ativa. Áreas fora da grade não entram."),
     dependencies=[Depends(exigir_chave_policia)],
-    responses={401: {"description": "Chave da polícia inválida ou ausente."},
-               422: {"description": "janela_min fora de 1 a 10080."}},
+    responses={401: {"model": ErroSimples, "description": "Chave da polícia inválida ou ausente."},
+               422: {"model": ErroValidacao, "description": "janela_min fora de 1 a 10080."}},
 )
 def listar_hotspots(
     janela_min: int = Query(60, ge=1, le=10080, description="Janela em minutos (1 a 10080)."),
