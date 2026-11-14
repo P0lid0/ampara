@@ -52,6 +52,8 @@ checa "entrevistas: 2 modelos" test "$(grep -c '^## Entrevista ' "$ROOT/docs/ent
 checa "entrevistas: aviso de anonimato" grep -qi "não identifique" "$ROOT/docs/entrevistas.md"
 checa "fontes: cabecalho" grep -qF "| Fonte | Link | Data de acesso | Usado para |" "$ROOT/docs/fontes.md"
 for id in net-target a-emulador-gps b-mqtt c-ssp d-vm e-wokwi; do checa "riscos: $id" grep -q "| $id |" "$ROOT/docs/riscos-dia1.md"; done
+# textos versionados precisam ser UTF-8 valido (evita bytes Latin-1 colados)
+checa "textos versionados em UTF-8" bash -c 'cd "$0" && for f in $(git ls-files "*.md" "*.txt" "*.sh" .env.example); do iconv -f utf-8 -t utf-8 "$f" >/dev/null 2>&1 || { echo "nao-UTF-8: $f"; exit 1; }; done' "$ROOT"
 # --final: nenhuma linha de risco pode continuar PENDENTE
 if [ "${1:-}" = "--final" ]; then
   checa "sem PENDENTE (tabela)" bash -c '! grep -q "| PENDENTE |" "$0"' "$ROOT/docs/riscos-dia1.md"
