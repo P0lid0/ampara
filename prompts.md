@@ -206,24 +206,52 @@ Resultado: testes da Ponte passando; migração 0001 aplicada no PostgreSQL loca
 
 Resultado: 41 testes do detector passando; 96 passando e 1 ignorado na suíte da Ponte Polícia; sem migration.
 
+### 32. Ponte Polícia: POST /ocorrencias idempotente, autenticação, 422 de PII e /health (Task 4 do plano 04)
+
+> Executar a Task 4 do plano da Ponte Polícia (`2026-11-14-04-ponte-policia`): escrever primeiro `test_ocorrencias_api` e `test_auth` (201 com protocolo, reenvio do mesmo `origem_id` dá 200 com o mesmo protocolo, trilha em ordem, `ts` gravado em UTC, payloads inválidos e PII em campo extra dão 422 sem ecoar o valor, chave ausente, vazia, errada ou com acento dá 401, chave configurada vazia falha fechado, corrida na idempotência devolve o vencedor), ver falhar, e implementar `schemas`, `security` (chaves por cabeçalho com `hmac.compare_digest`, `rejeitar_pii` antes da validação tipada), `erros` (handlers sem `input`/`ctx`), repositório, serviço, `deps`, `main`, `GET /health` e `POST /ocorrencias`.
+
+Resultado: 133 testes passando e 1 ignorado (PostgreSQL sem `PONTE_DB_TEST`) na suíte da Ponte Polícia; acrescentado um teste que viola a unicidade de verdade na corrida; sem migration. (Entrada registrada na revisão final do plano 04.)
+
+### 33. Ponte Polícia: retorno ao cidadão, mudança de status e listagem (Task 5 do plano 04)
+
 > Executar a Task 5 do plano da Ponte Polícia (`2026-11-14-04-ponte-policia`): escrever primeiro `test_retorno_status` e `test_listagem`, ver falhar, e implementar `GET /ocorrencias/{protocolo}/retorno`, `PATCH /ocorrencias/{protocolo}/status` e `GET /ocorrencias?status=` com schemas, serviço e repositório.
 
 Resultado: 163 testes passando e 1 ignorado na suíte da Ponte Polícia; migration 0002 amplia `retornos.mensagem` de 280 para 500 caracteres.
+
+### 34. Ponte Polícia: hotspots por janela de tempo (Task 6 do plano 04)
 
 > Executar a Task 6 do plano da Ponte Polícia (`2026-11-14-04-ponte-policia`): escrever primeiro `test_hotspots`, ver falhar, e implementar `GET /hotspots?janela_min=` (chave da polícia, janela de 1 a 10080 minutos, padrão 60) com `contar_por_area` no repositório, `HotspotService`, `risco_por_total` e `HotspotResposta`.
 
 Resultado: hotspots calculados na leitura, sem tabela nova e sem migration; descartadas e área fora da grade não entram.
 
+### 35. Ponte Polícia: painel /policia (Task 7 do plano 04)
+
 > Executar a Task 7 do plano da Ponte Polícia (`2026-11-14-04-ponte-policia`): escrever primeiro `test_painel` e implementar a página `GET /policia` (Jinja2 + Leaflet 1.9.4) com mapa de hotspots, tabela de ocorrências clicável e formulário de mudança de status, sem embutir chave nem dados.
 
 Resultado: painel conferido no navegador com 3 ocorrências sintéticas (2 círculos, 2 hotspots, 3 linhas, PATCH com "Status atualizado"); sem migration.
+
+### 36. Ponte Polícia: teste de contrato e documentação automática (Task 8 do plano 04)
+
+> Executar a Task 8 do plano da Ponte Polícia (`2026-11-14-04-ponte-policia`): criar `tests/contrato/contrato.json` (transcrição da seção "Ponte Polícia — rotas" dos contratos) e `test_contrato` (campos e enums dos schemas iguais ao contrato, rotas e esquemas de segurança do OpenAPI, exemplo gravado pela API C# em `exemplo_da_api.json` aceito pelo schema, pelo detector de PII e pelo `POST /ocorrencias`, `risco_previsto` só com os valores do contrato, toda rota com summary, description e 401 documentado), ver falhar, e completar só os `summary`/`description`/`responses` que faltarem nas rotas.
+
+Resultado: faltavam as descriptions de `GET /ocorrencias/{protocolo}/retorno` e `PATCH .../status`; 199 testes passando e 1 ignorado na suíte da Ponte Polícia; sem migration. (Entrada registrada na revisão final do plano 04.)
+
+### 37. Ponte Polícia: seed sintético para a demonstração (Task 9 do plano 04)
 
 > Executar a Task 9 do plano da Ponte Polícia (`2026-11-14-04-ponte-policia`): escrever primeiro `test_seed` e implementar `scripts/seed_demo.py` com `gerar_payloads` determinístico (3 focos sintéticos, `uuid5`, `device_hash` derivado, trilha de 2 pontos) e `main()` que posta na Ponte com `PONTE_CHAVE_SERVICO` e imprime o resumo por código. Correção da rodada 1: registrar este prompt, tratar timeout, validar `--n` e cobrir os campos do brief e o `main()` nos testes.
 
 Resultado: seed sintético validado contra o schema e sem PII; sem migration.
 
+### 38. Ponte Polícia: README e evidências (Task 10 do plano 04)
+
 > Executar a Task 10 do plano da Ponte Polícia (`2026-11-14-04-ponte-policia`): escrever o README da pasta (ficha da CitizenTech, arquitetura, execução, rotas, privacidade, testes, mapa da rubrica de SOA) e gerar as evidências em `ponte-policia/evidencias/` (pytest, Alembic, requisições reais, OpenAPI e prints do Swagger e do painel).
 
 Resultado: 208 testes passando (mais 1 de migração no PostgreSQL), Alembic até `0002 (head)` e evidências geradas com o serviço no ar e dados sintéticos; sem migration nova.
+
+### 39. Revisão final do plano 04 (Ponte Polícia, branch inteiro, 1157760..ac99018)
+
+> Revisão final do plano 04 (Ponte Polícia em `ponte-policia/`), como único corretor: corrigir todos os achados confirmados Critical/Important com teste que falharia sem a correção, e os Minor triviais e seguros; o resto vira dívida. Fontes de verdade: índice e contratos (seção "Ponte Polícia — rotas" e decisões da rodada 2 vencem), spec, plano 04 (Global Constraints, Review Focus, rubrica de SOA) e `global-constraints.md`; compatibilidade com o cliente da API C# sem editar `api/`. Commits pequenos na main, suíte completa antes de cada um.
+
+Resultado: nenhum Critical ou Important. Minors corrigidos: varredura de PII em tempo linear (a regex de e-mail era quadrática num texto longo sem "@") e fora do event loop; CPF e telefone com separador "/", "_" ou contrabarra passam a ser detectados; o 422 de validação não ecoa mais a chave extra do remetente; corpo aninhado demais sem Content-Type JSON dá 422 em vez de 500; `PATCH /status` trava a linha com `SELECT ... FOR UPDATE` (dois agentes simultâneos não reabrem um estado terminal, provado no PostgreSQL com duas threads); OpenAPI com os corpos de erro reais (`ErroSimples`, `ErroPii`, `ErroValidacao`), 200 idempotente documentado e `risco_previsto` como enum; teste PostgreSQL compara migrações e models (`compare_metadata`) e só roda em banco `*_test`; falha fechado testada nas duas chaves; `exemplo_da_api.json` obrigatório; etiqueta Review Focus 4 no teste certo; vetores marcados SINTETICO; testes de PATCH com campo extra e sem status; dependências fixadas, suíte sem avisos, entradas 32 e 36 deste arquivo e cabeçalhos das tarefas 5 a 10. 225 testes passando (2 no PostgreSQL); sem migration (o modelo não mudou).
 
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->
