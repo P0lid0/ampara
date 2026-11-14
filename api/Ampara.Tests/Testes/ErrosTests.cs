@@ -92,9 +92,10 @@ public class ErrosTests(AmparaFactory f) : IClassFixture<AmparaFactory>
     [Fact]
     public void Acesso_indevido_noop_nao_lanca()
     {
-        var a = f.Services.GetRequiredService<IAcessoIndevido>();
-        Assert.IsType<NoopAcessoIndevido>(a);
+        // A fabrica troca o no-op pelo spy (T5); o no-op real e a implementacao de producao ate o plano 03.
+        IAcessoIndevido a = new NoopAcessoIndevido();
         a.Registrar(Guid.NewGuid(), "codigo-emergencia");
+        Assert.IsType<AcessoIndevidoSpy>(f.Services.GetRequiredService<IAcessoIndevido>());
     }
 
     [Fact]

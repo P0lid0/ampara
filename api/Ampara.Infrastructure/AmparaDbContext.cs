@@ -8,6 +8,7 @@ namespace Ampara.Infrastructure;
 public class AmparaDbContext(DbContextOptions<AmparaDbContext> options) : DbContext(options), IAmparaDb
 {
     public DbSet<Usuario> Usuarios => Set<Usuario>();
+    public DbSet<TentativaEmergencia> TentativasEmergencia => Set<TentativaEmergencia>();
 
     protected override void ConfigureConventions(ModelConfigurationBuilder cb)
     {

@@ -6,6 +6,7 @@ public static class MapAmpara
     public static IEndpointRouteBuilder MapAmparaEndpoints(this IEndpointRouteBuilder rotas)
     {
         rotas.MapAuth();
+        rotas.MapMe();
         return rotas;
     }
 }

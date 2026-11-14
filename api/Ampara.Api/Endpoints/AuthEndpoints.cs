@@ -6,6 +6,7 @@ public static class AuthEndpoints
 {
     public sealed record RegistrarEntrada(string? Nome, string? Email, string? Senha);
     public sealed record LoginEntrada(string? Email, string? Senha);
+    public sealed record EmergenciaEntrada(string? Email, string? Codigo, string? PalavraSecreta);
 
     public static IEndpointRouteBuilder MapAuth(this IEndpointRouteBuilder rotas)
     {
@@ -20,6 +21,9 @@ public static class AuthEndpoints
 
         g.MapPost("/login", async (LoginEntrada e, IAuthService auth, CancellationToken ct) =>
             Results.Ok(await auth.LoginAsync(e.Email ?? "", e.Senha ?? "", ct))).AllowAnonymous();
+
+        g.MapPost("/emergencia", async (EmergenciaEntrada e, IAuthService auth, CancellationToken ct) =>
+            Results.Ok(await auth.LoginEmergenciaAsync(e.Email ?? "", e.Codigo ?? "", e.PalavraSecreta ?? "", ct))).AllowAnonymous();
 
         return rotas;
     }

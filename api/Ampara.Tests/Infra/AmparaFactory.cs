@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Ampara.Application.Cyber;
 using Ampara.Infrastructure;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -35,6 +36,8 @@ public class AmparaFactory : WebApplicationFactory<Program>
         _conexao.Open();
     }
 
+    public AcessoIndevidoSpy Acesso { get; } = new();
+
     public FakeTimeProvider Tempo { get; } = new(new DateTimeOffset(2026, 11, 14, 12, 0, 0, TimeSpan.Zero));
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -54,6 +57,8 @@ public class AmparaFactory : WebApplicationFactory<Program>
         {
             services.RemoveAll<TimeProvider>();
             services.AddSingleton<TimeProvider>(Tempo);
+            services.RemoveAll<IAcessoIndevido>();
+            services.AddSingleton<IAcessoIndevido>(Acesso);
 
             // Troca o Npgsql por SQLite em memória (o esquema vem do modelo, via EnsureCreated).
             services.RemoveAll<DbContextOptions<AmparaDbContext>>();
@@ -101,7 +106,14 @@ public class AmparaFactory : WebApplicationFactory<Program>
         return new Sessao(id, email.Trim().ToLowerInvariant(), c);
     }
 
-    // Completado na T5.
-    public Task<HttpClient> ClienteEmergenciaAsync(string email, string codigo, string palavra)
-        => throw new NotImplementedException("Completado na T5 (acesso de emergência).");
+    /// <summary>Entra pelo codigo de emergencia; o cliente devolvido leva o Bearer com scope=emergencia.</summary>
+    public async Task<HttpClient> ClienteEmergenciaAsync(string email, string codigo, string palavra)
+    {
+        var c = CreateClient();
+        var r = await c.PostAsJsonAsync("/api/v1/auth/emergencia", new { email, codigo, palavraSecreta = palavra });
+        r.EnsureSuccessStatusCode();
+        var token = (await r.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("token").GetString()!;
+        c.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        return c;
+    }
 }

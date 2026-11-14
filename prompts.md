@@ -80,4 +80,10 @@ Resultado: primitivas em `api/Ampara.Domain/Comum`, cifra em `api/Ampara.Infrast
 
 Resultado: 8 testes de auth passando; migration aplicada no PostgreSQL local (tabela `Usuarios`).
 
+### 11. Código de emergência com limite de tentativas (Task 5 do plano da API)
+
+> Executar a Task 5 do plano da API (`2026-11-14-02-api`): escrever primeiro o `EmergenciaTests` (definir código de 6 a 10 dígitos e palavra de ao menos 4 caracteres, entrar sem diferenciar caixa, 422 nos valores inválidos, 5 erros na janela de 15 min bloqueiam com 429 e `Retry-After` inclusive para o código certo, e-mail inexistente conta e responde 401 igual, token de emergência barrado nas rotas de usuário, `GET /me`), ver falhar, e implementar `TentativaEmergencia`, `DefinirEmergenciaAsync`/`LoginEmergenciaAsync`, `PUT /me/emergencia`, `POST /auth/emergencia`, `GET /me`, o spy de `IAcessoIndevido` na fábrica e a migration `Emergencia`.
+
+Resultado: 6 testes de emergência passando (43 na suíte); migration aplicada no PostgreSQL local.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->

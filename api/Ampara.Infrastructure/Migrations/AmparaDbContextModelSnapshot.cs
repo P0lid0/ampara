@@ -22,6 +22,30 @@ namespace Ampara.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Ampara.Domain.Entidades.TentativaEmergencia", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("Em")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("EmailNormalizado")
+                        .IsRequired()
+                        .HasMaxLength(320)
+                        .HasColumnType("character varying(320)");
+
+                    b.Property<bool>("Sucesso")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmailNormalizado", "Em");
+
+                    b.ToTable("TentativasEmergencia", (string)null);
+                });
+
             modelBuilder.Entity("Ampara.Domain.Entidades.Usuario", b =>
                 {
                     b.Property<Guid>("Id")

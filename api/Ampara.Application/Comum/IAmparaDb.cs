@@ -7,6 +7,7 @@ namespace Ampara.Application.Comum;
 public interface IAmparaDb
 {
     DbSet<Usuario> Usuarios { get; }
+    DbSet<TentativaEmergencia> TentativasEmergencia { get; }
 
     Task<int> SaveChangesAsync(CancellationToken ct = default);
 
