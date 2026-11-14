@@ -9,6 +9,7 @@ public static class MapAmpara
         rotas.MapMe();
         rotas.MapAparelhos();
         rotas.MapContas();
+        rotas.MapGuardioes();
         return rotas;
     }
 }

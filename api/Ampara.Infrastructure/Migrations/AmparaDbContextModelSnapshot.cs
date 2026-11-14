@@ -119,6 +119,66 @@ namespace Ampara.Infrastructure.Migrations
                     b.ToTable("Contas", (string)null);
                 });
 
+            modelBuilder.Entity("Ampara.Domain.Entidades.Convite", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Codigo")
+                        .IsRequired()
+                        .HasMaxLength(6)
+                        .HasColumnType("character varying(6)");
+
+                    b.Property<DateTime>("ExpiraEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("UsadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UsuarioId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Codigo")
+                        .IsUnique();
+
+                    b.HasIndex("UsuarioId");
+
+                    b.ToTable("Convites", (string)null);
+                });
+
+            modelBuilder.Entity("Ampara.Domain.Entidades.Guardiao", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("GuardiaoUsuarioId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Ordem")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("UsuarioId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GuardiaoUsuarioId");
+
+                    b.HasIndex("UsuarioId", "GuardiaoUsuarioId")
+                        .IsUnique();
+
+                    b.HasIndex("UsuarioId", "Ordem");
+
+                    b.ToTable("Guardioes", (string)null);
+                });
+
             modelBuilder.Entity("Ampara.Domain.Entidades.TentativaEmergencia", b =>
                 {
                     b.Property<Guid>("Id")
@@ -205,6 +265,30 @@ namespace Ampara.Infrastructure.Migrations
 
             modelBuilder.Entity("Ampara.Domain.Entidades.ContaVinculada", b =>
                 {
+                    b.HasOne("Ampara.Domain.Entidades.Usuario", null)
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Ampara.Domain.Entidades.Convite", b =>
+                {
+                    b.HasOne("Ampara.Domain.Entidades.Usuario", null)
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Ampara.Domain.Entidades.Guardiao", b =>
+                {
+                    b.HasOne("Ampara.Domain.Entidades.Usuario", null)
+                        .WithMany()
+                        .HasForeignKey("GuardiaoUsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Ampara.Domain.Entidades.Usuario", null)
                         .WithMany()
                         .HasForeignKey("UsuarioId")

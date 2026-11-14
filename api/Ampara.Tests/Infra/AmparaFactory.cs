@@ -121,6 +121,16 @@ public class AmparaFactory : WebApplicationFactory<Program>
         return new Sessao(id, email.Trim().ToLowerInvariant(), c);
     }
 
+    /// <summary>Cria um usuario novo e o vincula como guardiao da vitima (convite criado e aceito). Devolve a sessao do guardiao.</summary>
+    public async Task<Sessao> VincularGuardiaoAsync(Sessao vitima)
+    {
+        var g = await NovoUsuarioAsync("Guardiao " + Guid.NewGuid().ToString("N")[..6]);
+        var cv = await (await vitima.Cliente.PostAsync("/api/v1/guardioes/convites", null)).Content.ReadFromJsonAsync<JsonElement>();
+        var r = await g.Cliente.PostAsync($"/api/v1/guardioes/convites/{cv.GetProperty("codigo").GetString()}/aceitar", null);
+        r.EnsureSuccessStatusCode();
+        return g;
+    }
+
     /// <summary>Entra pelo codigo de emergencia; o cliente devolvido leva o Bearer com scope=emergencia.</summary>
     public async Task<HttpClient> ClienteEmergenciaAsync(string email, string codigo, string palavra)
     {
