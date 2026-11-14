@@ -81,4 +81,23 @@ public class DemoSeedTests : IClassFixture<AmparaFactory>
         Assert.Empty(await db.Aparelhos.ToListAsync());
         Assert.Empty(await db.Guardioes.ToListAsync());
     }
+
+    [Fact]
+    public async Task Conta_admin_registrada_por_terceiro_nao_e_promovida()
+    {
+        // Alguém registra admin@ampara.demo com a própria senha enquanto o demo está desligado; ao religar o demo,
+        // o seeder não pode adotar essa conta como admin.
+        using var fabrica = new AmparaFactory();
+        (await fabrica.CreateClient().PostAsJsonAsync("/api/v1/auth/registrar",
+            new { nome = "Terceiro", email = DemoSeeder.EmailAdmin, senha = "senha-do-terceiro-1" })).EnsureSuccessStatusCode();   // SINTETICO
+
+        using (var escopo = fabrica.Services.CreateScope())
+        {
+            var sp = escopo.ServiceProvider;
+            await Assert.ThrowsAsync<InvalidOperationException>(() => DemoSeeder.SemearAsync(sp.GetRequiredService<Ampara.Infrastructure.AmparaDbContext>(),
+                sp.GetRequiredService<ISenhaHasher>(), sp.GetRequiredService<ICifrador>(), sp.GetRequiredService<TimeProvider>(), CancellationToken.None));
+        }
+        using var db = fabrica.NovoDb();
+        Assert.NotEqual(Papeis.Admin, (await db.Usuarios.SingleAsync(u => u.Email == DemoSeeder.EmailAdmin)).Papel);
+    }
 }

@@ -27,7 +27,15 @@ public static class DemoSeeder
         var agora = tempo.GetUtcNow().UtcDateTime;
 
         var admin = await ObterOuCriarAsync(db, hasher, "Admin Demonstracao", EmailAdmin, agora, ct);
-        if (admin.Papel != Papeis.Admin) { admin.PromoverAAdmin(); await db.SaveChangesAsync(ct); }
+        if (admin.Papel != Papeis.Admin)
+        {
+            // Só promove a conta que o próprio seeder criou (senha da demonstração). Conta registrada por terceiro com
+            // o mesmo e-mail, enquanto o demo estava desligado, não vira admin.
+            if (!hasher.Verificar(SenhaDemo, admin.SenhaHash))
+                throw new InvalidOperationException($"{EmailAdmin} já existe sem papel admin e com outra senha; o seeder não a promove.");
+            admin.PromoverAAdmin();
+            await db.SaveChangesAsync(ct);
+        }
 
         var vitima = await ObterOuCriarAsync(db, hasher, "Vitima Demonstracao", EmailVitima, agora, ct);
         var g1 = await ObterOuCriarAsync(db, hasher, "Guardiao Um", EmailGuardiao1, agora, ct);
