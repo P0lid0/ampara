@@ -68,4 +68,10 @@ Resultado: solution `api/Ampara.sln` em net11.0 com 5 projetos, EF Core 10 e Npg
 
 Resultado: erros em `application/problem+json` com `title` fixo por exceção e só o tipo no log; 15 testes passando.
 
+### 9. Primitivas de domínio da API (Task 3 do plano da API)
+
+> Executar a Task 3 do plano da API (`2026-11-14-02-api`): escrever primeiro o `PrimitivasTests` (IMEI com Luhn, área do mapa e limites do contrato, faixa e dia em hora de São Paulo, vetores de `DeviceHash`, distância haversine, cifra AES-GCM e `NoopImeiRevelador`), ver falhar, e implementar `Imei`, `AreaMapa`, `FusoBrasil`, `Geo`, `DeviceHash`, `ICifrador`, `CifradorAesGcm`, `NoopImeiRevelador` e o registro na DI (`AMPARA_CRYPTO_KEY` ausente ou diferente de 32 bytes derruba a subida).
+
+Resultado: primitivas em `api/Ampara.Domain/Comum`, cifra em `api/Ampara.Infrastructure/Cripto`; correção da revisão com teste de adulteração por byte (nonce, tag e ciphertext) e teste da falha de subida da chave.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->

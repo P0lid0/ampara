@@ -1,6 +1,10 @@
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Ampara.Application.Comum;
 using Ampara.Domain.Comum;
+using Ampara.Infrastructure;
 using Ampara.Infrastructure.Cripto;
 using Ampara.Infrastructure.Cyber;
 
@@ -37,6 +41,36 @@ public class PrimitivasTests
         var c = new CifradorAesGcm(Convert.ToBase64String(new byte[32]));   // chave de teste
         var a = c.Cifrar("490154203237518"); var b = c.Cifrar("490154203237518");
         Assert.NotEqual(a, b); Assert.Equal("490154203237518", c.Decifrar(a)); Assert.DoesNotContain("4901542", a);
-        var adulterado = a[..^2] + (a[^2] == 'A' ? "B=" : "A="); Assert.ThrowsAny<CryptographicException>(() => c.Decifrar(adulterado));
+        
         Assert.Throws<ArgumentException>(() => new CifradorAesGcm(Convert.ToBase64String(new byte[16]))); }
+
+    [Theory]
+    [InlineData(0)]    // nonce
+    [InlineData(12)]   // tag
+    [InlineData(28)]   // ciphertext
+    public void Cifra_aesgcm_rejeita_byte_alterado(int posicao) {
+        var c = new CifradorAesGcm(Convert.ToBase64String(new byte[32]));   // SINTETICO
+        var bruto = Convert.FromBase64String(c.Cifrar("490154203237518"));
+        Assert.Equal(43, bruto.Length);
+        bruto[posicao] ^= 1;
+        var adulterado = Convert.ToBase64String(bruto);   // base64 valido: so a autenticacao do GCM pode recusar
+        Assert.ThrowsAny<CryptographicException>(() => c.Decifrar(adulterado));
+    }
+    [Fact] public void Cifra_aesgcm_rejeita_entrada_curta_ou_invalida() {
+        var c = new CifradorAesGcm(Convert.ToBase64String(new byte[32]));   // SINTETICO
+        Assert.Throws<CryptographicException>(() => c.Decifrar(Convert.ToBase64String(new byte[27])));
+        Assert.Throws<CryptographicException>(() => c.Decifrar("isto nao e base64!"));
+    }
+    [Fact] public void Subida_falha_sem_chave_ou_com_chave_de_tamanho_errado() {
+        static ICifrador Resolver(string? chave) {
+            var dados = new Dictionary<string, string?>();
+            if (chave is not null) dados["AMPARA_CRYPTO_KEY"] = chave;
+            var config = new ConfigurationBuilder().AddInMemoryCollection(dados).Build();
+            var sp = new ServiceCollection().AddSingleton<IConfiguration>(config).AddInfrastructure().BuildServiceProvider();
+            return sp.GetRequiredService<ICifrador>();
+        }
+        Assert.Throws<InvalidOperationException>(() => Resolver(null));
+        Assert.Throws<ArgumentException>(() => Resolver(Convert.ToBase64String(new byte[16])));   // SINTETICO
+        Assert.NotNull(Resolver(Convert.ToBase64String(new byte[32])));                           // SINTETICO
+    }
 }
