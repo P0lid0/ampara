@@ -104,4 +104,8 @@ Resultado: testes de conta e de seed passando; migration `Contas` aplicada no Po
 
 Resultado: testes de guardião passando (69 na suíte); migration `Guardioes` aplicada com `--migrar` no PostgreSQL local (5436, ampara_dev), tabelas `Convites` e `Guardioes` e seus índices únicos conferidos com psql.
 
+> Executar a Task 9 do plano da API (`2026-11-14-02-api`): escrever primeiro o `ChaveiroTests` (pareia, lista e envia find; deviceId inválido 422 e já pareado 409; comando em chaveiro alheio 403 com registro de acesso indevido; status preserva a bateria e marca bateria baixa; comando serializa no formato do contrato MQTT), ver falhar, e implementar `Chaveiro`, `ComandoChaveiro`, `IChaveiroGateway` (gateway por interface, desconectado até a T15), `ChaveiroService`, `ChaveiroEndpoints`, `FakeChaveiroGateway` na fábrica e a migration `Chaveiros`.
+
+Resultado: testes de chaveiro passando; migration `Chaveiros` aplicada com `--migrar` no PostgreSQL local (5436, ampara_dev), tabela e índice único em `DeviceId` conferidos com psql.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->

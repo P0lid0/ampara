@@ -1,8 +1,10 @@
 using Ampara.Application.Auth;
+using Ampara.Application.Chaveiros;
 using Ampara.Application.Comum;
 using Ampara.Application.Cyber;
 using Ampara.Infrastructure.Cripto;
 using Ampara.Infrastructure.Cyber;
+using Ampara.Infrastructure.Mqtt;
 using Ampara.Infrastructure.Seguranca;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -33,6 +35,8 @@ public static class DependencyInjection
         services.AddSingleton<IImeiRevelador, NoopImeiRevelador>();
         services.AddSingleton<ITaintGuard, NoopTaintGuard>();
         services.AddSingleton<IAcessoIndevido, NoopAcessoIndevido>();
+        // Gateway real (MQTT) entra na T15; ate la, desconectado.
+        services.AddSingleton<IChaveiroGateway, GatewayChaveiroDesconectado>();
         return services;
     }
 

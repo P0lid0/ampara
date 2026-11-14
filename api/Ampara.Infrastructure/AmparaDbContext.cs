@@ -14,6 +14,7 @@ public class AmparaDbContext(DbContextOptions<AmparaDbContext> options) : DbCont
     public DbSet<ContaVinculada> Contas => Set<ContaVinculada>();
     public DbSet<Convite> Convites => Set<Convite>();
     public DbSet<Guardiao> Guardioes => Set<Guardiao>();
+    public DbSet<Chaveiro> Chaveiros => Set<Chaveiro>();
 
     protected override void ConfigureConventions(ModelConfigurationBuilder cb)
     {

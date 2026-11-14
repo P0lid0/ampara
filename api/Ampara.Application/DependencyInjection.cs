@@ -1,5 +1,6 @@
 using Ampara.Application.Aparelhos;
 using Ampara.Application.Auth;
+using Ampara.Application.Chaveiros;
 using Ampara.Application.Contas;
 using Ampara.Application.Guardioes;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,6 +16,7 @@ public static class DependencyInjection
         services.AddScoped<IAparelhoService, AparelhoService>();
         services.AddScoped<IContaService, ContaService>();
         services.AddScoped<IGuardiaoService, GuardiaoService>();
+        services.AddScoped<IChaveiroService, ChaveiroService>();
         return services;
     }
 }

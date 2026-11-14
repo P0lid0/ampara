@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Ampara.Application.Chaveiros;
 using Ampara.Application.Cyber;
 using Ampara.Infrastructure;
 using Microsoft.AspNetCore.Hosting;
@@ -38,6 +39,8 @@ public class AmparaFactory : WebApplicationFactory<Program>
 
     public AcessoIndevidoSpy Acesso { get; } = new();
 
+    public FakeChaveiroGateway Gateway { get; } = new();
+
     public FakeTimeProvider Tempo { get; } = new(new DateTimeOffset(2026, 11, 14, 12, 0, 0, TimeSpan.Zero));
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -59,6 +62,8 @@ public class AmparaFactory : WebApplicationFactory<Program>
             services.AddSingleton<TimeProvider>(Tempo);
             services.RemoveAll<IAcessoIndevido>();
             services.AddSingleton<IAcessoIndevido>(Acesso);
+            services.RemoveAll<IChaveiroGateway>();
+            services.AddSingleton<IChaveiroGateway>(Gateway);
 
             // Troca o Npgsql por SQLite em memória (o esquema vem do modelo, via EnsureCreated).
             services.RemoveAll<DbContextOptions<AmparaDbContext>>();

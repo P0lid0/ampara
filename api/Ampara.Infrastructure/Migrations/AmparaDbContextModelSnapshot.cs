@@ -95,6 +95,45 @@ namespace Ampara.Infrastructure.Migrations
                     b.ToTable("Catalogo", (string)null);
                 });
 
+            modelBuilder.Entity("Ampara.Domain.Entidades.Chaveiro", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int?>("Bateria")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("BateriaBaixa")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("DeviceId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<bool>("Online")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("PareadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UsuarioId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("VistoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DeviceId")
+                        .IsUnique();
+
+                    b.HasIndex("UsuarioId");
+
+                    b.ToTable("Chaveiros", (string)null);
+                });
+
             modelBuilder.Entity("Ampara.Domain.Entidades.ContaVinculada", b =>
                 {
                     b.Property<Guid>("Id")
@@ -255,6 +294,15 @@ namespace Ampara.Infrastructure.Migrations
                 });
 
             modelBuilder.Entity("Ampara.Domain.Entidades.Aparelho", b =>
+                {
+                    b.HasOne("Ampara.Domain.Entidades.Usuario", null)
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Ampara.Domain.Entidades.Chaveiro", b =>
                 {
                     b.HasOne("Ampara.Domain.Entidades.Usuario", null)
                         .WithMany()

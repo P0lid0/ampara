@@ -13,6 +13,7 @@ public interface IAmparaDb
     DbSet<ContaVinculada> Contas { get; }
     DbSet<Convite> Convites { get; }
     DbSet<Guardiao> Guardioes { get; }
+    DbSet<Chaveiro> Chaveiros { get; }
 
     Task<int> SaveChangesAsync(CancellationToken ct = default);
 
