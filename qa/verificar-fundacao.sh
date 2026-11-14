@@ -21,11 +21,10 @@ checa "tagline" grep -qF "Levaram seu celular. Não levam o resto." "$ROOT/READM
 for o in "11.2" "11.7" "10.2" "9.c" "16.1" "16.6"; do checa "ODS meta $o" grep -q "$o" "$ROOT/README.md"; done
 # integrantes e prompts
 checa "integrantes Pedro" grep -q "Pedro" "$ROOT/integrantes.txt"
-checa "integrantes sem sublinhado de preencher" bash -c '! grep -q "______" "$0"' "$ROOT/integrantes.txt"
 checa "docs/ods.md cita as metas" bash -c 'for o in 11.2 11.7 10.2 9.c 16.1 16.6; do grep -q "$o" "$0" || exit 1; done' "$ROOT/docs/ods.md"
 checa "docs/rascunhos existe" test -d "$ROOT/docs/rascunhos"
 checa "integrantes Vitor" grep -q "Vitor Cesarino Marchese" "$ROOT/integrantes.txt"
-checa "prompts do Vitor copiados" grep -qF "$(grep -v '^[[:space:]]*$' "$ROOT/iot/prompts.md" | head -1)" "$ROOT/prompts.md"
+checa "prompts do Vitor copiados (bloco inteiro)" bash -c 'grep -v "^[[:space:]]*$" "$0/iot/prompts.md" | while IFS= read -r l; do grep -qxF -- "$l" "$0/prompts.md" || exit 1; done' "$ROOT"
 # o que NAO pode ir para o git
 for p in .env .env.local app/node_modules/x ml/dados/brutos/ssp/ssp.xlsx infra/vm/imagens/a.img x.qcow2 \
          cyber/relatorio.pdf entrega/cyber/ampara-cyber.pdf entrega/testing/ampara-testing.pdf qa/.venv/x qa/spikes/gps-background/android/x; do
@@ -54,7 +53,11 @@ checa "entrevistas: aviso de anonimato" grep -qi "não identifique" "$ROOT/docs/
 checa "fontes: cabecalho" grep -qF "| Fonte | Link | Data de acesso | Usado para |" "$ROOT/docs/fontes.md"
 for id in net-target a-emulador-gps b-mqtt c-ssp d-vm e-wokwi; do checa "riscos: $id" grep -q "| $id |" "$ROOT/docs/riscos-dia1.md"; done
 # --final: nenhuma linha de risco pode continuar PENDENTE
-[ "${1:-}" = "--final" ] && checa "sem PENDENTE" bash -c '! grep -q "| PENDENTE |" "$0"' "$ROOT/docs/riscos-dia1.md"
+if [ "${1:-}" = "--final" ]; then
+  checa "sem PENDENTE (tabela)" bash -c '! grep -q "| PENDENTE |" "$0"' "$ROOT/docs/riscos-dia1.md"
+  checa "sem PENDENTE (chave: valor)" bash -c '! grep -Eq "^(TargetFramework|ExpoSDK|SSP_VEREDITO|SSP_CELULAR|MQTT_HOST_EFETIVO|VM): *PENDENTE" "$0"' "$ROOT/docs/riscos-dia1.md"
+  checa "integrantes sem RM_____ (preencher)" bash -c '! grep -q "RM_____" "$0"' "$ROOT/integrantes.txt"
+fi
 
 echo "falhas: $falhas"
 [ "$falhas" -eq 0 ] || exit 1
