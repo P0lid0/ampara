@@ -123,3 +123,18 @@ def test_json_muito_aninhado_levanta_valueerror():
         d = {"a": d}
     with pytest.raises(ValueError):
         detectar_pii(d)
+
+
+# --- correcao rodada 2 -------------------------------------------------------
+
+@pytest.mark.parametrize("chave", ["11_91234_5678", "529_982_247_25", "aaa11_91234_5678"])
+def test_chave_com_separador_underscore_nao_vaza(chave):
+    achados = detectar_pii({chave: "ok"})
+    assert all(a.campo == "<chave>" for a in achados)
+    texto = repr(achados)
+    for trecho in ("91234", "5678", "529", "982", "247"):
+        assert trecho not in texto
+    achados2 = detectar_pii({chave: "11 91234-5678"})
+    assert achados2
+    assert all(a.campo == "<chave>" for a in achados2)
+    assert "91234" not in repr(achados2)

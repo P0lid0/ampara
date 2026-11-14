@@ -157,6 +157,8 @@ def _chave_segura(k: str) -> bool:
     return (
         bool(_CHAVE_SEGURA.match(k))
         and not re.search(r"\d{6,}", k)
+        and len(re.findall(r"\d", k)) <= 4
+        and not _classes_do_valor(k.replace("_", " "))
         and not _classes_do_valor(k)
     )
 

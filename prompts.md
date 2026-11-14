@@ -204,6 +204,6 @@ Resultado: testes da Ponte passando; migração 0001 aplicada no PostgreSQL loca
 
 > Executar a Task 3 do plano da Ponte Polícia (`2026-11-14-04-ponte-policia`): escrever primeiro `test_pii` (CPF com dígito verificador, telefone com DDD válido, IMEI com Luhn, e-mail, nome por chave e em texto livre, percurso de listas e objetos aninhados, hash/UUID sem falso positivo, resultado sem o valor), ver falhar, e implementar `app/pii.py` com `AchadoPii`, `detectar_pii`, `cpf_valido` e `luhn_valido`.
 
-Resultado: 25 testes do detector passando; 80 passando e 1 ignorado na suíte da Ponte Polícia; sem migration.
+Resultado: 41 testes do detector passando; 96 passando e 1 ignorado na suíte da Ponte Polícia; sem migration.
 
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->
