@@ -222,7 +222,10 @@ public class OcorrenciaApiTests(AmparaFactory f) : IClassFixture<AmparaFactory>
             Assert.Equal(JsonValueKind.Null, p.GetProperty("concluidoEm").ValueKind);
         }
         Assert.Equal(["Banco", "Bo", "CelularSeguro", "Operadora", "Senhas"], d.GetProperty("passos").EnumerateArray().Select(p => p.GetProperty("passo").GetString()!).Order().ToArray());
-        Assert.Equal(0, d.GetProperty("alertas").GetArrayLength());
+        // O guardião já foi alertado no disparo (Task 13): um alerta, ainda sem ciente.
+        var alerta = Assert.Single(d.GetProperty("alertas").EnumerateArray());
+        Assert.Equal(["alertaId", "cienteEm", "enviadoEm", "guardiaoId"], alerta.EnumerateObject().Select(x => x.Name).Order().ToArray());
+        Assert.Equal(JsonValueKind.Null, alerta.GetProperty("cienteEm").ValueKind);
         var m = d.GetProperty("momento");
         Assert.EndsWith("Z", m.GetProperty("em").GetString());
         Assert.Equal(-23.56, m.GetProperty("lat").GetDouble());

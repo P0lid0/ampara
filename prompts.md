@@ -120,4 +120,8 @@ Resultado: 108 testes passando; migration `Ocorrencias` aplicada com `--migrar` 
 
 Resultado: 114 testes passando na suíte; sem migration.
 
+> Executar a Task 13 do plano da API (`2026-11-14-02-api`): escrever primeiro `EscaladaTests` (disparo alerta o guardião 1 com o nome da vítima, escalada só aos 60 s e um guardião por vez com `AlertaEscalado` para os já acionados, ciente para a escalada e encerra os outros, ciente repetido 204 e de outro guardião 403, alertas ativos, alertas no detalhe da ocorrência, cancelar encerra com motivo `cancelado`) e `PassosTests` (conclusão notifica todos os guardiões, passo inválido 422, dono 403, repetição idempotente, cinco passos encerram a ocorrência e publicam o resolve do chaveiro), ver falhar, e implementar `Alerta`, `IEscalonamento`/`Escalonamento` (trava por ocorrência), `OpcoesEscalonamento`, `EscalonamentoWorker` (5 s), `AlertaEndpoints`, `ConcluirPassoAsync` e a rota dos passos, `Alertas` no `IAmparaDb` e a migration `Alertas`.
+
+Resultado: 127 testes passando na suíte; migration `Alertas` aplicada com `--migrar` no PostgreSQL local (5436, ampara_dev), tabela e índices conferidos com psql.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->

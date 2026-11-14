@@ -22,6 +22,45 @@ namespace Ampara.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Ampara.Domain.Entidades.Alerta", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("CienteEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("DisparadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("EscaladoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("GuardiaoId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("GuardiaoUsuarioId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("OcorrenciaId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GuardiaoId");
+
+                    b.HasIndex("OcorrenciaId");
+
+                    b.HasIndex("GuardiaoUsuarioId", "Estado");
+
+                    b.ToTable("Alertas", (string)null);
+                });
+
             modelBuilder.Entity("Ampara.Domain.Entidades.Aparelho", b =>
                 {
                     b.Property<Guid>("Id")
@@ -402,6 +441,27 @@ namespace Ampara.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("Usuarios", (string)null);
+                });
+
+            modelBuilder.Entity("Ampara.Domain.Entidades.Alerta", b =>
+                {
+                    b.HasOne("Ampara.Domain.Entidades.Guardiao", null)
+                        .WithMany()
+                        .HasForeignKey("GuardiaoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Ampara.Domain.Entidades.Usuario", null)
+                        .WithMany()
+                        .HasForeignKey("GuardiaoUsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Ampara.Domain.Entidades.Ocorrencia", null)
+                        .WithMany()
+                        .HasForeignKey("OcorrenciaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Ampara.Domain.Entidades.Aparelho", b =>

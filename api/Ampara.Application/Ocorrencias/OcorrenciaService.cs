@@ -1,3 +1,4 @@
+using Ampara.Application.Alertas;
 using Ampara.Application.Chaveiros;
 using Ampara.Application.Comum;
 using Ampara.Application.Contas;
@@ -12,7 +13,7 @@ namespace Ampara.Application.Ocorrencias;
 
 public sealed class OcorrenciaService(
     IAmparaDb db, IGuardiaoService guardioes, IContaService contas, IChaveiroGateway gateway,
-    IAcessoIndevido acessoIndevido, TimeProvider tempo) : IOcorrenciaService
+    IAcessoIndevido acessoIndevido, IEscalonamento escalonamento, IGuardiaoNotificador notificador, TimeProvider tempo) : IOcorrenciaService
 {
     public const int MaxListagem = 50;
 
@@ -33,6 +34,7 @@ public sealed class OcorrenciaService(
             if (await AbertaDaVitimaAsync(vitimaId, ct) is { } vencedora) return new OcorrenciaCriada(vencedora, false);
             throw;
         }
+        await escalonamento.IniciarAsync(o.Id, ct);
         return new OcorrenciaCriada(o.Id, true);
     }
 
@@ -40,7 +42,8 @@ public sealed class OcorrenciaService(
     {
         var o = await CarregarAsync(id, ct);
         var comMomento = await AutorizarLeituraAsync(ator, o, ct);
-        return OcorrenciaMapa.ParaDto(o, comMomento, [], await ContasDaVitimaAsync(o.UsuarioId, ct));
+        var alertas = await AlertasDasAsync([o.Id], ct);
+        return OcorrenciaMapa.ParaDto(o, comMomento, alertas.GetValueOrDefault(o.Id, []), await ContasDaVitimaAsync(o.UsuarioId, ct));
     }
 
     public async Task<IReadOnlyList<OcorrenciaDto>> ListarAsync(Ator ator, CancellationToken ct)
@@ -56,12 +59,13 @@ public sealed class OcorrenciaService(
         if (recentes.Count == 0) return [];
 
         var lista = await db.Ocorrencias.AsNoTracking().Include(o => o.Passos).Where(o => recentes.Contains(o.Id)).ToListAsync(ct);
+        var alertas = await AlertasDasAsync(recentes, ct);
         var cacheContas = new Dictionary<Guid, IReadOnlyList<ContaOcorrenciaDto>>();
         var saida = new List<OcorrenciaDto>(lista.Count);
         foreach (var o in lista.OrderByDescending(x => x.IniciadaEm))
         {
             if (!cacheContas.TryGetValue(o.UsuarioId, out var cs)) cacheContas[o.UsuarioId] = cs = await ContasDaVitimaAsync(o.UsuarioId, ct);
-            saida.Add(OcorrenciaMapa.ParaDto(o, o.UsuarioId == ator.UsuarioId, [], cs));
+            saida.Add(OcorrenciaMapa.ParaDto(o, o.UsuarioId == ator.UsuarioId, alertas.GetValueOrDefault(o.Id, []), cs));
         }
         return saida;
     }
@@ -84,6 +88,34 @@ public sealed class OcorrenciaService(
         if (o is { Origem: OrigemGatilho.Chaveiro, ChaveiroDeviceId: { } device, ChaveiroAlertId: { } alerta })
             await gateway.PublicarComandoAsync(device, ComandoChaveiro.Resolve(alerta), ct);
         await db.SaveChangesAsync(ct);
+        await escalonamento.EncerrarAlertasAsync(o.Id, "cancelado", ct);
+    }
+
+    public async Task ConcluirPassoAsync(Ator ator, Guid ocorrenciaId, PassoBloqueio passo, CancellationToken ct)
+    {
+        var o = await CarregarAsync(ocorrenciaId, ct, rastrear: true);
+        // Só o guardião da vítima conclui passos; dono e emergência levam 403 com registro.
+        if (ator.Escopo != Escopos.Usuario || ator.UsuarioId == o.UsuarioId || !await guardioes.EhGuardiaoDeAsync(ator.UsuarioId, o.UsuarioId, ct))
+            NegarAcesso(o);
+
+        // Repetir um passo já concluído é inócuo (204), mesmo com a ocorrência já encerrada.
+        if (o.Passos.Single(p => p.Passo == passo).ConcluidoEm.HasValue) return;
+        if (o.Estado != EstadoOcorrencia.Aberta) throw new ConflitoException("ocorrencia-nao-aberta");
+
+        var agora = Agora;
+        var completo = o.ConcluirPasso(passo, agora);
+        if (completo)
+        {
+            // Mesma política do cancelar: resolve antes de gravar, para o cliente poder repetir se o gateway falhar.
+            o.Encerrar(agora);
+            if (o is { Origem: OrigemGatilho.Chaveiro, ChaveiroDeviceId: { } device, ChaveiroAlertId: { } alerta })
+                await gateway.PublicarComandoAsync(device, ComandoChaveiro.Resolve(alerta), ct);
+        }
+        await db.SaveChangesAsync(ct);
+
+        var destinatarios = await db.Guardioes.AsNoTracking().Where(g => g.UsuarioId == o.UsuarioId).Select(g => g.GuardiaoUsuarioId).ToListAsync(ct);
+        await notificador.PassoAtualizadoAsync(destinatarios, new PassoAtualizadoMsg(o.Id, passo.ToString(), agora), ct);
+        if (completo) await escalonamento.EncerrarAlertasAsync(o.Id, "encerrado", ct);
     }
 
     public async Task CancelarPorChaveiroAsync(string deviceId, string alertId, CancellationToken ct)
@@ -93,6 +125,15 @@ public sealed class OcorrenciaService(
         if (o is null) return;
         o.Cancelar(Agora);
         await db.SaveChangesAsync(ct);
+        await escalonamento.EncerrarAlertasAsync(o.Id, "cancelado", ct);
+    }
+
+    private async Task<IReadOnlyDictionary<Guid, IReadOnlyList<AlertaDto>>> AlertasDasAsync(IReadOnlyCollection<Guid> ocorrenciaIds, CancellationToken ct)
+    {
+        var linhas = await db.Alertas.AsNoTracking().Where(a => ocorrenciaIds.Contains(a.OcorrenciaId)).ToListAsync(ct);
+        return linhas.GroupBy(a => a.OcorrenciaId).ToDictionary(
+            g => g.Key,
+            g => (IReadOnlyList<AlertaDto>)g.OrderBy(a => a.DisparadoEm).Select(a => new AlertaDto(a.Id, a.GuardiaoId, a.DisparadoEm, a.CienteEm)).ToList());
     }
 
     private async Task<Guid?> AbertaDaVitimaAsync(Guid vitimaId, CancellationToken ct) =>

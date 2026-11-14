@@ -24,6 +24,7 @@ builder.Services.AddSingleton<Ampara.Application.Alertas.IGuardiaoNotificador, A
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
 builder.Services.AddHostedService<Ampara.Api.Workers.RetencaoWorker>();
+builder.Services.AddHostedService<Ampara.Api.Workers.EscalonamentoWorker>();
 builder.Services.AddExceptionHandler<ProblemaHandler>();
 builder.Services.AddProblemDetails();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();

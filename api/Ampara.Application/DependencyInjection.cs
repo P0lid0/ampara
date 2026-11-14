@@ -1,3 +1,4 @@
+using Ampara.Application.Alertas;
 using Ampara.Application.Aparelhos;
 using Ampara.Application.Auth;
 using Ampara.Application.Chaveiros;
@@ -21,6 +22,8 @@ public static class DependencyInjection
         services.AddScoped<IChaveiroService, ChaveiroService>();
         services.AddScoped<IRotaService, RotaService>();
         services.AddScoped<IOcorrenciaService, OcorrenciaService>();
+        services.AddSingleton(new OpcoesEscalonamento());
+        services.AddScoped<IEscalonamento, Escalonamento>();
         return services;
     }
 }

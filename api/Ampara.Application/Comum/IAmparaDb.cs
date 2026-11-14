@@ -17,6 +17,7 @@ public interface IAmparaDb
     DbSet<PontoRota> Pontos { get; }
     DbSet<Ocorrencia> Ocorrencias { get; }
     DbSet<PassoOcorrencia> Passos { get; }
+    DbSet<Alerta> Alertas { get; }
 
     Task<int> SaveChangesAsync(CancellationToken ct = default);
 

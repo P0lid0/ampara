@@ -32,3 +32,17 @@ public sealed class PassoOcorrenciaConfiguration : IEntityTypeConfiguration<Pass
         b.HasIndex(p => new { p.OcorrenciaId, p.Passo }).IsUnique();
     }
 }
+
+public sealed class AlertaConfiguration : IEntityTypeConfiguration<Alerta>
+{
+    public void Configure(EntityTypeBuilder<Alerta> b)
+    {
+        b.ToTable("Alertas");
+        b.HasKey(a => a.Id);
+        b.HasIndex(a => a.OcorrenciaId);
+        b.HasIndex(a => new { a.GuardiaoUsuarioId, a.Estado });
+        b.HasOne<Ocorrencia>().WithMany().HasForeignKey(a => a.OcorrenciaId).OnDelete(DeleteBehavior.Cascade);
+        b.HasOne<Guardiao>().WithMany().HasForeignKey(a => a.GuardiaoId).OnDelete(DeleteBehavior.Cascade);
+        b.HasOne<Usuario>().WithMany().HasForeignKey(a => a.GuardiaoUsuarioId).OnDelete(DeleteBehavior.Cascade);
+    }
+}

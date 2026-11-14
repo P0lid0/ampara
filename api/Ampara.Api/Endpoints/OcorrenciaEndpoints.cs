@@ -2,6 +2,7 @@ using Ampara.Application.Comum;
 using Ampara.Application.Cyber;
 using Ampara.Application.Guardioes;
 using Ampara.Application.Ocorrencias;
+using Ampara.Domain;
 using Ampara.Domain.Gatilhos;
 
 namespace Ampara.Api.Endpoints;
@@ -64,6 +65,15 @@ public static class OcorrenciaEndpoints
         g.MapPost("{id:guid}/cancelar", async (Guid id, HttpContext http, IOcorrenciaService svc, CancellationToken ct) =>
         {
             await svc.CancelarAsync(http.User.ToAtor(), id, ct);
+            return Results.NoContent();
+        });
+
+        g.MapPost("{id:guid}/passos/{passo}/concluir", async (Guid id, string passo, HttpContext http, IOcorrenciaService svc, CancellationToken ct) =>
+        {
+            // Só os nomes do enum (sem diferenciar maiúsculas): "1" ou "Banco,Bo" não passam.
+            var nome = Enum.GetNames<PassoBloqueio>().FirstOrDefault(n => string.Equals(n, passo, StringComparison.OrdinalIgnoreCase))
+                ?? throw new DominioException("passo-invalido");
+            await svc.ConcluirPassoAsync(http.User.ToAtor(), id, Enum.Parse<PassoBloqueio>(nome), ct);
             return Results.NoContent();
         });
 
