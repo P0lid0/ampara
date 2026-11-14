@@ -1,10 +1,11 @@
 using Ampara.Application.Comum;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Ampara.Infrastructure;
 
-public sealed class SondaSaude(IServiceScopeFactory escopos) : ISondaSaude
+public sealed class SondaSaude(IServiceScopeFactory escopos, ILogger<SondaSaude> log) : ISondaSaude
 {
     public async Task<bool> BancoOkAsync(CancellationToken ct)
     {
@@ -15,6 +16,10 @@ public sealed class SondaSaude(IServiceScopeFactory escopos) : ISondaSaude
             using var escopo = escopos.CreateScope();
             return await escopo.ServiceProvider.GetRequiredService<AmparaDbContext>().Database.CanConnectAsync(limite.Token);
         }
-        catch { return false; }
+        catch (Exception ex)
+        {
+            log.LogWarning("Sonda de saude do banco falhou: {Tipo}", ex.GetType().Name);
+            return false;
+        }
     }
 }

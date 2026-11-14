@@ -66,7 +66,7 @@ public class SaudeTests
     {
         using var f = new AmparaFactory();
         using var escopo = f.Services.CreateScope();
-        var sonda = new Ampara.Infrastructure.SondaSaude(escopo.ServiceProvider.GetRequiredService<IServiceScopeFactory>());
+        var sonda = new Ampara.Infrastructure.SondaSaude(escopo.ServiceProvider.GetRequiredService<IServiceScopeFactory>(), Microsoft.Extensions.Logging.Abstractions.NullLogger<Ampara.Infrastructure.SondaSaude>.Instance);
         Assert.True(await sonda.BancoOkAsync(CancellationToken.None));
     }
 }

@@ -51,7 +51,11 @@ def main() -> int:
     c.on_connect = ao_conectar
     c.on_subscribe = ao_assinar
     c.on_message = ao_mensagem
-    c.connect(host, porta, keepalive=30)
+    try:
+        c.connect(host, porta, keepalive=30)
+    except OSError as ex:
+        print(f"nao conseguiu conectar em {host}:{porta}: {type(ex).__name__}", file=sys.stderr)
+        return 1
     c.loop_start()
     try:
         if not assinado.wait(10):

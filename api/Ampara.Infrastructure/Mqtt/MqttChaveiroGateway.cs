@@ -100,7 +100,14 @@ public sealed class MqttChaveiroGateway : BackgroundService, IChaveiroGateway
             .WithTopicFilter(TopicoChaveiro.RaizEventos, MqttQualityOfServiceLevel.AtLeastOnce)
             .WithTopicFilter(TopicoChaveiro.RaizStatus, MqttQualityOfServiceLevel.AtLeastOnce)
             .Build();
-        await _cliente.SubscribeAsync(assinatura, ct);
+        try { await _cliente.SubscribeAsync(assinatura, ct); }
+        catch
+        {
+            // Conectado sem assinatura deixaria o gateway surdo e o /health mentindo: derruba a conexao
+            // para que o laco de ExecuteAsync reconecte e assine de novo.
+            try { await _cliente.DisconnectAsync(cancellationToken: CancellationToken.None); } catch { /* ja caiu */ }
+            throw;
+        }
     }
 
     private async Task AoReceberAsync(MqttApplicationMessageReceivedEventArgs a)
