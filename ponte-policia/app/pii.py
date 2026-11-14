@@ -4,6 +4,7 @@ Modulo puro: percorre um payload JSON e informa ONDE ha dado pessoal e de que
 classe, sem nunca devolver o valor encontrado (o resultado vai para log/erro).
 """
 import re
+import unicodedata
 from dataclasses import dataclass
 
 
@@ -80,6 +81,8 @@ def cpf_valido(digitos: str) -> bool:
 
 
 def _telefone(d: str) -> bool:
+    if len(d) in (11, 12) and d.startswith("0"):  # zero de tronco: 011 91234-5678
+        d = d[1:]
     if len(d) in (12, 13) and d.startswith("55"):
         d = d[2:]
     if len(d) == 11:
@@ -95,18 +98,41 @@ def _estruturado(s: str) -> bool:
     return bool(_UUID.match(s) or _HEX64.match(s) or _DATA_ISO.match(s) or _AREA_ID.match(s))
 
 
+def _classe_numerica(d: str) -> str | None:
+    if len(d) == 15 and luhn_valido(d):
+        return "Imei"
+    if len(d) == 11 and cpf_valido(d):
+        return "Cpf"
+    if _telefone(d):
+        return "Telefone"
+    return None
+
+
+def _classe_do_candidato(cand: str) -> str | None:
+    """Classifica o candidato inteiro; se falhar, tenta janelas de grupos
+    separados por espaco (longas primeiro), para nao perder um telefone
+    colado a numeros vizinhos ("apto 12 11 91234-5678")."""
+    achada = _classe_numerica(re.sub(r"\D", "", cand))
+    if achada:
+        return achada
+    grupos = cand.split()
+    n = len(grupos)
+    for tam in range(n - 1, 0, -1):
+        for ini in range(n - tam + 1):
+            achada = _classe_numerica(re.sub(r"\D", "", " ".join(grupos[ini:ini + tam])))
+            if achada:
+                return achada
+    return None
+
+
 def _classes_do_valor(s: str) -> list[str]:
     if _estruturado(s):
         return []
     classes: list[str] = []
     for m in _CANDIDATO.finditer(s):
-        d = re.sub(r"\D", "", m.group(0))
-        if len(d) == 15 and luhn_valido(d):
-            classes.append("Imei")
-        elif len(d) == 11 and cpf_valido(d):
-            classes.append("Cpf")
-        elif _telefone(d):
-            classes.append("Telefone")
+        achada = _classe_do_candidato(m.group(0))
+        if achada:
+            classes.append(achada)
     if _EMAIL.search(s):
         classes.append("Email")
     if _NOME_TEXTO.search(s):
@@ -114,7 +140,29 @@ def _classes_do_valor(s: str) -> list[str]:
     return classes
 
 
+_CHAVE_SEGURA = re.compile(r"^[A-Za-z_][A-Za-z0-9_]{0,39}$")
+_PROFUNDIDADE_MAX = 32
+
+
+def _norm_chave(k: str) -> str:
+    sem_acento = "".join(
+        c for c in unicodedata.normalize("NFKD", k) if not unicodedata.combining(c)
+    )
+    return re.sub(r"[\s\-]+", "_", sem_acento.strip().lower())
+
+
+def _chave_segura(k: str) -> bool:
+    """Chave que pode aparecer no caminho: so identificador curto, sem sequencia
+    longa de digitos e sem PII. A chave e controlada pelo remetente."""
+    return (
+        bool(_CHAVE_SEGURA.match(k))
+        and not re.search(r"\d{6,}", k)
+        and not _classes_do_valor(k)
+    )
+
+
 def detectar_pii(dados: object) -> list[AchadoPii]:
+    """Levanta ValueError se o payload passar de _PROFUNDIDADE_MAX niveis."""
     achados: list[AchadoPii] = []
     vistos: set[tuple[str, str]] = set()
 
@@ -126,26 +174,34 @@ def detectar_pii(dados: object) -> list[AchadoPii]:
     def vazio(v: object) -> bool:
         return v is None or (isinstance(v, str) and not v.strip())
 
-    def visitar(v: object, caminho: str, chave: str | None) -> None:
+    def visitar(v: object, caminho: str, chave: str | None, herdada: str | None, nivel: int) -> None:
+        if nivel > _PROFUNDIDADE_MAX:
+            raise ValueError("payload aninhado demais")
+        classe_chave = _CHAVES.get(_norm_chave(chave)) if chave is not None else None
+        classe_chave = classe_chave or herdada
         if isinstance(v, dict):
             for k, sub in v.items():
                 ks = str(k)
-                visitar(sub, f"{caminho}.{ks}" if caminho else ks, ks)
+                if _chave_segura(ks):
+                    seg = ks
+                else:
+                    seg = "<chave>"
+                    for c in _classes_do_valor(ks):
+                        add(f"{caminho}.{seg}" if caminho else seg, c)
+                visitar(sub, f"{caminho}.{seg}" if caminho else seg, ks, classe_chave, nivel + 1)
             return
         if isinstance(v, (list, tuple)):
             for i, sub in enumerate(v):
-                visitar(sub, f"{caminho}[{i}]", None)
+                visitar(sub, f"{caminho}[{i}]", chave, classe_chave, nivel + 1)
             return
         if isinstance(v, bool) or isinstance(v, float) or vazio(v):
             return
         if not isinstance(v, (str, int)):
             return
-        if chave is not None:
-            classe = _CHAVES.get(chave.lower())
-            if classe:
-                add(caminho, classe)
+        if classe_chave:
+            add(caminho, classe_chave)
         for classe in _classes_do_valor(str(v)):
             add(caminho, classe)
 
-    visitar(dados, "", None)
+    visitar(dados, "", None, None, 0)
     return achados

@@ -60,3 +60,66 @@ def test_hash_e_uuid_com_digitos_seguidos_nao_geram_falso_positivo():          #
 def test_resultado_nunca_contem_o_valor():
     achados = detectar_pii({"obs": "529.982.247-25"})
     assert "529" not in repr(achados)
+
+
+# --- correcao rodada 1 -------------------------------------------------------
+
+@pytest.mark.parametrize("chave", ["joao@x.com", "529.982.247-25", "Maria Souza 11 91234-5678"])
+def test_chave_com_pii_nao_e_ecoada(chave):
+    achados = detectar_pii({chave: "11 91234-5678"})
+    assert achados
+    assert all(a.campo == "<chave>" for a in achados)
+    texto = repr(achados)
+    for trecho in ("joao", "x.com", "529", "Maria", "91234"):
+        assert trecho not in texto
+
+
+def test_chave_com_pii_gera_achado_da_propria_chave():
+    assert A("<chave>", "Email") in detectar_pii({"joao@x.com": "ok"})
+
+
+def test_telefone_colado_a_numeros_vizinhos():
+    assert detectar_pii({"obs": "apto 12 11 91234-5678"}) == [A("obs", "Telefone")]
+    assert detectar_pii({"obs": "bloco 3 529.982.247-25"}) == [A("obs", "Cpf")]
+
+
+def test_telefone_com_zero_de_tronco():
+    assert detectar_pii({"obs": "011 91234-5678"}) == [A("obs", "Telefone")]
+
+
+def test_chave_pii_propaga_para_listas_e_objetos_filhos():
+    assert detectar_pii({"nome": ["Maria Souza"]}) == [A("nome[0]", "Nome")]
+    assert detectar_pii({"vitima": {"primeiro": "Maria"}}) == [A("vitima.primeiro", "Nome")]
+
+
+def test_chave_normaliza_acento_e_espaco():
+    assert [a.classe for a in detectar_pii({"propriet\u00e1rio": "Maria"})] == ["Nome"]
+    assert [a.classe for a in detectar_pii({"nome ": "Maria"})] == ["Nome"]
+
+
+def test_chave_pii_vale_mesmo_com_valor_estruturado():
+    assert detectar_pii({"cpf": "a" * 64}) == [A("cpf", "Cpf")]
+
+
+def test_dedup_campo_classe():
+    assert detectar_pii({"nome": "Meu nome \u00e9 Maria Souza"}) == [A("nome", "Nome")]
+    assert detectar_pii({"obs": "11 91234-5678 e 21 99876-5432"}) == [A("obs", "Telefone")]
+
+
+def test_int_como_telefone_e_float_bool_ignorados():
+    assert detectar_pii({"obs": 11912345678}) == [A("obs", "Telefone")]
+    assert detectar_pii({"a": 11912345678.0, "b": True, "c": -23.5672490}) == []
+
+
+def test_resultado_nao_contem_digitos_do_valor():
+    texto = repr(detectar_pii({"obs": "529.982.247-25", "x": "11 91234-5678"}))
+    for trecho in ("529", "982", "247", "91234", "5678"):
+        assert trecho not in texto
+
+
+def test_json_muito_aninhado_levanta_valueerror():
+    d: object = "x"
+    for _ in range(100):
+        d = {"a": d}
+    with pytest.raises(ValueError):
+        detectar_pii(d)
