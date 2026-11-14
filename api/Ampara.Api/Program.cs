@@ -21,6 +21,7 @@ builder.Services.AddCors(o => o.AddDefaultPolicy(p =>
 builder.Services.AddOpenApi();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
+builder.Services.AddHostedService<Ampara.Api.Workers.RetencaoWorker>();
 builder.Services.AddExceptionHandler<ProblemaHandler>();
 builder.Services.AddProblemDetails();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();

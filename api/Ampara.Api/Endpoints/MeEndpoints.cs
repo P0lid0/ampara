@@ -1,5 +1,6 @@
 using Ampara.Application.Auth;
 using Ampara.Application.Comum;
+using Ampara.Application.Rota;
 using Microsoft.EntityFrameworkCore;
 
 namespace Ampara.Api.Endpoints;
@@ -34,13 +35,15 @@ public static class MeEndpoints
             return Results.NoContent();
         });
 
-        // Revogar também apaga os pontos da rota (ligação feita na T10).
-        g.MapPut("/consentimento-rota", async (ConsentimentoDefinicao c, HttpContext http, IAmparaDb db, TimeProvider tempo, CancellationToken ct) =>
+        // Revogar também apaga os pontos da rota.
+        g.MapPut("/consentimento-rota", async (ConsentimentoDefinicao c, HttpContext http, IAmparaDb db, IRotaService rota, TimeProvider tempo, CancellationToken ct) =>
         {
             if (c.Aceito is null) throw new DominioException("aceito-obrigatorio");
             var ator = http.User.ToAtor();
             var u = await db.Usuarios.SingleOrDefaultAsync(x => x.Id == ator.UsuarioId, ct)
                 ?? throw new NaoAutenticadoException("token-invalido");
+            // Apaga antes de gravar a revogação: se algo falhar, o consentimento segue de pé e o pedido pode ser repetido.
+            if (!c.Aceito.Value) await rota.ApagarTudoAsync(ator.UsuarioId, ct);
             u.AtualizarConsentimentoRota(c.Aceito.Value, tempo.GetUtcNow().UtcDateTime);
             await db.SaveChangesAsync(ct);
             return Results.NoContent();

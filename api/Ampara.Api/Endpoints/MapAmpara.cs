@@ -11,6 +11,7 @@ public static class MapAmpara
         rotas.MapContas();
         rotas.MapGuardioes();
         rotas.MapChaveiros();
+        rotas.MapRota();
         return rotas;
     }
 }

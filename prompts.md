@@ -108,4 +108,8 @@ Resultado: testes de guardião passando (69 na suíte); migration `Guardioes` ap
 
 Resultado: testes de chaveiro passando; migration `Chaveiros` aplicada com `--migrar` no PostgreSQL local (5436, ampara_dev), tabela e índice único em `DeviceId` conferidos com psql.
 
+> Executar a Task 10 do plano da API (`2026-11-14-02-api`): escrever primeiro o `RotaTests` (lote válido vira 202 e a consulta devolve só a janela em ordem crescente; lote com ponto inválido rejeita tudo sem gravar; futuro, antigo e lote de 501 viram 422; retransmissão não duplica; sem consentimento 403; purga só do que passou de 7 dias; revogar consentimento apaga a rota; emergência vê só a rota do dono), ver falhar, e implementar `PontoRota`, `IRotaService`/`RotaService`, `RotaEndpoints`, `RetencaoWorker`, `Pontos` no `IAmparaDb` com índice único `(UsuarioId, Em)`, a ligação da revogação em `MeEndpoints` e a migration `Rota`.
+
+Resultado: testes de rota passando (92 na suíte); migration `Rota` aplicada com `--migrar` no PostgreSQL local (5436, ampara_dev), tabela `Pontos` e índice único `(UsuarioId, Em)` conferidos com psql.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->

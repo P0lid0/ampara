@@ -218,6 +218,37 @@ namespace Ampara.Infrastructure.Migrations
                     b.ToTable("Guardioes", (string)null);
                 });
 
+            modelBuilder.Entity("Ampara.Domain.Entidades.PontoRota", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("Em")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<double>("Lat")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("Lng")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("Precisao")
+                        .HasColumnType("double precision");
+
+                    b.Property<Guid>("UsuarioId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Em");
+
+                    b.HasIndex("UsuarioId", "Em")
+                        .IsUnique();
+
+                    b.ToTable("Pontos", (string)null);
+                });
+
             modelBuilder.Entity("Ampara.Domain.Entidades.TentativaEmergencia", b =>
                 {
                     b.Property<Guid>("Id")
@@ -337,6 +368,15 @@ namespace Ampara.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Ampara.Domain.Entidades.Usuario", null)
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Ampara.Domain.Entidades.PontoRota", b =>
+                {
                     b.HasOne("Ampara.Domain.Entidades.Usuario", null)
                         .WithMany()
                         .HasForeignKey("UsuarioId")
