@@ -169,6 +169,20 @@ public class PoliciaTests : IDisposable
     }
 
     [Fact]
+    public async Task Trilha_para_no_fim_da_validade_do_token_do_aparelho_roubado()
+    {
+        // Minimização: depois de 8 h o JWT de app emitido antes do roubo expirou; o que vem depois é da vítima
+        // (aparelho novo), não do ladrão, e não vai para a polícia.
+        var dono = await f.NovoUsuarioAsync();
+        (await dono.Cliente.PutAsJsonAsync("/api/v1/me/consentimento-rota", new { aceito = true })).EnsureSuccessStatusCode();
+        var id = await OcorrenciaAsync(dono);
+        await PontosAsync(dono, Momento.AddMinutes(2), Momento.AddHours(7), Momento.AddHours(8).AddMinutes(1), Momento.AddDays(2));
+
+        (await Compartilhar(dono.Cliente, id)).EnsureSuccessStatusCode();
+        Assert.Equal([Momento.AddMinutes(2), Momento.AddHours(7)], f.Ponte.Enviadas.Single().Trilha.Select(p => p.Em).ToArray());
+    }
+
+    [Fact]
     public async Task Trilha_e_limitada_a_500_pontos()
     {
         var dono = await f.NovoUsuarioAsync();

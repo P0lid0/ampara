@@ -73,7 +73,10 @@ public sealed class PoliciaService(IAmparaDb db, IPontePoliciaClient ponte, ITai
         var consenteRota = await db.Usuarios.AsNoTracking().Where(u => u.Id == o.UsuarioId).Select(u => u.ConsentimentoRota).FirstOrDefaultAsync(ct);
         if (consenteRota)
         {
-            var pontos = await db.Pontos.AsNoTracking().Where(p => p.UsuarioId == o.UsuarioId && p.Em >= momento)
+            // Só a janela em que o aparelho roubado ainda consegue mandar pontos: o JWT de app emitido antes do roubo
+            // vale no máximo até momento + validade do login. O que vem depois é da vítima (aparelho novo).
+            var limite = momento + Auth.AuthService.ValidadeLogin;
+            var pontos = await db.Pontos.AsNoTracking().Where(p => p.UsuarioId == o.UsuarioId && p.Em >= momento && p.Em <= limite)
                 .OrderBy(p => p.Em).Take(MaximoPontosTrilha).ToListAsync(ct);
             trilha = pontos.Select(p => new PontoTrilha(p.Lat, p.Lng, DateTime.SpecifyKind(p.Em, DateTimeKind.Utc))).ToList();
         }
