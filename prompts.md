@@ -32,4 +32,10 @@ Resultado: firmware do ESP32, circuito do Wokwi, contrato MQTT com o app e simul
 
 Resultado: módulo e testes em `qa/spikes/ssp/`, `docs/dados-ssp-colunas.md` gerado, veredito `GRADE_500M` (76,9% de coordenadas válidas numa amostra de 20000 linhas) e `SSP_CELULAR: PROXY`.
 
+### 3. Risco (b): MQTT no broker.hivemq.com (Task 3 da fundação)
+
+> Executar a Task 3 do plano de fundação: escrever `qa/spikes/mqtt/test_hivemq.py` (conexão, assinatura, ida e volta do evento, status retido e comando ack) com paho-mqtt 2.x, provar que falha contra um broker inexistente, rodar contra o `broker.hivemq.com` e registrar `b-mqtt` e `MQTT_HOST_EFETIVO` em `docs/riscos-dia1.md`.
+
+Resultado: 5 testes passando no HiveMQ público; só mensagens `type: "test"` sintéticas, com `deviceId` aleatório.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->
