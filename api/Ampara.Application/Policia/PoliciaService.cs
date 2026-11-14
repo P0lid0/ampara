@@ -37,8 +37,12 @@ public sealed class PoliciaService(IAmparaDb db, IPontePoliciaClient ponte, ITai
         if (o.ProtocoloPolicia is not { } protocolo) throw new NaoEncontradoException("ocorrencia-nao-compartilhada");
 
         var r = await ponte.ObterRetornoAsync(protocolo, ct) ?? throw new NaoEncontradoException("retorno-indisponivel");
-        return new RetornoDto(r.Protocolo, r.Status, r.Mensagem, r.AtualizadoEm, o.BoNumero, o.BoStatus, o.Recuperacao);
+        return new RetornoDto(r.Protocolo, r.Status, r.Mensagem, AtualizadoEmUtc(r.AtualizadoEm), o.BoNumero, o.BoStatus, o.Recuperacao);
     }
+
+    // A API devolve datas em ISO UTC com Z, mesmo que a Ponte mande sem fuso.
+    private static DateTime AtualizadoEmUtc(DateTime d) =>
+        d.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(d, DateTimeKind.Utc) : d.ToUniversalTime();
 
     public async Task DefinirAcompanhamentoAsync(Ator ator, Guid ocorrenciaId, AcompanhamentoEntrada e, CancellationToken ct)
     {
@@ -69,9 +73,9 @@ public sealed class PoliciaService(IAmparaDb db, IPontePoliciaClient ponte, ITai
         var consenteRota = await db.Usuarios.AsNoTracking().Where(u => u.Id == o.UsuarioId).Select(u => u.ConsentimentoRota).FirstOrDefaultAsync(ct);
         if (consenteRota)
         {
-            var pontos = await db.Pontos.AsNoTracking().Where(p => p.UsuarioId == o.UsuarioId && p.Em >= momento).ToListAsync(ct);
-            trilha = pontos.OrderBy(p => p.Em).Take(MaximoPontosTrilha)
-                .Select(p => new PontoTrilha(p.Lat, p.Lng, DateTime.SpecifyKind(p.Em, DateTimeKind.Utc))).ToList();
+            var pontos = await db.Pontos.AsNoTracking().Where(p => p.UsuarioId == o.UsuarioId && p.Em >= momento)
+                .OrderBy(p => p.Em).Take(MaximoPontosTrilha).ToListAsync(ct);
+            trilha = pontos.Select(p => new PontoTrilha(p.Lat, p.Lng, DateTime.SpecifyKind(p.Em, DateTimeKind.Utc))).ToList();
         }
 
         return new PonteOcorrencia(o.Id, AreaMapa.AreaId(lat, lng), DateTime.SpecifyKind(momento, DateTimeKind.Utc),

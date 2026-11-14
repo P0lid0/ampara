@@ -323,4 +323,44 @@ public class PoliciaTests : IDisposable
         Assert.DoesNotContain(typeof(PonteOcorrencia).GetProperties(), p => System.Text.RegularExpressions.Regex.IsMatch(p.Name, "bo|recuperacao", System.Text.RegularExpressions.RegexOptions.IgnoreCase));
         Assert.Equal(7, JsonDocument.Parse(json).RootElement.EnumerateObject().Count());
     }
+
+    private sealed class GuardBloqueante : Ampara.Application.Cyber.ITaintGuard
+    {
+        public bool Ativo => true;
+        public Ampara.Application.Cyber.ResultadoTaint Sanitizar(string texto, Ampara.Domain.Cyber.Sink sink, Ampara.Application.Cyber.SanitizarOpcoes? o = null) =>
+            new(texto, true, []);
+    }
+
+    [Fact]
+    public async Task Guard_que_bloqueia_da_502_e_nada_e_enviado_nem_gravado()
+    {
+        var dono = await f.NovoUsuarioAsync();
+        var id = await OcorrenciaAsync(dono);
+        using var g = f.WithWebHostBuilder(b => b.ConfigureServices(s =>
+        {
+            Microsoft.Extensions.DependencyInjection.Extensions.ServiceCollectionDescriptorExtensions.RemoveAll<Ampara.Application.Cyber.ITaintGuard>(s);
+            Microsoft.Extensions.DependencyInjection.ServiceCollectionServiceExtensions.AddSingleton<Ampara.Application.Cyber.ITaintGuard>(s, new GuardBloqueante());
+        }));
+        var cliente = g.CreateClient();
+        cliente.DefaultRequestHeaders.Authorization = dono.Cliente.DefaultRequestHeaders.Authorization;
+
+        var r = await Compartilhar(cliente, id);
+        Assert.Equal(HttpStatusCode.BadGateway, r.StatusCode);
+        Assert.Equal("ponte-payload-bloqueado", await CodigoDoErroAsync(r));
+        Assert.Empty(f.Ponte.Enviadas);
+        using var db = f.NovoDb();
+        Assert.Null(db.Ocorrencias.Single(x => x.Id == id).ProtocoloPolicia);
+    }
+
+    [Fact]
+    public async Task Retorno_com_data_sem_fuso_sai_em_utc_com_Z()
+    {
+        var dono = await f.NovoUsuarioAsync();
+        var id = await OcorrenciaAsync(dono);
+        f.Ponte.Retorno = p => new PonteRetorno(p, "recebida", "ok", new DateTime(2026, 11, 14, 22, 0, 0, DateTimeKind.Unspecified));
+        (await Compartilhar(dono.Cliente, id)).EnsureSuccessStatusCode();
+
+        var j = await (await dono.Cliente.GetAsync($"/api/v1/ocorrencias/{id}/retorno")).Content.ReadFromJsonAsync<JsonElement>();
+        Assert.Equal("2026-11-14T22:00:00Z", j.GetProperty("atualizadoEm").GetString());
+    }
 }
