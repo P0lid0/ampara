@@ -111,6 +111,7 @@ app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapAmparaEndpoints();
+app.MapSeguranca();
 app.MapHub<Ampara.Api.Hubs.GuardiaoHub>("/hubs/guardiao");
 app.MapOpenApi();
 app.MapScalarApiReference();   // /scalar

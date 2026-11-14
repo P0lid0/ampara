@@ -322,4 +322,10 @@ Resultado: 8 testes novos passando, suíte inteira com 376 aprovados (os testes 
 
 Resultado: 17 testes do filtro `ImeiNoBoTests` e `ExceptionHandlerTests` passando, suíte inteira com 408 aprovados; sem migration.
 
+### 51. Cyber: índice, farol, rotas de segurança e simulador de ataque (Task 15 do plano 03)
+
+> Executar a Task 15 do plano 03 (Cyber): escrever primeiro os testes de `GET /api/v1/seguranca/meu-risco` (soma de pesos, farol, só eventos do próprio usuário nas últimas 24 h, no máximo 50, `mensagemCidadao` sempre preenchida, sem `usuarioAlvoId`), de `GET /api/v1/seguranca/executivo` (política `Admin`, 8 classes e 8 sinks sempre presentes, `porHora` com 24 posições, `Permitido` fora da conta) e de `POST /api/v1/seguranca/simular-ataque` (202, 404 com `AMPARA_DEMO` desligado, 422 para cenário desconhecido, farol 40, 65, 75 e 85 na sequência da demonstração, nenhum valor de PII na resposta); implementar `IndiceRiscoService`, `SegurancaEndpoints` e `SimuladorDeAtaque`, que roda o fluxo real com valores sintéticos.
+
+Resultado: 7 testes novos passando, suíte inteira com 415 aprovados; sem migration.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->

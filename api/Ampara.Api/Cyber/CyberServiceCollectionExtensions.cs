@@ -57,6 +57,8 @@ public static class CyberServiceCollectionExtensions
         AddLogProtegido(services);
         services.AddMemoryCache();
         services.TryAddScoped<ITradutorRisco, ClaudeTradutorRisco>();   // Scoped: depende do guard
+        services.TryAddScoped<IIndiceRiscoService, IndiceRiscoService>();
+        services.TryAddScoped<SimuladorDeAtaque>();
         services.TryAddScoped<ICorrelacao>(sp => sp.GetRequiredService<Correlacao>());
         services.TryAddScoped<Correlacao>();
 
