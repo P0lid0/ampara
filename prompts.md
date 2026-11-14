@@ -222,4 +222,8 @@ Resultado: painel conferido no navegador com 3 ocorrências sintéticas (2 círc
 
 Resultado: seed sintético validado contra o schema e sem PII; sem migration.
 
+> Executar a Task 10 do plano da Ponte Polícia (`2026-11-14-04-ponte-policia`): escrever o README da pasta (ficha da CitizenTech, arquitetura, execução, rotas, privacidade, testes, mapa da rubrica de SOA) e gerar as evidências em `ponte-policia/evidencias/` (pytest, Alembic, requisições reais, OpenAPI e prints do Swagger e do painel).
+
+Resultado: 208 testes passando (mais 1 de migração no PostgreSQL), Alembic até `0002 (head)` e evidências geradas com o serviço no ar e dados sintéticos; sem migration nova.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->

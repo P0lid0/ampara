@@ -1,0 +1,53 @@
+# Evidencias da Ponte Policia (servico no ar em http://localhost:8000). Chaves lidas do ambiente; valores nao registrados.
+# Dados sinteticos. Data da coleta: 2026-11-14T21:40:10Z
+seed: Resumo: 201 x12
+
+### 1) POST /ocorrencias (primeira vez: 201)
+$ curl -X POST $B/ocorrencias -H "X-Chave-Servico: $PONTE_CHAVE_SERVICO" -d <payload sintetico>
+{"protocolo":"PP-2026-000013","status":"recebida"}
+HTTP 201
+
+### 2) POST /ocorrencias (mesmo origem_id: 200, mesmo protocolo)
+$ curl -X POST $B/ocorrencias ... (mesmo payload)
+{"protocolo":"PP-2026-000013","status":"recebida"}
+HTTP 200
+
+### 3) POST com campo extra contendo CPF sintetico (422, sem eco do valor)
+$ curl -X POST $B/ocorrencias ... (payload com campo "observacao" com um CPF sintetico)
+{"detail":"Payload contém dado pessoal e foi rejeitado.","achados":[{"campo":"observacao","classe":"Cpf"}]}
+HTTP 422
+
+### 4) POST sem chave (401)
+$ curl -X POST $B/ocorrencias -d <payload sintetico>   (sem X-Chave-Servico)
+{"detail":"Chave inválida ou ausente."}
+HTTP 401
+
+### 5) GET /ocorrencias?status=recebida (chave da policia)
+$ curl "$B/ocorrencias?status=recebida" -H "X-Chave-Policia: $PONTE_CHAVE_POLICIA"
+[{"protocolo":"PP-2026-000013","area_id":"g051_026","ts":"2026-11-14T21:30:10Z","tipo":"roubo_celular","status":"recebida","origem_gatilho":"chaveiro"},{"protocolo":"PP-2026-000012","area_id":"g056_043","ts":"2026-11-14T21:29:10Z","tipo":"furto_celular","status":"recebida","origem_gatilho":"impacto"},{"protocolo":"PP-2026-000005","area_id":"g061_025","ts":"2026-11-14T21:29:10Z","tipo":"roubo_celular","status":"recebida","origem_gatilho":"chaveiro"},{"protocolo":"PP-2026-000004","area_id":"g051_026","ts":"2026-11-14T21:27:10Z","tipo":"furto_celular","status":"recebida","origem_gatilho":"impacto"},{"protocolo":"PP-2026-000003","area_id":"g056_043","ts":"2026-11-14T21:19:10Z","tipo":"roubo_celular","status":"recebida","origem_gatilho":"guardiao"},{"protocolo":"PP-2026-000011","area_id":"g061_026","ts":"2026-11-14T21:17:10Z","tipo":"roubo_celular","status":"recebida","origem_gatilho":"guardiao"},{"protocolo":"PP-2026-000001","area_id":"g051_025","ts":"2026-11-14T21:16:10Z","tipo":"roubo_celular","status":"recebida","origem_gatilho":"chaveiro"},{"protocolo":"PP-2026-000010","area_id":"g051_026","ts":"2026-11-14T21:10:10Z","tipo":"furto_celular","status":"recebida","origem_gatilho":"web"},{"protocolo":"PP-2026-000007","area_id":"g051_025","ts":"2026-11-14T21:07:10Z","tipo":"roubo_celular","status":"recebida","origem_gatilho":"guardiao"},{"protocolo":"PP-2026-000006","area_id":"g056_043","ts":"2026-11-14T21:03:10Z","tipo":"furto_celular","status":"recebida","origem_gatilho":"web"},{"protocolo":"PP-2026-000009","area_id":"g057_043","ts":"2026-11-14T21:02:10Z","tipo":"roubo_celular","status":"recebida","origem_gatilho":"chaveiro"},{"protocolo":"PP-2026-000008","area_id":"g061_025","ts":"2026-11-14T20:56:10Z","tipo":"furto_celular","status":"recebida","origem_gatilho":"impacto"},{"protocolo":"PP-2026-000002","area_id":"g061_025","ts":"2026-11-14T20:53:10Z","tipo":"furto_celular","status":"recebida","origem_gatilho":"web"}]
+HTTP 200
+
+### 6) PATCH /ocorrencias/PP-2026-000013/status -> em_analise
+$ curl -X PATCH $B/ocorrencias/<protocolo>/status -H "X-Chave-Policia: $PONTE_CHAVE_POLICIA" -d {"status":"em_analise",...}
+{"protocolo":"PP-2026-000013","status":"em_analise","mensagem":"Ocorrencia em analise pela equipe.","atualizado_em":"2026-11-14T21:40:38.149789Z"}
+HTTP 200
+
+### 7) PATCH -> atendida
+$ curl -X PATCH $B/ocorrencias/<protocolo>/status ... {"status":"atendida",...}
+{"protocolo":"PP-2026-000013","status":"atendida","mensagem":"Viatura enviada ao local.","atualizado_em":"2026-11-14T21:40:38.483292Z"}
+HTTP 200
+
+### 8) PATCH invalido (atendida -> em_analise: 409)
+$ curl -X PATCH $B/ocorrencias/<protocolo>/status ... {"status":"em_analise",...}
+{"detail":"Transição de status não permitida."}
+HTTP 409
+
+### 9) GET /ocorrencias/<protocolo>/retorno (chave de servico)
+$ curl $B/ocorrencias/<protocolo>/retorno -H "X-Chave-Servico: $PONTE_CHAVE_SERVICO"
+{"protocolo":"PP-2026-000013","status":"atendida","mensagem":"Viatura enviada ao local.","atualizado_em":"2026-11-14T21:40:38.483292Z"}
+HTTP 200
+
+### 10) GET /hotspots?janela_min=60
+$ curl "$B/hotspots?janela_min=60" -H "X-Chave-Policia: $PONTE_CHAVE_POLICIA"
+[{"area_id":"g051_026","lat":-23.56825,"lng":-46.70015,"total":3,"risco_previsto":"medio"},{"area_id":"g056_043","lat":-23.54575,"lng":-46.61685,"total":3,"risco_previsto":"medio"},{"area_id":"g061_025","lat":-23.52325,"lng":-46.70505,"total":3,"risco_previsto":"medio"},{"area_id":"g051_025","lat":-23.56825,"lng":-46.70505,"total":2,"risco_previsto":"medio"},{"area_id":"g057_043","lat":-23.54125,"lng":-46.61685,"total":1,"risco_previsto":"baixo"},{"area_id":"g061_026","lat":-23.52325,"lng":-46.70015,"total":1,"risco_previsto":"baixo"}]
+HTTP 200
