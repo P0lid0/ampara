@@ -62,4 +62,10 @@ Resultado: validador e CLI em `qa/spikes/mqtt/` (4 testes passando), `e-wokwi` =
 
 Resultado: solution `api/Ampara.sln` em net11.0 com 5 projetos, EF Core 10 e Npgsql 10 (sem estável para EF 11, registrado em `api/README.md`), teste de fumaça passando; `launchSettings.json` alinhado à porta 5080 na correção da revisão.
 
+### 8. Erros em problem+json, correlação e contratos do plano 03 (Task 2 do plano da API)
+
+> Executar a Task 2 do plano da API (`2026-11-14-02-api`): escrever primeiro o `ErrosTests` (500 sem vazar valor, mapeamento de status das exceções, 429 com Retry-After, `X-Correlation-Id` ecoado ou gerado, no-ops de taint e acesso indevido, enums e `EventoSeguranca` do contrato), ver falhar, e implementar exceções, enums, `EventoSeguranca`, as quatro interfaces do plano 03, os dois no-ops, `CorrelacaoMiddleware`, `PiiRequestMiddleware` e `ProblemaHandler` com o pipeline combinado.
+
+Resultado: erros em `application/problem+json` com `title` fixo por exceção e só o tipo no log; 15 testes passando.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->
