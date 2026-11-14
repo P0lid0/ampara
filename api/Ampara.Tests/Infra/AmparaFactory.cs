@@ -17,7 +17,7 @@ using Microsoft.Extensions.Time.Testing;
 
 namespace Ampara.Tests.Infra;
 
-public record Sessao(Guid UsuarioId, string Email, HttpClient Cliente);
+public record Sessao(Guid UsuarioId, string Email, HttpClient Cliente, string Token = "");
 
 public class AmparaFactory : WebApplicationFactory<Program>
 {
@@ -123,7 +123,7 @@ public class AmparaFactory : WebApplicationFactory<Program>
         login.EnsureSuccessStatusCode();
         var token = (await login.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("token").GetString()!;
         c.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-        return new Sessao(id, email.Trim().ToLowerInvariant(), c);
+        return new Sessao(id, email.Trim().ToLowerInvariant(), c, token);
     }
 
     /// <summary>Cria um usuario novo e o vincula como guardiao da vitima (convite criado e aceito). Devolve a sessao do guardiao.</summary>
@@ -134,6 +134,14 @@ public class AmparaFactory : WebApplicationFactory<Program>
         var r = await g.Cliente.PostAsync($"/api/v1/guardioes/convites/{cv.GetProperty("codigo").GetString()}/aceitar", null);
         r.EnsureSuccessStatusCode();
         return g;
+    }
+
+    /// <summary>Entra pelo codigo de emergencia e devolve so o token (scope=emergencia).</summary>
+    public async Task<string> TokenEmergenciaAsync(string email, string codigo, string palavra)
+    {
+        var r = await CreateClient().PostAsJsonAsync("/api/v1/auth/emergencia", new { email, codigo, palavraSecreta = palavra });
+        r.EnsureSuccessStatusCode();
+        return (await r.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("token").GetString()!;
     }
 
     /// <summary>Entra pelo codigo de emergencia; o cliente devolvido leva o Bearer com scope=emergencia.</summary>

@@ -19,6 +19,8 @@ var origens = builder.Configuration.GetSection("Cors:Origens").Get<string[]>() ?
 builder.Services.AddCors(o => o.AddDefaultPolicy(p =>
     p.WithOrigins(origens).AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
 builder.Services.AddOpenApi();
+builder.Services.AddSignalR();
+builder.Services.AddSingleton<Ampara.Application.Alertas.IGuardiaoNotificador, Ampara.Api.Hubs.SignalRGuardiaoNotificador>();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
 builder.Services.AddHostedService<Ampara.Api.Workers.RetencaoWorker>();
@@ -103,6 +105,7 @@ app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapAmparaEndpoints();
+app.MapHub<Ampara.Api.Hubs.GuardiaoHub>("/hubs/guardiao");
 app.MapOpenApi();
 app.MapScalarApiReference();   // /scalar
 
