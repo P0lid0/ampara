@@ -254,4 +254,10 @@ Resultado: 208 testes passando (mais 1 de migração no PostgreSQL), Alembic at�
 
 Resultado: nenhum Critical ou Important. Minors corrigidos: varredura de PII em tempo linear (a regex de e-mail era quadrática num texto longo sem "@") e fora do event loop; CPF e telefone com separador "/", "_" ou contrabarra passam a ser detectados; o 422 de validação não ecoa mais a chave extra do remetente; corpo aninhado demais sem Content-Type JSON dá 422 em vez de 500; `PATCH /status` trava a linha com `SELECT ... FOR UPDATE` (dois agentes simultâneos não reabrem um estado terminal, provado no PostgreSQL com duas threads); OpenAPI com os corpos de erro reais (`ErroSimples`, `ErroPii`, `ErroValidacao`), 200 idempotente documentado e `risco_previsto` como enum; teste PostgreSQL compara migrações e models (`compare_metadata`) e só roda em banco `*_test`; falha fechado testada nas duas chaves; `exemplo_da_api.json` obrigatório; etiqueta Review Focus 4 no teste certo; vetores marcados SINTETICO; testes de PATCH com campo extra e sem status; dependências fixadas, suíte sem avisos, entradas 32 e 36 deste arquivo e cabeçalhos das tarefas 5 a 10. 225 testes passando (2 no PostgreSQL); sem migration (o modelo não mudou).
 
+### 40. Cyber: Sensitive<T>, atributos, índice e farol (Task 1 do plano 03)
+
+> Executar a Task 1 do plano 03 (Cyber): escrever primeiro os testes de `Sensitive<T>` (ToString e JSON sempre `[PII:Classe]`), dos atributos e do `IndiceRisco` (pesos 10/25/40, janela de 24 h do dono, teto 100, limites do farol 30 e 70) e implementar em `Ampara.Domain/Cyber`, sem recriar os enums nem `EventoSeguranca` do plano 02.
+
+Resultado: 14 testes novos passando; sem migration.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->
