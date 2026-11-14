@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Ampara.Tests.Infra;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Ampara.Tests;
 
@@ -26,6 +27,28 @@ public class EmergenciaTests(AmparaFactory f) : IClassFixture<AmparaFactory>
         Assert.Equal(s.UsuarioId.ToString(), jwt.Claims.First(c => c.Type == "sub").Value);
         var esperado = f.Tempo.GetUtcNow().UtcDateTime.AddMinutes(30);
         Assert.InRange(Math.Abs((j.GetProperty("expiraEm").GetDateTime().ToUniversalTime() - esperado).TotalSeconds), 0, 5);
+    }
+
+    [Fact]
+    public async Task Purga_apaga_tentativas_com_mais_de_24_horas()
+    {
+        // A tabela guarda o e-mail digitado (mesmo de quem não tem conta); só os últimos 15 min contam para o bloqueio.
+        var agora = f.Tempo.GetUtcNow().UtcDateTime;
+        var antigo = $"antigo{Guid.NewGuid():N}@ampara.demo";
+        var recente = $"recente{Guid.NewGuid():N}@ampara.demo";
+        using (var db = f.NovoDb())
+        {
+            db.TentativasEmergencia.Add(Ampara.Domain.Entidades.TentativaEmergencia.Criar(antigo, agora.AddHours(-25), sucesso: false));
+            db.TentativasEmergencia.Add(Ampara.Domain.Entidades.TentativaEmergencia.Criar(recente, agora.AddHours(-1), sucesso: false));
+            await db.SaveChangesAsync();
+        }
+        using (var escopo = f.Services.CreateScope())
+            Assert.True(await escopo.ServiceProvider.GetRequiredService<Ampara.Application.Auth.IAuthService>().PurgarTentativasAsync(CancellationToken.None) >= 1);
+        using (var db = f.NovoDb())
+        {
+            Assert.Empty(db.TentativasEmergencia.Where(t => t.EmailNormalizado == antigo));
+            Assert.Single(db.TentativasEmergencia.Where(t => t.EmailNormalizado == recente));
+        }
     }
 
     [Fact]

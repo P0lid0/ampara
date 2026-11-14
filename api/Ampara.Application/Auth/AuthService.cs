@@ -16,6 +16,7 @@ public sealed class AuthService(IAmparaDb db, ISenhaHasher hasher, ITokenService
     public static readonly TimeSpan ValidadeEmergencia = TimeSpan.FromMinutes(30);
     public static readonly TimeSpan JanelaEmergencia = TimeSpan.FromMinutes(15);
     public const int ErrosParaBloquear = 5;
+    public static readonly TimeSpan RetencaoTentativas = TimeSpan.FromHours(24);
     private const int CodigoMinimo = 6;
     private const int CodigoMaximo = 10;
     private const int PalavraMinima = 4;
@@ -155,6 +156,16 @@ public sealed class AuthService(IAmparaDb db, ISenhaHasher hasher, ITokenService
         db.TentativasEmergencia.Add(TentativaEmergencia.Criar(emailNorm, agora, sucesso: ok));
         await db.SaveChangesAsync(ct);
         return ok ? new Entrou(usuario!.Id, usuario.Papel) : new Falhou(usuario?.Id);
+    }
+
+    public async Task<int> PurgarTentativasAsync(CancellationToken ct)
+    {
+        var limite = tempo.GetUtcNow().UtcDateTime - RetencaoTentativas;
+        var vencidas = await db.TentativasEmergencia.Where(t => t.Em < limite).ToListAsync(ct);
+        if (vencidas.Count == 0) return 0;
+        db.TentativasEmergencia.RemoveRange(vencidas);
+        await db.SaveChangesAsync(ct);
+        return vencidas.Count;
     }
 
     private static string NormalizarPalavra(string? palavra) => (palavra ?? "").Trim().ToLowerInvariant();

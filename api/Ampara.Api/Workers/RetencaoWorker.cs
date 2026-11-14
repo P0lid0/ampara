@@ -1,9 +1,10 @@
+using Ampara.Application.Auth;
 using Ampara.Application.Relatos;
 using Ampara.Application.Rota;
 
 namespace Ampara.Api.Workers;
 
-/// <summary>Apaga da rota o que passou de 7 dias e os relatos que passaram de 2 horas, a cada hora. Escopo novo por execução.</summary>
+/// <summary>Apaga da rota o que passou de 7 dias, os relatos que passaram de 2 horas e as tentativas de emergência com mais de 24 horas, a cada hora. Escopo novo por execução.</summary>
 public sealed class RetencaoWorker(IServiceScopeFactory escopos, TimeProvider tempo, ILogger<RetencaoWorker> log) : BackgroundService
 {
     public static readonly TimeSpan Intervalo = TimeSpan.FromHours(1);
@@ -37,6 +38,18 @@ public sealed class RetencaoWorker(IServiceScopeFactory escopos, TimeProvider te
             catch (Exception ex)
             {
                 log.LogError("Retencao dos relatos falhou: tipo={Tipo}", ex.GetType().Name);
+            }
+
+            try
+            {
+                using var escopo = escopos.CreateScope();
+                var apagadas = await escopo.ServiceProvider.GetRequiredService<IAuthService>().PurgarTentativasAsync(ct);
+                if (apagadas > 0) log.LogInformation("Retencao das tentativas de emergencia: {Total} apagadas", apagadas);
+            }
+            catch (OperationCanceledException) when (ct.IsCancellationRequested) { return; }
+            catch (Exception ex)
+            {
+                log.LogError("Retencao das tentativas de emergencia falhou: tipo={Tipo}", ex.GetType().Name);
             }
         }
         while (await SeguirAsync(timer, ct));
