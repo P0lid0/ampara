@@ -177,6 +177,23 @@ public class ChaveiroEventoTests(AmparaFactory f) : IClassFixture<AmparaFactory>
         Assert.Equal(1, Acks(dev, dev + "-1"));
     }
 
+    [Fact]
+    public async Task Json_valido_acima_de_2048_bytes_e_descartado_sem_ack()
+    {
+        var (v, dev) = await ChaveiroPareadoAsync();
+        var id = dev + "-grande";
+        var grande = Evento("alert", dev, id).TrimEnd('}') + ",\"enchimento\":\"" + new string('x', 2100) + "\"}";
+        Assert.NotNull(JsonDocument.Parse(grande));
+        await TratarAsync(dev, grande, Chegada);
+        await StatusAsync(dev, $"{{\"deviceId\":\"{dev}\",\"online\":true,\"enchimento\":\"{new string('x', 2100)}\"}}", Chegada);
+
+        using var db = f.NovoDb();
+        Assert.Empty(db.Ocorrencias.Where(o => o.UsuarioId == v.UsuarioId));
+        Assert.Empty(db.EventosRecebidos.Where(e => e.EventId == id));
+        Assert.Equal(0, Acks(dev));
+        Assert.False(db.Chaveiros.Single(x => x.DeviceId == dev).Online);
+    }
+
     [Theory]
     [MemberData(nameof(PayloadsMalformados))]
     public async Task Mensagem_malformada_e_descartada_sem_excecao_sem_ack_sem_ocorrencia(string deviceDoTopico, string payload)

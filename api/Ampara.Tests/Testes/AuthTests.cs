@@ -21,6 +21,9 @@ public class AuthTests(AmparaFactory f) : IClassFixture<AmparaFactory>
         Assert.True((await r.Content.ReadFromJsonAsync<JsonElement>()).TryGetProperty("usuarioId", out _));
         var l = await c.PostAsJsonAsync("/api/v1/auth/login", new { email = "pessoa@ampara.demo", senha = Senha });
         Assert.Equal(HttpStatusCode.OK, l.StatusCode);
+        // Caixa mista e espaços do teclado também no login.
+        var misto = await c.PostAsJsonAsync("/api/v1/auth/login", new { email = " PESSOA@Ampara.Demo ", senha = Senha });
+        Assert.Equal(HttpStatusCode.OK, misto.StatusCode);
         var dup = await c.PostAsJsonAsync("/api/v1/auth/registrar", new { nome = "Outra", email = "PESSOA@ampara.demo", senha = "senha-sintetica-2" });
         Assert.Equal(HttpStatusCode.Conflict, dup.StatusCode);
     }

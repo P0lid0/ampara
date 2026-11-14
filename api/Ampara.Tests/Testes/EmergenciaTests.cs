@@ -18,7 +18,7 @@ public class EmergenciaTests(AmparaFactory f) : IClassFixture<AmparaFactory>
     {
         var s = await f.NovoUsuarioAsync();
         Assert.Equal(HttpStatusCode.NoContent, (await s.Cliente.PutAsJsonAsync("/api/v1/me/emergencia", new { codigo = Codigo, palavraSecreta = Palavra })).StatusCode);
-        var r = await Entrar(f.CreateClient(), s.Email, Codigo, "  GIRASSOL ");
+        var r = await Entrar(f.CreateClient(), "  " + s.Email.ToUpperInvariant() + " ", Codigo, "  GIRASSOL ");
         Assert.Equal(HttpStatusCode.OK, r.StatusCode);
         var j = await r.Content.ReadFromJsonAsync<JsonElement>();
         var jwt = new JwtSecurityTokenHandler().ReadJwtToken(j.GetProperty("token").GetString());
