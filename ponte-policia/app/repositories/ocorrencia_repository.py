@@ -16,8 +16,13 @@ class OcorrenciaRepository:
     def buscar_por_origem(self, origem_id: UUID) -> Ocorrencia | None:
         return self._session.scalar(select(Ocorrencia).where(Ocorrencia.origem_id == origem_id))
 
-    def buscar_por_protocolo(self, protocolo: str) -> Ocorrencia | None:
-        return self._session.scalar(select(Ocorrencia).where(Ocorrencia.protocolo == protocolo))
+    def buscar_por_protocolo(self, protocolo: str, para_atualizar: bool = False) -> Ocorrencia | None:
+        consulta = select(Ocorrencia).where(Ocorrencia.protocolo == protocolo)
+        if para_atualizar:
+            # SELECT ... FOR UPDATE: um segundo PATCH simultâneo espera este terminar e
+            # então relê o status já gravado (no SQLite dos testes a cláusula é ignorada).
+            consulta = consulta.with_for_update().execution_options(populate_existing=True)
+        return self._session.scalar(consulta)
 
     def listar(self, status: StatusOcorrencia | None, limite: int = 200) -> list[Ocorrencia]:
         consulta = select(Ocorrencia)

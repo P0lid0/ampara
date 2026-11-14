@@ -40,8 +40,8 @@ class OcorrenciaService:
             return vencedor, False
         return oc, True
 
-    def _buscar(self, protocolo: str) -> Ocorrencia:
-        oc = self._repo.buscar_por_protocolo(protocolo)
+    def _buscar(self, protocolo: str, para_atualizar: bool = False) -> Ocorrencia:
+        oc = self._repo.buscar_por_protocolo(protocolo, para_atualizar)
         if oc is None:
             raise OcorrenciaNaoEncontrada(protocolo)
         return oc
@@ -56,7 +56,7 @@ class OcorrenciaService:
         return self._retorno(self._buscar(protocolo))
 
     def atualizar_status(self, protocolo: str, novo: StatusOcorrencia, mensagem: str) -> RetornoResposta:
-        oc = self._buscar(protocolo)
+        oc = self._buscar(protocolo, para_atualizar=True)
         oc.mudar_status(novo, mensagem, self._agora())
         self._repo.commit()
         return self._retorno(oc)
