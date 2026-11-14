@@ -33,6 +33,12 @@ public class AmparaDbContext(DbContextOptions<AmparaDbContext> options) : DbCont
         });
     }
 
+    public async Task TravarPorChaveAsync(string chave, CancellationToken ct = default)
+    {
+        if (Database.ProviderName != "Npgsql.EntityFrameworkCore.PostgreSQL") return;
+        await Database.ExecuteSqlAsync($"SELECT pg_advisory_xact_lock(hashtext({chave}))", ct);
+    }
+
     private sealed class DataUtcConversor() : ValueConverter<DateTime, DateTime>(
         v => v.Kind == DateTimeKind.Utc ? v : v.ToUniversalTime(),
         v => DateTime.SpecifyKind(v, DateTimeKind.Utc));

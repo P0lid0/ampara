@@ -78,6 +78,36 @@ public class EmergenciaTests(AmparaFactory f) : IClassFixture<AmparaFactory>
     }
 
     [Fact]
+    public async Task Requisicoes_paralelas_nao_passam_de_5_erros()
+    {
+        var s = await f.NovoUsuarioAsync();
+        await s.Cliente.PutAsJsonAsync("/api/v1/me/emergencia", new { codigo = Codigo, palavraSecreta = Palavra });
+        var anonimo = f.CreateClient();
+        f.Acesso.Limpar();
+        var respostas = await Task.WhenAll(Enumerable.Range(0, 12).Select(_ => Entrar(anonimo, s.Email, "000000", Palavra)));
+        Assert.Equal(5, respostas.Count(r => r.StatusCode == HttpStatusCode.Unauthorized));
+        Assert.Equal(7, respostas.Count(r => r.StatusCode == HttpStatusCode.TooManyRequests));
+        Assert.Equal(5, f.Acesso.Chamadas.Count);
+    }
+
+    [Fact]
+    public async Task Usuario_sem_emergencia_configurada_da_o_mesmo_401()
+    {
+        var s = await f.NovoUsuarioAsync();
+        var r = await Entrar(f.CreateClient(), s.Email, Codigo, Palavra);
+        Assert.Equal(HttpStatusCode.Unauthorized, r.StatusCode);
+        Assert.Equal("credenciais-invalidas", (await r.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("codigo").GetString());
+    }
+
+    [Fact]
+    public async Task So_a_palavra_errada_tambem_e_erro()
+    {
+        var s = await f.NovoUsuarioAsync();
+        await s.Cliente.PutAsJsonAsync("/api/v1/me/emergencia", new { codigo = Codigo, palavraSecreta = Palavra });
+        Assert.Equal(HttpStatusCode.Unauthorized, (await Entrar(f.CreateClient(), s.Email, Codigo, "outra")).StatusCode);
+    }
+
+    [Fact]
     public async Task Token_de_emergencia_nao_acessa_rota_de_usuario()
     {
         var s = await f.NovoUsuarioAsync();

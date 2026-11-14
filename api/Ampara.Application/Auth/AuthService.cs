@@ -83,10 +83,52 @@ public sealed class AuthService(IAmparaDb db, ISenhaHasher hasher, ITokenService
         await db.SaveChangesAsync(ct);
     }
 
+    // Trava em processo por e-mail (faixas fixas, sem crescer com e-mails arbitrários). Com várias instâncias,
+    // o advisory lock do PostgreSQL (db.TravarPorChaveAsync) faz o mesmo papel entre processos.
+    private static readonly SemaphoreSlim[] _travas = Enumerable.Range(0, 64).Select(_ => new SemaphoreSlim(1, 1)).ToArray();
+
+    private abstract record ResultadoEmergencia;
+    private sealed record Bloqueado(TimeSpan Libera) : ResultadoEmergencia;
+    private sealed record Falhou(Guid? UsuarioId) : ResultadoEmergencia;
+    private sealed record Entrou(Guid UsuarioId, string Papel) : ResultadoEmergencia;
+
     public async Task<TokenDto> LoginEmergenciaAsync(string email, string codigo, string palavraSecreta, CancellationToken ct)
     {
         var emailNorm = NormalizarEmail(email);
         if (emailNorm.Length > EmailMaximo) emailNorm = emailNorm[..EmailMaximo];
+
+        // Contar, verificar e gravar o erro formam uma única seção crítica por e-mail: sem isso, N requisições
+        // paralelas leriam 0 a 4 erros e todas verificariam, furando o limite de 5.
+        var trava = _travas[(int)((uint)StringComparer.Ordinal.GetHashCode(emailNorm) % (uint)_travas.Length)];
+        await trava.WaitAsync(ct);
+        ResultadoEmergencia resultado;
+        try
+        {
+            resultado = await db.TransacaoAsync<ResultadoEmergencia>(async () =>
+            {
+                await db.TravarPorChaveAsync("emergencia:" + emailNorm, ct);
+                return await TentarEmergenciaAsync(emailNorm, codigo, palavraSecreta, ct);
+            }, ct);
+        }
+        finally { trava.Release(); }
+
+        // As exceções saem depois do commit: dentro da transação desfariam a gravação do erro.
+        switch (resultado)
+        {
+            case Bloqueado b:
+                throw new LimiteExcedidoException("emergencia-bloqueada", b.Libera);
+            case Falhou f:
+                acessoIndevido.Registrar(f.UsuarioId, "codigo-emergencia");
+                throw new NaoAutenticadoException("credenciais-invalidas");
+            case Entrou e:
+                return tokens.Emitir(e.UsuarioId, e.Papel, Escopos.Emergencia, ValidadeEmergencia);
+            default:
+                throw new InvalidOperationException();
+        }
+    }
+
+    private async Task<ResultadoEmergencia> TentarEmergenciaAsync(string emailNorm, string codigo, string palavraSecreta, CancellationToken ct)
+    {
         var agora = tempo.GetUtcNow().UtcDateTime;
         var desde = agora - JanelaEmergencia;
 
@@ -98,7 +140,7 @@ public sealed class AuthService(IAmparaDb db, ISenhaHasher hasher, ITokenService
         if (errosRecentes.Count >= ErrosParaBloquear)
         {
             var libera = errosRecentes[^1] + JanelaEmergencia - agora;
-            throw new LimiteExcedidoException("emergencia-bloqueada", libera > TimeSpan.Zero ? libera : TimeSpan.FromSeconds(1));
+            return new Bloqueado(libera > TimeSpan.Zero ? libera : TimeSpan.FromSeconds(1));
         }
 
         var usuario = await db.Usuarios.AsNoTracking().SingleOrDefaultAsync(u => u.Email == emailNorm, ct);
@@ -108,17 +150,11 @@ public sealed class AuthService(IAmparaDb db, ISenhaHasher hasher, ITokenService
         var codigoOk = hasher.Verificar((codigo ?? "").Trim(), temConfig ? usuario!.CodigoEmergenciaHash! : _hashFalsoEmergencia);
         var palavraOk = hasher.Verificar(NormalizarPalavra(palavraSecreta), temConfig ? usuario!.PalavraSecretaHash! : _hashFalsoEmergencia);
 
-        if (!temConfig || !codigoOk || !palavraOk)
-        {
-            db.TentativasEmergencia.Add(TentativaEmergencia.Criar(emailNorm, agora, sucesso: false));
-            await db.SaveChangesAsync(ct);
-            acessoIndevido.Registrar(usuario?.Id, "codigo-emergencia");
-            throw new NaoAutenticadoException("credenciais-invalidas");
-        }
-
-        db.TentativasEmergencia.Add(TentativaEmergencia.Criar(emailNorm, agora, sucesso: true));
+        var ok = temConfig && codigoOk && palavraOk;
+        // O acerto também é gravado, como trilha de auditoria (nada lê; só erros contam para o bloqueio).
+        db.TentativasEmergencia.Add(TentativaEmergencia.Criar(emailNorm, agora, sucesso: ok));
         await db.SaveChangesAsync(ct);
-        return tokens.Emitir(usuario!.Id, usuario.Papel, Escopos.Emergencia, ValidadeEmergencia);
+        return ok ? new Entrou(usuario!.Id, usuario.Papel) : new Falhou(usuario?.Id);
     }
 
     private static string NormalizarPalavra(string? palavra) => (palavra ?? "").Trim().ToLowerInvariant();

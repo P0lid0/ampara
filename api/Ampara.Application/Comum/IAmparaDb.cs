@@ -13,6 +13,9 @@ public interface IAmparaDb
 
     /// <summary>Executa a ação numa transação (com a estratégia de execução do provedor).</summary>
     Task<T> TransacaoAsync<T>(Func<Task<T>> acao, CancellationToken ct = default);
+
+    /// <summary>Trava de aviso (advisory lock) por chave, válida até o fim da transação atual. Só tem efeito no PostgreSQL.</summary>
+    Task TravarPorChaveAsync(string chave, CancellationToken ct = default);
 }
 
 public static class Escopos
