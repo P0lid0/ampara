@@ -12,7 +12,7 @@
 | O que cada parte faz | **App** (Expo): cadastro, guardiões, alarme, mapa, histórico de rota, BO. **Página de emergência** (web): acesso por outro aparelho. **API Ampara** (C#/.NET): regras, dados, tempo real, escuta do chaveiro por MQTT, motor PII e taint. **Ponte Polícia** (Python/FastAPI): recebe ocorrências minimizadas e mostra pontos quentes à polícia. **ML** (Python): risco por área e horário. **Chaveiro** (ESP32/Wokwi, Vitor): botão de pânico que fala por MQTT com a API. **VM Linux**: provisiona e mantém tudo no ar. **Painel Risco Cidadão**: bloqueios de segurança traduzidos por IA. |
 | Link do repositório | (preencher ao publicar) |
 | Indicador de impacto | minutos entre o roubo e o primeiro bloqueio confirmado pelo guardião; % de BOs gerados com IMEI válido; tempo para gerar o BO |
-| ODS conectados | **11, 10, 9** (na lista do briefing) e **16** (adicional, fora da lista do briefing) — explicação por meta na seção 13 [Claude] |
+| ODS conectados | **11, 10, 9** (na lista do briefing) e **16** (adicional, fora da lista do briefing) — explicação por meta na seção 13 da [spec do projeto](../docs/superpowers/specs/2026-11-14-ampara-design.md) [Claude] |
 
 ## 2. O que é a Ponte Polícia
 
@@ -56,7 +56,7 @@ Pré-requisitos: Python 3.13 e um PostgreSQL.
 cd ponte-policia
 python -m venv .venv
 source .venv/Scripts/activate        # Windows (Git Bash); no Linux: source .venv/bin/activate
-pip install -r requirements-dev.txt
+pip install -r requirements-dev.txt     # versões fixas, as mesmas da suíte e das evidências
 ```
 
 Crie os bancos `ponte` e `ponte_test` (usuário com permissão de criar tabelas) e defina as variáveis de ambiente. Nenhum valor fica no repositório (modelo em `.env.example`):
