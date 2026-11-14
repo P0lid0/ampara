@@ -16,6 +16,13 @@ public class RespostaNaoAutenticadaTests
     private static void Mapa(IEndpointRouteBuilder m)
     {
         m.MapGet("/vaza-cpf", () => Results.Json(new { cpf = "529.982.247-25" }));
+        m.MapGet("/vaza-cpf-cors", (HttpContext c) =>
+        {
+            // Simula o CorsMiddleware: grava o cabeçalho direto antes do corpo.
+            c.Response.Headers["Access-Control-Allow-Origin"] = "https://app.exemplo.test";
+            c.Response.Headers["Set-Cookie"] = "s=529.982.247-25";
+            return Results.Json(new { cpf = "529.982.247-25" });
+        });
         m.MapGet("/vaza-senha", () => Results.Json(new { senha = "abc12345" }));
         m.MapGet("/autenticado", (HttpContext c) =>
         {
@@ -82,9 +89,21 @@ public class RespostaNaoAutenticadaTests
         Assert.Empty(h.Rastro.Eventos);
     }
 
+    [Fact] public async Task Resposta_bloqueada_preserva_cabecalhos_de_cors_e_descarta_os_do_corpo_original()
+    {
+        var (r, t, h) = await Get("/vaza-cpf-cors");
+        await using var _ = h;
+        Assert.Equal(HttpStatusCode.InternalServerError, r.StatusCode);
+        Assert.Equal("application/problem+json", r.Content.Headers.ContentType!.MediaType);
+        Assert.Equal("https://app.exemplo.test", Assert.Single(r.Headers.GetValues("Access-Control-Allow-Origin")));
+        Assert.False(r.Headers.Contains("Set-Cookie"));
+        Assert.DoesNotContain("529.982.247-25", t);
+    }
+
     [Fact] public async Task Erro_400_do_binding_que_ecoa_o_valor_e_bloqueado_mantendo_400()
     {
-        // Binding real: o corpo é inválido para Guid.
+        // Binding real: o corpo é inválido para Guid. Este 400 vem do tratamento de erro fora do buffer, não deste sink;
+        // o caso que exercita o sink é o /eco-400 logo abaixo.
         var (r, t, h) = await Get("/binding", metodo: HttpMethod.Post,
             conteudo: new StringContent("{\"id\":\"529.982.247-25\"}", Encoding.UTF8, "application/json"));
         await using var _ = h;

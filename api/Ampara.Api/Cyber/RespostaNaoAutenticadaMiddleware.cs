@@ -17,6 +17,8 @@ public sealed class RespostaNaoAutenticadaMiddleware(RequestDelegate next, IPiiS
 {
     private static readonly JsonSerializerOptions JsonProblema = new(JsonSerializerDefaults.Web);
     private const int FatorLimite = 4;
+    private static readonly string[] CabecalhosDoCorpo =
+        ["Content-Type", "Content-Length", "Content-Encoding", "Content-Disposition", "Content-Language", "Content-Range", "ETag", "Last-Modified", "Set-Cookie"];
 
     public async Task InvokeAsync(HttpContext ctx, ITaintGuard guard, ITaintScope escopo, ITradutorRisco tradutor,
         IRastroSeguranca rastro, ICorrelacao correlacao)
@@ -95,7 +97,9 @@ public sealed class RespostaNaoAutenticadaMiddleware(RequestDelegate next, IPiiS
             type = "urn:ampara:taint:bloqueado", title = "Resposta bloqueada para proteger seus dados",
             status, correlationId = cid, detalheCidadao = frase,
         }, JsonProblema);
-        ctx.Response.Clear();
+        // Não usar Response.Clear(): apagaria cabeçalhos de CORS/segurança gravados por middlewares anteriores.
+        // Remove só o que descreve o corpo antigo ou pode carregar dado da resposta original.
+        foreach (var h in CabecalhosDoCorpo) ctx.Response.Headers.Remove(h);
         ctx.Response.StatusCode = status;
         ctx.Response.ContentType = "application/problem+json";
         ctx.Response.ContentLength = corpo.Length;
