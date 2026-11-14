@@ -19,6 +19,7 @@ public class AmparaDbContext(DbContextOptions<AmparaDbContext> options) : DbCont
     public DbSet<Ocorrencia> Ocorrencias => Set<Ocorrencia>();
     public DbSet<PassoOcorrencia> Passos => Set<PassoOcorrencia>();
     public DbSet<Alerta> Alertas => Set<Alerta>();
+    public DbSet<EventoRecebido> EventosRecebidos => Set<EventoRecebido>();
 
     protected override void ConfigureConventions(ModelConfigurationBuilder cb)
     {
@@ -31,8 +32,12 @@ public class AmparaDbContext(DbContextOptions<AmparaDbContext> options) : DbCont
 
     protected override void OnModelCreating(ModelBuilder mb) => mb.ApplyConfigurationsFromAssembly(typeof(AmparaDbContext).Assembly);
 
+    public void LimparRastreamento() => ChangeTracker.Clear();
+
     public async Task<T> TransacaoAsync<T>(Func<Task<T>> acao, CancellationToken ct = default)
     {
+        // Já dentro de uma transação (serviço chamado por outro): participa dela em vez de abrir uma aninhada.
+        if (Database.CurrentTransaction is not null) return await acao();
         var estrategia = Database.CreateExecutionStrategy();
         return await estrategia.ExecuteAsync(async () =>
         {

@@ -18,6 +18,10 @@ public interface IAmparaDb
     DbSet<Ocorrencia> Ocorrencias { get; }
     DbSet<PassoOcorrencia> Passos { get; }
     DbSet<Alerta> Alertas { get; }
+    DbSet<EventoRecebido> EventosRecebidos { get; }
+
+    /// <summary>Descarta as entidades rastreadas (usado depois de uma gravação que falhou).</summary>
+    void LimparRastreamento();
 
     Task<int> SaveChangesAsync(CancellationToken ct = default);
 

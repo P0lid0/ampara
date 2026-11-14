@@ -20,6 +20,7 @@ public static class DependencyInjection
         services.AddScoped<IContaService, ContaService>();
         services.AddScoped<IGuardiaoService, GuardiaoService>();
         services.AddScoped<IChaveiroService, ChaveiroService>();
+        services.AddScoped<IChaveiroEventoService, ChaveiroEventoService>();
         services.AddScoped<IRotaService, RotaService>();
         services.AddScoped<IOcorrenciaService, OcorrenciaService>();
         services.AddSingleton(new OpcoesEscalonamento());

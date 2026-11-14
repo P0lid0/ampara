@@ -227,6 +227,41 @@ namespace Ampara.Infrastructure.Migrations
                     b.ToTable("Convites", (string)null);
                 });
 
+            modelBuilder.Entity("Ampara.Domain.Entidades.EventoRecebido", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("DeviceId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("EventId")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<Guid?>("OcorrenciaId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("RecebidoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EventId")
+                        .IsUnique();
+
+                    b.ToTable("EventosRecebidos", (string)null);
+                });
+
             modelBuilder.Entity("Ampara.Domain.Entidades.Guardiao", b =>
                 {
                     b.Property<Guid>("Id")

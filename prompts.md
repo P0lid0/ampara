@@ -124,4 +124,8 @@ Resultado: 114 testes passando na suíte; sem migration.
 
 Resultado: 127 testes passando na suíte; migration `Alertas` aplicada com `--migrar` no PostgreSQL local (5436, ampara_dev), tabela e índices conferidos com psql.
 
+> Executar a Task 14 do plano da API (`2026-11-14-02-api`): escrever primeiro `ChaveiroEventoTests` (alert cria ocorrência de chaveiro e responde ack, mesmo eventId cinco vezes gera uma ocorrência e cinco acks, cancel com alerta desconhecido, test, low_battery sem ack, chaveiro não pareado só recebe ack, payloads malformados descartados, falha no ack não desfaz a ação, status e última vontade), ver falhar, e implementar `EventoRecebido` (índice único em `EventId`), `MensagemChaveiro`, `IChaveiroEventoService`/`ChaveiroEventoService`, `EventosRecebidos` no `IAmparaDb`, `TransacaoAsync` reentrante e a migration `EventosRecebidos`.
+
+Resultado: 144 testes passando na suíte; migration `EventosRecebidos` aplicada com `--migrar` no PostgreSQL local (5436, ampara_dev), tabela e índice único conferidos com psql.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->
