@@ -290,4 +290,10 @@ Resultado: 11 testes do scanner e do taint passando; sem migration.
 
 Resultado: 8 testes novos passando, suíte inteira com 324 aprovados; sem migration.
 
+### 46. Cyber: TaintGuard, política por sink e flag de demonstração (Task 7 do plano 03)
+
+> Executar a Task 7 do plano 03 (Cyber): escrever primeiro os testes do `TaintGuard` (Log bloqueia CPF e grava rastro sem o valor, valor marcado sem padrão também é bloqueado, Banco mascara CPF e cifra IMEI, sem PII devolve a mesma string, valor repetido gera um evento, HttpAutenticada passa, falha do rastro não libera nem derruba, flag `Cyber__TaintAtivo=false` só vale com `AMPARA_DEMO=true`); implementar `TaintGuard`, `PoliticaTaint` e `TaintBloqueadoException` e registrar o guard Scoped no `AddCyber` no lugar do `NoopTaintGuard`.
+
+Resultado: 11 testes novos do guard passando; o teste do no-op em `ErrosTests` passou a afirmar o guard real; sem migration.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->

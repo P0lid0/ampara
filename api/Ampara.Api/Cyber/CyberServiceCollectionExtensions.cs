@@ -33,6 +33,10 @@ public static class CyberServiceCollectionExtensions
         services.TryAddSingleton<IPiiProtetor>(sp => sp.GetRequiredService<PiiProtetor>());
 
         services.TryAddScoped<ITaintScope, TaintScope>();
+        services.AddHttpContextAccessor();
+        // Guard real no lugar do NoopTaintGuard do plano 02 (Scoped: depende do escopo e do usuario da requisicao).
+        services.RemoveAll<ITaintGuard>();
+        services.AddScoped<ITaintGuard, TaintGuard>();
         services.TryAddScoped<ICorrelacao>(sp => sp.GetRequiredService<Correlacao>());
         services.TryAddScoped<Correlacao>();
 

@@ -90,16 +90,17 @@ public class ErrosTests(AmparaFactory f) : IClassFixture<AmparaFactory>
     }
 
     [Fact]
-    public void Taint_noop_nao_altera_o_texto_e_nao_gera_evento()
+    public void Taint_real_bloqueia_cpf_no_log_na_aplicacao_montada()
     {
-        var g = f.Services.GetRequiredService<ITaintGuard>();
-        Assert.IsType<NoopTaintGuard>(g);
-        Assert.False(g.Ativo);
-        var t = "cpf 529.982.247-25";   // SINTETICO
-        var r = g.Sanitizar(t, Sink.Log, new SanitizarOpcoes(OrigemDado.Http, "campo"));
-        Assert.Same(t, r.Texto);
-        Assert.False(r.Bloqueado);
-        Assert.Empty(r.Eventos);
+        // O TaintGuard real (plano 03) substituiu o no-op do plano 02 no host de producao.
+        using var escopo = f.Services.CreateScope();
+        var g = escopo.ServiceProvider.GetRequiredService<ITaintGuard>();
+        Assert.IsType<TaintGuard>(g);
+        Assert.True(g.Ativo);
+        var r = g.Sanitizar("cpf 529.982.247-25", Sink.Log, new SanitizarOpcoes(OrigemDado.Http, "campo"));   // SINTETICO
+        Assert.True(r.Bloqueado);
+        Assert.DoesNotContain("529.982.247-25", r.Texto);
+        Assert.Single(r.Eventos);
     }
 
     [Fact]
