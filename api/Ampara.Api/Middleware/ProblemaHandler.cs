@@ -1,5 +1,7 @@
 using System.Text.Json;
 using Ampara.Application.Comum;
+using Ampara.Application.Cyber;
+using Ampara.Infrastructure.Cyber;
 using Microsoft.AspNetCore.Diagnostics;
 
 namespace Ampara.Api.Middleware;
@@ -30,11 +32,21 @@ public sealed class ProblemaHandler(ILogger<ProblemaHandler> log) : IExceptionHa
         // Só o tipo e o correlationId vão para o log; Message pode carregar dado pessoal.
         log.LogWarning("Falha tratada: tipo={Tipo} status={Status} correlationId={CorrelationId}", ex.GetType().Name, status, cid);
 
+        // Frase humana para o cidadão; o tradutor nunca lança, mas a resposta não pode depender disso.
+        string? detalhe;
+        try
+        {
+            var tradutor = ctx.RequestServices?.GetService<ITradutorRisco>();
+            detalhe = tradutor is null ? null
+                : await tradutor.TraduzirAsync(new EventoTecnico("FalhaSistema", "Erro", ex.GetType().Name), ct);
+        }
+        catch (Exception) { detalhe = FrasesPadrao.FalhaSistema; }
+
         ctx.Response.StatusCode = status;
         if (ex is LimiteExcedidoException l)
             ctx.Response.Headers["Retry-After"] = ((int)Math.Ceiling(l.RetryAfter.TotalSeconds)).ToString();
         ctx.Response.ContentType = "application/problem+json";
-        var corpo = new { type = "urn:ampara:erro:" + codigo, title, status, codigo, detalheCidadao = (string?)null, correlationId = cid };
+        var corpo = new { type = "urn:ampara:erro:" + codigo, title, status, codigo, detalheCidadao = detalhe, correlationId = cid };
         await JsonSerializer.SerializeAsync(ctx.Response.Body, corpo, Opcoes, ct);
         return true;
     }

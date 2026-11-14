@@ -35,6 +35,12 @@ public static class CyberServiceCollectionExtensions
 
         services.TryAddScoped<ITaintScope, TaintScope>();
         services.AddHttpContextAccessor();
+        // Acesso indevido real no lugar do no-op do plano 02. Singleton (há consumidores singleton), com correlação ambiente.
+        services.RemoveAll<IAcessoIndevido>();
+        services.AddSingleton<IAcessoIndevido>(sp => new AcessoIndevido(sp.GetRequiredService<IRastroSeguranca>(),
+            new CorrelacaoAmbiente(sp.GetRequiredService<IHttpContextAccessor>())));
+        // Registrado antes do ProblemaHandler (Program.cs chama AddCyber primeiro): assume só as exceções inesperadas.
+        services.AddExceptionHandler<TaintExceptionHandler>();
         // Guard real no lugar do NoopTaintGuard do plano 02 (Scoped: depende do escopo e do usuario da requisicao).
         services.RemoveAll<ITaintGuard>();
         services.AddScoped<ITaintGuard, TaintGuard>();
