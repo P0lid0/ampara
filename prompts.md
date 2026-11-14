@@ -140,4 +140,8 @@ Resultado: 204 testes passando na suíte; sem migration.
 
 Resultado: 225 testes passando na suíte; migration `Acompanhamento` aplicada com `--migrar` no PostgreSQL local (5436, ampara_dev), colunas `BoNumero`, `BoStatus` e `Recuperacao` e a linha em `__EFMigrationsHistory` conferidas com psql.
 
+> Executar a Task 19 do plano da API (`2026-11-14-02-api`): escrever primeiro o `RelatoTests` (relato sozinho em area baixa fica oculto e com a 2a confirmacao aparece, lista com exatamente id/tipo/lat/lng/em/confirmacoes, area de risco alto aparece sozinho, confirmar duas vezes ou o autor nao soma, expira em 2 h e a purga remove, em invalido ou fora do mapa 422, 6o relato na hora 429, texto livre nao gravado), ver falhar, e implementar `Relato`/`RelatoConfirmacao`, `IRelatoService`/`RelatoService`, `ModeradorTextoDescartado` (Singleton, devolve sempre null ate o plano 03), `RelatoEndpoints`, purga no `RetencaoWorker` e a migration `Relatos`.
+
+Resultado: 239 testes passando na suite; migration `Relatos` aplicada com `--migrar` no PostgreSQL local (5436, ampara_dev), tabelas `Relatos` e `RelatoConfirmacoes` e o indice unico (RelatoId, UsuarioId) conferidos com psql.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->

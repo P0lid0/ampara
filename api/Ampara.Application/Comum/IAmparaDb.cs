@@ -20,6 +20,8 @@ public interface IAmparaDb
     DbSet<Alerta> Alertas { get; }
     DbSet<EventoRecebido> EventosRecebidos { get; }
     DbSet<BoRascunho> BosRascunho { get; }
+    DbSet<Relato> Relatos { get; }
+    DbSet<RelatoConfirmacao> RelatoConfirmacoes { get; }
 
     /// <summary>Descarta as entidades rastreadas (usado depois de uma gravação que falhou).</summary>
     void LimparRastreamento();

@@ -21,6 +21,8 @@ public class AmparaDbContext(DbContextOptions<AmparaDbContext> options) : DbCont
     public DbSet<Alerta> Alertas => Set<Alerta>();
     public DbSet<EventoRecebido> EventosRecebidos => Set<EventoRecebido>();
     public DbSet<BoRascunho> BosRascunho => Set<BoRascunho>();
+    public DbSet<Relato> Relatos => Set<Relato>();
+    public DbSet<RelatoConfirmacao> RelatoConfirmacoes => Set<RelatoConfirmacao>();
 
     protected override void ConfigureConventions(ModelConfigurationBuilder cb)
     {

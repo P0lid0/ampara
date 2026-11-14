@@ -7,6 +7,7 @@ using Ampara.Application.Contas;
 using Ampara.Application.Guardioes;
 using Ampara.Application.Ocorrencias;
 using Ampara.Application.Policia;
+using Ampara.Application.Relatos;
 using Ampara.Application.Rota;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -27,6 +28,7 @@ public static class DependencyInjection
         services.AddScoped<IOcorrenciaService, OcorrenciaService>();
         services.AddScoped<IBoGenerator, BoGenerator>();
         services.AddScoped<IPoliciaService, PoliciaService>();
+        services.AddScoped<IRelatoService, RelatoService>();
         services.AddSingleton(new OpcoesEscalonamento());
         services.AddScoped<IEscalonamento, Escalonamento>();
         return services;

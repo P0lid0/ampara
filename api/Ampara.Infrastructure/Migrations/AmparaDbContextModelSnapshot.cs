@@ -450,6 +450,74 @@ namespace Ampara.Infrastructure.Migrations
                     b.ToTable("Pontos", (string)null);
                 });
 
+            modelBuilder.Entity("Ampara.Domain.Entidades.Relato", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AreaId")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.Property<Guid>("AutorId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("Em")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<double>("Lat")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("Lng")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("Texto")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Em");
+
+                    b.HasIndex("AutorId", "CriadoEm");
+
+                    b.ToTable("Relatos", (string)null);
+                });
+
+            modelBuilder.Entity("Ampara.Domain.Entidades.RelatoConfirmacao", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("Em")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("RelatoId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UsuarioId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.HasIndex("RelatoId", "UsuarioId")
+                        .IsUnique();
+
+                    b.ToTable("RelatoConfirmacoes", (string)null);
+                });
+
             modelBuilder.Entity("Ampara.Domain.Entidades.TentativaEmergencia", b =>
                 {
                     b.Property<Guid>("Id")
@@ -626,6 +694,30 @@ namespace Ampara.Infrastructure.Migrations
 
             modelBuilder.Entity("Ampara.Domain.Entidades.PontoRota", b =>
                 {
+                    b.HasOne("Ampara.Domain.Entidades.Usuario", null)
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Ampara.Domain.Entidades.Relato", b =>
+                {
+                    b.HasOne("Ampara.Domain.Entidades.Usuario", null)
+                        .WithMany()
+                        .HasForeignKey("AutorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Ampara.Domain.Entidades.RelatoConfirmacao", b =>
+                {
+                    b.HasOne("Ampara.Domain.Entidades.Relato", null)
+                        .WithMany()
+                        .HasForeignKey("RelatoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Ampara.Domain.Entidades.Usuario", null)
                         .WithMany()
                         .HasForeignKey("UsuarioId")

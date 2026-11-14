@@ -41,6 +41,7 @@ public static class DependencyInjection
         services.AddSingleton<IImeiRevelador, NoopImeiRevelador>();
         services.AddSingleton<ITaintGuard, NoopTaintGuard>();
         services.AddSingleton<IAcessoIndevido, NoopAcessoIndevido>();
+        services.AddSingleton<IModeradorRelato, ModeradorTextoDescartado>();   // texto livre descartado ate o plano 03
         services.AddSingleton<MqttChaveiroGateway>();
         services.AddSingleton<IChaveiroGateway>(sp => sp.GetRequiredService<MqttChaveiroGateway>());
         services.AddHostedService(sp => sp.GetRequiredService<MqttChaveiroGateway>());
