@@ -8,6 +8,9 @@ public sealed class AuthService(IAmparaDb db, ISenhaHasher hasher, ITokenService
 {
     public static readonly TimeSpan ValidadeLogin = TimeSpan.FromHours(8);
     private const int SenhaMinima = 8;
+    private const int SenhaMaxima = 256;
+    private const int NomeMaximo = 200;
+    private const int EmailMaximo = 320;
 
     // Hash usado para gastar o mesmo tempo quando o e-mail não existe (sem enumeração por tempo).
     private static string? _hashFalso;
@@ -19,8 +22,10 @@ public sealed class AuthService(IAmparaDb db, ISenhaHasher hasher, ITokenService
         nome = (nome ?? "").Trim();
         var emailNorm = NormalizarEmail(email);
         if (nome.Length == 0) throw new DominioException("nome-obrigatorio");
-        if (emailNorm.Length == 0 || !emailNorm.Contains('@')) throw new DominioException("email-invalido");
+        if (nome.Length > NomeMaximo) throw new DominioException("nome-longo");
+        if (emailNorm.Length == 0 || emailNorm.Length > EmailMaximo || !emailNorm.Contains('@')) throw new DominioException("email-invalido");
         if ((senha ?? "").Length < SenhaMinima) throw new DominioException("senha-curta");
+        if (senha!.Length > SenhaMaxima) throw new DominioException("senha-longa");
 
         if (await db.Usuarios.AnyAsync(u => u.Email == emailNorm, ct)) throw new ConflitoException("email-ja-cadastrado");
 

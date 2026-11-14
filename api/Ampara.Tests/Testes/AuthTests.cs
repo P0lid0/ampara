@@ -51,6 +51,23 @@ public class AuthTests(AmparaFactory f) : IClassFixture<AmparaFactory>
     }
 
     [Fact]
+    public async Task Nome_email_e_senha_longos_demais_422_sem_chegar_ao_banco()
+    {
+        var c = f.CreateClient();
+        var casos = new[]
+        {
+            new { nome = new string('n', 201), email = "longo1@ampara.demo", senha = Senha },
+            new { nome = "Pessoa", email = new string('e', 320) + "@ampara.demo", senha = Senha },
+            new { nome = "Pessoa", email = "longo3@ampara.demo", senha = new string('s', 257) },
+        };
+        foreach (var caso in casos)
+            Assert.Equal(HttpStatusCode.UnprocessableEntity, (await c.PostAsJsonAsync("/api/v1/auth/registrar", caso)).StatusCode);
+        // limites exatos continuam aceitos
+        var ok = await c.PostAsJsonAsync("/api/v1/auth/registrar", new { nome = new string('n', 200), email = "limite@ampara.demo", senha = new string('s', 256) });
+        Assert.Equal(HttpStatusCode.Created, ok.StatusCode);
+    }
+
+    [Fact]
     public async Task Registro_nunca_cria_admin_mesmo_com_papel_no_corpo()
     {
         var c = f.CreateClient();
@@ -86,6 +103,7 @@ public class AuthTests(AmparaFactory f) : IClassFixture<AmparaFactory>
     [Fact]
     public void Segredo_curto_derruba_a_subida()
     {
-        Assert.Throws<InvalidOperationException>(() => new AmparaFactory(jwtSecret: "curto").CreateClient());
+        using var fabrica = new AmparaFactory(jwtSecret: "curto");
+        Assert.Throws<InvalidOperationException>(() => fabrica.CreateClient());
     }
 }
