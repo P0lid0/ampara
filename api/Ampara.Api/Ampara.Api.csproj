@@ -3,6 +3,9 @@
     <ProjectReference Include="..\Ampara.Infrastructure\Ampara.Infrastructure.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <None Update="Dados/*.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="11.0.0" />
     <PackageReference Include="Scalar.AspNetCore" Version="2.21.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="11.0.0" />

@@ -77,6 +77,9 @@ _ = app.Services.GetRequiredService<Ampara.Application.Comum.ICifrador>();
 // Falha na subida se AMPARA_JWT_SECRET faltar ou tiver menos de 64 caracteres, ou se AMPARA_DB faltar.
 _ = app.Services.GetRequiredService<ITokenService>();
 _ = Ampara.Infrastructure.DependencyInjection.StringDeConexao(app.Configuration);
+// Carrega as delegacias e as camadas do mapa na subida (arquivo ausente = lista vazia e aviso no log).
+_ = app.Services.GetRequiredService<Ampara.Application.Bo.IDelegaciaLocator>();
+_ = app.Services.GetRequiredService<Ampara.Infrastructure.Dados.CamadasMapa>();
 
 var caminhoCatalogo = Path.Combine(AppContext.BaseDirectory, "Dados", "catalogo-contas.json");
 

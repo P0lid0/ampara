@@ -1,0 +1,5 @@
+[
+  { "nome": "Delegacia Teste A", "endereco": "Rua Sintetica A, 100 - Pinheiros, Sao Paulo/SP", "lat": -23.5670, "lng": -46.7020 },
+  { "nome": "Delegacia Teste B", "endereco": "Rua Sintetica B, 200 - Se, Sao Paulo/SP", "lat": -23.5505, "lng": -46.6333 },
+  { "nome": "Delegacia Teste C", "endereco": "Rua Sintetica C, 300 - Santo Amaro, Sao Paulo/SP", "lat": -23.6500, "lng": -46.7100 }
+]

@@ -21,5 +21,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Fixtures/catalogo-teste.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Fixtures/delegacias-teste.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

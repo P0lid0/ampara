@@ -36,6 +36,7 @@ public class AmparaFactory : WebApplicationFactory<Program>
     {
         _jwtSecret = jwtSecret ?? new string('s', 64) + "-segredo-falso-de-teste";
         _conexao.Open();
+        ImeiRevelador = new ImeiReveladorSpy(() => new Ampara.Infrastructure.Cyber.NoopImeiRevelador(Services.GetRequiredService<Ampara.Application.Comum.ICifrador>()));
     }
 
     public AcessoIndevidoSpy Acesso { get; } = new();
@@ -43,6 +44,8 @@ public class AmparaFactory : WebApplicationFactory<Program>
     public FakeChaveiroGateway Gateway { get; } = new();
 
     public FakeSondaSaude Sonda { get; } = new();
+
+    public ImeiReveladorSpy ImeiRevelador { get; }
 
     public FakeTimeProvider Tempo { get; } = new(new DateTimeOffset(2026, 11, 14, 12, 0, 0, TimeSpan.Zero));
 
@@ -57,6 +60,7 @@ public class AmparaFactory : WebApplicationFactory<Program>
             ["MQTT_HOST"] = "127.0.0.1",
             ["MQTT_PORT"] = "1883",
             ["RISCO_CSV"] = "risco-teste.csv",
+            ["Delegacias:Arquivo"] = Path.Combine(AppContext.BaseDirectory, "Fixtures", "delegacias-teste.json"),
         }));
 
         builder.ConfigureServices(services =>
@@ -69,6 +73,9 @@ public class AmparaFactory : WebApplicationFactory<Program>
             services.AddSingleton<IChaveiroGateway>(Gateway);
             services.RemoveAll<ISondaSaude>();
             services.AddSingleton<ISondaSaude>(Sonda);
+            // Espia o revelador de IMEI (delega ao no-op, que só decifra); o BO tem de passar por ele.
+            services.RemoveAll<IImeiRevelador>();
+            services.AddSingleton<IImeiRevelador>(ImeiRevelador);
 
             // Troca o Npgsql por SQLite em memória (o esquema vem do modelo, via EnsureCreated).
             services.RemoveAll<DbContextOptions<AmparaDbContext>>();

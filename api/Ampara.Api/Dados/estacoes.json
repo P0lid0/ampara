@@ -1,0 +1,812 @@
+[
+  {
+    "nome": "Estação Aacd-servidor (Metro)",
+    "lat": -23.597636,
+    "lng": -46.6517999
+  },
+  {
+    "nome": "Estação Adolfo Pinheiro (Metro)",
+    "lat": -23.6496526,
+    "lng": -46.7038836
+  },
+  {
+    "nome": "Estação Aeroporto Guarulhos (CPTM)",
+    "lat": -23.4330569,
+    "lng": -46.493813
+  },
+  {
+    "nome": "Estação Alto da Boa Vista (Metro)",
+    "lat": -23.6415009,
+    "lng": -46.6990556
+  },
+  {
+    "nome": "Estação Alto do Ipiranga (Metro)",
+    "lat": -23.6021946,
+    "lng": -46.6123702
+  },
+  {
+    "nome": "Estação Ana Rosa (Metro)",
+    "lat": -23.581355,
+    "lng": -46.6386275
+  },
+  {
+    "nome": "Estação Ana Rosa (Metro)",
+    "lat": -23.5812571,
+    "lng": -46.6384522
+  },
+  {
+    "nome": "Estação Anhangabaú (Metro)",
+    "lat": -23.5479476,
+    "lng": -46.6388856
+  },
+  {
+    "nome": "Estação Antonio Gianetti Neto (CPTM)",
+    "lat": -23.5543494,
+    "lng": -46.38367
+  },
+  {
+    "nome": "Estação Armênia (Metro)",
+    "lat": -23.5255001,
+    "lng": -46.6293398
+  },
+  {
+    "nome": "Estação Artur Alvim (Metro)",
+    "lat": -23.5402884,
+    "lng": -46.48459
+  },
+  {
+    "nome": "Estação Autódromo (Viamobilidade)",
+    "lat": -23.706557,
+    "lng": -46.688447
+  },
+  {
+    "nome": "Estação Ayrton Senna-jardim São Paulo (Metro)",
+    "lat": -23.4924166,
+    "lng": -46.6171096
+  },
+  {
+    "nome": "Estação Belém (Metro)",
+    "lat": -23.5430226,
+    "lng": -46.5901078
+  },
+  {
+    "nome": "Estação Berrini (Viamobilidade)",
+    "lat": -23.6052775,
+    "lng": -46.696976
+  },
+  {
+    "nome": "Estação Borba Gato (Metro)",
+    "lat": -23.6333612,
+    "lng": -46.6930152
+  },
+  {
+    "nome": "Estação Bresser-mooca (Metro)",
+    "lat": -23.5464764,
+    "lng": -46.60754
+  },
+  {
+    "nome": "Estação Brigadeiro (Metro)",
+    "lat": -23.56888,
+    "lng": -46.6473539
+  },
+  {
+    "nome": "Estação Brooklin (Metro)",
+    "lat": -23.6272532,
+    "lng": -46.6880285
+  },
+  {
+    "nome": "Estação Brás (CPTM)",
+    "lat": -23.5440214,
+    "lng": -46.6168771
+  },
+  {
+    "nome": "Estação Brás (Metro)",
+    "lat": -23.5478844,
+    "lng": -46.615909
+  },
+  {
+    "nome": "Estação Butantã (Viaquatro)",
+    "lat": -23.5719929,
+    "lng": -46.7082396
+  },
+  {
+    "nome": "Estação Caieiras (CPTM)",
+    "lat": -23.3662763,
+    "lng": -46.7516356
+  },
+  {
+    "nome": "Estação Camilo Haddad (Metro)",
+    "lat": -23.5954129,
+    "lng": -46.5376932
+  },
+  {
+    "nome": "Estação Campo Belo (Metro)",
+    "lat": -23.6189739,
+    "lng": -46.6823189
+  },
+  {
+    "nome": "Estação Campo Limpo (Metro)",
+    "lat": -23.6493844,
+    "lng": -46.7589607
+  },
+  {
+    "nome": "Estação Capuava (CPTM)",
+    "lat": -23.6583494,
+    "lng": -46.4901092
+  },
+  {
+    "nome": "Estação Capão Redondo (Metro)",
+    "lat": -23.6592992,
+    "lng": -46.7680122
+  },
+  {
+    "nome": "Estação Carandiru (Metro)",
+    "lat": -23.5092756,
+    "lng": -46.6249626
+  },
+  {
+    "nome": "Estação Carrão (Metro)",
+    "lat": -23.537851,
+    "lng": -46.5641554
+  },
+  {
+    "nome": "Estação Ceasa (Viamobilidade)",
+    "lat": -23.5374192,
+    "lng": -46.7426107
+  },
+  {
+    "nome": "Estação Chácara Klabin (Metro)",
+    "lat": -23.5926318,
+    "lng": -46.6304864
+  },
+  {
+    "nome": "Estação Cidade Jardim (Viamobilidade)",
+    "lat": -23.5855236,
+    "lng": -46.6911627
+  },
+  {
+    "nome": "Estação Cidade Universitária (Viamobilidade)",
+    "lat": -23.5576426,
+    "lng": -46.7117772
+  },
+  {
+    "nome": "Estação Clínicas (Metro)",
+    "lat": -23.5541111,
+    "lng": -46.6707622
+  },
+  {
+    "nome": "Estação Comandante Sampaio (Viamobilidade)",
+    "lat": -23.5257055,
+    "lng": -46.7958692
+  },
+  {
+    "nome": "Estação Comendador Ermelino (CPTM)",
+    "lat": -23.4851421,
+    "lng": -46.4824092
+  },
+  {
+    "nome": "Estação Conceição (Metro)",
+    "lat": -23.6353778,
+    "lng": -46.6413322
+  },
+  {
+    "nome": "Estação Consolação (Metro)",
+    "lat": -23.557228,
+    "lng": -46.6611923
+  },
+  {
+    "nome": "Estação Corinthians - Itaquera (CPTM)",
+    "lat": -23.5420603,
+    "lng": -46.4711437
+  },
+  {
+    "nome": "Estação Corinthians-itaquera (Metro)",
+    "lat": -23.5423053,
+    "lng": -46.4710777
+  },
+  {
+    "nome": "Estação Dom Bosco (CPTM)",
+    "lat": -23.5417982,
+    "lng": -46.4481292
+  },
+  {
+    "nome": "Estação Domingos de Morais (Viamobilidade)",
+    "lat": -23.5189295,
+    "lng": -46.7214846
+  },
+  {
+    "nome": "Estação Engenheiro Goulart (CPTM)",
+    "lat": -23.4981011,
+    "lng": -46.5201021
+  },
+  {
+    "nome": "Estação Engenheiro Manoel Feio (CPTM)",
+    "lat": -23.4793657,
+    "lng": -46.3683804
+  },
+  {
+    "nome": "Estação Eucaliptos (Metro)",
+    "lat": -23.610145,
+    "lng": -46.6689913
+  },
+  {
+    "nome": "Estação Faria Lima (Viaquatro)",
+    "lat": -23.5671582,
+    "lng": -46.6939879
+  },
+  {
+    "nome": "Estação Fazenda da Juta (Metro)",
+    "lat": -23.6116883,
+    "lng": -46.4874719
+  },
+  {
+    "nome": "Estação Ferraz de Vasconcelos (CPTM)",
+    "lat": -23.5407505,
+    "lng": -46.3682694
+  },
+  {
+    "nome": "Estação Fradique Coutinho (Viaquatro)",
+    "lat": -23.5661686,
+    "lng": -46.684165
+  },
+  {
+    "nome": "Estação General Miguel Costa (Viamobilidade)",
+    "lat": -23.5234232,
+    "lng": -46.8156954
+  },
+  {
+    "nome": "Estação Giovanni Gronchi (Metro)",
+    "lat": -23.6439647,
+    "lng": -46.7340962
+  },
+  {
+    "nome": "Estação Grajaú (Viamobilidade)",
+    "lat": -23.7364487,
+    "lng": -46.6970151
+  },
+  {
+    "nome": "Estação Granja Julieta (Viamobilidade)",
+    "lat": -23.6279161,
+    "lng": -46.7122883
+  },
+  {
+    "nome": "Estação Guaianases (CPTM)",
+    "lat": -23.5423184,
+    "lng": -46.4156117
+  },
+  {
+    "nome": "Estação Guapituba (CPTM)",
+    "lat": -23.6920311,
+    "lng": -46.4488487
+  },
+  {
+    "nome": "Estação Guarulhos Cecap (CPTM)",
+    "lat": -23.4474414,
+    "lng": -46.4936932
+  },
+  {
+    "nome": "Estação Guilhermina-esperança (Metro)",
+    "lat": -23.5292629,
+    "lng": -46.5165482
+  },
+  {
+    "nome": "Estação Hebraica - Rebouças (Viamobilidade)",
+    "lat": -23.5736118,
+    "lng": -46.6987924
+  },
+  {
+    "nome": "Estação Higienópolis-mackenzie (Viaquatro)",
+    "lat": -23.5489515,
+    "lng": -46.6522614
+  },
+  {
+    "nome": "Estação Hospital São Paulo (Metro)",
+    "lat": -23.5981598,
+    "lng": -46.6453598
+  },
+  {
+    "nome": "Estação Imperatriz Leopoldina (Viamobilidade)",
+    "lat": -23.523754,
+    "lng": -46.7375925
+  },
+  {
+    "nome": "Estação Ipiranga (CPTM)",
+    "lat": -23.5824945,
+    "lng": -46.5966508
+  },
+  {
+    "nome": "Estação Itaim Paulista (CPTM)",
+    "lat": -23.4938537,
+    "lng": -46.401997
+  },
+  {
+    "nome": "Estação Jabaquara (Metro)",
+    "lat": -23.6464832,
+    "lng": -46.6409909
+  },
+  {
+    "nome": "Estação Japão-liberdade (Metro)",
+    "lat": -23.5549764,
+    "lng": -46.6357338
+  },
+  {
+    "nome": "Estação Jaraguá (CPTM)",
+    "lat": -23.4554497,
+    "lng": -46.7384166
+  },
+  {
+    "nome": "Estação Jardim Helena - Vila Mara (CPTM)",
+    "lat": -23.4927042,
+    "lng": -46.4209323
+  },
+  {
+    "nome": "Estação Jardim Planalto (Metro)",
+    "lat": -23.6073908,
+    "lng": -46.5070525
+  },
+  {
+    "nome": "Estação Jardim Romano (CPTM)",
+    "lat": -23.4848225,
+    "lng": -46.3853913
+  },
+  {
+    "nome": "Estação José Bonifácio (CPTM)",
+    "lat": -23.5390606,
+    "lng": -46.4315068
+  },
+  {
+    "nome": "Estação João Dias (Viamobilidade)",
+    "lat": -23.640213,
+    "lng": -46.7238426
+  },
+  {
+    "nome": "Estação Jurubatuba (Viamobilidade)",
+    "lat": -23.6774362,
+    "lng": -46.7021279
+  },
+  {
+    "nome": "Estação Júlio Prestes (Viamobilidade)",
+    "lat": -23.532597,
+    "lng": -46.640984
+  },
+  {
+    "nome": "Estação Lapa (linha 7) (CPTM)",
+    "lat": -23.5177342,
+    "lng": -46.7036587
+  },
+  {
+    "nome": "Estação Lapa (linha 8) (Viamobilidade)",
+    "lat": -23.5201638,
+    "lng": -46.6990048
+  },
+  {
+    "nome": "Estação Largo Treze (Metro)",
+    "lat": -23.6544632,
+    "lng": -46.7095352
+  },
+  {
+    "nome": "Estação Luz (CPTM)",
+    "lat": -23.5349608,
+    "lng": -46.6351152
+  },
+  {
+    "nome": "Estação Luz (Metro)",
+    "lat": -23.5369023,
+    "lng": -46.6336703
+  },
+  {
+    "nome": "Estação Luz (Viaquatro)",
+    "lat": -23.5361548,
+    "lng": -46.6344918
+  },
+  {
+    "nome": "Estação Marechal Deodoro (Metro)",
+    "lat": -23.5335183,
+    "lng": -46.6560266
+  },
+  {
+    "nome": "Estação Mauá (CPTM)",
+    "lat": -23.6682662,
+    "lng": -46.4615401
+  },
+  {
+    "nome": "Estação Mendes / Bruno Covas (Viamobilidade)",
+    "lat": -23.7542907,
+    "lng": -46.7092792
+  },
+  {
+    "nome": "Estação Moema (Metro)",
+    "lat": -23.6033289,
+    "lng": -46.6619868
+  },
+  {
+    "nome": "Estação Mooca (CPTM)",
+    "lat": -23.5580664,
+    "lng": -46.6083523
+  },
+  {
+    "nome": "Estação Morumbi (Viamobilidade)",
+    "lat": -23.6218451,
+    "lng": -46.7018221
+  },
+  {
+    "nome": "Estação Oratório (Metro)",
+    "lat": -23.5821776,
+    "lng": -46.5619
+  },
+  {
+    "nome": "Estação Osasco (Viamobilidade)",
+    "lat": -23.5277474,
+    "lng": -46.7758839
+  },
+  {
+    "nome": "Estação Oscar Freire (Viaquatro)",
+    "lat": -23.5605182,
+    "lng": -46.6720837
+  },
+  {
+    "nome": "Estação Palmeiras - Barra Funda (CPTM)",
+    "lat": -23.5255841,
+    "lng": -46.667516
+  },
+  {
+    "nome": "Estação Palmeiras - Barra Funda (Viamobilidade)",
+    "lat": -23.5255841,
+    "lng": -46.667516
+  },
+  {
+    "nome": "Estação Palmeiras-barra Funda (Metro)",
+    "lat": -23.5259477,
+    "lng": -46.6673728
+  },
+  {
+    "nome": "Estação Parada Inglesa (Metro)",
+    "lat": -23.4870327,
+    "lng": -46.6088209
+  },
+  {
+    "nome": "Estação Paraíso (Metro)",
+    "lat": -23.5757681,
+    "lng": -46.6410557
+  },
+  {
+    "nome": "Estação Paraíso (Metro)",
+    "lat": -23.5757242,
+    "lng": -46.6407738
+  },
+  {
+    "nome": "Estação Patriarca (Metro)",
+    "lat": -23.5311828,
+    "lng": -46.5013818
+  },
+  {
+    "nome": "Estação Paulista (Viaquatro)",
+    "lat": -23.5550759,
+    "lng": -46.6621866
+  },
+  {
+    "nome": "Estação Pedro Ii (Metro)",
+    "lat": -23.5497155,
+    "lng": -46.6259094
+  },
+  {
+    "nome": "Estação Penha (Metro)",
+    "lat": -23.5334813,
+    "lng": -46.5423491
+  },
+  {
+    "nome": "Estação Perus (CPTM)",
+    "lat": -23.4047739,
+    "lng": -46.753753
+  },
+  {
+    "nome": "Estação Pinheiros (Viamobilidade)",
+    "lat": -23.5664676,
+    "lng": -46.7030444
+  },
+  {
+    "nome": "Estação Pinheiros (Viaquatro)",
+    "lat": -23.5671835,
+    "lng": -46.7016955
+  },
+  {
+    "nome": "Estação Piqueri (CPTM)",
+    "lat": -23.5028927,
+    "lng": -46.7148663
+  },
+  {
+    "nome": "Estação Pirituba (CPTM)",
+    "lat": -23.4885201,
+    "lng": -46.726029
+  },
+  {
+    "nome": "Estação Portuguesa-tietê (Metro)",
+    "lat": -23.5161313,
+    "lng": -46.6251613
+  },
+  {
+    "nome": "Estação Praça da Árvore (Metro)",
+    "lat": -23.6106418,
+    "lng": -46.6378837
+  },
+  {
+    "nome": "Estação Prefeito Celso Daniel - Santo André (CPTM)",
+    "lat": -23.65208,
+    "lng": -46.5282946
+  },
+  {
+    "nome": "Estação Prefeito Saladino (CPTM)",
+    "lat": -23.6378122,
+    "lng": -46.5369389
+  },
+  {
+    "nome": "Estação Presidente Altino (Viamobilidade)",
+    "lat": -23.5312244,
+    "lng": -46.7617731
+  },
+  {
+    "nome": "Estação Primavera - Interlagos (Viamobilidade)",
+    "lat": -23.7227123,
+    "lng": -46.6917588
+  },
+  {
+    "nome": "Estação Quitaúna (Viamobilidade)",
+    "lat": -23.5228227,
+    "lng": -46.8067656
+  },
+  {
+    "nome": "Estação República (Metro)",
+    "lat": -23.5438939,
+    "lng": -46.6431491
+  },
+  {
+    "nome": "Estação República (Viaquatro)",
+    "lat": -23.5445822,
+    "lng": -46.6430252
+  },
+  {
+    "nome": "Estação Ribeirão Pires (CPTM)",
+    "lat": -23.7138272,
+    "lng": -46.4145414
+  },
+  {
+    "nome": "Estação Rio Grande da Serra (CPTM)",
+    "lat": -23.7435042,
+    "lng": -46.3915972
+  },
+  {
+    "nome": "Estação Sacomã (Metro)",
+    "lat": -23.6014149,
+    "lng": -46.6031722
+  },
+  {
+    "nome": "Estação Santa Cecília (Metro)",
+    "lat": -23.5396381,
+    "lng": -46.6488796
+  },
+  {
+    "nome": "Estação Santa Cruz (Metro)",
+    "lat": -23.5988293,
+    "lng": -46.6366882
+  },
+  {
+    "nome": "Estação Santa Cruz (Metro)",
+    "lat": -23.5984754,
+    "lng": -46.6371774
+  },
+  {
+    "nome": "Estação Santana (Metro)",
+    "lat": -23.5025689,
+    "lng": -46.6247729
+  },
+  {
+    "nome": "Estação Santo Amaro (Metro)",
+    "lat": -23.6557502,
+    "lng": -46.7209343
+  },
+  {
+    "nome": "Estação Santo Amaro (linha 9) (Viamobilidade)",
+    "lat": -23.6562083,
+    "lng": -46.7191838
+  },
+  {
+    "nome": "Estação Santos-imigrantes (Metro)",
+    "lat": -23.5959376,
+    "lng": -46.6207002
+  },
+  {
+    "nome": "Estação Santuário Nossa Senhora de Fátima-sumaré (Metro)",
+    "lat": -23.5510163,
+    "lng": -46.6775384
+  },
+  {
+    "nome": "Estação Sapopemba (Metro)",
+    "lat": -23.614753,
+    "lng": -46.5014272
+  },
+  {
+    "nome": "Estação Saúde (Metro)",
+    "lat": -23.6186089,
+    "lng": -46.6392373
+  },
+  {
+    "nome": "Estação Socorro (Viamobilidade)",
+    "lat": -23.6634726,
+    "lng": -46.7109087
+  },
+  {
+    "nome": "Estação São Bento (Metro)",
+    "lat": -23.5440841,
+    "lng": -46.6341667
+  },
+  {
+    "nome": "Estação São Caetano (CPTM)",
+    "lat": -23.6098448,
+    "lng": -46.5700581
+  },
+  {
+    "nome": "Estação São Joaquim (Metro)",
+    "lat": -23.561911,
+    "lng": -46.6386966
+  },
+  {
+    "nome": "Estação São Judas (Metro)",
+    "lat": -23.6257515,
+    "lng": -46.6408116
+  },
+  {
+    "nome": "Estação São Lucas (Metro)",
+    "lat": -23.5892946,
+    "lng": -46.5443694
+  },
+  {
+    "nome": "Estação São Mateus (Metro)",
+    "lat": -23.6120876,
+    "lng": -46.4766822
+  },
+  {
+    "nome": "Estação São Miguel Paulista (CPTM)",
+    "lat": -23.49053,
+    "lng": -46.4437231
+  },
+  {
+    "nome": "Estação São Paulo-morumbi (Viaquatro)",
+    "lat": -23.5863889,
+    "lng": -46.7238301
+  },
+  {
+    "nome": "Estação Sé (Metro)",
+    "lat": -23.5509214,
+    "lng": -46.6331346
+  },
+  {
+    "nome": "Estação Sé (Metro)",
+    "lat": -23.5510004,
+    "lng": -46.6330882
+  },
+  {
+    "nome": "Estação Tamanduateí (CPTM)",
+    "lat": -23.5927537,
+    "lng": -46.5894164
+  },
+  {
+    "nome": "Estação Tamanduateí (Metro)",
+    "lat": -23.5929385,
+    "lng": -46.5895746
+  },
+  {
+    "nome": "Estação Tatuapé (CPTM)",
+    "lat": -23.5402277,
+    "lng": -46.576457
+  },
+  {
+    "nome": "Estação Tatuapé (Metro)",
+    "lat": -23.5404399,
+    "lng": -46.5762845
+  },
+  {
+    "nome": "Estação Tiradentes (Metro)",
+    "lat": -23.5306581,
+    "lng": -46.6321716
+  },
+  {
+    "nome": "Estação Trianon-masp (Metro)",
+    "lat": -23.5631614,
+    "lng": -46.654416
+  },
+  {
+    "nome": "Estação Tucuruvi (Metro)",
+    "lat": -23.4799805,
+    "lng": -46.6031506
+  },
+  {
+    "nome": "Estação Usp Leste (CPTM)",
+    "lat": -23.4854797,
+    "lng": -46.5007107
+  },
+  {
+    "nome": "Estação Utinga (CPTM)",
+    "lat": -23.6262548,
+    "lng": -46.5441723
+  },
+  {
+    "nome": "Estação Varginha (Viamobilidade)",
+    "lat": -23.7700014,
+    "lng": -46.7119005
+  },
+  {
+    "nome": "Estação Vergueiro (Metro)",
+    "lat": -23.5689147,
+    "lng": -46.6399368
+  },
+  {
+    "nome": "Estação Vila Aurora (CPTM)",
+    "lat": -23.437453,
+    "lng": -46.7473709
+  },
+  {
+    "nome": "Estação Vila Clarice (CPTM)",
+    "lat": -23.469903,
+    "lng": -46.744164
+  },
+  {
+    "nome": "Estação Vila Madalena (Metro)",
+    "lat": -23.5463907,
+    "lng": -46.6908548
+  },
+  {
+    "nome": "Estação Vila Mariana (Metro)",
+    "lat": -23.5891075,
+    "lng": -46.6346509
+  },
+  {
+    "nome": "Estação Vila Matilde (Metro)",
+    "lat": -23.5318774,
+    "lng": -46.5310055
+  },
+  {
+    "nome": "Estação Vila Olímpia (Viamobilidade)",
+    "lat": -23.5934539,
+    "lng": -46.6928546
+  },
+  {
+    "nome": "Estação Vila Prudente (Metro)",
+    "lat": -23.5843259,
+    "lng": -46.5819062
+  },
+  {
+    "nome": "Estação Vila Prudente (Metro)",
+    "lat": -23.5847496,
+    "lng": -46.583788
+  },
+  {
+    "nome": "Estação Vila Sônia (Viaquatro)",
+    "lat": -23.5934176,
+    "lng": -46.7347575
+  },
+  {
+    "nome": "Estação Vila Tolstói (Metro)",
+    "lat": -23.6009205,
+    "lng": -46.5270952
+  },
+  {
+    "nome": "Estação Vila União (Metro)",
+    "lat": -23.6028698,
+    "lng": -46.516113
+  },
+  {
+    "nome": "Estação Vila das Belezas (Metro)",
+    "lat": -23.6404062,
+    "lng": -46.7457365
+  },
+  {
+    "nome": "Estação Villa-lobos - Jaguaré (Viamobilidade)",
+    "lat": -23.54602,
+    "lng": -46.7328169
+  },
+  {
+    "nome": "Estação Água Branca (CPTM)",
+    "lat": -23.5214354,
+    "lng": -46.6890449
+  }
+]

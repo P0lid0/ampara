@@ -100,6 +100,35 @@ namespace Ampara.Infrastructure.Migrations
                     b.ToTable("Aparelhos", (string)null);
                 });
 
+            modelBuilder.Entity("Ampara.Domain.Entidades.BoRascunho", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("DelegaciaNome")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime>("GeradoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("OcorrenciaId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("TextoCifrado")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OcorrenciaId")
+                        .IsUnique();
+
+                    b.ToTable("BosRascunho", (string)null);
+                });
+
             modelBuilder.Entity("Ampara.Domain.Entidades.CatalogoConta", b =>
                 {
                     b.Property<string>("Id")
@@ -504,6 +533,15 @@ namespace Ampara.Infrastructure.Migrations
                     b.HasOne("Ampara.Domain.Entidades.Usuario", null)
                         .WithMany()
                         .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Ampara.Domain.Entidades.BoRascunho", b =>
+                {
+                    b.HasOne("Ampara.Domain.Entidades.Ocorrencia", null)
+                        .WithMany()
+                        .HasForeignKey("OcorrenciaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

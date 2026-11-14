@@ -128,4 +128,8 @@ Resultado: 127 testes passando na suíte; migration `Alertas` aplicada com `--mi
 
 Resultado: 144 testes passando na suíte; migration `EventosRecebidos` aplicada com `--migrar` no PostgreSQL local (5436, ampara_dev), tabela e índice único conferidos com psql.
 
+> Executar a Task 16 do plano da API (`2026-11-14-02-api`): escrever primeiro `DelegaciaTests` (delegacia mais próxima de Pinheiros num fixture sintético, arquivo real com pelo menos 10 delegacias dentro de São Paulo), `CamadaTests` (camadas públicas só com nome, lat e lng; tipo desconhecido 404 `camada-desconhecida`) e `BoTests` (texto com IMEI, hora de Brasília e delegacia; sem aparelho diz IMEI não informado; sem momento 409; guardião e estranho 403 com registro; emergência do dono gera; rascunho cifrado e um por ocorrência; IMEI sempre pelo `IImeiRevelador`), ver falhar, e implementar `BoRascunho`, `IBoGenerator`/`BoGenerator`, `IDelegaciaLocator`/`DelegaciaJsonLocator` (haversine), `CamadasMapa`, `BoEndpoints`, `CamadaEndpoints`, o `ImeiReveladorSpy` de teste, `api/tools/extrair_camadas.py` (WFS do GeoSampa) com os três JSONs reais e a migration `Bo`.
+
+Resultado: testes de BO, delegacia e camada passando; migration `Bo` aplicada com `--migrar` no PostgreSQL local (5436, ampara_dev), tabela `BosRascunho` e índice único em `OcorrenciaId` conferidos com psql; JSONs reais do GeoSampa (92 delegacias, 162 estações, 158 da PM).
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->

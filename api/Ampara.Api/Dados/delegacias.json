@@ -1,0 +1,554 @@
+[
+  {
+    "nome": "100° DP - Jd. Herculano",
+    "endereco": "Rua José Carlos dos Santos Marques, 301, São Paulo/SP",
+    "lat": -23.6929887,
+    "lng": -46.7599783
+  },
+  {
+    "nome": "101° DP - Jd. Imbuias",
+    "endereco": "Rua Carolina Michaelis, 370, São Paulo/SP",
+    "lat": -23.7298353,
+    "lng": -46.7093943
+  },
+  {
+    "nome": "102° DP - Socorro",
+    "endereco": "Av. Atlantica, 1171, São Paulo/SP",
+    "lat": -23.6762612,
+    "lng": -46.7121237
+  },
+  {
+    "nome": "103° DP - Itaquera/Cohab II",
+    "endereco": "Av. Nagib Farah Maluf, 209, São Paulo/SP",
+    "lat": -23.5519944,
+    "lng": -46.4370144
+  },
+  {
+    "nome": "10° DP - Penha",
+    "endereco": "Av. Airton Pretini, 69, São Paulo/SP",
+    "lat": -23.5288165,
+    "lng": -46.5540478
+  },
+  {
+    "nome": "11° DP - Santo Amaro",
+    "endereco": "Rua Pe. José de Anchieta, 138, São Paulo/SP",
+    "lat": -23.650042,
+    "lng": -46.7017383
+  },
+  {
+    "nome": "12° DP - Pari",
+    "endereco": "Rua Rio Bonito, 950, São Paulo/SP",
+    "lat": -23.5297225,
+    "lng": -46.6123369
+  },
+  {
+    "nome": "13° DP - Casa Verde",
+    "endereco": "Av. Casa Verde, 677, São Paulo/SP",
+    "lat": -23.5004832,
+    "lng": -46.6491004
+  },
+  {
+    "nome": "14° DP - Pinheiros",
+    "endereco": "Rua Dep. Lacerda Franco, 372, São Paulo/SP",
+    "lat": -23.5617714,
+    "lng": -46.6911823
+  },
+  {
+    "nome": "15° DP - Itaim Bibi",
+    "endereco": "Rua Dr. Renato Paes de Barros, 340, São Paulo/SP",
+    "lat": -23.5816982,
+    "lng": -46.6745348
+  },
+  {
+    "nome": "16° DP - V. Clementino",
+    "endereco": "Av. Onze de Junho, 89, São Paulo/SP",
+    "lat": -23.6018262,
+    "lng": -46.6377652
+  },
+  {
+    "nome": "17° DP - Ipiranga",
+    "endereco": "Rua Dom Luís Lasanha, 534, São Paulo/SP",
+    "lat": -23.5909342,
+    "lng": -46.608728
+  },
+  {
+    "nome": "18° DP - Alto da Moóca",
+    "endereco": "Rua Juventus, 350, São Paulo/SP",
+    "lat": -23.5704988,
+    "lng": -46.59162
+  },
+  {
+    "nome": "19° DP - V. Maria",
+    "endereco": "Rua Amambaí, 1181, São Paulo/SP",
+    "lat": -23.5178375,
+    "lng": -46.584771
+  },
+  {
+    "nome": "1° DP - Liberdade",
+    "endereco": "Rua da Glória, 410, São Paulo/SP",
+    "lat": -23.5569803,
+    "lng": -46.6343707
+  },
+  {
+    "nome": "20° DP - Água Fria",
+    "endereco": "Rua São Zeferino, 34, São Paulo/SP",
+    "lat": -23.478257,
+    "lng": -46.6207276
+  },
+  {
+    "nome": "21° DP - V. Matilde",
+    "endereco": "Av. Marcondes de Brito, 1416, São Paulo/SP",
+    "lat": -23.5370451,
+    "lng": -46.5266046
+  },
+  {
+    "nome": "22° DP - São Miguel Paulista",
+    "endereco": "Rua Américo Gomes da Costa, 305, São Paulo/SP",
+    "lat": -23.4963086,
+    "lng": -46.4412205
+  },
+  {
+    "nome": "23° DP - Perdizes",
+    "endereco": "Rua Itapicuru, 80, São Paulo/SP",
+    "lat": -23.537194,
+    "lng": -46.665302
+  },
+  {
+    "nome": "24° DP - Ponte Rasa",
+    "endereco": "Av. São Miguel, 3551, São Paulo/SP",
+    "lat": -23.5099068,
+    "lng": -46.4986202
+  },
+  {
+    "nome": "26° DP - Sacomã",
+    "endereco": "Av. Pe. Arlindo Vieira, 50, São Paulo/SP",
+    "lat": -23.6229112,
+    "lng": -46.6019069
+  },
+  {
+    "nome": "27° DP - Campo Belo",
+    "endereco": "Rua Demóstenes, 407, São Paulo/SP",
+    "lat": -23.6152298,
+    "lng": -46.6750101
+  },
+  {
+    "nome": "28° DP - Freguesia do Ó",
+    "endereco": "Av. Itaberaba, 731, São Paulo/SP",
+    "lat": -23.4946947,
+    "lng": -46.6977047
+  },
+  {
+    "nome": "29° DP - V. Diva",
+    "endereco": "Av. Sapopemba, 3259, São Paulo/SP",
+    "lat": -23.5737271,
+    "lng": -46.5576479
+  },
+  {
+    "nome": "2° DP - Bom Retiro",
+    "endereco": "Rua Jaraguá, 383, São Paulo/SP",
+    "lat": -23.523067,
+    "lng": -46.6442514
+  },
+  {
+    "nome": "30° DP - Tatuapé",
+    "endereco": "Rua Antônio Camardo, 69, São Paulo/SP",
+    "lat": -23.5499498,
+    "lng": -46.5677144
+  },
+  {
+    "nome": "31° DP - V. Carrão",
+    "endereco": "Av. Cons. Carrão, 2580, São Paulo/SP",
+    "lat": -23.5488691,
+    "lng": -46.536612
+  },
+  {
+    "nome": "32° DP - Itaquera",
+    "endereco": "Rua Sabbado D'angelo, 64, São Paulo/SP",
+    "lat": -23.5342696,
+    "lng": -46.4518314
+  },
+  {
+    "nome": "33° DP - Pirituba",
+    "endereco": "Rua Joaquim Oliveira Freitas, 1170, São Paulo/SP",
+    "lat": -23.497318,
+    "lng": -46.7457456
+  },
+  {
+    "nome": "34° DP - V. Sônia",
+    "endereco": "Av. Prof. Francisco Morato, 2971, São Paulo/SP",
+    "lat": -23.5881419,
+    "lng": -46.7267421
+  },
+  {
+    "nome": "35° DP - Jabaquara",
+    "endereco": "Av. Eng. George Corbisier, 322, São Paulo/SP",
+    "lat": -23.6394048,
+    "lng": -46.6433
+  },
+  {
+    "nome": "36° DP - V. Mariana",
+    "endereco": "Rua Tutóia, 921, São Paulo/SP",
+    "lat": -23.5789824,
+    "lng": -46.6512285
+  },
+  {
+    "nome": "37° DP - Campo Limpo",
+    "endereco": "Rua Jacaratinga, 201, São Paulo/SP",
+    "lat": -23.6332482,
+    "lng": -46.7705964
+  },
+  {
+    "nome": "38° DP - V. Amália",
+    "endereco": "Av. Parada Pinto, 2387, São Paulo/SP",
+    "lat": -23.4695114,
+    "lng": -46.6483016
+  },
+  {
+    "nome": "39° DP - V. Gustavo",
+    "endereco": "Rua da Esperança, 797, São Paulo/SP",
+    "lat": -23.4832396,
+    "lng": -46.5898624
+  },
+  {
+    "nome": "3° DP - Campos Elíseos",
+    "endereco": "Rua Aurora, 322, São Paulo/SP",
+    "lat": -23.539323,
+    "lng": -46.6397243
+  },
+  {
+    "nome": "40° DP - V. Santa Maria",
+    "endereco": "Av. Dep. Emílio Carlos, 1251, São Paulo/SP",
+    "lat": -23.4943057,
+    "lng": -46.6779149
+  },
+  {
+    "nome": "41° DP - V. Rica",
+    "endereco": "Av. Inconfidência Mineira, 688, São Paulo/SP",
+    "lat": -23.5793484,
+    "lng": -46.5174946
+  },
+  {
+    "nome": "42° DP - Pq. São Lucas",
+    "endereco": "Av. Oratório, 1588, São Paulo/SP",
+    "lat": -23.589822,
+    "lng": -46.5532915
+  },
+  {
+    "nome": "43° DP - Cidade Ademar",
+    "endereco": "Rua Antônio Gil, 1349, São Paulo/SP",
+    "lat": -23.6566766,
+    "lng": -46.6692856
+  },
+  {
+    "nome": "44° DP - Guaianases",
+    "endereco": "Rua Salvador Gianetti, 386, São Paulo/SP",
+    "lat": -23.5427277,
+    "lng": -46.4187585
+  },
+  {
+    "nome": "45° DP - V. Brasilândia",
+    "endereco": "Rua Joaquim Ferreira da Rocha, 403, São Paulo/SP",
+    "lat": -23.4691369,
+    "lng": -46.689795
+  },
+  {
+    "nome": "46° DP - Perus",
+    "endereco": "Rua Fiorelli Pecicacco, 320, São Paulo/SP",
+    "lat": -23.4040919,
+    "lng": -46.7380363
+  },
+  {
+    "nome": "47° DP - Capão Redondo",
+    "endereco": "Estr. de Itapecerica, 5864, São Paulo/SP",
+    "lat": -23.6646712,
+    "lng": -46.7829717
+  },
+  {
+    "nome": "48° DP - Cidade Dutra",
+    "endereco": "Rua Aníbal dos Anjos Carvalho, 87, São Paulo/SP",
+    "lat": -23.7121609,
+    "lng": -46.6957234
+  },
+  {
+    "nome": "49° DP - São Mateus",
+    "endereco": "Av. Ragueb Chohfi, 870, São Paulo/SP",
+    "lat": -23.6054835,
+    "lng": -46.4707403
+  },
+  {
+    "nome": "4° DP - Consolação",
+    "endereco": "Rua Mq. de Paranaguá, 246, São Paulo/SP",
+    "lat": -23.5506532,
+    "lng": -46.650074
+  },
+  {
+    "nome": "50° DP - Itaim Paulista",
+    "endereco": "Rua Tibúrcio de Souza, 860, São Paulo/SP",
+    "lat": -23.5046049,
+    "lng": -46.3967358
+  },
+  {
+    "nome": "51° DP - Rio Pequeno/Butantã",
+    "endereco": "Rua Barroso Neto, 46, São Paulo/SP",
+    "lat": -23.5718195,
+    "lng": -46.7225826
+  },
+  {
+    "nome": "52° DP - Pq. São Jorge",
+    "endereco": "Rua Dr. Corinto Baldoíno Costa, 400, São Paulo/SP",
+    "lat": -23.5364393,
+    "lng": -46.5633628
+  },
+  {
+    "nome": "53° DP - Pq. do Carmo",
+    "endereco": "Rua Osvaldo Pucci, 180, São Paulo/SP",
+    "lat": -23.566398,
+    "lng": -46.4669329
+  },
+  {
+    "nome": "54° DP - Cidade Tiradentes",
+    "endereco": "Rua Francisco José Viana, 175, São Paulo/SP",
+    "lat": -23.6052239,
+    "lng": -46.4012097
+  },
+  {
+    "nome": "55° DP - Pq. São Rafael",
+    "endereco": "Rua Aldeia de Santo Inácio, 696, São Paulo/SP",
+    "lat": -23.6235989,
+    "lng": -46.4701397
+  },
+  {
+    "nome": "56° DP - V. Alpina",
+    "endereco": "Rua Dra. Esmeralda Mendes Policine, 264, São Paulo/SP",
+    "lat": -23.5937484,
+    "lng": -46.5671675
+  },
+  {
+    "nome": "57° DP - Pq. da Moóca",
+    "endereco": "Rua do Oratório, 2220, São Paulo/SP",
+    "lat": -23.5688539,
+    "lng": -46.5845809
+  },
+  {
+    "nome": "58° DP - V. Formosa",
+    "endereco": "Rua Antúrios, 362, São Paulo/SP",
+    "lat": -23.5624913,
+    "lng": -46.5452257
+  },
+  {
+    "nome": "59° DP - Jd. Noêmia",
+    "endereco": "Rua Vistosa da Madre de Deus, 120, São Paulo/SP",
+    "lat": -23.4875936,
+    "lng": -46.4101306
+  },
+  {
+    "nome": "5° DP - Aclimação",
+    "endereco": "Rua Prof. Antônio Prudente, 160, São Paulo/SP",
+    "lat": -23.5656195,
+    "lng": -46.6381429
+  },
+  {
+    "nome": "62° DP - Ermelino Matarazzo",
+    "endereco": "Rua Ruy Pirozzelli, 250, São Paulo/SP",
+    "lat": -23.4894311,
+    "lng": -46.482036
+  },
+  {
+    "nome": "63° DP - V. Jacuí",
+    "endereco": "Rua Dríades, 50, São Paulo/SP",
+    "lat": -23.5092849,
+    "lng": -46.4463252
+  },
+  {
+    "nome": "64° DP - Cidade A E Carvalho",
+    "endereco": "Rua Sonho Gaúcho, 638, São Paulo/SP",
+    "lat": -23.5241016,
+    "lng": -46.475464
+  },
+  {
+    "nome": "65° DP - Artur Alvim",
+    "endereco": "Av. Pe. Estanislau de Campos, 750, São Paulo/SP",
+    "lat": -23.5437622,
+    "lng": -46.4814419
+  },
+  {
+    "nome": "66° DP - Vale do Aricanduva",
+    "endereco": "Av. Osvaldo Valle Cordeiro, 190, São Paulo/SP",
+    "lat": -23.5546664,
+    "lng": -46.4924188
+  },
+  {
+    "nome": "67° DP - Jd. Robru",
+    "endereco": "Rua Severino José Fernandes, 1900, São Paulo/SP",
+    "lat": -23.5202068,
+    "lng": -46.4114907
+  },
+  {
+    "nome": "68° DP - Lajeado",
+    "endereco": "Rua João da Silva Aguiar, 850, São Paulo/SP",
+    "lat": -23.537349,
+    "lng": -46.3976269
+  },
+  {
+    "nome": "69° DP - Teotônio Vilela",
+    "endereco": "Rua Arq. Vila Nova Artigas, 720, São Paulo/SP",
+    "lat": -23.6082638,
+    "lng": -46.5008274
+  },
+  {
+    "nome": "6° DP - Cambuci",
+    "endereco": "Rua Hermínio Lemos, 70, São Paulo/SP",
+    "lat": -23.567624,
+    "lng": -46.6235614
+  },
+  {
+    "nome": "70° DP - Sapopemba",
+    "endereco": "Rua Otávio Alves Dundas, 390, São Paulo/SP",
+    "lat": -23.5988169,
+    "lng": -46.5331216
+  },
+  {
+    "nome": "72° DP - V. Penteado",
+    "endereco": "Rua Rua Silvio Bueno Peruche, 500, São Paulo/SP",
+    "lat": -23.463522,
+    "lng": -46.6787699
+  },
+  {
+    "nome": "73° DP - Jaçanã",
+    "endereco": "Av. Paulo Lincoln do Vale Pontim, 744, São Paulo/SP",
+    "lat": -23.4586553,
+    "lng": -46.5853323
+  },
+  {
+    "nome": "74° DP - Jaraguá",
+    "endereco": "Av. Elísio Teixeira Leite, 7461, São Paulo/SP",
+    "lat": -23.4457244,
+    "lng": -46.7169018
+  },
+  {
+    "nome": "75° DP - Jd. Arpoador",
+    "endereco": "Rua Mário Ancona, 530, São Paulo/SP",
+    "lat": -23.5973003,
+    "lng": -46.7960428
+  },
+  {
+    "nome": "77° DP - Santa Cecília",
+    "endereco": "Al. Glete, 827, São Paulo/SP",
+    "lat": -23.5366674,
+    "lng": -46.6489418
+  },
+  {
+    "nome": "78° DP - Jardins",
+    "endereco": "Rua Estados Unidos, 1608, São Paulo/SP",
+    "lat": -23.5660725,
+    "lng": -46.6692885
+  },
+  {
+    "nome": "7° DP - Lapa",
+    "endereco": "Rua Camilo, 317, São Paulo/SP",
+    "lat": -23.5295435,
+    "lng": -46.6951429
+  },
+  {
+    "nome": "80° DP - V. Joaniza",
+    "endereco": "Rua Leonel da Gama Beles, S/n, São Paulo/SP",
+    "lat": -23.6731727,
+    "lng": -46.659496
+  },
+  {
+    "nome": "81° DP - Belém",
+    "endereco": "Av. Celso Garcia, 2875, São Paulo/SP",
+    "lat": -23.5352219,
+    "lng": -46.5846386
+  },
+  {
+    "nome": "83° DP - Pq. Bristol",
+    "endereco": "Rua Ângelo Bertini, 82, São Paulo/SP",
+    "lat": -23.6565809,
+    "lng": -46.6138536
+  },
+  {
+    "nome": "85° DP - Jd. Mirna",
+    "endereco": "Rua Dr. Juvenal Hudson Ferreira, 141, São Paulo/SP",
+    "lat": -23.7706136,
+    "lng": -46.6970229
+  },
+  {
+    "nome": "87° DP - V. Pereira Barreto",
+    "endereco": "Av. Menotti Laudísio, 286, São Paulo/SP",
+    "lat": -23.4818025,
+    "lng": -46.7234335
+  },
+  {
+    "nome": "89° DP - Portal do Morumbi",
+    "endereco": "Rua Domingos Simões, 21, São Paulo/SP",
+    "lat": -23.6083156,
+    "lng": -46.7361935
+  },
+  {
+    "nome": "8° DP - Brás/Belém",
+    "endereco": "Rua Sapucaia, 206, São Paulo/SP",
+    "lat": -23.5483289,
+    "lng": -46.5937954
+  },
+  {
+    "nome": "90° DP - Pq. Novo Mundo",
+    "endereco": "Al. 1° Sarg. Osmar Cortez Claro, 52, São Paulo/SP",
+    "lat": -23.5009954,
+    "lng": -46.5697085
+  },
+  {
+    "nome": "91° DP - Ceagesp",
+    "endereco": "Av. Gastão Vidigal, 307, São Paulo/SP",
+    "lat": -23.5387098,
+    "lng": -46.7309228
+  },
+  {
+    "nome": "92° DP - Pq. Santo Antônio",
+    "endereco": "Rua Maria Benedita Rodrigues, 200, São Paulo/SP",
+    "lat": -23.6628231,
+    "lng": -46.7553876
+  },
+  {
+    "nome": "93° DP - V. Lageado",
+    "endereco": "Av. Corifeu de Azevedo Marques, 4300, São Paulo/SP",
+    "lat": -23.5587764,
+    "lng": -46.7465839
+  },
+  {
+    "nome": "95° DP - Heliópolis",
+    "endereco": "Rua Com. Taylor, 1180, São Paulo/SP",
+    "lat": -23.6037665,
+    "lng": -46.5949591
+  },
+  {
+    "nome": "96° DP - Cidade Monções",
+    "endereco": "Av. Eng. Luís Carlos Berrini, 900, São Paulo/SP",
+    "lat": -23.6043563,
+    "lng": -46.6929145
+  },
+  {
+    "nome": "97° DP - Americanópolis",
+    "endereco": "Rod. dos Imigrantes, Km. 11, São Paulo/SP",
+    "lat": -23.6534607,
+    "lng": -46.6333174
+  },
+  {
+    "nome": "98° DP - Jd. Miriam",
+    "endereco": "Av. Ângelo Cristianini, 467, São Paulo/SP",
+    "lat": -23.6853135,
+    "lng": -46.6371326
+  },
+  {
+    "nome": "99° DP - Campo Grande",
+    "endereco": "Rua Sarg. Manoel Barbosa da Silva, 115, São Paulo/SP",
+    "lat": -23.6619988,
+    "lng": -46.6870116
+  },
+  {
+    "nome": "9° DP - Carandiru",
+    "endereco": "Rua dos Camarés, 94, São Paulo/SP",
+    "lat": -23.503388,
+    "lng": -46.6130193
+  }
+]

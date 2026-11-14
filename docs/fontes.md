@@ -37,3 +37,15 @@ Links conferidos em 2026-11-14 abrindo a página oficial: BB, Caixa, Bradesco, M
 | Vivo | https://vivo.com.br/ | null | Link conferido em navegador real em 2026-11-14 (403 a leitores automáticos); telefone não confirmado |
 
 Pendência: Pedro conferir à mão, no navegador, os telefones das instituições com `null` (os links já foram conferidos) antes da demonstração e preencher `telefone` e `conferidoEm` no JSON.
+
+## Camadas do mapa: delegacias, estações e PM (GeoSampa)
+
+Gerado por `api/tools/extrair_camadas.py` em 2026-11-14, a partir do WFS público do GeoSampa (Prefeitura de São Paulo, dado aberto; coordenadas pedidas em `srsName=EPSG:4326`, sem conversão). Camadas descobertas pelo `GetCapabilities` (https://wfs.geosampa.prefeitura.sp.gov.br/geoserver/wfs?service=WFS&request=GetCapabilities, acessado em 2026-11-14, 488 camadas em `geoportal`).
+
+| Arquivo (`api/Ampara.Api/Dados/`) | Camada WFS | URL do GetFeature (acessada em 2026-11-14) | Itens |
+|---|---|---|---|
+| `delegacias.json` | `geoportal:equipamento_policia_civil` | https://wfs.geosampa.prefeitura.sp.gov.br/geoserver/geoportal/wfs?service=WFS&version=2.0.0&request=GetFeature&typeNames=geoportal:equipamento_policia_civil&outputFormat=application/json&srsName=EPSG:4326 | 92 |
+| `pm.json` | `geoportal:equipamento_policia_militar` | https://wfs.geosampa.prefeitura.sp.gov.br/geoserver/geoportal/wfs?service=WFS&version=2.0.0&request=GetFeature&typeNames=geoportal:equipamento_policia_militar&outputFormat=application/json&srsName=EPSG:4326 | 158 |
+| `estacoes.json` | `geoportal:estacao_metro` + `geoportal:estacao_trem` (só as OPERANDO) | https://wfs.geosampa.prefeitura.sp.gov.br/geoserver/geoportal/wfs?service=WFS&version=2.0.0&request=GetFeature&typeNames=geoportal:estacao_metro&outputFormat=application/json&srsName=EPSG:4326 e a mesma URL com `estacao_trem` | 162 |
+
+Tratamento: só pontos dentro da grade do contrato (`AreaMapa`); delegacia sem endereço fica de fora (o BO não mostra delegacia vazia); nomes e endereços em caixa de título; delegacias levam `endereco` (concatenado com o bairro, quando houver, e "São Paulo/SP"), as outras camadas só `nome`, `lat`, `lng`. A camada `geoportal:delegacia_policia_civil` não serve: é o polígono da área de cada DP, não o ponto da delegacia. O servidor não traz telefone nem horário das delegacias. Pendência: conferir à mão os endereços das delegacias que a demonstração usar (a camada é da Prefeitura e pode estar defasada).

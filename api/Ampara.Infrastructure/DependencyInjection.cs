@@ -1,14 +1,17 @@
 using Ampara.Application.Auth;
+using Ampara.Application.Bo;
 using Ampara.Application.Chaveiros;
 using Ampara.Application.Comum;
 using Ampara.Application.Cyber;
 using Ampara.Infrastructure.Cripto;
 using Ampara.Infrastructure.Cyber;
+using Ampara.Infrastructure.Dados;
 using Ampara.Infrastructure.Mqtt;
 using Ampara.Infrastructure.Seguranca;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Ampara.Infrastructure;
 
@@ -39,6 +42,15 @@ public static class DependencyInjection
         services.AddSingleton<IChaveiroGateway>(sp => sp.GetRequiredService<MqttChaveiroGateway>());
         services.AddHostedService(sp => sp.GetRequiredService<MqttChaveiroGateway>());
         services.AddSingleton<ISondaSaude, SondaSaude>();
+
+        // Delegacias do BO: Delegacias:Arquivo (padrão Dados/delegacias.json), relativo à pasta da aplicação.
+        services.AddSingleton<IDelegaciaLocator>(sp =>
+        {
+            var arquivo = sp.GetRequiredService<IConfiguration>()["Delegacias:Arquivo"];
+            if (string.IsNullOrWhiteSpace(arquivo)) arquivo = Path.Combine("Dados", "delegacias.json");
+            return new DelegaciaJsonLocator(Path.Combine(AppContext.BaseDirectory, arquivo), sp.GetRequiredService<ILoggerFactory>().CreateLogger<DelegaciaJsonLocator>());
+        });
+        services.AddSingleton(sp => new CamadasMapa(Path.Combine(AppContext.BaseDirectory, "Dados"), sp.GetRequiredService<ILoggerFactory>().CreateLogger<CamadasMapa>()));
         return services;
     }
 

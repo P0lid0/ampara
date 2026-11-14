@@ -19,6 +19,7 @@ public interface IAmparaDb
     DbSet<PassoOcorrencia> Passos { get; }
     DbSet<Alerta> Alertas { get; }
     DbSet<EventoRecebido> EventosRecebidos { get; }
+    DbSet<BoRascunho> BosRascunho { get; }
 
     /// <summary>Descarta as entidades rastreadas (usado depois de uma gravação que falhou).</summary>
     void LimparRastreamento();
