@@ -1,4 +1,3 @@
-using System.Globalization;
 using Ampara.Application.Comum;
 using Ampara.Application.Relatos;
 using Ampara.Domain;
@@ -29,8 +28,7 @@ public static class RelatoEndpoints
 
         g.MapGet("", async (string? minLat, string? minLng, string? maxLat, string? maxLng, IRelatoService svc, CancellationToken ct) =>
         {
-            if (!Coord(minLat, out var a) || !Coord(minLng, out var b) || !Coord(maxLat, out var c) || !Coord(maxLng, out var d) || a >= c || b >= d)
-                throw new DominioException("relato-bbox-invalido");
+            var (a, b, c, d) = BBoxHelper.Ler(minLat, minLng, maxLat, maxLng, "relato-bbox-invalido");
             return Results.Ok(await svc.ListarVisiveisAsync(a, b, c, d, ct));
         });
 
@@ -49,7 +47,4 @@ public static class RelatoEndpoints
             default: return false;
         }
     }
-
-    private static bool Coord(string? s, out double v) =>
-        double.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out v) && double.IsFinite(v);
 }

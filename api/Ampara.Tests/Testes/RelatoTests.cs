@@ -144,11 +144,13 @@ public class RelatoTests(AmparaFactory f) : IClassFixture<AmparaFactory>
 
         f.Tempo.Advance(TimeSpan.FromHours(2) + TimeSpan.FromMinutes(1));   // o relato foi feito 1 min antes de "agora"
         Assert.Empty(await ListarAsync(autor, Caixa(lat, lng)));
+        var recente = await CriarAsync(autor, lat, lng);   // relato novo: nao pode ser purgado
 
         using var escopo = f.Services.CreateScope();
         var svc = escopo.ServiceProvider.GetRequiredService<IRelatoService>();
         Assert.True(await svc.PurgarExpiradosAsync(CancellationToken.None) >= 1);
         using var db = f.NovoDb();
+        Assert.Single(db.Relatos.Where(r => r.Id == recente));   // o recente sobrevive
         Assert.Empty(db.Relatos.Where(r => r.Id == id));
         Assert.Empty(db.RelatoConfirmacoes.Where(c => c.RelatoId == id));   // confirmacoes vao junto
     }
