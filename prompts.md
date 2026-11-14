@@ -214,4 +214,8 @@ Resultado: 163 testes passando e 1 ignorado na suíte da Ponte Polícia; migrati
 
 Resultado: hotspots calculados na leitura, sem tabela nova e sem migration; descartadas e área fora da grade não entram.
 
+> Executar a Task 7 do plano da Ponte Polícia (`2026-11-14-04-ponte-policia`): escrever primeiro `test_painel` e implementar a página `GET /policia` (Jinja2 + Leaflet 1.9.4) com mapa de hotspots, tabela de ocorrências clicável e formulário de mudança de status, sem embutir chave nem dados.
+
+Resultado: painel conferido no navegador com 3 ocorrências sintéticas (2 círculos, 2 hotspots, 3 linhas, PATCH com "Status atualizado"); sem migration.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->

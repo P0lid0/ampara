@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Painel da Polícia · Ampara</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<style>
+:root{--petroleo:#0F4C4A;--esmeralda:#14B88A;--areia:#F4EFE6;--alarme:#E5484D;--ambar:#D98E04;--texto:#16302F;--borda:#d8d0c0}
+*{box-sizing:border-box}
+body{margin:0;font-family:Manrope,system-ui,sans-serif;background:var(--areia);color:var(--texto);line-height:1.45}
+header{background:var(--petroleo);color:#fff;padding:14px 20px;display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between}
+header h1{margin:0;font-size:1.25rem;font-weight:800}
+header h1 span{color:var(--esmeralda)}
+main{max-width:1200px;margin:0 auto;padding:16px 20px 40px;display:grid;gap:20px}
+section{background:#fff;border:1px solid var(--borda);border-radius:10px;padding:16px}
+h2{margin:0 0 12px;font-size:1.05rem;color:var(--petroleo)}
+label{display:block;font-weight:600;font-size:.85rem;margin-bottom:4px}
+input,select,textarea,button{font:inherit}
+input,select,textarea{width:100%;padding:8px 10px;border:1px solid #9aa9a7;border-radius:6px;background:#fff;color:var(--texto)}
+button{background:var(--petroleo);color:#fff;border:0;border-radius:6px;padding:9px 16px;font-weight:600;cursor:pointer}
+header button{background:var(--esmeralda);color:#05302a}
+button:hover{filter:brightness(.92)}
+:focus-visible{outline:3px solid var(--esmeralda);outline-offset:2px}
+header :focus-visible{outline-color:#fff}
+.linha{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
+.linha>div{flex:1 1 180px}
+.linha>div.fixo{flex:0 0 auto}
+#mapa{height:420px;border-radius:8px;border:1px solid var(--borda)}
+.tabela-rolagem{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.9rem}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid #e8e1d2;white-space:nowrap}
+th{background:var(--areia);color:var(--petroleo);font-weight:800}
+tr.clicavel{cursor:pointer}
+tr.clicavel:hover,tr.clicavel:focus-visible{background:#e6f6f0}
+.risco{display:inline-block;padding:2px 10px;border-radius:99px;font-weight:800;font-size:.8rem;color:#fff}
+.risco-baixo{background:#0c7f5e}.risco-medio{background:#8a5a00}.risco-alto{background:#c4282d}
+#aviso{min-height:1.5em;font-weight:600;margin:0}
+#aviso.ok{color:#0c7f5e}#aviso.erro{color:#b3262b}
+.vazio{color:#5b6f6d;font-style:italic}
+</style>
+</head>
+<body>
+<header>
+  <h1>Ampara <span>·</span> Painel da Polícia</h1>
+  <form id="form-chave" class="linha" onsubmit="return false">
+    <div>
+      <label for="campo-chave">Chave da polícia</label>
+      <input id="campo-chave" type="password" autocomplete="off" placeholder="Digite a chave">
+    </div>
+    <div class="fixo"><button id="btn-entrar" type="button">Entrar</button></div>
+  </form>
+</header>
+<main>
+  <p id="aviso" role="status" aria-live="polite"></p>
+
+  <section aria-labelledby="t-mapa">
+    <h2 id="t-mapa">Mapa de hotspots</h2>
+    <div class="linha" style="margin-bottom:12px">
+      <div>
+        <label for="janela">Janela de tempo</label>
+        <select id="janela">
+          <option value="15">Últimos 15 minutos</option>
+          <option value="60" selected>Última hora</option>
+          <option value="240">Últimas 4 horas</option>
+          <option value="1440">Últimas 24 horas</option>
+        </select>
+      </div>
+    </div>
+    <div id="mapa" role="region" aria-label="Mapa com os hotspots"></div>
+  </section>
+
+  <section aria-labelledby="t-hot">
+    <h2 id="t-hot">Hotspots</h2>
+    <div class="tabela-rolagem">
+      <table id="tabela-hotspots">
+        <thead><tr><th>Área</th><th>Ocorrências</th><th>Risco</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="t-oc">
+    <h2 id="t-oc">Ocorrências</h2>
+    <div class="linha" style="margin-bottom:12px">
+      <div>
+        <label for="filtro-status">Filtrar por status</label>
+        <select id="filtro-status">
+          <option value="todos">Todos</option>
+          <option value="recebida" selected>Recebida</option>
+          <option value="em_analise">Em análise</option>
+          <option value="atendida">Atendida</option>
+          <option value="descartada">Descartada</option>
+        </select>
+      </div>
+    </div>
+    <div class="tabela-rolagem">
+      <table id="tabela-ocorrencias">
+        <thead><tr><th>Protocolo</th><th>Área</th><th>Tipo</th><th>Status</th><th>Origem</th><th>Quando</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="t-form">
+    <h2 id="t-form">Atualizar status</h2>
+    <form id="form-status" onsubmit="return false">
+      <div class="linha">
+        <div>
+          <label for="protocolo">Protocolo</label>
+          <input id="protocolo" type="text" autocomplete="off" placeholder="Clique numa ocorrência da lista" required>
+        </div>
+        <div>
+          <label for="novo-status">Novo status</label>
+          <select id="novo-status">
+            <option value="em_analise">Em análise</option>
+            <option value="atendida">Atendida</option>
+            <option value="descartada">Descartada</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-top:12px">
+        <label for="mensagem">Mensagem ao cidadão (até 500 caracteres, sem dado pessoal)</label>
+        <textarea id="mensagem" rows="3" maxlength="500" required></textarea>
+      </div>
+      <div style="margin-top:12px"><button id="btn-atualizar" type="submit">Atualizar status</button></div>
+    </form>
+  </section>
+</main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+const API_BASE = "{{ api_base }}";
+const CHAVE_SS = "ponte-chave-policia";
+const MSG_PADRAO = {
+  em_analise: "Sua ocorrência está em análise pela polícia.",
+  atendida: "Sua ocorrência foi atendida pela polícia.",
+  descartada: "Sua ocorrência foi analisada e encerrada pela polícia."
+};
+const COR_RISCO = {baixo: "#14B88A", medio: "#D98E04", alto: "#E5484D"};
+const ROT_RISCO = {baixo: "Baixo", medio: "Médio", alto: "Alto"};
+const ROT_STATUS = {recebida: "Recebida", em_analise: "Em análise", atendida: "Atendida", descartada: "Descartada"};
+const ROT_TIPO = {roubo_celular: "Roubo de celular", furto_celular: "Furto de celular"};
+const ROT_ORIGEM = {chaveiro: "Chaveiro", web: "Web", guardiao: "Guardião", impacto: "Impacto"};
+const ERROS = {401: "Chave inválida", 404: "Protocolo não encontrado",
+               409: "Mudança de status não permitida", 422: "A mensagem não pode ter dado pessoal"};
+
+const $ = (id) => document.getElementById(id);
+const fmt = new Intl.DateTimeFormat("pt-BR", {timeZone: "America/Sao_Paulo", dateStyle: "short", timeStyle: "short"});
+let chave = lerChave();
+let mapa = null, camada = null, timer = null;
+
+function lerChave() { try { return sessionStorage.getItem(CHAVE_SS) || ""; } catch (e) { return ""; } }
+function guardarChave(v) { try { sessionStorage.setItem(CHAVE_SS, v); } catch (e) { /* sem storage: fica só em memória */ } }
+
+function aviso(texto, tipo) {
+  const el = $("aviso");
+  el.textContent = texto;
+  el.className = tipo || "";
+}
+
+async function chamar(caminho, opcoes) {
+  const o = opcoes || {};
+  const cab = Object.assign({"X-Chave-Policia": chave}, o.headers || {});
+  const r = await fetch(API_BASE + caminho, Object.assign({}, o, {headers: cab}));
+  if (!r.ok) {
+    const e = new Error("http");
+    e.status = r.status;
+    throw e;
+  }
+  return r.json();
+}
+
+function msgErro(e) {
+  return ERROS[e.status] || (e.status ? "Erro " + e.status + " ao falar com o servidor" : "Servidor indisponível");
+}
+
+function celula(tr, texto) {
+  const td = document.createElement("td");
+  td.textContent = texto;
+  tr.appendChild(td);
+  return td;
+}
+
+function linhaVazia(tbody, colunas, texto) {
+  const tr = document.createElement("tr");
+  const td = document.createElement("td");
+  td.colSpan = colunas;
+  td.className = "vazio";
+  td.textContent = texto;
+  tr.appendChild(td);
+  tbody.replaceChildren(tr);
+}
+
+function ativar(tr, acao) {
+  tr.className = "clicavel";
+  tr.tabIndex = 0;
+  tr.addEventListener("click", acao);
+  tr.addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); acao(); } });
+}
+
+function iniciarMapa() {
+  if (mapa || typeof L === "undefined") return;
+  mapa = L.map("mapa").setView([-23.55, -46.63], 11);
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19, attribution: "&copy; colaboradores do OpenStreetMap"
+  }).addTo(mapa);
+  camada = L.layerGroup().addTo(mapa);
+}
+
+async function carregarHotspots() {
+  try {
+    const dados = await chamar("/hotspots?janela_min=" + encodeURIComponent($("janela").value));
+    iniciarMapa();
+    if (camada) camada.clearLayers();
+    const tbody = $("tabela-hotspots").tBodies[0];
+    if (!dados.length) { linhaVazia(tbody, 3, "Nenhum hotspot na janela."); return; }
+    const linhas = dados.map((h) => {
+      const cor = COR_RISCO[h.risco_previsto] || COR_RISCO.baixo;
+      const rotulo = ROT_RISCO[h.risco_previsto] || h.risco_previsto;
+      if (camada) {
+        L.circle([h.lat, h.lng], {radius: 250 + 60 * h.total, color: cor, fillColor: cor, fillOpacity: 0.35, weight: 2})
+          .bindTooltip(h.area_id + " · " + h.total + " ocorrência(s) · risco " + rotulo.toLowerCase())
+          .addTo(camada);
+      }
+      const tr = document.createElement("tr");
+      celula(tr, h.area_id);
+      celula(tr, String(h.total));
+      const td = document.createElement("td");
+      const tag = document.createElement("span");
+      tag.className = "risco risco-" + (COR_RISCO[h.risco_previsto] ? h.risco_previsto : "baixo");
+      tag.textContent = rotulo;
+      td.appendChild(tag);
+      tr.appendChild(td);
+      ativar(tr, () => { if (mapa) mapa.setView([h.lat, h.lng], 15); });
+      return tr;
+    });
+    tbody.replaceChildren(...linhas);
+  } catch (e) { tratarErroCarga(e); }
+}
+
+async function carregarOcorrencias() {
+  try {
+    const st = $("filtro-status").value;
+    const dados = await chamar("/ocorrencias" + (st === "todos" ? "" : "?status=" + encodeURIComponent(st)));
+    const tbody = $("tabela-ocorrencias").tBodies[0];
+    if (!dados.length) { linhaVazia(tbody, 6, "Nenhuma ocorrência neste filtro."); return; }
+    const linhas = dados.map((o) => {
+      const tr = document.createElement("tr");
+      celula(tr, o.protocolo);
+      celula(tr, o.area_id);
+      celula(tr, ROT_TIPO[o.tipo] || o.tipo);
+      celula(tr, ROT_STATUS[o.status] || o.status);
+      celula(tr, ROT_ORIGEM[o.origem_gatilho] || o.origem_gatilho);
+      celula(tr, fmt.format(new Date(o.ts)));
+      ativar(tr, () => { $("protocolo").value = o.protocolo; $("form-status").scrollIntoView({block: "center"}); $("protocolo").focus(); });
+      return tr;
+    });
+    tbody.replaceChildren(...linhas);
+  } catch (e) { tratarErroCarga(e); }
+}
+
+function tratarErroCarga(e) {
+  aviso(msgErro(e), "erro");
+  if (e.status === 401) parar();
+}
+
+function atualizarTudo() { return Promise.all([carregarHotspots(), carregarOcorrencias()]); }
+
+function iniciar() {
+  parar();
+  atualizarTudo();
+  timer = setInterval(atualizarTudo, 30000);
+}
+function parar() { if (timer) { clearInterval(timer); timer = null; } }
+
+function entrar() {
+  const v = $("campo-chave").value.trim();
+  if (!v) { aviso("Digite a chave da polícia", "erro"); return; }
+  chave = v;
+  guardarChave(v);
+  $("campo-chave").value = "";
+  aviso("", "");
+  iniciar();
+}
+
+function preencherMensagem() { $("mensagem").value = MSG_PADRAO[$("novo-status").value] || ""; }
+
+async function atualizarStatus() {
+  const protocolo = $("protocolo").value.trim();
+  if (!protocolo) { aviso("Informe o protocolo", "erro"); $("protocolo").focus(); return; }
+  try {
+    await chamar("/ocorrencias/" + encodeURIComponent(protocolo) + "/status", {
+      method: "PATCH",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({status: $("novo-status").value, mensagem: $("mensagem").value})
+    });
+    aviso("Status atualizado", "ok");
+    atualizarTudo();
+  } catch (e) { aviso(msgErro(e), "erro"); }
+}
+
+$("btn-entrar").addEventListener("click", entrar);
+$("campo-chave").addEventListener("keydown", (ev) => { if (ev.key === "Enter") entrar(); });
+$("janela").addEventListener("change", carregarHotspots);
+$("filtro-status").addEventListener("change", carregarOcorrencias);
+$("novo-status").addEventListener("change", preencherMensagem);
+$("form-status").addEventListener("submit", atualizarStatus);
+preencherMensagem();
+iniciarMapa();
+if (chave) iniciar(); else aviso("Digite a chave para ver os dados.", "");
+</script>
+</body>
+</html>

@@ -2,7 +2,7 @@
 from fastapi import FastAPI
 
 from app.erros import registrar_handlers
-from app.routers import health, hotspots, ocorrencias
+from app.routers import health, hotspots, ocorrencias, painel
 
 
 def create_app() -> FastAPI:
@@ -15,6 +15,7 @@ def create_app() -> FastAPI:
     app.include_router(health.router)
     app.include_router(ocorrencias.router)
     app.include_router(hotspots.router)
+    app.include_router(painel.router)
     return app
 
 
