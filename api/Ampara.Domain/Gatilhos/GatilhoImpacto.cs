@@ -18,4 +18,6 @@ public sealed class GatilhoImpacto(string deviceId, string alertId, DateTime emC
         o.AlertasLiberadosEm = o.IniciadaEm + Janela;
         return o;
     }
+
+    public void Reaproveitar(Ocorrencia aberta) => aberta.VincularChaveiro(deviceId, alertId);
 }

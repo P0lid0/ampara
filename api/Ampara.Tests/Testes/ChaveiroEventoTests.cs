@@ -100,6 +100,47 @@ public class ChaveiroEventoTests(AmparaFactory f) : IClassFixture<AmparaFactory>
         Assert.Equal(1, Acks(dev, dev + "-7"));
     }
 
+    private async Task<(Sessao Vitima, string Dev, HttpClient Emergencia, Guid OcorrenciaId)> WebDepoisChaveiroAsync()
+    {
+        var (v, dev) = await ChaveiroPareadoAsync();
+        (await v.Cliente.PutAsJsonAsync("/api/v1/me/emergencia", new { codigo = "123456", palavraSecreta = "palavra-sintetica" })).EnsureSuccessStatusCode();
+        var em = await f.ClienteEmergenciaAsync(v.Email, "123456", "palavra-sintetica");
+        var r = await em.PostAsJsonAsync("/api/v1/ocorrencias/gatilho", new { origem = "web" });
+        r.EnsureSuccessStatusCode();
+        var id = (await r.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("ocorrenciaId").GetGuid();
+        // Segundos depois a vítima aperta o chaveiro: o alert reaproveita a ocorrência aberta.
+        await TratarAsync(dev, Evento("alert", dev, dev + "-20"), Chegada);
+        return (v, dev, em, id);
+    }
+
+    [Fact]
+    public async Task Web_depois_chaveiro_vincula_o_alerta_e_o_cancel_do_chaveiro_fecha()
+    {
+        var (v, dev, _, id) = await WebDepoisChaveiroAsync();
+        using (var db = f.NovoDb())
+        {
+            var o = db.Ocorrencias.Single(x => x.UsuarioId == v.UsuarioId);
+            Assert.Equal(id, o.Id);
+            Assert.Equal((dev, dev + "-20"), (o.ChaveiroDeviceId, o.ChaveiroAlertId));
+        }
+        Assert.Equal(1, Acks(dev, dev + "-20"));
+
+        await TratarAsync(dev, Evento("cancel", dev, dev + "-21", alertId: dev + "-20"), Chegada);
+        using (var db = f.NovoDb())
+            Assert.Equal(EstadoOcorrencia.Cancelada, db.Ocorrencias.Single(x => x.Id == id).Estado);
+    }
+
+    [Fact]
+    public async Task Web_depois_chaveiro_cancelar_pelo_app_publica_resolve()
+    {
+        var (_, dev, em, id) = await WebDepoisChaveiroAsync();
+
+        var antes = f.Gateway.Publicados.Count(p => p.DeviceId == dev && p.Cmd.Cmd == "resolve");
+        Assert.Equal(System.Net.HttpStatusCode.NoContent, (await em.PostAsync($"/api/v1/ocorrencias/{id}/cancelar", null)).StatusCode);
+        var resolve = Assert.Single(f.Gateway.Publicados.Where(p => p.DeviceId == dev && p.Cmd.Cmd == "resolve").Skip(antes));
+        Assert.Equal(dev + "-20", resolve.Cmd.AlertId);
+    }
+
     [Fact]
     public async Task Test_so_atualiza_sinal_e_ack_sem_acionar_ninguem()
     {

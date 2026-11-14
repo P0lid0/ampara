@@ -15,4 +15,6 @@ public sealed class GatilhoChaveiro(string deviceId, string alertId, DateTime em
         o.ChaveiroAlertId = alertId;
         return o;
     }
+
+    public void Reaproveitar(Ocorrencia aberta) => aberta.VincularChaveiro(deviceId, alertId);
 }

@@ -22,7 +22,7 @@ public sealed class OcorrenciaService(
     public async Task<OcorrenciaCriada> DispararAsync(IGatilho gatilho, Guid vitimaId, CancellationToken ct)
     {
         var existente = await AbertaDaVitimaAsync(vitimaId, ct);
-        if (existente is { } id) return new OcorrenciaCriada(id, false);
+        if (existente is { } id) return await ReaproveitarAsync(gatilho, id, ct);
 
         var o = gatilho.CriarOcorrencia(vitimaId, Agora);
         db.Ocorrencias.Add(o);
@@ -31,12 +31,24 @@ public sealed class OcorrenciaService(
         {
             // Outra requisição abriu a ocorrência no meio (índice único parcial): solta a nossa e devolve a que ficou.
             db.Ocorrencias.Remove(o);
-            if (await AbertaDaVitimaAsync(vitimaId, ct) is { } vencedora) return new OcorrenciaCriada(vencedora, false);
+            if (await AbertaDaVitimaAsync(vitimaId, ct) is { } vencedora) return await ReaproveitarAsync(gatilho, vencedora, ct);
             throw;
         }
         // Com janela de cancelamento (impacto) o alerta só sai quando ela fecha, pelo ProcessarVencidosAsync.
         if (o.AlertasLiberadosEm is not { } liberadoEm || liberadoEm <= Agora) await escalonamento.IniciarAsync(o.Id, ct);
         return new OcorrenciaCriada(o.Id, true);
+    }
+
+    /// <summary>Devolve a ocorrência aberta e deixa o gatilho se ligar a ela (o chaveiro grava deviceId e alertId).</summary>
+    private async Task<OcorrenciaCriada> ReaproveitarAsync(IGatilho gatilho, Guid id, CancellationToken ct)
+    {
+        if (gatilho is GatilhoChaveiro or GatilhoImpacto)
+        {
+            var aberta = await db.Ocorrencias.FirstAsync(o => o.Id == id, ct);
+            gatilho.Reaproveitar(aberta);
+            await db.SaveChangesAsync(ct);
+        }
+        return new OcorrenciaCriada(id, false);
     }
 
     public async Task<OcorrenciaDto> ObterAsync(Ator ator, Guid id, CancellationToken ct)
@@ -86,7 +98,7 @@ public sealed class OcorrenciaService(
         // Política: valida o cancelamento, publica o resolve e só então grava. Se o gateway falhar, a exceção sobe
         // e a ocorrência continua Aberta, então o cliente pode repetir e o chaveiro ainda recebe o resolve.
         o.Cancelar(Agora);
-        if (o is { Origem: OrigemGatilho.Chaveiro or OrigemGatilho.Impacto, ChaveiroDeviceId: { } device, ChaveiroAlertId: { } alerta })
+        if (o is { ChaveiroDeviceId: { } device, ChaveiroAlertId: { } alerta })
             await gateway.PublicarComandoAsync(device, ComandoChaveiro.Resolve(alerta), ct);
         await db.SaveChangesAsync(ct);
         await escalonamento.EncerrarAlertasAsync(o.Id, "cancelado", ct);
@@ -109,7 +121,7 @@ public sealed class OcorrenciaService(
         {
             // Mesma política do cancelar: resolve antes de gravar, para o cliente poder repetir se o gateway falhar.
             o.Encerrar(agora);
-            if (o is { Origem: OrigemGatilho.Chaveiro or OrigemGatilho.Impacto, ChaveiroDeviceId: { } device, ChaveiroAlertId: { } alerta })
+            if (o is { ChaveiroDeviceId: { } device, ChaveiroAlertId: { } alerta })
                 await gateway.PublicarComandoAsync(device, ComandoChaveiro.Resolve(alerta), ct);
         }
         await db.SaveChangesAsync(ct);

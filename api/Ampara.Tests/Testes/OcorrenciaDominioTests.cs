@@ -77,4 +77,21 @@ public class OcorrenciaDominioTests
         Assert.Equal(OrigemGatilho.Web, new GatilhoWeb().CriarOcorrencia(vitima, Agora).Origem);
         Assert.Equal(OrigemGatilho.Guardiao, new GatilhoGuardiao(Guid.NewGuid()).CriarOcorrencia(vitima, Agora).Origem);
     }
+
+    [Fact]
+    public void Reaproveitar_vincula_o_chaveiro_sem_tomar_o_de_outro_aparelho()
+    {
+        var o = Nova();
+        new GatilhoChaveiro("chaveiro-a", "a-1", Agora).Reaproveitar(o);
+        Assert.Equal(("chaveiro-a", "a-1"), (o.ChaveiroDeviceId, o.ChaveiroAlertId));
+        new GatilhoImpacto("chaveiro-a", "a-2", Agora).Reaproveitar(o);   // alerta mais novo do mesmo aparelho
+        Assert.Equal("a-2", o.ChaveiroAlertId);
+        new GatilhoChaveiro("chaveiro-b", "b-1", Agora).Reaproveitar(o);  // outro aparelho não toma o vínculo
+        Assert.Equal(("chaveiro-a", "a-2"), (o.ChaveiroDeviceId, o.ChaveiroAlertId));
+        ((IGatilho)new GatilhoWeb()).Reaproveitar(o);
+        Assert.Equal("chaveiro-a", o.ChaveiroDeviceId);
+        o.Cancelar(Agora);
+        new GatilhoChaveiro("chaveiro-a", "a-3", Agora).Reaproveitar(o);  // fechada não muda
+        Assert.Equal("a-2", o.ChaveiroAlertId);
+    }
 }

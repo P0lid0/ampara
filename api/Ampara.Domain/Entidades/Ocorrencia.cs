@@ -60,6 +60,19 @@ public sealed class Ocorrencia
         MomentoLng = lng;
     }
 
+    /// <summary>
+    /// Liga o alerta do chaveiro a uma ocorrência já aberta (o disparo veio antes pela web ou pelo guardião), para que o
+    /// cancel do chaveiro a ache e o cancelamento pelo app publique o resolve. Só troca o vínculo do mesmo aparelho
+    /// (o alerta mais novo é o ativo no firmware); vínculo com outro chaveiro fica.
+    /// </summary>
+    public void VincularChaveiro(string deviceId, string alertId)
+    {
+        if (Estado != EstadoOcorrencia.Aberta) return;
+        if (ChaveiroDeviceId is not null && ChaveiroDeviceId != deviceId) return;
+        ChaveiroDeviceId = deviceId;
+        ChaveiroAlertId = alertId;
+    }
+
     public void RegistrarProtocoloPolicia(string protocolo) => ProtocoloPolicia = protocolo;
 
     /// <summary>Acompanhamento da vítima (fica só na API). Valor fora do conjunto ou número com mais de 40 caracteres: acompanhamento-invalido.</summary>
