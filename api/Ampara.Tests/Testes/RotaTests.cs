@@ -182,6 +182,54 @@ public class RotaTests(AmparaFactory f) : IClassFixture<AmparaFactory>
         Assert.Equal(HttpStatusCode.Forbidden, (await emergencia.PostAsJsonAsync("/api/v1/rota/pontos", new[] { Ponto(t.AddMinutes(-1)) })).StatusCode);
     }
 
+    private static async Task<List<double>> LatsAsync(HttpClient c) =>
+        (await (await c.GetAsync("/api/v1/rota")).Content.ReadFromJsonAsync<JsonElement>()).EnumerateArray()
+            .Select(p => p.GetProperty("lat").GetDouble()).ToList();
+
+    [Fact]
+    public async Task Pontos_depois_do_roubo_nao_voltam_ao_dono_com_ocorrencia_aberta()
+    {
+        // Anti-objetivo da spec: vítima e guardião nunca veem a posição do aparelho depois do roubo.
+        var s = await UsuarioComConsentimentoAsync();
+        var t = f.Tempo.GetUtcNow().UtcDateTime;
+        (await s.Cliente.PostAsJsonAsync("/api/v1/rota/pontos", new[] { Ponto(t.AddMinutes(-30), -23.30), Ponto(t.AddMinutes(-5), -23.05) })).EnsureSuccessStatusCode();
+        (await s.Cliente.PutAsJsonAsync("/api/v1/me/emergencia", new { codigo = Codigo, palavraSecreta = Palavra })).EnsureSuccessStatusCode();
+        var emergencia = await f.ClienteEmergenciaAsync(s.Email, Codigo, Palavra);
+        var r = await emergencia.PostAsJsonAsync("/api/v1/ocorrencias/gatilho", new { origem = "web" });
+        Assert.Equal(HttpStatusCode.Created, r.StatusCode);
+        var id = (await r.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("ocorrenciaId").GetGuid();
+
+        // O aparelho roubado segue mandando pontos com o JWT do app.
+        (await s.Cliente.PostAsJsonAsync("/api/v1/rota/pontos", new[] { Ponto(t.AddMinutes(1), -24.01), Ponto(t.AddMinutes(2), -24.02) })).EnsureSuccessStatusCode();
+        Assert.Equal([-23.30, -23.05], await LatsAsync(emergencia));
+        Assert.Equal([-23.30, -23.05], await LatsAsync(s.Cliente));
+
+        // Marcado o momento do roubo antes do disparo, o trecho entre o momento e o disparo também some.
+        (await emergencia.PostAsJsonAsync($"/api/v1/ocorrencias/{id}/momento", new { em = t.AddMinutes(-10), lat = -23.1, lng = -46.6 })).EnsureSuccessStatusCode();
+        Assert.Equal([-23.30], await LatsAsync(emergencia));
+    }
+
+    [Fact]
+    public async Task Ocorrencia_fechada_esconde_ate_o_fim_da_validade_do_token_do_aparelho_roubado()
+    {
+        var s = await UsuarioComConsentimentoAsync();
+        var t = f.Tempo.GetUtcNow().UtcDateTime;
+        using (var db = f.NovoDb())
+        {
+            // Roubo às t-10h, cancelada 10 min depois: o JWT do aparelho roubado vale até t-2h.
+            var o = Ocorrencia.Iniciar(s.UsuarioId, Ampara.Domain.OrigemGatilho.Web, t.AddHours(-10));
+            o.Cancelar(t.AddHours(-10).AddMinutes(10));
+            db.Ocorrencias.Add(o);
+            db.Pontos.AddRange(
+                PontoRota.Criar(s.UsuarioId, -23.11, -46.7, 5, t.AddHours(-11)),
+                PontoRota.Criar(s.UsuarioId, -24.09, -46.7, 5, t.AddHours(-9)),
+                PontoRota.Criar(s.UsuarioId, -24.03, -46.7, 5, t.AddHours(-3)),
+                PontoRota.Criar(s.UsuarioId, -23.01, -46.7, 5, t.AddHours(-1)));
+            await db.SaveChangesAsync();
+        }
+        Assert.Equal([-23.11, -23.01], await LatsAsync(s.Cliente));
+    }
+
     [Fact]
     public async Task Consulta_exige_autenticacao()
     {

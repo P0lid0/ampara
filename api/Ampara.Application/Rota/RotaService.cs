@@ -1,4 +1,5 @@
 using Ampara.Application.Comum;
+using Ampara.Domain;
 using Ampara.Domain.Entidades;
 using Microsoft.EntityFrameworkCore;
 
@@ -70,8 +71,30 @@ public sealed class RotaService(IAmparaDb db, TimeProvider tempo) : IRotaService
             .Where(p => p.UsuarioId == ator.UsuarioId && p.Em >= inicio && p.Em <= fim)
             .Select(p => new PontoRotaDto(p.Lat, p.Lng, p.Em))
             .ToListAsync(ct);
+        var ocultas = await JanelasPosRouboAsync(ator.UsuarioId, ct);
         // Ordena em memória: o SQLite dos testes não ordena data UTC de forma confiável no servidor.
-        return linhas.OrderBy(p => p.Em).Take(MaxConsulta).ToList();
+        return linhas.Where(p => !ocultas.Any(j => p.Em >= j.Inicio && p.Em <= j.Fim))
+            .OrderBy(p => p.Em).Take(MaxConsulta).ToList();
+    }
+
+    /// <summary>
+    /// Anti-objetivo da spec: o dono nunca vê a posição do aparelho depois do roubo (essa trilha vai só para a Ponte).
+    /// Cada ocorrência esconde do menor entre o momento marcado e o disparo até: sem fim enquanto aberta; fechada,
+    /// até o maior entre o fechamento e o fim da validade do JWT de app emitido antes do roubo (o aparelho roubado
+    /// só consegue mandar pontos até ali).
+    /// </summary>
+    private async Task<List<(DateTime Inicio, DateTime Fim)>> JanelasPosRouboAsync(Guid usuarioId, CancellationToken ct)
+    {
+        var ocorrencias = await db.Ocorrencias.AsNoTracking().Where(o => o.UsuarioId == usuarioId)
+            .Select(o => new { o.Estado, o.IniciadaEm, o.MomentoEm, o.EncerradaEm }).ToListAsync(ct);
+        return ocorrencias.Select(o =>
+        {
+            var inicio = o.MomentoEm is { } m && m < o.IniciadaEm ? m : o.IniciadaEm;
+            var fim = o.Estado == EstadoOcorrencia.Aberta || o.EncerradaEm is not { } fechada
+                ? DateTime.MaxValue
+                : (fechada > inicio + Auth.AuthService.ValidadeLogin ? fechada : inicio + Auth.AuthService.ValidadeLogin);
+            return (inicio, fim);
+        }).ToList();
     }
 
     public async Task<int> PurgarExpiradosAsync(CancellationToken ct)
