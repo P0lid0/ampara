@@ -278,4 +278,10 @@ Resultado: testes novos de "nunca lança" e de listas sem espaço; corpus com 37
 
 Resultado: teste novo `Documento_ao_lado_de_numero_curto_ou_texto_em_csv_continua_detectado`; corpus com 387 linhas (220 positivas, 167 negativas), 100 % de precisão e recall; sem migration.
 
+### 44. Cyber: PiiScanner e TaintScope (Task 5 do plano 03)
+
+> Executar a Task 5 do plano 03 (Cyber): escrever primeiro os testes do `PiiScanner` (JSON aninhado e arrays com caminho `a.b[1].c`, raiz array, 60 níveis, pares de form/query/header, texto livre com posição, escapes unicode) e do `TaintScope` (só valores com 4 ou mais caracteres, comparação sensível a caixa); implementar o percurso iterativo com pilha explícita, achado por chave e valor virando um só, falha fechada no timeout de regex. Rodada 1 da revisão: registrar este prompt, cobrir a falha fechada por timeout e a deduplicação/nulo do `TaintScope`, e avisar na interface que `AchadoPii.Valor` é PII em claro.
+
+Resultado: 11 testes do scanner e do taint passando; sem migration.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->

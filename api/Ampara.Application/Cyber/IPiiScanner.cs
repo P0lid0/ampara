@@ -3,7 +3,7 @@ using Ampara.Domain.Cyber;
 
 namespace Ampara.Application.Cyber;
 
-/// <summary>Um dado sensível achado: onde (caminho do campo), de que classe, o trecho e se a chave sozinha o denunciou.</summary>
+/// <summary>Um dado sensível achado: onde (caminho do campo), de que classe, o trecho e se a chave sozinha o denunciou. <c>Valor</c> é o PII em claro: nunca gravar em log, evento ou banco.</summary>
 public sealed record AchadoPii(string Campo, PiiClasse Classe, string Valor, bool PorChave);
 
 /// <summary>Varre JSON, pares chave/valor e texto livre atrás de PII, nome do campo incluído.</summary>

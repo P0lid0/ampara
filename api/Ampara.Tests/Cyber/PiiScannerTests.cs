@@ -53,4 +53,21 @@ public class PiiScannerTests
         var s = new TaintScope(); s.Marcar("Zq9!xKp2", OrigemDado.Form, "senha", PiiClasse.Senha); s.Marcar("ab", OrigemDado.Form, "x", PiiClasse.Senha);
         Assert.Single(s.Encontrar("falha ao salvar Zq9!xKp2 no banco")); Assert.Empty(s.Encontrar("tem ab aqui"));
         Assert.Empty(s.Encontrar("falha ao salvar zq9!xkp2 no banco")); }
+
+    private sealed class DetectorQueEstoura : IPiiDetector {
+        public PiiClasse Classe => PiiClasse.Cpf;
+        public IReadOnlyList<Deteccao> Detectar(string t) => throw new System.Text.RegularExpressions.RegexMatchTimeoutException();
+        public bool ChaveIndica(string c) => false; }
+
+    [Fact] public void Timeout_de_regex_falha_fechada_marcando_o_texto_inteiro() {   // SINTETICO
+        var a = Assert.Single(new PiiScanner(new IPiiDetector[]{ new DetectorQueEstoura() }).EscanearTexto("qualquer coisa"));
+        Assert.Equal(PiiClasse.Cpf, a.Classe); Assert.Equal("qualquer coisa", a.Valor);
+        var d = Assert.Single(new PiiScanner(new IPiiDetector[]{ new DetectorQueEstoura() }).Localizar("qualquer coisa"));
+        Assert.Equal(new Deteccao(PiiClasse.Cpf, 0, 14), d); }
+
+    [Fact] public void TaintScope_nao_duplica_e_ignora_nulo() {
+        var s = new TaintScope();
+        s.Marcar("Zq9!xKp2", OrigemDado.Form, "senha", PiiClasse.Senha); s.Marcar("Zq9!xKp2", OrigemDado.Form, "senha", PiiClasse.Senha);
+        s.Marcar(null!, OrigemDado.Form, "x", PiiClasse.Senha);
+        Assert.Single(s.Encontrar("Zq9!xKp2")); }
 }
