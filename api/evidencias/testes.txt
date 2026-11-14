@@ -1,0 +1,2 @@
+$ dotnet test api/Ampara.sln   (2026-11-14)
+Aprovado!  – Com falha:     0, Aprovado:   245, Ignorado:     0, Total:   245, Duração: 17 s - Ampara.Tests.dll (net11.0)

@@ -1,0 +1,33 @@
+# Fluxo da demonstracao contra a API real (PostgreSQL ampara_dev), 2026-11-14. Tokens omitidos.
+$ GET /health
+{"status":"ok","mqtt":true,"db":true}
+
+$ POST /api/v1/auth/login (vitima@ampara.demo)
+{"token":"<jwt-omitido>","expiraEm":"2026-11-15T04:23:17.3637448Z"}
+
+$ GET /api/v1/me
+{"usuarioId":"aaa76ff6-6f21-461c-ae7e-716f211e3d01","nome":"Vitima Demonstracao","email":"vitima@ampara.demo","consentimentoRota":true,"emergenciaConfigurada":true}
+
+$ GET /api/v1/guardioes
+[{"guardiaoId":"288bee88-14d4-4192-94a9-7e0df7171186","nome":"Guardiao Um","ordem":1},{"guardiaoId":"91742f2c-af7c-4143-99ea-6b9adac1d967","nome":"Guardiao Dois","ordem":2}]
+
+$ GET /api/v1/aparelhos
+[{"id":"60fe9535-73c5-4de8-89d1-b071a6dbc581","marca":"Marca Demo","modelo":"Modelo Demo","imeiMascarado":"***********7518"}]
+
+$ POST /api/v1/chaveiros (deviceId chaveiro-ampara-d3m0a1)
+{"id":"da094835-fa7a-4643-9d55-d5914642aaca","deviceId":"chaveiro-ampara-d3m0a1"}
+HTTP 201
+
+$ POST /api/v1/auth/emergencia (codigo e palavra da demo)
+{"token":"<jwt-omitido>","expiraEm":"2026-11-14T20:53:18.8564018Z"}
+
+$ POST /api/v1/ocorrencias/gatilho {"origem":"web"} (token de emergencia)
+{"ocorrenciaId":"020850b0-7f9c-46ac-812e-82ff54b2900d"}
+HTTP 201
+
+$ GET /api/v1/ocorrencias (token de login da vitima)
+[{"id":"020850b0-7f9c-46ac-812e-82ff54b2900d","estado":"Aberta","origem":"web","iniciadaEm":"2026-11-14T20:23:19.267489Z","momento":null,"passos":[{"passo":"Banco","concluidoEm":null},{"passo":"CelularSeguro","concluidoEm":null},{"passo":"Operadora","concluidoEm":null},{"passo":"Senhas","concluidoEm":null},{"passo":"Bo","concluidoEm":null}],"alertas":[{"alertaId":"0b57dcbd-2d71-444c-8632-f48b0bb04402","guardiaoId":"288bee88-14d4-4192-94a9-7e0df7171186","enviadoEm":"2026-11-14T20:23:19.403458Z","cienteEm":null}],"contas":[]}]
+HTTP 200
+
+$ GET /scalar
+HTTP 200

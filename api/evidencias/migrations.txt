@@ -1,0 +1,54 @@
+$ psql -c "\dt"
+                  List of tables
+ Esquema |         Nome          |  Tipo  |  Dono  
+---------+-----------------------+--------+--------
+ public  | Alertas               | tabela | ampara
+ public  | Aparelhos             | tabela | ampara
+ public  | BosRascunho           | tabela | ampara
+ public  | Catalogo              | tabela | ampara
+ public  | Chaveiros             | tabela | ampara
+ public  | Contas                | tabela | ampara
+ public  | Convites              | tabela | ampara
+ public  | EventosRecebidos      | tabela | ampara
+ public  | Guardioes             | tabela | ampara
+ public  | Ocorrencias           | tabela | ampara
+ public  | PassosOcorrencia      | tabela | ampara
+ public  | Pontos                | tabela | ampara
+ public  | RelatoConfirmacoes    | tabela | ampara
+ public  | Relatos               | tabela | ampara
+ public  | TentativasEmergencia  | tabela | ampara
+ public  | Usuarios              | tabela | ampara
+ public  | __EFMigrationsHistory | tabela | ampara
+(17 linhas)
+
+
+$ psql -c "select \"MigrationId\" from \"__EFMigrationsHistory\" order by 1"
+           MigrationId           
+---------------------------------
+ 20261114173054_Inicial
+ 20261114174015_Emergencia
+ 20261114175154_Aparelhos
+ 20261114180206_Contas
+ 20261114181312_Guardioes
+ 20261114182039_Chaveiros
+ 20261114183833_Rota
+ 20261114184855_Ocorrencias
+ 20261114190724_Alertas
+ 20261114191544_EventosRecebidos
+ 20261114194214_Bo
+ 20261114195647_Acompanhamento
+ 20261114200858_Relatos
+ 20261114201625_Impacto
+(14 linhas)
+
+
+$ psql -c "select \"Email\",\"Papel\" from \"Usuarios\" where \"Email\" like '%@ampara.demo' order by 1"
+                 Email                  |  Papel  
+----------------------------------------+---------
+ admin@ampara.demo                      | admin
+ guardiao1@ampara.demo                  | usuario
+ guardiao2@ampara.demo                  | usuario
+ t15-chaveiro-ampara-fae8af@ampara.demo | usuario
+ vitima@ampara.demo                     | usuario
+(5 linhas)
+

@@ -1,0 +1,4 @@
+$ python api/tools/publicar_alerta.py chaveiro-ampara-d3m0a1   (API real rodando, broker publico, 2026-11-14)
+evento publicado: chaveiro-ampara-d3m0a1-fe694105
+ack recebido
+exit=0

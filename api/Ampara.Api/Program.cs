@@ -91,6 +91,7 @@ if (args.Contains("--migrar"))
     await Ampara.Infrastructure.Dados.CatalogoSeeder.SemearAsync(db, caminhoCatalogo, CancellationToken.None);
     var total = await db.Catalogo.CountAsync();
     if (total < Ampara.Infrastructure.Dados.CatalogoSeeder.MinimoEsperado) throw new InvalidOperationException($"Catalogo com {total} itens (esperado >= {Ampara.Infrastructure.Dados.CatalogoSeeder.MinimoEsperado}).");
+    if (app.Configuration.GetValue<bool>("AMPARA_DEMO")) await SemearDemoAsync(escopo.ServiceProvider);
     return;
 }
 
@@ -100,6 +101,7 @@ if (app.Configuration.GetValue<bool>("AMPARA_DEMO"))
     using var escopoDemo = app.Services.CreateScope();
     await Ampara.Infrastructure.Dados.CatalogoSeeder.SemearAsync(
         escopoDemo.ServiceProvider.GetRequiredService<AmparaDbContext>(), caminhoCatalogo, CancellationToken.None);
+    await SemearDemoAsync(escopoDemo.ServiceProvider);
 }
 
 app.UseMiddleware<CorrelacaoMiddleware>();
@@ -114,5 +116,10 @@ app.MapOpenApi();
 app.MapScalarApiReference();   // /scalar
 
 app.Run();
+
+// Usuarios sinteticos da demonstracao (admin inclusive); so e chamado com AMPARA_DEMO=true.
+static Task SemearDemoAsync(IServiceProvider sp) => Ampara.Infrastructure.Dados.DemoSeeder.SemearAsync(
+    sp.GetRequiredService<AmparaDbContext>(), sp.GetRequiredService<ISenhaHasher>(),
+    sp.GetRequiredService<Ampara.Application.Comum.ICifrador>(), sp.GetRequiredService<TimeProvider>(), CancellationToken.None);
 
 public partial class Program;
