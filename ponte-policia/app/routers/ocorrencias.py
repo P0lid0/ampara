@@ -60,6 +60,8 @@ def listar_ocorrencias(
     "/ocorrencias/{protocolo}/retorno",
     response_model=RetornoResposta,
     summary="Retorno atual ao cidadão",
+    description=("Devolve o status e a mensagem mais recentes da ocorrência, para a API da Ampara "
+                 "repassar ao cidadão pelo protocolo."),
     dependencies=[Depends(exigir_chave_servico)],
     responses={401: {"description": "Chave de serviço inválida ou ausente."},
                404: {"description": "Protocolo não encontrado."}},
@@ -73,6 +75,8 @@ def obter_retorno(protocolo: str, servico: OcorrenciaService = Depends(get_ocorr
     "/ocorrencias/{protocolo}/status",
     response_model=RetornoResposta,
     summary="Muda o status e registra a mensagem de retorno",
+    description=("Usado pela polícia: aceita em_analise, atendida ou descartada, respeitando as transições "
+                 "permitidas. A mensagem não pode conter dado pessoal."),
     dependencies=[Depends(exigir_chave_policia), Depends(rejeitar_pii)],
     responses={401: {"description": "Chave da polícia inválida ou ausente."},
                404: {"description": "Protocolo não encontrado."},

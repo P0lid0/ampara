@@ -1,0 +1,21 @@
+{
+  "rotas": [["GET","/health"],["POST","/ocorrencias"],["GET","/ocorrencias"],["GET","/ocorrencias/{protocolo}/retorno"],
+            ["PATCH","/ocorrencias/{protocolo}/status"],["GET","/hotspots"]],
+  "seguranca": {"ChaveServico": "X-Chave-Servico", "ChavePolicia": "X-Chave-Policia"},
+  "POST /ocorrencias": {
+    "campos": ["origem_id","area_id","ts","tipo","origem_gatilho","device_hash","trilha"],
+    "obrigatorios": ["origem_id","area_id","ts","tipo","origem_gatilho","device_hash"],
+    "tipo": ["roubo_celular","furto_celular"],
+    "origem_gatilho": ["chaveiro","web","guardiao","impacto"],
+    "trilha_campos": ["lat","lng","em"],
+    "resposta": ["protocolo","status"]},
+  "retorno": ["protocolo","status","mensagem","atualizado_em"],
+  "PATCH status": {"campos": ["status","mensagem"], "status": ["em_analise","atendida","descartada"]},
+  "hotspot": ["area_id","lat","lng","total","risco_previsto"],
+  "risco_previsto": ["baixo","medio","alto"],
+  "resumo": ["protocolo","area_id","ts","tipo","status","origem_gatilho"],
+  "exemplo": {"origem_id": "3f2b8c1e-5a4d-4e7b-9c1a-0d2e4f6a8b10", "area_id": "g051_026",
+              "ts": "2026-11-16T11:30:00Z", "tipo": "roubo_celular", "origem_gatilho": "chaveiro",
+              "device_hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+              "trilha": [{"lat": -23.567249, "lng": -46.7019515, "em": "2026-11-16T11:31:00Z"}]}
+}
