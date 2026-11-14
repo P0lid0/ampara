@@ -69,6 +69,10 @@ public class AparelhoTests(AmparaFactory f) : IClassFixture<AmparaFactory>
         Assert.True((await s.Cliente.GetFromJsonAsync<JsonElement>("/api/v1/me")).GetProperty("consentimentoRota").GetBoolean());
         Assert.Equal(HttpStatusCode.NoContent, (await s.Cliente.PutAsJsonAsync("/api/v1/me/consentimento-rota", new { aceito = false })).StatusCode);
         Assert.False((await s.Cliente.GetFromJsonAsync<JsonElement>("/api/v1/me")).GetProperty("consentimentoRota").GetBoolean());
+        using (var db2 = f.NovoDb()) Assert.NotNull(db2.Usuarios.Single(x => x.Id == s.UsuarioId).ConsentimentoEm);
+        var semAceito = await s.Cliente.PutAsJsonAsync("/api/v1/me/consentimento-rota", new { });
+        Assert.Equal(HttpStatusCode.UnprocessableEntity, semAceito.StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, (await f.CreateClient().PutAsJsonAsync("/api/v1/me/consentimento-rota", new { aceito = true })).StatusCode);
     }
 
     [Fact]
