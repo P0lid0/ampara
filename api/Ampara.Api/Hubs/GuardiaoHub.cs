@@ -14,7 +14,7 @@ public sealed class GuardiaoHub : Hub
         if (Guid.TryParse(Context.User?.FindFirst("sub")?.Value, out var id))
             await Groups.AddToGroupAsync(Context.ConnectionId, Grupo(id));
         else
-            Context.Abort();
+            { Context.Abort(); return; }
         await base.OnConnectedAsync();
     }
 }

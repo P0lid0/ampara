@@ -116,4 +116,8 @@ Resultado: testes de rota passando (92 na suíte); migration `Rota` aplicada com
 
 Resultado: 108 testes passando; migration `Ocorrencias` aplicada com `--migrar` no PostgreSQL local (5436, ampara_dev), índice parcial `UX_Ocorrencias_UmaAbertaPorUsuario` conferido com psql.
 
+> Executar a Task 12 do plano da API (`2026-11-14-02-api`): escrever primeiro o `HubTests` (sem token não conecta, token de emergência não conecta, `AlertaDisparado` chega só ao guardião destinatário, e `AlertaEscalado`/`AlertaEncerrado`/`PassoAtualizado` com os nomes e o JSON camelCase do contrato), ver falhar, e implementar os records de `Mensagens`, `IGuardiaoNotificador`, o `GuardiaoHub` (política `Usuario`, grupo `g-{usuarioId}`, sem métodos cliente→servidor) e o `SignalRGuardiaoNotificador` sobre `IHubContext`, com `AddSignalR` e `MapHub("/hubs/guardiao")`.
+
+Resultado: 114 testes passando na suíte; sem migration.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->

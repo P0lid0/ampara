@@ -42,15 +42,15 @@ public class HubTests(AmparaFactory f) : IClassFixture<AmparaFactory>
     {
         var a = await f.NovoUsuarioAsync(); var b = await f.NovoUsuarioAsync();
         await using var hubA = Conectar(a.Token); await using var hubB = Conectar(b.Token);
-        var recebido = new TaskCompletionSource<AlertaDisparadoMsg>(); var intruso = false;
+        var recebido = new TaskCompletionSource<AlertaDisparadoMsg>(); var intruso = new TaskCompletionSource<bool>();
         hubA.On<AlertaDisparadoMsg>("AlertaDisparado", m => recebido.TrySetResult(m));
-        hubB.On<AlertaDisparadoMsg>("AlertaDisparado", _ => intruso = true);
+        hubB.On<AlertaDisparadoMsg>("AlertaDisparado", _ => intruso.TrySetResult(true));
         await hubA.StartAsync(); await hubB.StartAsync();
         var msg = new AlertaDisparadoMsg(Guid.NewGuid(), Guid.NewGuid(), "Vitima Teste", "chaveiro", DateTime.UtcNow);
         await Notificador.AlertaDisparadoAsync(a.UsuarioId, msg, default);
         Assert.Equal(msg.AlertaId, (await recebido.Task.WaitAsync(TimeSpan.FromSeconds(5))).AlertaId);
         await Task.Delay(300);
-        Assert.False(intruso);
+        Assert.False(intruso.Task.IsCompleted);
     }
 
     [Fact]
