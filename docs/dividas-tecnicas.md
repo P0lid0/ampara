@@ -25,3 +25,10 @@ Itens que a revisão final do plano encontrou, verificou como reais e deixou de 
 - **E-mail em claro** (seguranca-6): `TentativasEmergencia` grava o e-mail sem cifra. A retenção já é de 24 h, mas o certo seria guardar um HMAC.
 - **Credenciais de demonstração** (seguranca-4): ficam versionadas e só valem com `AMPARA_DEMO=true`. O domínio `ampara.demo` não é reservado no cadastro.
 - **Regex de deviceId com `$`** (re-revisão): em `TopicoChaveiro.cs` e `ChaveiroService.cs` o `$` também aceita `\n` no fim do texto. O certo é `\z`. O efeito é desprezível, porque o valor não vai mais para o log.
+
+## Ponte Polícia (plano 04, revisão final de 14/11/2026, até o commit 742d3ae)
+
+- **401 versus 422 com corpo malformado** (contrato-3): sem chave e com um corpo que não é JSON, a resposta é 422, não 401, porque o FastAPI lê o corpo antes de conferir a chave. O cliente C# sempre envia JSON válido.
+- **Limite de tamanho do corpo** (seguranca-1, parcial): a regex quadrática foi corrigida e a varredura saiu do event loop. O limite (413) fica para o nginx da VM, com `client_max_body_size`, no plano 07.
+- **Print do Swagger desatualizado**: `ponte-policia/evidencias/openapi-docs.png` é de antes dos modelos de erro. Recapturar antes de usar no PDF.
+- **Miúdos sem cenário na demo**: o limite de 200 itens não aparece na descrição de `GET /ocorrencias`; um `area_id` malformado gravado fora da API vira 500; os enums não têm CHECK no banco; o nome em texto livre sem prefixo nem acento não é detectado; o painel não tem timeout no fetch; `_postar` do seed não tem teste.
