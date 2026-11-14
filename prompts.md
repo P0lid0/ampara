@@ -148,4 +148,8 @@ Resultado: 239 testes passando na suite; migration `Relatos` aplicada com `--mig
 
 Resultado: 242 testes passando na suíte; migration `Impacto` aplicada com `--migrar` no PostgreSQL local (5436, ampara_dev), coluna `AlertasLiberadosEm` (timestamptz, nula) e a linha em `__EFMigrationsHistory` conferidas com psql.
 
+> Executar a Task 21 do plano da API (`2026-11-14-02-api`): escrever primeiro o `DemoSeedTests` (semear duas vezes dá 4 usuários, 1 aparelho e 2 guardiões em ordem, admin com claim `role=admin`, login do guardião 1, `AMPARA_DEMO=false` não semeia nada), ver falhar, e implementar o `DemoSeeder` idempotente (chamado no `--migrar` e na subida só com `AMPARA_DEMO=true`), o `api/README.md` com a ficha da CitizenTech e as evidências em `api/evidencias/` (testes, migrations, fluxo pela API, rotas no Scalar, ack do MQTT).
+
+Resultado: 245 testes passando na suíte; `--migrar` com seed de demonstração no PostgreSQL local (5436, ampara_dev), `/health` ok e fluxo login, gatilho e listagem conferidos contra a API real.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->
