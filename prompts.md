@@ -98,4 +98,10 @@ Resultado: 6 testes de aparelho passando (52 na suíte); migration gerada e `--m
 
 Resultado: testes de conta e de seed passando; migration `Contas` aplicada no PostgreSQL local (5436, ampara_dev) com 13 linhas em `Catalogo`; só Nubank e Inter tiveram telefone confirmado, o resto ficou com link e `telefone: null`.
 
+### 14. Guardiões e convites (Task 8 do plano da API)
+
+> Executar a Task 8 do plano da API (`2026-11-14-02-api`): escrever primeiro o `GuardiaoTests` (convite de 6 caracteres do alfabeto sem ambíguos, aceite que vira guardião com ordem, 404 `convite-invalido` para inexistente ou já usado, 410 `convite-vencido` após 25 h, 409 `limite-guardioes`, aceitar o próprio convite 422, quarto convite com três guardiões 409, reordenação que exige permutação exata e `PodeEscalar`), ver falhar, e implementar `Convite`, `Guardiao`, `IGuardiaoService`/`GuardiaoService` (código com `RandomNumberGenerator`, trava por vítima), `GuardiaoEndpoints`, `Convites`/`Guardioes` no `IAmparaDb`, o helper `VincularGuardiaoAsync` na fábrica e a migration `Guardioes`.
+
+Resultado: testes de guardião passando (69 na suíte); migration `Guardioes` aplicada com `--migrar` no PostgreSQL local (5436, ampara_dev), tabelas `Convites` e `Guardioes` e seus índices únicos conferidos com psql.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->
