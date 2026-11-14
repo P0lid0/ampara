@@ -296,4 +296,10 @@ Resultado: 8 testes novos passando, suíte inteira com 324 aprovados; sem migrat
 
 Resultado: 11 testes novos do guard passando; o teste do no-op em `ErrosTests` passou a afirmar o guard real; sem migration.
 
+### 47. Cyber: tradutor de risco com a Claude API (Task 8 do plano 03)
+
+> Executar a Task 8 do plano 03 (Cyber): escrever primeiro os testes do `ITradutorRisco` com `HttpMessageHandler` falso (prompt só com categoria, sink e tipo; valor no tipo nunca sai; sem chave, 401, 500, lentidão e JSON inválido caem na frase padrão em até 5 s; resposta vazia, curta ou longa demais usa a frase padrão; cache de 1 h só para respostas da IA; worker preenche `MensagemCidadao` antes de persistir); implementar `ClaudeTradutorRisco` (Messages API, prompt passando pelo `ITaintGuard` no sink Llm) e registrar `AddHttpClient("anthropic")`, `AddMemoryCache` e o tradutor no `AddCyber`.
+
+Resultado: 24 testes novos passando, suíte inteira com 359 aprovados; sem migration; a chave `ANTHROPIC_API_KEY` ainda não existe, então a chamada real não foi exercitada.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->

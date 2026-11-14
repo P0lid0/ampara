@@ -23,6 +23,9 @@ public sealed class RastroSegurancaWorker(RastroSeguranca rastro, IServiceScopeF
         try
         {
             await using var escopo = escopos.CreateAsyncScope();
+            // O tradutor nunca lanca e tem teto de 5 s; sem ele registrado, o evento segue sem mensagem.
+            var tradutor = escopo.ServiceProvider.GetService<ITradutorRisco>();
+            if (tradutor is not null) e.MensagemCidadao = await tradutor.TraduzirAsync(EventoTecnico.De(e), ct);
             await escopo.ServiceProvider.GetRequiredService<IEventoSegurancaRepository>().AdicionarAsync(e, ct);
         }
         catch (OperationCanceledException) when (ct.IsCancellationRequested) { throw; }

@@ -37,6 +37,9 @@ public static class CyberServiceCollectionExtensions
         // Guard real no lugar do NoopTaintGuard do plano 02 (Scoped: depende do escopo e do usuario da requisicao).
         services.RemoveAll<ITaintGuard>();
         services.AddScoped<ITaintGuard, TaintGuard>();
+        services.AddHttpClient("anthropic");
+        services.AddMemoryCache();
+        services.TryAddScoped<ITradutorRisco, ClaudeTradutorRisco>();   // Scoped: depende do guard
         services.TryAddScoped<ICorrelacao>(sp => sp.GetRequiredService<Correlacao>());
         services.TryAddScoped<Correlacao>();
 
