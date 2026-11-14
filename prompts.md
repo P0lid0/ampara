@@ -132,4 +132,8 @@ Resultado: 144 testes passando na suíte; migration `EventosRecebidos` aplicada 
 
 Resultado: testes de BO, delegacia e camada passando; migration `Bo` aplicada com `--migrar` no PostgreSQL local (5436, ampara_dev), tabela `BosRascunho` e índice único em `OcorrenciaId` conferidos com psql; JSONs reais do GeoSampa (92 delegacias, 162 estações, 158 da PM).
 
+> Executar a Task 17 do plano da API (`2026-11-14-02-api`): escrever primeiro o `RiscoTests` (importa e consulta por bbox, dia e faixa; CSV com cabeçalho errado, classe fora do conjunto, prob_alto acima de 1, area_id inválido, dia/faixa fora da faixa e chave repetida falha sem trocar o snapshot; rota anônima em camelCase; 422 para bbox ausente ou invertida e faixa fora do intervalo; sem dia/faixa usa agora em hora de São Paulo), ver falhar, e implementar `IRiscoService`/`RiscoService` (snapshot imutável trocado por `Interlocked.Exchange`), `RiscoCelulaDto`, `RiscoInicializador` (importa `RISCO_CSV`, arquivo ausente ou inválido só avisa), `RiscoEndpoints` e o fixture sintético `risco-teste.csv` (o `ml/saida/risco.csv` real ainda não existe).
+
+Resultado: 204 testes passando na suíte; sem migration.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->

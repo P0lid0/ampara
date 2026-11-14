@@ -15,6 +15,7 @@ public static class MapAmpara
         rotas.MapOcorrencias();
         rotas.MapBo();
         rotas.MapCamadas();
+        rotas.MapRisco();
         rotas.MapAlertas();
         rotas.MapSaude();
         return rotas;

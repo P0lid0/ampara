@@ -3,10 +3,12 @@ using Ampara.Application.Bo;
 using Ampara.Application.Chaveiros;
 using Ampara.Application.Comum;
 using Ampara.Application.Cyber;
+using Ampara.Application.Risco;
 using Ampara.Infrastructure.Cripto;
 using Ampara.Infrastructure.Cyber;
 using Ampara.Infrastructure.Dados;
 using Ampara.Infrastructure.Mqtt;
+using Ampara.Infrastructure.Risco;
 using Ampara.Infrastructure.Seguranca;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -42,6 +44,9 @@ public static class DependencyInjection
         services.AddSingleton<IChaveiroGateway>(sp => sp.GetRequiredService<MqttChaveiroGateway>());
         services.AddHostedService(sp => sp.GetRequiredService<MqttChaveiroGateway>());
         services.AddSingleton<ISondaSaude, SondaSaude>();
+        services.AddSingleton<RiscoService>();
+        services.AddSingleton<IRiscoService>(sp => sp.GetRequiredService<RiscoService>());
+        services.AddHostedService<RiscoInicializador>();
 
         // Delegacias do BO: Delegacias:Arquivo (padrão Dados/delegacias.json), relativo à pasta da aplicação.
         services.AddSingleton<IDelegaciaLocator>(sp =>
