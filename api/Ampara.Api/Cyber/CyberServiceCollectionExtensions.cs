@@ -2,6 +2,7 @@ using Ampara.Api.Middleware;
 using Ampara.Application.Cyber;
 using Ampara.Infrastructure.Cyber;
 using Ampara.Infrastructure.Cyber.Detectores;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 
@@ -38,6 +39,7 @@ public static class CyberServiceCollectionExtensions
         services.RemoveAll<ITaintGuard>();
         services.AddScoped<ITaintGuard, TaintGuard>();
         services.AddHttpClient("anthropic");
+        AddLogProtegido(services);
         services.AddMemoryCache();
         services.TryAddScoped<ITradutorRisco, ClaudeTradutorRisco>();   // Scoped: depende do guard
         services.TryAddScoped<ICorrelacao>(sp => sp.GetRequiredService<Correlacao>());
@@ -46,6 +48,30 @@ public static class CyberServiceCollectionExtensions
         // UseExceptionHandler precisa de um destino mesmo em hosts sem o ProblemaHandler.
         services.AddProblemDetails();
         return services;
+    }
+
+    /// <summary>
+    /// Troca o <see cref="ILoggerFactory"/> por um que embrulha o original e passa cada linha pelo guard (sink Log).
+    /// Sem requisição em andamento usa um guard próprio com <see cref="TaintScope"/> vazio (só o scanner age).
+    /// </summary>
+    private static void AddLogProtegido(IServiceCollection services)
+    {
+        services.AddLogging();
+        services.RemoveAll<ILoggerFactory>();
+        services.AddSingleton<ILoggerFactory>(sp =>
+        {
+            var original = ActivatorUtilities.CreateInstance<LoggerFactory>(sp);
+            TaintGuard? semEscopo = null;
+            ITaintGuard Guard()
+            {
+                var daRequisicao = sp.GetService<IHttpContextAccessor>()?.HttpContext?.RequestServices.GetService<ITaintGuard>();
+                if (daRequisicao is not null) return daRequisicao;
+                return semEscopo ??= new TaintGuard(sp.GetRequiredService<IPiiScanner>(), new TaintScope(),
+                    sp.GetRequiredService<IPiiProtetor>(), sp.GetRequiredService<IRastroSeguranca>(),
+                    sp.GetRequiredService<IOptions<CyberOptions>>());
+            }
+            return new GuardedLoggerFactory(original, Guard);
+        });
     }
 
     /// <summary>Ordem fixa: Correlacao, UseExceptionHandler, PiiRequest. Os demais passos do plano 03 entram depois.</summary>

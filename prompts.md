@@ -302,4 +302,10 @@ Resultado: 11 testes novos do guard passando; o teste do no-op em `ErrosTests` p
 
 Resultado: 24 testes novos passando, suíte inteira com 359 aprovados; sem migration; a chave `ANTHROPIC_API_KEY` ainda não existe, então a chamada real não foi exercitada.
 
+### 48. Cyber: sink de log protegido (Task 9 do plano 03)
+
+> Executar a Task 9 do plano 03 (Cyber): escrever primeiro os testes do logger protegido (CPF no template não chega ao provedor, exceção com PII sanitizada, `Sensitive<T>` aparece como `[PII:Classe]`, mensagem limpa passa igual com nível e `EventId`, antes/depois com a flag de demonstração, senha do corpo de um cadastro não vai ao log); implementar `GuardedLoggerFactory` e `GuardedLogger` e trocar o `ILoggerFactory` no `AddCyber` por um que embrulha o original e resolve o guard da requisição a cada linha.
+
+Resultado: 8 testes novos passando, suíte inteira com 367 aprovados; sem migration.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->
