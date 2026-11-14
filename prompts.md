@@ -316,4 +316,10 @@ Resultado: 8 testes novos passando, suíte inteira com 367 aprovados; sem migrat
 Resultado: 8 testes novos passando, suíte inteira com 376 aprovados (os testes que ecoam a entrada passaram a rodar como usuário autenticado); sem migration.
 
 
+### 50. Cyber: caso permitido do IMEI no BO do dono (Task 14 do plano 03)
+
+> Executar a Task 14 do plano 03 (Cyber): escrever primeiro os testes do `ImeiRevelador` (dono recebe o IMEI e fica `Imei/HttpAutenticada/Permitido` no rastro com `bo.imei`; outro usuário vira acesso indevido de peso 40 para o dono e leva 403), do BO pela API (dono vê o IMEI, intruso 403, anônimo 401), de que o IMEI nunca sai em resposta anônima nem em log e de que fica cifrado no banco (`enc:v1:`); implementar `ImeiRevelador` no lugar do `NoopImeiRevelador`, a `CyberApiFactory` (InMemory, tradutor falso, rastro síncrono) com o helper `CriarVitimaComOcorrenciaAsync` só com rotas do contrato, e habilitar o teste de API da Tarefa 11.
+
+Resultado: 17 testes do filtro `ImeiNoBoTests` e `ExceptionHandlerTests` passando, suíte inteira com 408 aprovados; sem migration.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->
