@@ -1,0 +1,80 @@
+using Ampara.Application.Cyber;
+using Ampara.Domain.Cyber;
+using Ampara.Infrastructure.Cyber.Detectores;
+
+namespace Ampara.Tests.Cyber;
+
+public class DetectoresTests
+{
+    internal static IReadOnlyList<IPiiDetector> TodosDetectores() =>
+    [
+        new CpfDetector(), new RgDetector(), new ImeiDetector(), new TelefoneDetector(),
+        new EmailDetector(), new PlacaDetector(), new SenhaDetector(), new SaudeDetector(),
+    ];
+
+    [Fact] public void Cpf_valido_com_e_sem_pontuacao() {   // SINTETICO
+        Assert.Single(new CpfDetector().Detectar("cpf 529.982.247-25 ok"));
+        Assert.Single(new CpfDetector().Detectar("52998224725"));
+        Assert.Empty(new CpfDetector().Detectar("529.982.247-26"));     // DV inválido
+        Assert.Empty(new CpfDetector().Detectar("111.111.111-11")); }
+
+    [Fact] public void Cpf_com_digitos_fullwidth_e_nbsp() =>   // Review Focus 3
+        Assert.Single(new CpfDetector().Detectar(Normalizador.Normalizar("５２９.９８２.２４７-２５ e 529\u00A0982\u00A0247\u00A025")).Take(1));
+
+    [Fact] public void Cpf_com_caractere_invisivel_no_meio() =>
+        Assert.Single(new CpfDetector().Detectar(Normalizador.Normalizar("529\u200B.982.247\u2060-25")));
+
+    [Fact] public void Imei_luhn_e_desempate() {
+        Assert.Single(new ImeiDetector().Detectar("490154203237518"));
+        Assert.Single(new ImeiDetector().Detectar("49-015420-323751-8"));
+        Assert.Empty(new ImeiDetector().Detectar("490154203237519"));            // Luhn inválido
+        Assert.Empty(new ImeiDetector().Detectar("4111111111111111"));           // 16 dígitos (cartão)
+        Assert.Empty(new CpfDetector().Detectar("490154203237518")); }            // 15 dígitos nunca é CPF
+
+    [Fact] public void Telefone_formatos() {
+        Assert.Single(new TelefoneDetector().Detectar("(11) 98765-4321"));
+        Assert.Single(new TelefoneDetector().Detectar("+55 11 98765-4321"));
+        Assert.Single(new TelefoneDetector().Detectar("11987654321"));             // 11 dígitos, DV de CPF inválido
+        Assert.Single(new TelefoneDetector().Detectar("(11) 3456-7890"));          // 10 dígitos com DDD
+        Assert.Empty(new TelefoneDetector().Detectar("52998224725")); }            // é CPF válido
+
+    [Fact] public void Rg_por_valor_so_no_formato_e_por_chave_qualquer_valor() {
+        Assert.Single(new RgDetector().Detectar("rg 12.345.678-9"));
+        Assert.Empty(new RgDetector().Detectar("123456789"));
+        Assert.True(new RgDetector().ChaveIndica(Chaves.Normalizar("identidade")));
+        Assert.True(new RgDetector().ChaveIndica("rg"));
+        Assert.False(new RgDetector().ChaveIndica("organograma")); }              // 2 letras: só igualdade
+
+    [Fact] public void Email_placa_e_senha_por_valor() {
+        Assert.Single(new EmailDetector().Detectar("fale com ana.souza@exemplo.com.br hoje"));
+        Assert.Empty(new EmailDetector().Detectar("sem arroba aqui.com"));
+        Assert.Single(new PlacaDetector().Detectar("ABC1D23"));
+        Assert.Single(new PlacaDetector().Detectar("placa ABC-1234"));
+        Assert.Single(new PlacaDetector().Detectar("ABC1234"));
+        var s = "minha senha: Abc12345!";
+        var d = Assert.Single(new SenhaDetector().Detectar(s));
+        Assert.Equal("Abc12345!", s.Substring(d.Inicio, d.Tamanho));              // cobre só o segredo
+        Assert.Empty(new SenhaDetector().Detectar("esqueci minha senha")); }
+
+    [Fact] public void Saude_termos_inteiros_sem_acento_e_sem_caixa() {
+        Assert.Single(new SaudeDetector().Detectar("Laudo do paciente"));
+        Assert.Single(new SaudeDetector().Detectar("tem DEPRESSÃO há anos"));
+        Assert.Single(new SaudeDetector().Detectar("ATESTADO   MÉDICO anexo"));
+        Assert.Single(new SaudeDetector().Detectar("CID-F32"));
+        Assert.Empty(new SaudeDetector().Detectar("saúde"));                       // a palavra sozinha não é dado
+        Assert.Empty(new SaudeDetector().Detectar("laudos")); }                    // termo inteiro
+
+    [Fact] public void Nao_casa_decimais_guid_nem_jwt() {                          // Review Focus 1
+        foreach (var s in new[]{"-23.5672490","-46.7019515","-23.56724901234","3f2b8c1e-5a4d-4e0b-9c7a-1d2e3f4a5b6c",
+            "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI1Mjk5ODIyNDcyNSJ9.c2lnMTIzNDU2Nzg5MDE","11.222.333/0001-81","PP-2026-000001"})
+            foreach (var d in TodosDetectores()) Assert.Empty(d.Detectar(Normalizador.Normalizar(s))); }
+
+    [Fact] public void Chave_indica_classe() {
+        Assert.True(new CpfDetector().ChaveIndica(Chaves.Normalizar("documento")));
+        Assert.True(new SenhaDetector().ChaveIndica(Chaves.Normalizar("palavraSecreta")));
+        Assert.True(new SenhaDetector().ChaveIndica(Chaves.Normalizar("X-Chave-Servico")));
+        Assert.True(new TelefoneDetector().ChaveIndica(Chaves.Normalizar("telefone_contato")));
+        Assert.Equal("palavrasecreta", Chaves.Normalizar("palavraSecreta"));
+        Assert.Equal("diagnostico", Chaves.Normalizar("Diagnóstico"));
+        Assert.False(new CpfDetector().ChaveIndica(Chaves.Normalizar("codigo"))); }
+}

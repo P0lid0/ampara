@@ -260,4 +260,10 @@ Resultado: nenhum Critical ou Important. Minors corrigidos: varredura de PII em 
 
 Resultado: 14 testes novos passando; sem migration.
 
+### 41. Cyber: detectores por classe, corpus sintético e precisão/recall (Task 3 do plano 03)
+
+> Executar a Task 3 do plano 03 (Cyber): escrever primeiro os testes dos detectores (CPF com DV, IMEI com Luhn, telefone, RG, e-mail, placa, senha, saúde, bordas contra decimais, GUID e JWT, chave indicando classe) e do corpus; implementar `Normalizador`, `Chaves`, `IPiiDetector` e os oito detectores, gerar `cyber/corpus/corpus.csv` com `gerar_corpus.py` (semente 42, só dado sintético) e a evidência `cyber/evidencias/precisao-recall.md` pelo teste.
+
+Resultado: corpus de 357 linhas (194 positivas, 163 negativas), precisão e recall de 100 % no corpus sintético (metas: 95 % e 90 % globais); limitações conhecidas listadas na evidência; sem migration.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->

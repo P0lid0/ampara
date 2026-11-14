@@ -1,0 +1,358 @@
+id,chave,valor,esperado
+c001,observacao,043.321.819-30,Cpf
+c002,codigo,001.338.908-48,Cpf
+c003,mensagem,863.794.026-91,Cpf
+c004,id,423.511.615-05,Cpf
+c005,id,940.781.618-47,Cpf
+c006,campo,959.310.341-45,Cpf
+c007,mensagem,16475255351,Cpf
+c008,campo,19283276485,Cpf
+c009,valor,35030564160,Cpf
+c010,mensagem,95376724255,Cpf
+c011,mensagem,88496965317,Cpf
+c012,detalhe,documento do titular: 287.101.226-13.,Cpf
+c013,campo,"meu cpf e 69784801850, pode confirmar?",Cpf
+c014,observacao,o numero 46270482895 pertence ao pai,Cpf
+c015,detalhe,documento do titular: 89325288028.,Cpf
+c016,observacao,"meu cpf e 01543039170, pode confirmar?",Cpf
+c017,codigo,registrar o cpf 822.782.489-79 no atendimento,Cpf
+c018,cpf,12345,Cpf
+c019,documento,12345,Cpf
+c020,CPF_Titular,***.456.***-00,Cpf
+c021,cpfUsuario,12345,Cpf
+c022,documento_fiscal,nao informado,Cpf
+c023,Documento,nao informado,Cpf
+c024,texto,５７８.７１３.３１５-３１,Cpf
+c025,detalhe,cpf ５７８７１３３１５３１,Cpf
+c026,texto,839​.301.031-41,Cpf
+c027,detalhe,518 347 382 02,Cpf
+c028,observacao,97-376311-656670-0,Imei
+c029,mensagem,06-513338-726247-1,Imei
+c030,codigo,17-810801-326773-4,Imei
+c031,mensagem,02-606474-687234-6,Imei
+c032,observacao,09805009 788208 6,Imei
+c033,codigo,21913619 399091 7,Imei
+c034,detalhe,985435346247510,Imei
+c035,texto,799118384251356,Imei
+c036,campo,278498084124115,Imei
+c037,valor,244935348740161,Imei
+c038,campo,005242786801129,Imei
+c039,valor,059826204505331,Imei
+c040,observacao,586923226025638,Imei
+c041,campo,numero de serie 216073375433031 informado no BO,Imei
+c042,id,"roubaram o aparelho, imei 414586850142942",Imei
+c043,observacao,"roubaram o aparelho, imei 965569816934068",Imei
+c044,valor,numero de serie 835615951484654 informado no BO,Imei
+c045,campo,IMEI: 823662994680447,Imei
+c046,imei,enc:v1:abc,Imei
+c047,IMEI,desconhecido,Imei
+c048,imei_aparelho,desconhecido,Imei
+c049,ImeiCifrado,desconhecido,Imei
+c050,imeiOriginal,enc:v1:abc,Imei
+c051,protocolo,(67) 97387-2148,Telefone
+c052,mensagem,(71) 5320-1632,Telefone
+c053,valor,(70) 4798-6872,Telefone
+c054,protocolo,+55 68 94348-7347,Telefone
+c055,descricao,+55 (40) 96231 6658,Telefone
+c056,codigo,72 90546-6889,Telefone
+c057,codigo,(32)97298-0699,Telefone
+c058,id,(38) 97556-4641,Telefone
+c059,detalhe,42930923271,Telefone
+c060,campo,38974529912,Telefone
+c061,detalhe,24990496631,Telefone
+c062,valor,99931491905,Telefone
+c063,codigo,65951850671,Telefone
+c064,id,"o numero e 92 97262-8498, fale com a Ana",Telefone
+c065,mensagem,me liga no +55 (70) 99965 0752 depois das 18h,Telefone
+c066,valor,ligar para (35) 5014-3634,Telefone
+c067,id,ligar para (71) 4443-1351,Telefone
+c068,descricao,WhatsApp +55 35 93749-8941.,Telefone
+c069,telefone,1140028922,Telefone
+c070,celular,1140028922,Telefone
+c071,fone,n/d,Telefone
+c072,whatsapp,sem numero,Telefone
+c073,telefone_contato,n/d,Telefone
+c074,foneResidencial,1140028922,Telefone
+c075,protocolo,10.947.775-2,Rg
+c076,texto,47.116.719-X,Rg
+c077,texto,22.941.318-6,Rg
+c078,detalhe,99.386.774-9,Rg
+c079,codigo,49.909.133-4,Rg
+c080,observacao,23.281.206-7,Rg
+c081,detalhe,74.034.471-X,Rg
+c082,mensagem,49.361.832-4,Rg
+c083,descricao,registro geral 10.249.947-1.,Rg
+c084,campo,registro geral 64.887.719-0.,Rg
+c085,id,meu rg e 94.013.990-X e preciso corrigir,Rg
+c086,detalhe,registro geral 02.787.429-6.,Rg
+c087,observacao,registro geral 75.655.125-6.,Rg
+c088,rg,123456789,Rg
+c089,RG,MG-12.345.678,Rg
+c090,identidade,1234567,Rg
+c091,rg,SSP 998877,Rg
+c092,identidade,N/D,Rg
+c093,rg,12345678X,Rg
+c094,identidade,9876543,Rg
+c095,campo,rafael99@dominio.com.br,Email
+c096,texto,bia.santos@exemplo.com,Email
+c097,id,lucia-m@mail.exemplo.com.br,Email
+c098,observacao,rafael99@dominio.com.br,Email
+c099,texto,bia.santos@ampara.test,Email
+c100,texto,pedro.h@dominio.com.br,Email
+c101,id,bia.santos@ampara.test,Email
+c102,texto,pedro.h@mail.exemplo.com.br,Email
+c103,valor,"meu e-mail e maria.s@mail.exemplo.com.br, obrigado",Email
+c104,protocolo,email: joao_lima@exemplo.com,Email
+c105,descricao,escreva para lucia-m@dominio.com.br com o comprovante,Email
+c106,valor,email: rafael99@exemplo.com,Email
+c107,observacao,email: bia.santos@exemplo.com,Email
+c108,protocolo,contato lucia-m@dominio.com.br.,Email
+c109,email,sem email,Email
+c110,Email,sem email,Email
+c111,email_contato,sem email,Email
+c112,emailPrincipal,ana,Email
+c113,e-mail,sem email,Email
+c114,E_Mail,n/d,Email
+c115,descricao,NGX8C14,Placa
+c116,codigo,LTJ0E49,Placa
+c117,detalhe,SER8H55,Placa
+c118,valor,UNR5D39,Placa
+c119,codigo,HPB5H66,Placa
+c120,descricao,SBE8F17,Placa
+c121,observacao,DTR-0262,Placa
+c122,valor,SJL-9615,Placa
+c123,observacao,NLZ-7809,Placa
+c124,observacao,HZK-3161,Placa
+c125,protocolo,FKA0504,Placa
+c126,id,MPE3869,Placa
+c127,descricao,FFC9693,Placa
+c128,protocolo,veiculo ARK8217.,Placa
+c129,codigo,anotei JRK3G71 do carro suspeito,Placa
+c130,campo,o carro de placa AVB9H43 estava parado,Placa
+c131,campo,placa LPF3285,Placa
+c132,campo,o carro de placa HNU5160 estava parado,Placa
+c133,placa,sem placa,Placa
+c134,Placa,sem placa,Placa
+c135,placa_veiculo,n/d,Placa
+c136,placaMoto,n/d,Placa
+c137,campo,senha: Zx9!kLm2,Senha
+c138,codigo,senha: p4ssw0rd?,Senha
+c139,id,senha: Abc12345!,Senha
+c140,mensagem,senha: tr0ca-ja,Senha
+c141,texto,senha: Zx9!kLm2,Senha
+c142,valor,senha: Qwerty#2026,Senha
+c143,detalhe,password=s3nh4Forte,Senha
+c144,observacao,password=minhaSenha77,Senha
+c145,protocolo,password=minhaSenha77,Senha
+c146,campo,password=minhaSenha77,Senha
+c147,codigo,pwd: Abc12345!,Senha
+c148,descricao,SENHA = Abc12345!,Senha
+c149,texto,minha senha é Qwerty#2026,Senha
+c150,protocolo,"login ana, senha:Abc12345! (nao compartilhar)",Senha
+c151,senha,x,Senha
+c152,password,abc,Senha
+c153,Authorization,Bearer abc.def,Senha
+c154,cookie,sid=abc,Senha
+c155,X-Chave-Servico,chave,Senha
+c156,palavraSecreta,lua,Senha
+c157,xApiKey,k,Senha
+c158,segredo,s,Senha
+c159,passwd,p,Senha
+c160,pwd,p,Senha
+c161,X-Chave-Policia,chave,Senha
+c162,observacao,o laudo do medico saiu ontem,Saude
+c163,mensagem,paciente com diagnostico de diabetes,Saude
+c164,valor,preciso do prontuario dele,Saude
+c165,descricao,apresentou atestado medico por 3 dias,Saude
+c166,codigo,sofre de depressão há anos,Saude
+c167,protocolo,tratamento oncologico em andamento,Saude
+c168,id,tem hipertensão e ansiedade,Saude
+c169,valor,internacao de 5 dias,Saude
+c170,codigo,receita medica anexada,Saude
+c171,detalhe,resultado de HIV positivo,Saude
+c172,descricao,fez acompanhamento psiquiátrico,Saude
+c173,codigo,historico de esquizofrenia na familia,Saude
+c174,observacao,diagnóstico de câncer,Saude
+c175,protocolo,CID F32,Saude
+c176,detalhe,CID-F32,Saude
+c177,codigo,cid z00,Saude
+c178,campo,diagnostico CID A15 confirmado,Saude
+c179,texto,CIDJ45,Saude
+c180,laudo,ok,Saude
+c181,diagnostico,n/d,Saude
+c182,saude,regular,Saude
+c183,cid,F32,Saude
+c184,prontuario,123,Saude
+c185,medicamento,A,Saude
+c186,doenca,sim,Saude
+c187,Diagnóstico,x,Saude
+c188,id,cpf 377.351.585-56 e email ana.souza@ampara.test,Cpf|Email
+c189,campo,cpf 317.139.005-13 e email pedro.h@teste.org,Cpf|Email
+c190,detalhe,"ligue (37) 2422-8421, carro placa AEA5D95",Telefone|Placa
+c191,texto,imei 240268117758915 do paciente com laudo,Imei|Saude
+c192,protocolo,RG 83.908.470-0 senha: tr0ca-ja,Rg|Senha
+c193,codigo,rafael99@exemplo.com / 77115921245 / (46)99985-6984,Email|Cpf|Telefone
+c194,telefone,bia.santos@teste.org,Telefone|Email
+c195,lat,-23.6576615,
+c196,lng,-46.6545271,
+c197,lat,-23.1116152,
+c198,lng,-46.8098851,
+c199,lat,-23.6560494,
+c200,lng,-46.5198327,
+c201,lat,-23.3158514,
+c202,lng,-46.9368998,
+c203,lat,-23.0940244,
+c204,lng,-46.5502296,
+c205,lat,-23.1201836,
+c206,lng,-46.6752545,
+c207,lat,-23.9910229,
+c208,lng,-46.0147679,
+c209,lat,-23.7643815,
+c210,lng,-46.6149784,
+c211,latitude,-23.03690034324,
+c212,longitude,-46.45107622683,
+c213,latitude,-23.88516060715,
+c214,longitude,-46.96966416052,
+c215,latitude,-23.97516136968,
+c216,longitude,-46.16453521818,
+c217,latitude,-23.83552312432,
+c218,longitude,-46.92127799799,
+c219,ts,2026-06-28T20:20:09Z,
+c220,ts,2026-08-03T15:28:40Z,
+c221,ts,2026-05-26T08:37:03Z,
+c222,ts,2026-06-17T02:19:29Z,
+c223,ts,2026-08-02T01:23:53Z,
+c224,ts,2026-05-03T20:55:54Z,
+c225,ts,2026-02-20T19:32:24Z,
+c226,ts,2026-08-19T17:50:47Z,
+c227,id,e8b77f7b-7321-4f6b-8a80-76ece5582e16,
+c228,id,30307633-a6de-41d8-9258-17b7cf501889,
+c229,id,80599b93-79c2-42e4-9ae1-a991524f93ff,
+c230,id,73557b9d-0fd6-447e-b52d-4af2269ed4c9,
+c231,id,d65e59dd-e62d-4d06-8f9b-85581a7f195b,
+c232,id,15969802-b6dd-4257-bb7d-9f1c57eb89b1,
+c233,id,0a0537f0-2c2c-422b-a568-95c6812a1f9b,
+c234,id,fdb1429e-7010-4d13-b526-b22d3f6c21f7,
+c235,jwt,eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiAiNzg4OTI1NTQ2NjUiLCAibiI6ICI5MDUxNTEifQ.Mz_KRt1TnJPH-M9ZJWay2AJUheDwYnFt0orFo_sit5A,
+c236,jwt,eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiAiOTI1NDYyOTE0ODYiLCAibiI6ICI1MjgxNjgifQ.8XmMZKYQKlsmS0UOaDNGGfNv7-i0avIuJj6yidLeU94,
+c237,jwt,eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiAiMzMyMjE0MTg4ODAiLCAibiI6ICI1OTI5NjIifQ.92WysvkG113qudYingXkzt372M1EasG99L9cQxrEWvM,
+c238,jwt,eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiAiMzc5NDczODM0NzMiLCAibiI6ICI1OTc3NDYifQ.e0B-zRYMgjAmkRz5PaJS2vMIujix_zBxfEy9fgHQqB8,
+c239,jwt,eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiAiMDc1ODE4MTQxMjQiLCAibiI6ICI3ODI2MTMifQ.6hCFrScS8qNn1Po23fTAQ_0qbTj23HR7XqpLIMDH5po,
+c240,hash,4ef5bd20c118cf124cafd1081072673a3f1cbb05e173bdfc07adef74166c3209,
+c241,hash,6df3d8f7fc240f7f65902687d1532b528bf7cdbf27eb2758f11e3ebc71bf652f,
+c242,hash,8c41aec0b5055f4259c88b722fa425514b5f645e793cc3f72eb41004e827dbe4,
+c243,hash,7b7fb2401dc69363eabef5752e5913d9f74ff6af49f3327c0c35e7af11f9533f,
+c244,hash,3dfba03229e972ebe2bd4ce62bffdc3ef3dfa25b008bff9048c96e9ef116d909,
+c245,hash,a0d45249f4119744527d1d5f735100963dfd2d5e4b0b9d121f68973c8584c884,
+c246,hash,bbae1b976cd6aefe95f4c495baa5d8e2,
+c247,hash,428700fbda77171915bac7254ac6a60a,
+c248,texto,305.486.874-03,
+c249,campo,505.415.667-65,
+c250,descricao,775.841.616-92,
+c251,valor,451.154.479-62,
+c252,protocolo,570.596.401-65,
+c253,valor,202.970.213-55,
+c254,codigo,909.275.571-92,
+c255,valor,565.431.027-86,
+c256,valor,14473947312,
+c257,observacao,72715518844,
+c258,descricao,25831323705,
+c259,valor,95782911467,
+c260,valor,111.111.111-11,
+c261,codigo,00000000000,
+c262,codigo,91251778528922,
+c263,codigo,80182422535841,
+c264,campo,38424981829922,
+c265,detalhe,95900109439690,
+c266,cartao,4111111111111111,
+c267,cartao,5555555555554444,
+c268,cartao,4111 1111 1111 1111,
+c269,cartao,6011111111111117,
+c270,protocolo,4736471027677,
+c271,mensagem,9255562588153,
+c272,protocolo,473210469632,
+c273,id,3278774701687,
+c274,mensagem,95004797,
+c275,campo,16245650,
+c276,codigo,98358416,
+c277,serie,878499121655852,
+c278,serie,398680002578720,
+c279,serie,259526949588872,
+c280,serie,705516940974998,
+c281,cnpj,09.728.962/0001-36,
+c282,cnpj,30.913.075/0001-24,
+c283,cnpj,62.636.897/0001-00,
+c284,cnpj,02.838.578/0001-47,
+c285,cnpj,11.222.333/0001-81,
+c286,cep,65278-585,
+c287,cep,49733-484,
+c288,cep,34437-575,
+c289,cep,84419-866,
+c290,cep,01310-100,
+c291,valor,"R$ 45.240,41",
+c292,valor,"R$ 45.747,33",
+c293,valor,"R$ 69.484,21",
+c294,valor,"R$ 79.933,08",
+c295,valor,"R$ 1.234,56",
+c296,versao,1.2.3,
+c297,versao,v2.14.7,
+c298,versao,3.11.4,
+c299,versao,10.0.2,
+c300,protocolo,PP-2026-236634,
+c301,protocolo,PP-2026-668934,
+c302,protocolo,PP-2026-244147,
+c303,protocolo,PP-2026-055041,
+c304,chaveiro,chaveiro-ampara-16c7a2,
+c305,chaveiro,chaveiro-ampara-08b6f7,
+c306,chaveiro,chaveiro-ampara-73c5c0,
+c307,chaveiro,chaveiro-ampara-19b8f0,
+c308,device,g262_067,
+c309,device,g240_049,
+c310,device,g915_478,
+c311,device,g051_026,
+c312,convite,TS79E6,
+c313,convite,TRJG4D,
+c314,convite,MF2RXJ,
+c315,convite,ZFA2M4,
+c316,convite,K7M2QX,
+c317,campo,saúde,
+c318,detalhe,Saúde,
+c319,mensagem,saude,
+c320,descricao,SAÚDE,
+c321,titulo,Saúde e bem-estar,
+c322,ip,192.168.0.10,
+c323,ip,10.0.0.254,
+c324,ip,127.0.0.1,
+c325,ts,1782000924,
+c326,ts,1789576467144,
+c327,ts,1754423996,
+c328,ts,1759386469111,
+c329,ts,1769159799,
+c330,ts,1709998368883,
+c331,data,14/11/2026 as 10h30,
+c332,data,15/11/2026,
+c333,data,12:45:10,
+c334,data,ate 17h,
+c335,data,dia 14,
+c336,codigo,Obrigado pelo atendimento,
+c337,observacao,esqueci minha senha,
+c338,descricao,"Rua das Flores, 123, apto 45",
+c339,descricao,chaveiro perdido perto do metro,
+c340,protocolo,o aparelho tocou por 10 minutos,
+c341,id,preciso de ajuda urgente,
+c342,mensagem,"Av. Paulista, 1578 - Bela Vista",
+c343,texto,alerta de proximidade sem som,
+c344,campo,bateria em 15%,
+c345,codigo,sinal fraco no bairro,
+c346,mensagem,nao consegui logar no app,
+c347,protocolo,o codigo de emergencia nao funcionou,
+c348,campo,recebi o aviso as 14h,
+c349,id,"bom dia, tudo bem?",
+c350,campo,ok,
+c351,detalhe,temperatura 36.5 graus,
+c352,detalhe,12 pessoas na fila,
+c353,texto,pedido numero 4521,
+c354,campo,fila 100 200 300 40,
+c355,id,a receita do bolo estava otima,
+c356,mensagem,laudos,
+c357,descricao,tratamento de dados conforme a lei,
