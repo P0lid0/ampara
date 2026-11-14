@@ -23,6 +23,7 @@ public class AmparaDbContext(DbContextOptions<AmparaDbContext> options) : DbCont
     public DbSet<BoRascunho> BosRascunho => Set<BoRascunho>();
     public DbSet<Relato> Relatos => Set<Relato>();
     public DbSet<RelatoConfirmacao> RelatoConfirmacoes => Set<RelatoConfirmacao>();
+    public DbSet<Ampara.Domain.Cyber.EventoSeguranca> EventosSeguranca => Set<Ampara.Domain.Cyber.EventoSeguranca>();
 
     protected override void ConfigureConventions(ModelConfigurationBuilder cb)
     {

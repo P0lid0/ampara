@@ -22,6 +22,55 @@ namespace Ampara.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Ampara.Domain.Cyber.EventoSeguranca", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Campo")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<string>("Classe")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("CorrelationId")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<string>("Decisao")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("Em")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("MensagemCidadao")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("Sink")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("UsuarioAlvoId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UsuarioAlvoId", "Em");
+
+                    b.ToTable("evento_seguranca", (string)null);
+                });
+
             modelBuilder.Entity("Ampara.Domain.Entidades.Alerta", b =>
                 {
                     b.Property<Guid>("Id")

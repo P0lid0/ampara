@@ -41,6 +41,10 @@ public static class DependencyInjection
         services.AddSingleton<IImeiRevelador, NoopImeiRevelador>();
         services.AddSingleton<ITaintGuard, NoopTaintGuard>();
         services.AddSingleton<IAcessoIndevido, NoopAcessoIndevido>();
+        services.AddSingleton<RastroSeguranca>();
+        services.AddSingleton<IRastroSeguranca>(sp => sp.GetRequiredService<RastroSeguranca>());
+        services.AddScoped<IEventoSegurancaRepository, EventoSegurancaRepository>();
+        services.AddHostedService<RastroSegurancaWorker>();
         services.AddSingleton<IModeradorRelato, ModeradorTextoDescartado>();   // texto livre descartado ate o plano 03
         services.AddSingleton<MqttChaveiroGateway>();
         services.AddSingleton<IChaveiroGateway>(sp => sp.GetRequiredService<MqttChaveiroGateway>());
