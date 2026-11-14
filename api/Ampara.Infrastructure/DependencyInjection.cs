@@ -24,13 +24,10 @@ public static class DependencyInjection
     {
         // Lida de forma preguiçosa (config final do host, inclusive a de testes). Program.cs resolve
         // ICifrador e ITokenService logo após o Build: ausente ou inválido derruba a subida.
-        services.AddSingleton<ICifrador>(sp =>
-        {
-            var chave = sp.GetRequiredService<IConfiguration>()["AMPARA_CRYPTO_KEY"];
-            if (string.IsNullOrWhiteSpace(chave))
-                throw new InvalidOperationException("AMPARA_CRYPTO_KEY ausente (base64 de 32 bytes).");
-            return new CifradorAesGcm(chave);
-        });
+        // PiiProtetor e a unica implementacao de ICifrador: grava enc:v1: e le o formato antigo.
+        services.AddSingleton<PiiProtetor>(sp => new PiiProtetor(sp.GetRequiredService<IConfiguration>()));
+        services.AddSingleton<ICifrador>(sp => sp.GetRequiredService<PiiProtetor>());
+        services.AddSingleton<IPiiProtetor>(sp => sp.GetRequiredService<PiiProtetor>());
         services.AddSingleton<ISenhaHasher, SenhaHasherPbkdf2>();
         services.AddSingleton<ITokenService>(sp =>
             new TokenService(sp.GetRequiredService<IConfiguration>()["AMPARA_JWT_SECRET"], sp.GetRequiredService<TimeProvider>()));
