@@ -1,0 +1,5 @@
+[
+  { "id": "nubank", "nome": "Banco Teste A", "tipo": "banco", "telefone": "4020 0185", "link": "https://exemplo.invalid/a", "conferidoEm": "2026-11-14" },
+  { "id": "itau", "nome": "Banco Teste B", "tipo": "banco", "telefone": null, "link": "https://exemplo.invalid/b", "conferidoEm": null },
+  { "id": "vivo", "nome": "Operadora Teste", "tipo": "operadora", "telefone": null, "link": "https://exemplo.invalid/c", "conferidoEm": null }
+]

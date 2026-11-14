@@ -79,7 +79,11 @@ public class AmparaFactory : WebApplicationFactory<Program>
     {
         var host = base.CreateHost(builder);
         using var escopo = host.Services.CreateScope();
-        escopo.ServiceProvider.GetRequiredService<AmparaDbContext>().Database.EnsureCreated();
+        var db = escopo.ServiceProvider.GetRequiredService<AmparaDbContext>();
+        db.Database.EnsureCreated();
+        Ampara.Infrastructure.Dados.CatalogoSeeder
+            .SemearAsync(db, Path.Combine(AppContext.BaseDirectory, "Fixtures", "catalogo-teste.json"), CancellationToken.None)
+            .GetAwaiter().GetResult();
         return host;
     }
 

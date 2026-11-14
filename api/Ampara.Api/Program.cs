@@ -74,11 +74,25 @@ _ = app.Services.GetRequiredService<Ampara.Application.Comum.ICifrador>();
 _ = app.Services.GetRequiredService<ITokenService>();
 _ = Ampara.Infrastructure.DependencyInjection.StringDeConexao(app.Configuration);
 
+var caminhoCatalogo = Path.Combine(AppContext.BaseDirectory, "Dados", "catalogo-contas.json");
+
 if (args.Contains("--migrar"))
 {
     using var escopo = app.Services.CreateScope();
-    await escopo.ServiceProvider.GetRequiredService<AmparaDbContext>().Database.MigrateAsync();
+    var db = escopo.ServiceProvider.GetRequiredService<AmparaDbContext>();
+    await db.Database.MigrateAsync();
+    await Ampara.Infrastructure.Dados.CatalogoSeeder.SemearAsync(db, caminhoCatalogo, CancellationToken.None);
+    var total = await db.Catalogo.CountAsync();
+    if (total < 13) throw new InvalidOperationException($"Catalogo com {total} itens (esperado >= 13).");
     return;
+}
+
+// Modo demonstracao: semeia o catalogo na subida.
+if (app.Configuration.GetValue<bool>("AMPARA_DEMO"))
+{
+    using var escopoDemo = app.Services.CreateScope();
+    await Ampara.Infrastructure.Dados.CatalogoSeeder.SemearAsync(
+        escopoDemo.ServiceProvider.GetRequiredService<AmparaDbContext>(), caminhoCatalogo, CancellationToken.None);
 }
 
 app.UseMiddleware<CorrelacaoMiddleware>();

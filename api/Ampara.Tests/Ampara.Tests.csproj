@@ -19,4 +19,7 @@
     <Using Include="Xunit" />
     <Using Include="System.Net" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Fixtures/catalogo-teste.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>

@@ -92,4 +92,10 @@ Resultado: 6 testes de emergência passando (43 na suíte); migration aplicada n
 
 Resultado: 6 testes de aparelho passando (52 na suíte); migration gerada e `--migrar` aplicado no PostgreSQL local (porta 5436, ampara_dev); tabela `Aparelhos` conferida com psql.
 
+### 13. Catálogo curado de contas e contas vinculadas (Task 7 do plano da API)
+
+> Executar a Task 7 do plano da API (`2026-11-14-02-api`): `CatalogoConta` e `ContaVinculada` (slug cifrado), seed curado de 10 bancos e 3 operadoras com telefones e links conferidos nos sites oficiais no dia (sem copiar de memória; o que não foi confirmado fica `null`), `CatalogoSeeder` idempotente, rotas `GET /api/v1/contas/catalogo` (anônima), `POST /api/v1/contas` (404 desconhecida, 409 `conta-ja-vinculada` comparando decifrado) e `GET /api/v1/contas` só do dono, fontes em `docs/fontes.md`.
+
+Resultado: testes de conta e de seed passando; migration `Contas` aplicada no PostgreSQL local (5436, ampara_dev) com 13 linhas em `Catalogo`; só Nubank e Inter tiveram telefone confirmado, o resto ficou com link e `telefone: null`.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->

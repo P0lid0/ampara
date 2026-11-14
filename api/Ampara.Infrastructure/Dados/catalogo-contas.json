@@ -1,0 +1,15 @@
+[
+  { "id": "bb", "nome": "Banco do Brasil", "tipo": "banco", "telefone": null, "link": "https://www.bb.com.br/", "conferidoEm": null },
+  { "id": "caixa", "nome": "Caixa Econômica Federal", "tipo": "banco", "telefone": null, "link": "https://www.caixa.gov.br/", "conferidoEm": null },
+  { "id": "itau", "nome": "Itaú", "tipo": "banco", "telefone": null, "link": "https://www.itau.com.br/", "conferidoEm": null },
+  { "id": "bradesco", "nome": "Bradesco", "tipo": "banco", "telefone": null, "link": "https://banco.bradesco/", "conferidoEm": null },
+  { "id": "santander", "nome": "Santander", "tipo": "banco", "telefone": null, "link": "https://www.santander.com.br/", "conferidoEm": null },
+  { "id": "nubank", "nome": "Nubank", "tipo": "banco", "telefone": "4020 0185", "link": "https://nubank.com.br/contato", "conferidoEm": "2026-11-14" },
+  { "id": "inter", "nome": "Banco Inter", "tipo": "banco", "telefone": "3003 4070", "link": "https://inter.co/canais-de-atendimento/", "conferidoEm": "2026-11-14" },
+  { "id": "c6", "nome": "C6 Bank", "tipo": "banco", "telefone": null, "link": "https://www.c6bank.com.br/", "conferidoEm": null },
+  { "id": "mercadopago", "nome": "Mercado Pago", "tipo": "banco", "telefone": null, "link": "https://www.mercadopago.com.br/", "conferidoEm": null },
+  { "id": "picpay", "nome": "PicPay", "tipo": "banco", "telefone": null, "link": "https://picpay.com/", "conferidoEm": null },
+  { "id": "vivo", "nome": "Vivo", "tipo": "operadora", "telefone": null, "link": "https://vivo.com.br/", "conferidoEm": null },
+  { "id": "claro", "nome": "Claro", "tipo": "operadora", "telefone": null, "link": "https://www.claro.com.br/atendimento", "conferidoEm": null },
+  { "id": "tim", "nome": "TIM", "tipo": "operadora", "telefone": null, "link": "https://www.tim.com.br/sp/para-voce/atendimento", "conferidoEm": null }
+]

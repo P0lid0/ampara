@@ -61,6 +61,64 @@ namespace Ampara.Infrastructure.Migrations
                     b.ToTable("Aparelhos", (string)null);
                 });
 
+            modelBuilder.Entity("Ampara.Domain.Entidades.CatalogoConta", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<string>("ConferidoEm")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<string>("Link")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<string>("Telefone")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Catalogo", (string)null);
+                });
+
+            modelBuilder.Entity("Ampara.Domain.Entidades.ContaVinculada", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CatalogoIdCifrado")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UsuarioId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.ToTable("Contas", (string)null);
+                });
+
             modelBuilder.Entity("Ampara.Domain.Entidades.TentativaEmergencia", b =>
                 {
                     b.Property<Guid>("Id")
@@ -137,6 +195,15 @@ namespace Ampara.Infrastructure.Migrations
                 });
 
             modelBuilder.Entity("Ampara.Domain.Entidades.Aparelho", b =>
+                {
+                    b.HasOne("Ampara.Domain.Entidades.Usuario", null)
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Ampara.Domain.Entidades.ContaVinculada", b =>
                 {
                     b.HasOne("Ampara.Domain.Entidades.Usuario", null)
                         .WithMany()
