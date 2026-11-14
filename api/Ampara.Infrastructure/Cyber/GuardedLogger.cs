@@ -13,6 +13,8 @@ public sealed class GuardedLogger(ILogger inner, Func<ITaintGuard> guard) : ILog
 {
     public const string Suprimido = "[log suprimido: falha ao sanitizar]";
 
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, byte> JaAvisados = new();
+
     public IDisposable? BeginScope<TState>(TState state) where TState : notnull => inner.BeginScope(state);
 
     public bool IsEnabled(LogLevel logLevel) => inner.IsEnabled(logLevel);
@@ -27,9 +29,13 @@ public sealed class GuardedLogger(ILogger inner, Func<ITaintGuard> guard) : ILog
             if (exception is not null) bruto = $"{bruto}{Environment.NewLine}{exception}";
             texto = guard().Sanitizar(bruto, Sink.Log).Texto;
         }
-        catch
+        catch (Exception falha)
         {
-            texto = Suprimido;
+            // So o TIPO da falha: Message pode carregar o valor sensivel.
+            var tipo = falha.GetType().Name;
+            texto = $"{Suprimido[..^1]} ({tipo})]";
+            if (JaAvisados.TryAdd(tipo, 0))
+                Console.Error.WriteLine($"[Cyber] GuardedLogger: falha ao sanitizar log ({tipo}); linhas suprimidas.");
         }
         inner.Log(logLevel, eventId, texto, null, static (s, _) => s);
     }

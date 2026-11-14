@@ -84,7 +84,17 @@ public class LoggerProtegidoTests
         var cap = new Captura();
         var logger = new GuardedLoggerFactory(new LoggerFactory([cap]), () => throw new InvalidOperationException("sem guard")).CreateLogger("c");
         logger.LogInformation("cpf {C}", "529.982.247-25");   // SINTETICO
-        Assert.Equal(GuardedLogger.Suprimido, Assert.Single(cap.Linhas).Texto); }
+        var texto = Assert.Single(cap.Linhas).Texto;
+        Assert.StartsWith("[log suprimido: falha ao sanitizar", texto);
+        Assert.Contains("InvalidOperationException", texto);   // diagnostico: so o tipo
+        Assert.DoesNotContain("529.982.247-25", texto); }
+
+    [Fact] public void Falha_do_guard_nao_expoe_a_mensagem_da_excecao() {
+        var cap = new Captura();
+        var logger = new GuardedLoggerFactory(new LoggerFactory([cap]), () => throw new InvalidOperationException("valor 529.982.247-25")).CreateLogger("c");   // SINTETICO
+        logger.LogInformation("x");
+        var texto = Assert.Single(cap.Linhas).Texto;
+        Assert.Contains("InvalidOperationException", texto); Assert.DoesNotContain("529.982.247-25", texto); }
 
     [Fact] public void Antes_e_depois_com_a_flag_de_demonstracao() {   // evidência do PDF   SINTETICO
         Assert.Contains("529.982.247-25", Logar(taintAtivo: false, demo: true, "cpf 529.982.247-25"));
