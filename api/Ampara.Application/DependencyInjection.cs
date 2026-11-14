@@ -1,3 +1,4 @@
+using Ampara.Application.Aparelhos;
 using Ampara.Application.Auth;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -9,6 +10,7 @@ public static class DependencyInjection
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IAparelhoService, AparelhoService>();
         return services;
     }
 }

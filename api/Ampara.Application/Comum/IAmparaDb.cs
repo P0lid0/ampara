@@ -8,6 +8,7 @@ public interface IAmparaDb
 {
     DbSet<Usuario> Usuarios { get; }
     DbSet<TentativaEmergencia> TentativasEmergencia { get; }
+    DbSet<Aparelho> Aparelhos { get; }
 
     Task<int> SaveChangesAsync(CancellationToken ct = default);
 

@@ -86,4 +86,10 @@ Resultado: 8 testes de auth passando; migration aplicada no PostgreSQL local (ta
 
 Resultado: 6 testes de emergência passando (43 na suíte); migration aplicada no PostgreSQL local.
 
+### 12. Aparelhos com IMEI cifrado e consentimento da rota (Task 6 do plano da API)
+
+> Executar a Task 6 do plano da API (`2026-11-14-02-api`): escrever primeiro o `AparelhoTests` (criar aparelho com IMEI normalizado e cifrado, IMEI inválido 422 `imei-invalido` sem gravar, 401 sem token e 422 com marca vazia, `PUT /me/consentimento-rota` grava e revoga, listagem só do dono com `imeiMascarado` de 11 asteriscos mais os 4 últimos dígitos), ver falhar, e implementar `Aparelho`, `IAparelhoService`/`AparelhoService` (inclui `ImeiCifradoMaisRecenteAsync` para o BO), `POST/GET /aparelhos`, `PUT /me/consentimento-rota`, `Aparelhos` no `IAmparaDb` e a migration `Aparelhos`.
+
+Resultado: 6 testes de aparelho passando (52 na suíte); migration gerada, `--migrar` não rodado (sem PostgreSQL local nesta sessão).
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->

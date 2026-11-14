@@ -85,8 +85,19 @@ public class AmparaFactory : WebApplicationFactory<Program>
 
     protected override void Dispose(bool disposing)
     {
+        if (disposing) foreach (var e in _escopos) e.Dispose();
         base.Dispose(disposing);
         if (disposing) _conexao.Dispose();
+    }
+
+    private readonly System.Collections.Concurrent.ConcurrentBag<IServiceScope> _escopos = new();
+
+    /// <summary>Um AmparaDbContext em escopo novo (os escopos são descartados junto com a fábrica).</summary>
+    public AmparaDbContext NovoDb()
+    {
+        var escopo = Services.CreateScope();
+        _escopos.Add(escopo);
+        return escopo.ServiceProvider.GetRequiredService<AmparaDbContext>();
     }
 
     private const string SenhaPadrao = "senha-sintetica-1";   // SINTETICO

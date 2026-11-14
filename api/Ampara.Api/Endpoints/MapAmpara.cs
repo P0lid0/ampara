@@ -7,6 +7,7 @@ public static class MapAmpara
     {
         rotas.MapAuth();
         rotas.MapMe();
+        rotas.MapAparelhos();
         return rotas;
     }
 }

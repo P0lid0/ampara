@@ -9,6 +9,7 @@ public class AmparaDbContext(DbContextOptions<AmparaDbContext> options) : DbCont
 {
     public DbSet<Usuario> Usuarios => Set<Usuario>();
     public DbSet<TentativaEmergencia> TentativasEmergencia => Set<TentativaEmergencia>();
+    public DbSet<Aparelho> Aparelhos => Set<Aparelho>();
 
     protected override void ConfigureConventions(ModelConfigurationBuilder cb)
     {
