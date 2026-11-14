@@ -21,3 +21,6 @@ def payload_valido(**sobrescritas) -> dict:
     }
     base.update(sobrescritas)
     return base
+
+
+HS = {"X-Chave-Servico": CHAVE_SERVICO}
