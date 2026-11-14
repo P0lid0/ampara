@@ -18,7 +18,7 @@ Preencha o link e a data de acesso só depois de abrir a página.
 
 ## Catálogo de contas (`api/Ampara.Infrastructure/Dados/catalogo-contas.json`)
 
-Telefones e links conferidos em 2026-11-14 abrindo as páginas oficiais. Só entra telefone com `conferidoEm` quando o número está escrito na página oficial e cabe no formato do seed (8 a 20 caracteres de dígitos, espaço, `+`, `()`, `-`). Entrada sem telefone confirmado fica com `telefone: null` e `conferidoEm: null` (o app mostra só o link). Nenhum número veio de memória.
+Links conferidos em 2026-11-14 abrindo a página oficial: BB, Caixa, Bradesco, Mercado Pago e PicPay por requisição (200/302); Itaú, Santander, C6 Bank e Vivo, que devolvem 403 a leitores automáticos, abertos num navegador real (a página oficial carregou em cada domínio; a Vivo redireciona para vivo.com.br/para-voce). Telefones: só os de Nubank e Inter foram conferidos nas páginas. Só entra telefone com `conferidoEm` quando o número está escrito na página oficial e cabe no formato do seed (8 a 20 caracteres de dígitos, espaço, `+`, `()`, `-`). Entrada sem telefone confirmado fica com `telefone: null` e `conferidoEm: null` (o app mostra só o link). Nenhum número veio de memória.
 
 | Instituição | Link (acessado em 2026-11-14) | Telefone | Observação |
 |---|---|---|---|
@@ -31,9 +31,9 @@ Telefones e links conferidos em 2026-11-14 abrindo as páginas oficiais. Só ent
 | Bradesco | https://banco.bradesco/ | null | Página inicial abre (200) sem número legível; telefone não confirmado |
 | Mercado Pago | https://www.mercadopago.com.br/ | null | Página inicial abre (200); página de ajuda bloqueou a leitura (403); telefone não confirmado |
 | PicPay | https://picpay.com/ | null | Página inicial abre (200); telefone não confirmado |
-| Itaú | https://www.itau.com.br/ | null | O site responde 403 a leitores automáticos (domínio oficial não verificado por leitura); telefone não confirmado |
-| Santander | https://www.santander.com.br/ | null | Idem: 403 a leitores automáticos; telefone não confirmado |
-| C6 Bank | https://www.c6bank.com.br/ | null | Idem: 403 a leitores automáticos; telefone não confirmado |
-| Vivo | https://vivo.com.br/ | null | Idem: 403 a leitores automáticos; telefone não confirmado |
+| Itaú | https://www.itau.com.br/ | null | Link conferido em navegador real em 2026-11-14 (403 a leitores automáticos); telefone não confirmado |
+| Santander | https://www.santander.com.br/ | null | Link conferido em navegador real em 2026-11-14 (403 a leitores automáticos); telefone não confirmado |
+| C6 Bank | https://www.c6bank.com.br/ | null | Link conferido em navegador real em 2026-11-14 (403 a leitores automáticos); telefone não confirmado |
+| Vivo | https://vivo.com.br/ | null | Link conferido em navegador real em 2026-11-14 (403 a leitores automáticos); telefone não confirmado |
 
-Pendência: Pedro conferir à mão, no navegador, os telefones das instituições com `null` antes da demonstração e preencher `telefone` e `conferidoEm` no JSON.
+Pendência: Pedro conferir à mão, no navegador, os telefones das instituições com `null` (os links já foram conferidos) antes da demonstração e preencher `telefone` e `conferidoEm` no JSON.

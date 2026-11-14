@@ -83,7 +83,7 @@ if (args.Contains("--migrar"))
     await db.Database.MigrateAsync();
     await Ampara.Infrastructure.Dados.CatalogoSeeder.SemearAsync(db, caminhoCatalogo, CancellationToken.None);
     var total = await db.Catalogo.CountAsync();
-    if (total < 13) throw new InvalidOperationException($"Catalogo com {total} itens (esperado >= 13).");
+    if (total < Ampara.Infrastructure.Dados.CatalogoSeeder.MinimoEsperado) throw new InvalidOperationException($"Catalogo com {total} itens (esperado >= {Ampara.Infrastructure.Dados.CatalogoSeeder.MinimoEsperado}).");
     return;
 }
 

@@ -9,8 +9,19 @@ public static class CatalogoSeeder
 {
     private static readonly JsonSerializerOptions Opcoes = new(JsonSerializerDefaults.Web);
 
-    public static List<CatalogoConta> Ler(string caminhoJson) =>
-        JsonSerializer.Deserialize<List<CatalogoConta>>(File.ReadAllText(caminhoJson), Opcoes) ?? [];
+    /// <summary>Quantidade minima de itens do catalogo curado (10 bancos e 3 operadoras).</summary>
+    public const int MinimoEsperado = 13;
+
+    public static List<CatalogoConta> Ler(string caminhoJson)
+    {
+        var itens = JsonSerializer.Deserialize<List<CatalogoConta>>(File.ReadAllText(caminhoJson), Opcoes) ?? [];
+        if (itens.Any(i => string.IsNullOrWhiteSpace(i.Id)))
+            throw new InvalidOperationException("Catalogo com item sem id.");
+        var repetido = itens.GroupBy(i => i.Id).FirstOrDefault(g => g.Count() > 1);
+        if (repetido is not null)
+            throw new InvalidOperationException($"Catalogo com id repetido: {repetido.Key}.");
+        return itens;
+    }
 
     /// <summary>Upsert idempotente por Id: roda quantas vezes quiser sem duplicar.</summary>
     public static async Task SemearAsync(IAmparaDb db, string caminhoJson, CancellationToken ct)

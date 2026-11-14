@@ -7,7 +7,7 @@ namespace Ampara.Application.Contas;
 public sealed class ContaService(IAmparaDb db, ICifrador cifrador, TimeProvider tempo) : IContaService
 {
     public async Task<IReadOnlyList<CatalogoConta>> ListarCatalogoAsync(CancellationToken ct) =>
-        (await db.Catalogo.AsNoTracking().ToListAsync(ct)).OrderBy(c => c.Tipo, StringComparer.Ordinal).ThenBy(c => c.Nome, StringComparer.CurrentCulture).ToList();
+        (await db.Catalogo.AsNoTracking().ToListAsync(ct)).OrderBy(c => c.Tipo, StringComparer.Ordinal).ThenBy(c => c.Nome, StringComparer.Ordinal).ToList();
 
     public async Task<Guid> VincularAsync(Guid usuarioId, string catalogoId, CancellationToken ct)
     {
