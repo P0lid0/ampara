@@ -126,14 +126,20 @@ public class ChaveiroTests(AmparaFactory f) : IClassFixture<AmparaFactory>
     [Fact]
     public async Task Lista_vem_na_ordem_do_pareamento()
     {
+        // Grava direto com PareadoEm fora da ordem de inserção (t+2, t+0, t+1): sem o OrderBy do serviço
+        // o SQLite devolveria na ordem de inserção e o teste quebraria. Não mexe no relógio compartilhado.
         var s = await f.NovoUsuarioAsync();
-        var ids = new[] { NovoId(), NovoId(), NovoId() };
-        foreach (var id in ids)
+        var t0 = new DateTime(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc);
+        var (a, b, c) = (NovoId(), NovoId(), NovoId());
+        var db = f.NovoDb();
+        // Um SaveChanges por linha: o EF reordena inserts do mesmo lote pela chave (Guid aleatório).
+        foreach (var (id, em) in new[] { (c, t0.AddMinutes(2)), (a, t0), (b, t0.AddMinutes(1)) })
         {
-            Assert.Equal(HttpStatusCode.Created, (await s.Cliente.PostAsJsonAsync("/api/v1/chaveiros", new { deviceId = id })).StatusCode);
-            f.Tempo.Advance(TimeSpan.FromMinutes(1));
+            db.Chaveiros.Add(Chaveiro.Parear(s.UsuarioId, id, em));
+            await db.SaveChangesAsync();
         }
+
         var l = await s.Cliente.GetFromJsonAsync<JsonElement>("/api/v1/chaveiros");
-        Assert.Equal(ids, l.EnumerateArray().Select(e => e.GetProperty("deviceId").GetString()!).ToArray());
+        Assert.Equal(new[] { a, b, c }, l.EnumerateArray().Select(e => e.GetProperty("deviceId").GetString()!).ToArray());
     }
 }
