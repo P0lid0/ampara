@@ -1,3 +1,4 @@
+using Ampara.Application.Auth;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Ampara.Application;
@@ -5,5 +6,9 @@ namespace Ampara.Application;
 public static class DependencyInjection
 {
     /// <summary>Serviços da camada de aplicação. Cresce nas próximas tarefas.</summary>
-    public static IServiceCollection AddApplication(this IServiceCollection services) => services;
+    public static IServiceCollection AddApplication(this IServiceCollection services)
+    {
+        services.AddScoped<IAuthService, AuthService>();
+        return services;
+    }
 }

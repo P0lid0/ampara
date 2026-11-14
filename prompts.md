@@ -74,4 +74,10 @@ Resultado: erros em `application/problem+json` com `title` fixo por exceção e 
 
 Resultado: primitivas em `api/Ampara.Domain/Comum`, cifra em `api/Ampara.Infrastructure/Cripto`; correção da revisão com teste de adulteração por byte (nonce, tag e ciphertext) e teste da falha de subida da chave.
 
+### 10. Banco, usuário e autenticação JWT (Task 4 do plano da API)
+
+> Executar a Task 4 do plano da API (`2026-11-14-02-api`): escrever primeiro o `AuthTests` (registro 201 com e-mail normalizado e 409 no duplicado, 401 idêntico para senha errada e e-mail desconhecido, 422 para senha curta e nome vazio, registro nunca cria admin, claims e validade de 8 h, segredo curto derruba a subida), ver falhar, e implementar `Usuario`, `IAmparaDb`, `AmparaDbContext` (datas UTC, enums como texto), hasher PBKDF2-SHA256, `TokenService`, `AuthService`, rotas `/api/v1/auth`, JWT Bearer com políticas, `--migrar`, a migration `Inicial` (dotnet-ef como ferramenta local) e a fábrica de testes com SQLite em memória.
+
+Resultado: 8 testes de auth passando; migration aplicada no PostgreSQL local (tabela `Usuarios`).
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->
