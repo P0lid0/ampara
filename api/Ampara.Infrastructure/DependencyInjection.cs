@@ -8,6 +8,7 @@ using Ampara.Infrastructure.Cripto;
 using Ampara.Infrastructure.Cyber;
 using Ampara.Infrastructure.Dados;
 using Ampara.Infrastructure.Mqtt;
+using Ampara.Infrastructure.Ponte;
 using Ampara.Infrastructure.Risco;
 using Ampara.Infrastructure.Seguranca;
 using Microsoft.EntityFrameworkCore;
@@ -43,6 +44,7 @@ public static class DependencyInjection
         services.AddSingleton<MqttChaveiroGateway>();
         services.AddSingleton<IChaveiroGateway>(sp => sp.GetRequiredService<MqttChaveiroGateway>());
         services.AddHostedService(sp => sp.GetRequiredService<MqttChaveiroGateway>());
+        services.AddPontePolicia();
         services.AddSingleton<ISondaSaude, SondaSaude>();
         services.AddSingleton<RiscoService>();
         services.AddSingleton<IRiscoService>(sp => sp.GetRequiredService<RiscoService>());

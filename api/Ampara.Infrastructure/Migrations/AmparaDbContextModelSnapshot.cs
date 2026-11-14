@@ -327,6 +327,17 @@ namespace Ampara.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("BoNumero")
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<string>("BoStatus")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("nao_registrado");
+
                     b.Property<string>("ChaveiroAlertId")
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)");
@@ -361,6 +372,13 @@ namespace Ampara.Infrastructure.Migrations
                     b.Property<string>("ProtocoloPolicia")
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
+
+                    b.Property<string>("Recuperacao")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("sem_noticia");
 
                     b.Property<Guid>("UsuarioId")
                         .HasColumnType("uuid");

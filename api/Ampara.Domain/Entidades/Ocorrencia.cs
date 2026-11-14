@@ -5,6 +5,10 @@ namespace Ampara.Domain.Entidades;
 /// <summary>Uma ocorrência de roubo/furto de celular, aberta por um gatilho. No máximo uma Aberta por vítima (índice parcial).</summary>
 public sealed class Ocorrencia
 {
+    public const int BoNumeroMaximo = 40;
+    public const string BoNaoRegistrado = "nao_registrado", BoRegistrado = "registrado";
+    public const string SemNoticia = "sem_noticia", Localizado = "localizado", Recuperado = "recuperado";
+
     private static readonly TimeSpan ToleranciaFuturo = TimeSpan.FromMinutes(5);
     private static readonly TimeSpan JanelaPassado = TimeSpan.FromDays(7);
 
@@ -20,6 +24,9 @@ public sealed class Ocorrencia
     public string? ChaveiroDeviceId { get; internal set; }
     public string? ChaveiroAlertId { get; internal set; }
     public string? ProtocoloPolicia { get; private set; }
+    public string? BoNumero { get; private set; }
+    public string BoStatus { get; private set; } = BoNaoRegistrado;
+    public string Recuperacao { get; private set; } = SemNoticia;
     public List<PassoOcorrencia> Passos { get; private set; } = [];
 
     private Ocorrencia() { }
@@ -49,6 +56,21 @@ public sealed class Ocorrencia
         MomentoEm = DateTime.SpecifyKind(emUtc, DateTimeKind.Utc);
         MomentoLat = lat;
         MomentoLng = lng;
+    }
+
+    public void RegistrarProtocoloPolicia(string protocolo) => ProtocoloPolicia = protocolo;
+
+    /// <summary>Acompanhamento da vítima (fica só na API). Valor fora do conjunto ou número com mais de 40 caracteres: acompanhamento-invalido.</summary>
+    public void DefinirAcompanhamento(string? boNumero, string? boStatus, string? recuperacao)
+    {
+        var numero = string.IsNullOrWhiteSpace(boNumero) ? null : boNumero.Trim();
+        if (numero is { Length: > BoNumeroMaximo }
+            || boStatus is not (BoNaoRegistrado or BoRegistrado)
+            || recuperacao is not (SemNoticia or Localizado or Recuperado))
+            throw new DominioException("acompanhamento-invalido");
+        BoNumero = numero;
+        BoStatus = boStatus;
+        Recuperacao = recuperacao;
     }
 
     public void Cancelar(DateTime agora) => Fechar(EstadoOcorrencia.Cancelada, agora);

@@ -14,6 +14,9 @@ public sealed class OcorrenciaConfiguration : IEntityTypeConfiguration<Ocorrenci
         b.Property(o => o.ChaveiroDeviceId).HasMaxLength(64);
         b.Property(o => o.ChaveiroAlertId).HasMaxLength(128);
         b.Property(o => o.ProtocoloPolicia).HasMaxLength(64);
+        b.Property(o => o.BoNumero).HasMaxLength(Ocorrencia.BoNumeroMaximo);
+        b.Property(o => o.BoStatus).HasMaxLength(20).IsRequired().HasDefaultValue(Ocorrencia.BoNaoRegistrado);
+        b.Property(o => o.Recuperacao).HasMaxLength(20).IsRequired().HasDefaultValue(Ocorrencia.SemNoticia);
         b.HasOne<Usuario>().WithMany().HasForeignKey(o => o.UsuarioId).OnDelete(DeleteBehavior.Cascade);
         // No máximo uma ocorrência Aberta por vítima (a corrida de dois gatilhos termina no índice).
         b.HasIndex(o => o.UsuarioId).IsUnique().HasDatabaseName("UX_Ocorrencias_UmaAbertaPorUsuario")

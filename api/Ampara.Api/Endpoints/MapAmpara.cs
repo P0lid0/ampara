@@ -14,6 +14,7 @@ public static class MapAmpara
         rotas.MapRota();
         rotas.MapOcorrencias();
         rotas.MapBo();
+        rotas.MapPolicia();
         rotas.MapCamadas();
         rotas.MapRisco();
         rotas.MapAlertas();

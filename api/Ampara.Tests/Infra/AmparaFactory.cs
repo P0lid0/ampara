@@ -4,6 +4,7 @@ using System.Text.Json;
 using Ampara.Application.Chaveiros;
 using Ampara.Application.Comum;
 using Ampara.Application.Cyber;
+using Ampara.Application.Policia;
 using Ampara.Infrastructure;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -39,6 +40,10 @@ public class AmparaFactory : WebApplicationFactory<Program>
         ImeiRevelador = new ImeiReveladorSpy(() => new Ampara.Infrastructure.Cyber.NoopImeiRevelador(Services.GetRequiredService<Ampara.Application.Comum.ICifrador>()));
     }
 
+    public const string ChaveServicoTeste = "chave-teste-sintetica";   // SINTETICO
+
+    public FakePontePoliciaClient Ponte { get; } = new();
+
     public AcessoIndevidoSpy Acesso { get; } = new();
 
     public FakeChaveiroGateway Gateway { get; } = new();
@@ -57,6 +62,8 @@ public class AmparaFactory : WebApplicationFactory<Program>
             ["AMPARA_CRYPTO_KEY"] = ChaveTeste,
             ["AMPARA_DEMO"] = "false",
             ["AMPARA_DB"] = "Host=localhost;Database=teste;Username=teste;Password=falsa",
+            ["PONTE_URL"] = "http://ponte.invalid",
+            ["PONTE_CHAVE_SERVICO"] = ChaveServicoTeste,
             ["MQTT_HOST"] = "127.0.0.1",
             ["MQTT_PORT"] = "1883",
             ["RISCO_CSV"] = "risco-teste.csv",
@@ -71,6 +78,8 @@ public class AmparaFactory : WebApplicationFactory<Program>
             services.AddSingleton<IAcessoIndevido>(Acesso);
             services.RemoveAll<IChaveiroGateway>();
             services.AddSingleton<IChaveiroGateway>(Gateway);
+            services.RemoveAll<IPontePoliciaClient>();
+            services.AddSingleton<IPontePoliciaClient>(Ponte);
             services.RemoveAll<ISondaSaude>();
             services.AddSingleton<ISondaSaude>(Sonda);
             // Espia o revelador de IMEI (delega ao no-op, que só decifra); o BO tem de passar por ele.

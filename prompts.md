@@ -136,4 +136,8 @@ Resultado: testes de BO, delegacia e camada passando; migration `Bo` aplicada co
 
 Resultado: 204 testes passando na suíte; sem migration.
 
+> Executar a Task 18 do plano da API (`2026-11-14-02-api`): cliente da Ponte Polícia (`IPontePoliciaClient`/`PontePoliciaClient`, POST /ocorrencias e GET retorno, chave `X-Chave-Servico`, timeout 5 s, falha vira `ponte-indisponivel`), `PoliciaService` (compartilhar com consentimento, device_hash, trilha só com consentimento de rota, taint guard no sink Ponte, retorno, acompanhamento do BO e da recuperação que nunca vai para a Ponte), rotas, `FakePontePoliciaClient`, migration `Acompanhamento` e o exemplo `ponte-policia/tests/contrato/exemplo_da_api.json` gravado pelo teste.
+
+Resultado: suíte completa passando; migration Acompanhamento gerada.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->
