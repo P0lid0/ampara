@@ -29,11 +29,45 @@ public sealed class Escalonamento(
 
     public async Task<int> ProcessarVencidosAsync(CancellationToken ct)
     {
-        var abertas = await db.Ocorrencias.AsNoTracking().Where(o => o.Estado == EstadoOcorrencia.Aberta).Select(o => o.Id).ToListAsync(ct);
+        var abertas = await db.Ocorrencias.AsNoTracking().Where(o => o.Estado == EstadoOcorrencia.Aberta)
+            .Select(o => new { o.Id, o.AlertasLiberadosEm }).ToListAsync(ct);
+        var agora = Agora;
         var escaladas = 0;
-        foreach (var id in abertas)
-            if (await TentarEscalarAsync(id, ct)) escaladas++;
+        foreach (var x in abertas)
+        {
+            // Janela de cancelamento (impacto): fechada, dispara o 1o alerta; aberta, nada a fazer. Conta como ocorrência processada.
+            if (x.AlertasLiberadosEm is { } liberadoEm)
+            {
+                if (liberadoEm <= agora && await TentarLiberarAsync(x.Id, ct)) escaladas++;
+                if (liberadoEm > agora) continue;
+            }
+            if (await TentarEscalarAsync(x.Id, ct)) escaladas++;
+        }
         return escaladas;
+    }
+
+    /// <summary>Primeiro alerta de uma ocorrência cuja janela de cancelamento fechou. Idempotente: com alerta já criado, não faz nada.</summary>
+    private async Task<bool> TentarLiberarAsync(Guid ocorrenciaId, CancellationToken ct)
+    {
+        var resultado = await db.TransacaoAsync(async () =>
+        {
+            await db.TravarPorChaveAsync("escalada:" + ocorrenciaId, ct);
+            var o = await db.Ocorrencias.AsNoTracking().FirstOrDefaultAsync(x => x.Id == ocorrenciaId, ct);
+            if (o is null || o.Estado != EstadoOcorrencia.Aberta || o.AlertasLiberadosEm is not { } liberadoEm || liberadoEm > Agora) return null;
+            if (await db.Alertas.AnyAsync(a => a.OcorrenciaId == ocorrenciaId, ct)) return null;
+            var primeiro = (await db.Guardioes.AsNoTracking().Where(g => g.UsuarioId == o.UsuarioId).ToListAsync(ct))
+                .OrderBy(g => g.Ordem).FirstOrDefault();
+            if (primeiro is null) return null;
+
+            var alerta = Alerta.Disparar(ocorrenciaId, primeiro, Agora);
+            db.Alertas.Add(alerta);
+            await db.SaveChangesAsync(ct);
+            return new Liberada(o, alerta);
+        }, ct);
+
+        if (resultado is null) return false;
+        await notificador.AlertaDisparadoAsync(resultado.Alerta.GuardiaoUsuarioId, await MensagemAsync(resultado.Alerta, resultado.Ocorrencia, ct), ct);
+        return true;
     }
 
     private async Task<bool> TentarEscalarAsync(Guid ocorrenciaId, CancellationToken ct)
@@ -71,6 +105,7 @@ public sealed class Escalonamento(
         return true;
     }
 
+    private sealed record Liberada(Ocorrencia Ocorrencia, Alerta Alerta);
     private sealed record Escalada(Ocorrencia Ocorrencia, Alerta Novo, IReadOnlyList<Guid> Anteriores);
 
     public async Task ConfirmarCienteAsync(Ator ator, Guid alertaId, CancellationToken ct)

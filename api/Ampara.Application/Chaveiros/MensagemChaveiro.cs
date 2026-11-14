@@ -7,7 +7,7 @@ namespace Ampara.Application.Chaveiros;
 public sealed record MensagemChaveiro(string EventId, string Tipo, string DeviceId, string? AlertId, long? Ts, int AgeMs, int? Battery)
 {
     public const int LimiteBytes = 2048;
-    public static readonly IReadOnlySet<string> TiposValidos = new HashSet<string> { "alert", "cancel", "test", "low_battery" };
+    public static readonly IReadOnlySet<string> TiposValidos = new HashSet<string> { "alert", "impact", "cancel", "test", "low_battery" };
 
     public static MensagemChaveiro? Ler(string? payload)
     {

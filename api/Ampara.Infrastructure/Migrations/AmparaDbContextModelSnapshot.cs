@@ -327,6 +327,9 @@ namespace Ampara.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime?>("AlertasLiberadosEm")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("BoNumero")
                         .HasMaxLength(40)
                         .HasColumnType("character varying(40)");

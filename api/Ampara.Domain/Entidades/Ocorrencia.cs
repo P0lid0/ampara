@@ -23,6 +23,8 @@ public sealed class Ocorrencia
     public double? MomentoLng { get; private set; }
     public string? ChaveiroDeviceId { get; internal set; }
     public string? ChaveiroAlertId { get; internal set; }
+    /// <summary>Janela de cancelamento do impacto: antes disso nenhum alerta sai. Nulo = alertas imediatos.</summary>
+    public DateTime? AlertasLiberadosEm { get; internal set; }
     public string? ProtocoloPolicia { get; private set; }
     public string? BoNumero { get; private set; }
     public string BoStatus { get; private set; } = BoNaoRegistrado;

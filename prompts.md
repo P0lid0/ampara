@@ -144,4 +144,8 @@ Resultado: 225 testes passando na suíte; migration `Acompanhamento` aplicada co
 
 Resultado: 239 testes passando na suite; migration `Relatos` aplicada com `--migrar` no PostgreSQL local (5436, ampara_dev), tabelas `Relatos` e `RelatoConfirmacoes` e o indice unico (RelatoId, UsuarioId) conferidos com psql.
 
+> Executar a Task 20 do plano da API (`2026-11-14-02-api`): escrever primeiro o `ImpactoTests` (impacto não alerta dentro dos 10 s, cancel na janela nunca chega a alertar, passada a janela o primeiro `ProcessarVencidosAsync` alerta o guardião 1), ver falhar, e implementar `GatilhoImpacto`, `Ocorrencia.AlertasLiberadosEm`, o evento `impact` no `ChaveiroEventoService`/`MensagemChaveiro`, a liberação dos alertas no `Escalonamento` e a migration `Impacto`.
+
+Resultado: 242 testes passando na suíte; migration `Impacto` aplicada com `--migrar` no PostgreSQL local (5436, ampara_dev), coluna `AlertasLiberadosEm` (timestamptz, nula) e a linha em `__EFMigrationsHistory` conferidas com psql.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->

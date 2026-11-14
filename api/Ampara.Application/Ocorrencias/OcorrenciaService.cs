@@ -34,7 +34,8 @@ public sealed class OcorrenciaService(
             if (await AbertaDaVitimaAsync(vitimaId, ct) is { } vencedora) return new OcorrenciaCriada(vencedora, false);
             throw;
         }
-        await escalonamento.IniciarAsync(o.Id, ct);
+        // Com janela de cancelamento (impacto) o alerta só sai quando ela fecha, pelo ProcessarVencidosAsync.
+        if (o.AlertasLiberadosEm is not { } liberadoEm || liberadoEm <= Agora) await escalonamento.IniciarAsync(o.Id, ct);
         return new OcorrenciaCriada(o.Id, true);
     }
 
@@ -85,7 +86,7 @@ public sealed class OcorrenciaService(
         // Política: valida o cancelamento, publica o resolve e só então grava. Se o gateway falhar, a exceção sobe
         // e a ocorrência continua Aberta, então o cliente pode repetir e o chaveiro ainda recebe o resolve.
         o.Cancelar(Agora);
-        if (o is { Origem: OrigemGatilho.Chaveiro, ChaveiroDeviceId: { } device, ChaveiroAlertId: { } alerta })
+        if (o is { Origem: OrigemGatilho.Chaveiro or OrigemGatilho.Impacto, ChaveiroDeviceId: { } device, ChaveiroAlertId: { } alerta })
             await gateway.PublicarComandoAsync(device, ComandoChaveiro.Resolve(alerta), ct);
         await db.SaveChangesAsync(ct);
         await escalonamento.EncerrarAlertasAsync(o.Id, "cancelado", ct);
@@ -108,7 +109,7 @@ public sealed class OcorrenciaService(
         {
             // Mesma política do cancelar: resolve antes de gravar, para o cliente poder repetir se o gateway falhar.
             o.Encerrar(agora);
-            if (o is { Origem: OrigemGatilho.Chaveiro, ChaveiroDeviceId: { } device, ChaveiroAlertId: { } alerta })
+            if (o is { Origem: OrigemGatilho.Chaveiro or OrigemGatilho.Impacto, ChaveiroDeviceId: { } device, ChaveiroAlertId: { } alerta })
                 await gateway.PublicarComandoAsync(device, ComandoChaveiro.Resolve(alerta), ct);
         }
         await db.SaveChangesAsync(ct);
