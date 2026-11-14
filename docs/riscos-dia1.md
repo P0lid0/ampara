@@ -7,7 +7,7 @@
 | a2-build-expo-router | PENDENTE | 2026-11-14 | O spike a-emulador-gps roda sem Expo Router (index.js + App.tsx) porque o build Android com `expo-router` (react-native-screens, react-native-safe-area-context) estoura o limite de 260 caracteres do ninja/CMake no Windows (`LongPathsEnabled=0`; mesmo em `C:\a\gps` o objeto ficou com 304 caracteres). O contrato do projeto exige Expo Router; o build dele nesta máquina NÃO foi provado. Decisão do Pedro por escrito antes do plano 05: ativar `LongPathsEnabled=1` (configuração de sistema, não alterada por mim) ou aprovar o desvio do contrato | (1) LongPathsEnabled=1 e provar o build com Expo Router; (2) caminho de build ainda mais curto (ex. `C:\a`) com subst/junction; (3) build do APK em outra máquina/CI (EAS Build); (4) Pedro aprovar por escrito app sem Expo Router (navegação própria) |
 | b-mqtt | PASSOU | 2026-11-14 | broker.hivemq.com:1883, paho-mqtt 2.x: 5 testes passaram (CONNACK 0, SUBACK em events/status, ida e volta do evento type test, status retido recebido por quem assina depois, comando ack em cmd). Contra 127.0.0.1 os 5 falham (recusa de conexão), então o teste sabe falhar. Firmware do Vitor tem o broker fixo | modo demonstração injeta o mesmo handleEvent |
 | c-ssp | PASSOU | 2026-11-14 | SPDadosCriminais_2025.xlsx (abas JAN-JUN_2025 e JUL-DEZ_2025) abriu e foi perfilada (`docs/dados-ssp-colunas.md`). Achou LATITUDE, LONGITUDE, DATA_OCORRENCIA_BO, RUBRICA, NOME_MUNICIPIO, BAIRRO. Coordenadas válidas na capital: 76,9% nas primeiras 20000 linhas da aba JAN-JUN_2025 (amostra, não o ano todo). Sem coluna de objeto celular: RUBRICA/DESCR_CONDUTA como proxy | distrito ou SPSafe |
-| d-vm | PENDENTE |  |  | Hyper-V ou Azure |
+| d-vm | PASSOU | 2026-11-14 | `bash infra/spike/verificar-vm.sh` sai com código 0 (asserções 1-8), duas execuções seguidas. QEMU 11.1.0 (scoop) com `-accel whpx,kernel-irqchip=off -cpu qemu64 -m 4096 -smp 2`, imagem cloud Ubuntu 24.04 (noble-server-cloudimg-amd64.img, SHA-256 conferido contra SHA256SUMS). Login (`ampara-vm login:` na serial) em 62 s desde o `subir` (primeira execução; a segunda levou 80 s até o poweroff, a primeira 75 s); SSH com chave em `localhost:2222` imprime `ampara-vm`; `cloud-init status --wait` = done; `sudo poweroff` encerra o processo do QEMU. Seed NoCloud servido por `python -m http.server 8088` e lido via `-smbios`. Achados: (1) `-cpu max` quebra com WHPX (`failed to get xsave state`), manter `qemu64`; o aviso `host doesn't support requested feature ... svm` no qemu.log é inofensivo. (2) `Start-Process` dentro de `$(...)` do bash trava o script (o filho herda o pipe): `run-vm.sh` redireciona stdout/stderr dos filhos e grava o PID por arquivo, sem substituição de comando. (3) O cloud-init só aplica o seed uma vez por instance-id: o `disco.qcow2` é recriado a cada `verificar-vm.sh`; reutilizar o disco de uma execução anterior deu SSH com `Connection reset` (causa não aprofundada, disco novo resolve). Nenhuma configuração do Windows foi alterada | Hyper-V ou Azure |
 | e-wokwi | PENDENTE |  |  | simulador Python do Vitor |
 
 Resultado: `PENDENTE`, `PASSOU`, `FALHOU` ou `PULADO`.
@@ -19,7 +19,7 @@ ExpoSDK: 58.0.25
 SSP_VEREDITO: GRADE_500M
 SSP_CELULAR: PROXY
 MQTT_HOST_EFETIVO: broker.hivemq.com
-VM: PENDENTE
+VM: QEMU+WHPX
 
 ## Pendências
 
