@@ -32,7 +32,7 @@ public class RespostaNaoAutenticadaTests
         m.MapGet("/vaza-senha", () => Results.Json(new { senha = "abc12345" }));
         m.MapGet("/autenticado", (HttpContext c) =>
         {
-            c.User = new ClaimsPrincipal(new ClaimsIdentity([new Claim(ClaimTypes.NameIdentifier, Guid.NewGuid().ToString())], "teste"));
+            c.User = new ClaimsPrincipal(new ClaimsIdentity([new Claim("sub", Guid.NewGuid().ToString())], "teste"));
             return Results.Json(new { cpf = "529.982.247-25" });
         });
         m.MapPost("/binding", (Corpo c) => Results.Ok(c));

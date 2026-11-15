@@ -91,14 +91,18 @@ public class TaintGuardTests
 
     [Fact] public void Alvo_e_correlacao_vem_das_opcoes_do_escopo_ou_do_usuario_logado() {   // SINTETICO
         var id = Guid.NewGuid();
-        var http = new HttpContextAccessor { HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal(new ClaimsIdentity([new Claim(ClaimTypes.NameIdentifier, id.ToString())], "t")) } };
+        // Como o TokenService emite (só "sub", MapInboundClaims=false). Revisão final do plano 03 (regressao-2).
+        var http = new HttpContextAccessor { HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal(new ClaimsIdentity([new Claim("sub", id.ToString())], "t")) } };
         var rastro = new RastroEmMemoria();
         var g = Montar(rastro, http: http);
         Assert.Equal(id, g.Sanitizar("529.982.247-25", Sink.Log, new SanitizarOpcoes(OrigemDado.Query, "cpf", null, "abc-1")).Eventos.Single().UsuarioAlvoId);
         var e = rastro.Eventos.Single(); Assert.Equal(("cpf", OrigemDado.Query, "abc-1"), (e.Campo, e.Source, e.CorrelationId));
         var outro = Guid.NewGuid();
         Assert.Equal(outro, g.Sanitizar("123.456.789-09", Sink.Log, new SanitizarOpcoes(UsuarioAlvoId: outro)).Eventos.Single().UsuarioAlvoId);
-        Assert.Equal(("texto", OrigemDado.Http), (rastro.Eventos[1].Campo, rastro.Eventos[1].Source)); }
+        Assert.Equal(("texto", OrigemDado.Http), (rastro.Eventos[1].Campo, rastro.Eventos[1].Source));
+        var reserva = Guid.NewGuid();   // NameIdentifier continua aceito como reserva
+        var http2 = new HttpContextAccessor { HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal(new ClaimsIdentity([new Claim(ClaimTypes.NameIdentifier, reserva.ToString())], "t")) } };
+        Assert.Equal(reserva, Montar(new RastroEmMemoria(), http: http2).Sanitizar("529.982.247-25", Sink.Log).Eventos.Single().UsuarioAlvoId); }
 
     [Fact] public void Excecao_nao_carrega_o_valor() {
         var ex = new TaintBloqueadoException(Sink.Log, PiiClasse.Cpf);

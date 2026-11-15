@@ -63,7 +63,7 @@ public sealed class CyberTestHost : IAsyncDisposable
                         app.Use((ctx, prox) =>
                         {
                             ctx.User = new System.Security.Claims.ClaimsPrincipal(new System.Security.Claims.ClaimsIdentity(
-                                [new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.NameIdentifier, Guid.NewGuid().ToString())], "teste"));
+                                [new System.Security.Claims.Claim("sub", Guid.NewGuid().ToString())], "teste"));
                             return prox(ctx);
                         });
                     app.UseCyber();

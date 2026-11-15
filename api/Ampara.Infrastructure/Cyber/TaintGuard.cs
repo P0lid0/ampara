@@ -98,9 +98,11 @@ public sealed class TaintGuard(
         return saida;
     }
 
+    /// <summary>Dono do dado = usuário logado. O host usa MapInboundClaims=false e o TokenService emite só "sub"; NameIdentifier fica de reserva.</summary>
     private Guid? AlvoDoUsuario()
     {
-        var id = http?.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var user = http?.HttpContext?.User;
+        var id = user?.FindFirst("sub")?.Value ?? user?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         return Guid.TryParse(id, out var g) ? g : null;
     }
 }
