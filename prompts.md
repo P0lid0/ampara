@@ -510,4 +510,10 @@ Resultado: 8 testes novos passando (56 no app), `tsc --noEmit` sem erros. O mock
 
 Resultado: 29 testes novos passando (85 no app), `tsc --noEmit` sem erros. O guard de rotas ficou em função pura (`auth/guard.ts`, testada); as telas `historico`, `rota` e `bo` do modo emergência chegam nas próximas tarefas. Sem migration de servidor.
 
+### 80. App: leitor de código e passo a passo do IMEI (Task 4 do plano 05)
+
+> Executar a Task 4 do plano 05 (app): escrever primeiro os testes de `luhn` (`limparImei`, `imeiValido` com IMEI sintético `490154203237518`, `extrairImeiDeCodigo` descartando EAN-13 e texto livre) e da tela `onboarding/imei` (4 modos de obter o IMEI, discador `tel:*%2306%23`, mensagem de IMEI inválido com Confirmar desabilitado, RF4 câmera negada com a frase "Sem a câmera, digite o número.", envio só com dígitos, 422 com `detalheCidadao`, RF5 IMEI fora do SQLite e dos `console.*` e campo limpo); ver falhar; implementar `imei/luhn.ts`, `ui/LeitorCodigo.tsx` (expo-camera, `code128`/`code39`/`qr`, permissão negada chama `aoNegar`) e a tela em passos curtos com botão Voltar. Sem build Android nesta fase.
+
+Resultado: 13 testes novos passando (101 no app), `tsc --noEmit` sem erros. O IMEI vive só em estado de tela, vai à API só com dígitos e é limpo após o envio; nenhum `console.*` no fluxo. Câmera real e discador no aparelho adiados para a fase de build nativo. Sem migration de servidor.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->
