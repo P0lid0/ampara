@@ -25,6 +25,7 @@ export function Painel({
   const [avisadoEm, setAvisadoEm] = useState<Date | null>(null);
   const [lista, setLista] = useState<OcorrenciaDto[] | null>(null);
   const [erro, setErro] = useState<string | null>(null);
+  const [erroLista, setErroLista] = useState(false);
 
   const tratar = useCallback(
     (x: unknown) => {
@@ -38,10 +39,12 @@ export function Painel({
   );
 
   const carregar = useCallback(async () => {
+    setErroLista(false);
     try {
       setLista(await api.ocorrencias.listar());
     } catch (x) {
-      if (!tratar(x)) setLista([]);
+      // Falha que não é 401 não é "lista vazia": mostra erro e deixa tentar de novo.
+      if (!tratar(x)) setErroLista(true);
     }
   }, [tratar]);
 
@@ -94,7 +97,12 @@ export function Painel({
 
       <section className="lista" aria-labelledby="titulo-lista">
         <h2 id="titulo-lista">Suas ocorrências</h2>
-        {lista === null ? (
+        {erroLista ? (
+          <div role="alert">
+            <p className="erro">Não foi possível carregar suas ocorrências. Tente de novo.</p>
+            <button type="button" className="secundario" onClick={() => void carregar()}>Tentar de novo</button>
+          </div>
+        ) : lista === null ? (
           <p>Carregando…</p>
         ) : lista.length === 0 ? (
           <p className="vazio">Nenhuma ocorrência ainda.</p>

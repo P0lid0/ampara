@@ -51,7 +51,7 @@ describe("Painel", () => {
     expect(aoMarcar).toHaveBeenCalledWith("o1");
   });
 
-  it("gatilho com 200 (já havia ocorrência Aberta) é sucesso e usa a ocorrenciaId devolvida, sem criar segunda", async () => {
+  it("gatilho que devolve a id de uma ocorrência já aberta usa essa id, sem criar segunda (o 200 em si é provado em cliente.test)", async () => {
     // O cliente trata qualquer 2xx como sucesso; aqui a API devolve a id da ocorrência que já existia.
     const gatilho = vi.spyOn(api.ocorrencias, "gatilho").mockResolvedValue({ ocorrenciaId: "ja-aberta" });
     const aoMarcar = vi.fn();
@@ -71,6 +71,25 @@ describe("Painel", () => {
     expect(await screen.findByText("Aberta")).toBeInTheDocument();
     expect(screen.getByText("Cancelada")).toBeInTheDocument();
     expect(screen.getByText("Encerrada")).toBeInTheDocument();
+  });
+
+  it("falha ao listar (não 401) mostra erro e 'Tentar de novo', não 'Nenhuma ocorrência ainda.'", async () => {
+    const listar = vi.spyOn(api.ocorrencias, "listar").mockRejectedValueOnce(new ApiErro(500));
+    const u = userEvent.setup();
+    render(<Painel aoSair={vi.fn()} aoSessaoVencida={vi.fn()} aoMarcar={vi.fn()} />);
+    expect(await screen.findByText("Não foi possível carregar suas ocorrências. Tente de novo.")).toBeInTheDocument();
+    expect(screen.queryByText("Nenhuma ocorrência ainda.")).not.toBeInTheDocument();
+    listar.mockResolvedValue([oc("a", "Aberta")]);
+    await u.click(screen.getByRole("button", { name: "Tentar de novo" }));
+    expect(await screen.findByText("Aberta")).toBeInTheDocument();
+    expect(screen.queryByText(/Não foi possível carregar/)).not.toBeInTheDocument();
+  });
+
+  it("falha de rede ao listar também não vira lista vazia", async () => {
+    vi.spyOn(api.ocorrencias, "listar").mockRejectedValue(new ApiErro(0));
+    render(<Painel aoSair={vi.fn()} aoSessaoVencida={vi.fn()} aoMarcar={vi.fn()} />);
+    expect(await screen.findByRole("button", { name: "Tentar de novo" })).toBeInTheDocument();
+    expect(screen.queryByText("Nenhuma ocorrência ainda.")).not.toBeInTheDocument();
   });
 
   it("falha do gatilho (não 401) mostra frase e permite tentar de novo", async () => {

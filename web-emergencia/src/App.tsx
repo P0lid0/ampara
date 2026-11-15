@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { lerSessao, sair } from "./sessao/sessao";
 import { Login, MSG_SESSAO_VENCIDA } from "./telas/Login";
 import { Painel } from "./telas/Painel";
@@ -10,18 +10,18 @@ export function App() {
   const [aviso, setAviso] = useState<string | undefined>();
   const [ocorrenciaId, setOcorrenciaId] = useState<string | null>(null);
 
-  const sairDaAba = () => {
+  const sairDaAba = useCallback(() => {
     sair();
     setAviso(undefined);
     setOcorrenciaId(null);
     setTela("login");
-  };
-  const vencida = () => {
+  }, []);
+  const vencida = useCallback(() => {
     sair();
     setAviso(MSG_SESSAO_VENCIDA);
     setOcorrenciaId(null);
     setTela("login");
-  };
+  }, []);
 
   if (tela === "login") {
     return <Login aviso={aviso} aoEntrar={() => { setAviso(undefined); setTela("painel"); }} />;
