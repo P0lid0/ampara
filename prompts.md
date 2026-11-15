@@ -480,4 +480,10 @@ Resultado: `pipeline.py` (1 teste de integração com os dados reais, 9 min) e n
 
 Resultado: `ml/RELATORIO_ML.md` (cerca de 780 palavras, 3 figuras, 2 páginas A4 conferidas em PDF) dizendo com todas as letras que o Random Forest venceu o XGBoost no teste (0.466 contra 0.440) e que o `risco.csv` usa o XGBoost por decisão do projeto; `ml/ROTEIRO_VIDEO.md` com 7 blocos de 0:00 a 4:55; 2 testes novos passando (109 na suíte do ml). Sem migration.
 
+### 75. ML: fechamento da entrega (Task 14 do plano 06)
+
+> Executar a Task 14 do plano 06 (ML): escrever primeiro `ml/tests/test_entrega.py` (arquivos obrigatórios, requirements com versões exatas, `dados/README.md` com link, período e data de acesso para SSP, GeoSampa, Open-Meteo e IBGE, README do ml com os integrantes, `risco.csv` versionado e dentro do contrato, tamanhos); ver falhar; fixar as versões do ambiente real, escrever o `ml/README.md` e revisar o `dados/README.md`; rodar a suíte inteira e a de dados.
+
+Resultado: `ml/README.md` (pergunta, F1 de teste do XGBoost e do Random Forest, integrantes, como rodar, semântica do `risco.csv`), `ml/requirements.txt` com as 13 versões instaladas, `dados/README.md` com seções `## SSP`, `## GeoSampa`, `## Open-Meteo` e `## IBGE`. Verificação com a API pendente (a API exige Postgres); o plano 08 repete.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->

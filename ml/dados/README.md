@@ -2,11 +2,12 @@
 
 Os dados brutos ficam em `ml/dados/brutos/` e **não são versionados** (git-ignorados). Esta página registra de onde vêm e o que foi feito com eles.
 
-## SSP-SP (ocorrências criminais)
+## SSP (ocorrências criminais, SSP-SP)
 
 - **Conjunto:** SPDadosCriminais (Boletins de Ocorrência, dados mensais da Secretaria da Segurança Pública do Estado de São Paulo).
 - **Link:** https://www.ssp.sp.gov.br/estatistica/dados-mensais
-- **Anos cobertos:** 2022, 2023, 2024 e 2025 (`SPDadosCriminais_<ano>.xlsx`, duas abas por ano: JAN-JUN e JUL-DEZ, mais uma aba de dicionário que o leitor ignora). Data de acesso: 14/11/2026.
+- **Período:** 2022, 2023, 2024 e 2025 (`SPDadosCriminais_<ano>.xlsx`, duas abas por ano: JAN-JUN e JUL-DEZ, mais uma aba de dicionário que o leitor ignora).
+- **Acesso em:** 14/11/2026.
 - **Proxy de celular (`SSP_CELULAR: PROXY`):** a planilha mistura todas as naturezas e **não tem coluna de celular**. Por isso `carregar_ssp(..., proxy=True)` mantém **roubo e furto em via pública** (`RUBRICA` contém ROUBO ou FURTO e o tipo/subtipo do local contém VIA PUBLICA). É uma aproximação: inclui roubo e furto de qualquer bem. Dizer isso no `RELATORIO_ML.md`.
 - **Colunas usadas** (nomes variam entre anos, o mapeamento em `ampara_ml/ssp.py` aceita os candidatos):
 
@@ -36,9 +37,12 @@ Os dados brutos ficam em `ml/dados/brutos/` e **não são versionados** (git-ign
 - **Ressalva:** as 420.058 linhas com hora `NULL` (cerca de 32 % das linhas da capital com o proxy) ficam fora do modelo, porque não têm como entrar numa faixa horária. O risco estimado vale para os boletins com hora registrada.
 - Custo da leitura: ~20 a 30 minutos por planilha (openpyxl somente leitura, 4 processos em paralelo), pico de ~1,2 GB de memória no 2023.
 
-## GeoSampa (WFS): distância à estação e à delegacia
+## GeoSampa (WFS): estações, delegacias, distritos e iluminação
 
-- **Fonte:** GeoSampa, Prefeitura de São Paulo (dado aberto). WFS 2.0.0 em `https://wfs.geosampa.prefeitura.sp.gov.br/geoserver/ows` (o mesmo servidor responde em `/geoserver/wfs`; 488 camadas no `GetCapabilities`). Data de acesso: 14/11/2026. As camadas não trazem data de atualização nos atributos; a defasagem é a do servidor da Prefeitura.
+- **Fonte:** GeoSampa, Prefeitura de São Paulo (dado aberto).
+- **Link:** https://wfs.geosampa.prefeitura.sp.gov.br/geoserver/ows (WFS 2.0.0; o mesmo servidor responde em `/geoserver/wfs`; 488 camadas no `GetCapabilities`). Portal: https://geosampa.prefeitura.sp.gov.br
+- **Período:** cadastro vigente na data do acesso (não é série histórica); os pontos de iluminação têm data de carga 21/10/2026, e as demais camadas não trazem data de atualização.
+- **Acesso em:** 14/11/2026 (estações, delegacias) e 15/11/2026 (distritos, iluminação). As camadas não trazem data de atualização nos atributos; a defasagem é a do servidor da Prefeitura.
 - **Coordenadas:** pedidas em `srsName=EPSG:4326`; `carregar_pontos` troca os eixos quando vêm invertidos e usa o centróide para polígonos e linhas.
 - **Camadas** (`ampara_ml/geosampa.CAMADAS`):
 
@@ -55,16 +59,26 @@ Os dados brutos ficam em `ml/dados/brutos/` e **não são versionados** (git-ign
 - Os arquivos baixados ficam em `ml/dados/brutos/geosampa/` (git-ignorado, ~200 KB); `baixar_camada` reaproveita o arquivo se já existir.
 - **Features produzidas** (`features_celulas`): `dist_estacao_m` e `dist_delegacia_m`, distância haversine (raio 6.371.008,8 m) do centro da célula à feição mais próxima.
 
-## Clima histórico (Open-Meteo)
+## Open-Meteo (clima histórico)
 
-- **Fonte:** Open-Meteo Historical Weather API (dado aberto, sem chave), `https://archive-api.open-meteo.com/v1/archive`; documentação em `https://open-meteo.com/en/docs/historical-weather-api`. Data de acesso: 15/11/2026.
-- **Período baixado:** 01/01/2022 a 31/12/2025 (uma requisição por ano), série horária de `temperature_2m` e `precipitation` em `America/Sao_Paulo`: 35.064 linhas (4 anos, 1.461 dias × 24 h), sem nenhum valor ausente. Arquivo: `ml/dados/brutos/clima_horario.csv` (git-ignorado, ~0,9 MB); `baixar_clima` reaproveita o arquivo se já existir.
+- **Fonte:** Open-Meteo Historical Weather API (dado aberto, sem chave).
+- **Link:** https://archive-api.open-meteo.com/v1/archive (documentação: https://open-meteo.com/en/docs/historical-weather-api)
+- **Acesso em:** 15/11/2026.
+- **Período:** 01/01/2022 a 31/12/2025 (uma requisição por ano), série horária de `temperature_2m` e `precipitation` em `America/Sao_Paulo`: 35.064 linhas (4 anos, 1.461 dias × 24 h), sem nenhum valor ausente. Arquivo: `ml/dados/brutos/clima_horario.csv` (git-ignorado, ~0,9 MB); `baixar_clima` reaproveita o arquivo se já existir.
 - **Ponto único:** a cidade inteira usa um ponto só (`LAT_CLIMA = -23.5505`, `LNG_CLIMA = -46.6333`, Sé). O clima não varia entre as áreas; só entre período, dia da semana e faixa. É uma limitação, registrada no relatório.
 - **INMET não foi usado:** a API do INMET exige cadastro e a série horária das estações da capital tem lacunas; o Open-Meteo não pede chave e entrega a série horária completa.
 - **Agregação** (`agregar_clima`): por `(periodo, dia_semana, faixa)`, `clima_temp_media` é a média das horas da faixa e `clima_chuva_mm` é a chuva total da faixa dividida pelo número de datas distintas do grupo (mm por dia). Resultado real: 896 linhas (16 trimestres × 7 dias × 8 faixas); temperatura média de 11,7 a 28,6 °C e chuva de 0 a 4,5 mm por dia.
 - **Período futuro** (`juntar_clima`): o trimestre que ainda não aconteceu recebe o clima do mesmo trimestre do ano anterior; se esse também faltar, a função levanta `ValueError`.
 
-## Distritos, população (IBGE) e iluminação (GeoSampa): features urbanas
+## IBGE (Censo 2022: população por distrito)
+
+- **Link:** https://apisidra.ibge.gov.br/values/t/9923/n10/in%20n6%203550308/p/2022 (SIDRA, tabela 9923; portal: https://sidra.ibge.gov.br)
+- **Período:** Censo Demográfico 2022 (população residente em 2022).
+- **Acesso em:** 15/11/2026.
+- **Colunas usadas:** `cod_ibge`, `distrito`, `populacao`; o arquivo baixado fica em `ml/dados/brutos/ibge/populacao_distritos_2022.csv` (git-ignorado).
+- Detalhes de junção e densidade na seção seguinte.
+
+## Features urbanas: distritos, população e iluminação
 
 Módulo `ampara_ml/urbano.py`; produz `densidade_pop_hab_km2` e `iluminacao_n` por célula (`features_urbanas`).
 
