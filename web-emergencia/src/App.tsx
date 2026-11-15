@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import { lerSessao, sair } from "./sessao/sessao";
 import { Login, MSG_SESSAO_VENCIDA } from "./telas/Login";
+import { Bo } from "./telas/Bo";
 import { LinhaDoTempo } from "./telas/LinhaDoTempo";
 import { Painel } from "./telas/Painel";
 
@@ -47,10 +48,7 @@ export function App() {
         />
       )}
       {tela === "bo" && (
-        <main className="tela">
-          <h1>Boletim de ocorrência</h1>
-          <button type="button" onClick={() => setTela("painel")}>Voltar</button>
-        </main>
+        <Bo ocorrenciaId={ocorrenciaId} aoVoltar={() => setTela("painel")} aoSessaoVencida={vencida} />
       )}
     </>
   );
