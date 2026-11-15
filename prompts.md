@@ -406,4 +406,10 @@ Resultado: corrigidos os cinco Important. O `Normalizador` passou a descartar to
 
 Resultado: testes de `test_area.py` passando (16 do brief mais NaN e limite superior em ponto flutuante na correção da revisão); sem migration. (Entrada acrescentada na correção da rodada 1 da revisão.)
 
+### 65. ML: mapeamento de colunas da SSP, carga limpa e decisão grade × distrito (Task 2 do plano 06)
+
+> Executar a Task 2 do plano 06 (ML): escrever primeiro os testes de `ssp.py` (normalização de texto e coluna, mapeamento com `ColunaAusente`, `parse_coordenada`, `parse_hora`, carga com resumo por motivo de descarte, proxy de roubo/furto em via pública, CSV latin-1 com ponto e vírgula, `decidir_resolucao`); implementar `ssp.py`, mapear as colunas reais das planilhas SSP 2022 a 2025, rodar a carga real e registrar resumo e decisão em `ml/dados/README.md`.
+
+Resultado: 12 testes de `test_ssp.py` passando; carga real das planilhas 2022 a 2025: 828.618 linhas usadas (proxy de roubo e furto em via pública, capital, dentro da grade), 63,2 % da base, o que faz `decidir_resolucao` devolver `distrito` por causa de linhas com hora `NULL`, não de coordenada (93 % válidas entre as com data e hora). Decisão pendente do controlador; plano B não executado. Sem migration.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->
