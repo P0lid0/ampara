@@ -7,6 +7,7 @@ from shapely.geometry import box
 from ampara_ml.urbano import (
     contar_iluminacao,
     densidade_populacional,
+    extrair_pontos,
     distrito_de_celulas,
     features_urbanas,
     normalizar_nome,
@@ -40,7 +41,7 @@ def test_densidade():
 def test_densidade_sem_correspondencia_falha_listando():
     d = gpd.GeoDataFrame({"cod_distrito": [1], "nome_norm": ["JARDIM PAULISTA"], "geometry": [box(0, 0, 1000, 1000)]}, crs="EPSG:31983")
     pop = pd.DataFrame({"nome_norm": ["JD PAULISTA"], "populacao": [1000]})
-    with pytest.raises(ValueError, match="JARDIM PAULISTA"):
+    with pytest.raises(ValueError, match="distritos sem população: JARDIM PAULISTA"):
         densidade_populacional(d, pop)
     r = densidade_populacional(d, pop, aliases={"JARDIM PAULISTA": "JD PAULISTA"})
     assert len(r) == 1
@@ -64,3 +65,22 @@ def test_features_urbanas_colunas_e_zero(distritos):
     assert r["iluminacao_n"].tolist() == [3, 0]
     assert r["densidade_pop_hab_km2"].tolist() == [1000.0, 2000.0]
     assert not r.isna().any().any()
+
+
+def test_densidade_populacao_duplicada_falha():
+    d = gpd.GeoDataFrame({"cod_distrito": [1], "nome_norm": ["A"], "geometry": [box(0, 0, 1000, 1000)]}, crs="EPSG:31983")
+    pop = pd.DataFrame({"nome_norm": ["A", "A"], "populacao": [1, 2]})
+    with pytest.raises(ValueError, match="duplicados: A"):
+        densidade_populacional(d, pop)
+
+
+def test_extrair_pontos_valido_e_invalido():
+    ok = extrair_pontos(pd.DataFrame({"FID": ["a", "b"], "ge_ponto": ["POINT (-46.7 -23.5)", "POINT(-4.6e1 -23.5)"]}))
+    assert ok["lng"].tolist() == [-46.7, -46.0] and ok["lat"].tolist() == [-23.5, -23.5]
+    with pytest.raises(ValueError, match="POINT"):
+        extrair_pontos(pd.DataFrame({"FID": ["a"], "ge_ponto": ["POINT Z (-46.7 -23.5 1)"]}))
+
+
+def test_contar_iluminacao_vazio():
+    pts = pd.DataFrame({"lat": [], "lng": []})
+    assert contar_iluminacao(pts).empty

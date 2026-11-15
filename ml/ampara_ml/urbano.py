@@ -76,17 +76,20 @@ def carregar_populacao(caminho: Path, col_nome: str = "distrito", col_pop: str =
 def densidade_populacional(
     distritos: gpd.GeoDataFrame, populacao: pd.DataFrame, aliases: dict[str, str] | None = None
 ) -> pd.DataFrame:
-    aliases = aliases or {}
+    aliases = ALIASES_DISTRITO if aliases is None else aliases
+    if populacao["nome_norm"].duplicated().any():
+        dup = sorted(populacao.loc[populacao["nome_norm"].duplicated(keep=False), "nome_norm"].unique())
+        raise ValueError("populacao com nomes duplicados: " + ", ".join(dup))
     d = pd.DataFrame({
         "cod_distrito": distritos["cod_distrito"].to_numpy(),
         "nome_norm": distritos["nome_norm"].to_numpy(),
         "area_km2": (distritos.geometry.to_crs(CRS_M).area / 1e6).to_numpy(),
     })
     d["chave"] = d["nome_norm"].map(lambda n: aliases.get(n, n))
-    m = d.merge(populacao[["nome_norm", "populacao"]].rename(columns={"nome_norm": "chave"}), on="chave", how="left")
+    m = d.merge(populacao[["nome_norm", "populacao"]].rename(columns={"nome_norm": "chave"}), on="chave", how="left", validate="many_to_one")
     faltando = m.loc[m["populacao"].isna(), "nome_norm"]
     if len(faltando):
-        raise ValueError("distritos sem populacao: " + ", ".join(sorted(faltando)))
+        raise ValueError("distritos sem população: " + ", ".join(sorted(faltando)))
     m["densidade_hab_km2"] = m["populacao"] / m["area_km2"]
     return m[["cod_distrito", "densidade_hab_km2"]].reset_index(drop=True)
 
@@ -123,6 +126,29 @@ def contar_iluminacao(pontos: pd.DataFrame) -> pd.Series:
     return cont.astype(int)
 
 
+def extrair_pontos(lote: pd.DataFrame) -> pd.DataFrame:
+    """Converte o CSV do WFS (FID, ge_ponto em WKT) em fid, lng, lat; falha se algum WKT nao for POINT."""
+    xy = lote["ge_ponto"].str.extract(r"POINT\s*\(\s*(-?[\d.eE+-]+)\s+(-?[\d.eE+-]+)\s*\)").astype(float)
+    if xy.isna().any().any():
+        raise ValueError("geometria de iluminacao fora do formato POINT (x y)")
+    return pd.DataFrame({"fid": lote["FID"], "lng": xy[0], "lat": xy[1]})
+
+
+def total_iluminacao() -> int:
+    """Total de feicoes segundo o servidor (resultType=hits)."""
+    r = requests.get(
+        WFS_URL,
+        params={"service": "WFS", "version": "2.0.0", "request": "GetFeature",
+                "typeNames": "geoportal:iluminacao_publica", "resultType": "hits"},
+        timeout=TIMEOUT_S,
+    )
+    r.raise_for_status()
+    m = re.search(r'numberMatched="(\d+)"', r.text)
+    if not m:
+        raise ValueError("servidor nao informou numberMatched para iluminacao")
+    return int(m.group(1))
+
+
 def baixar_iluminacao(
     destino: Path = DIR_BRUTOS / "geosampa" / "iluminacao_publica_pontos.csv", pagina: int = 20000
 ) -> Path:
@@ -134,6 +160,7 @@ def baixar_iluminacao(
     destino = Path(destino)
     if destino.exists():
         return destino
+    esperado = total_iluminacao()
     partes: list[pd.DataFrame] = []
     inicio = 0
     while True:
@@ -152,12 +179,15 @@ def baixar_iluminacao(
         lote = pd.read_csv(io.StringIO(r.content.decode("utf-8")), usecols=["FID", "ge_ponto"])
         if lote.empty:
             break
-        xy = lote["ge_ponto"].str.extract(r"POINT \((-?[\d.]+) (-?[\d.]+)\)").astype(float)
-        partes.append(pd.DataFrame({"fid": lote["FID"], "lng": xy[0], "lat": xy[1]}))
-        if len(lote) < pagina:
+        partes.append(extrair_pontos(lote))
+        inicio += len(lote)
+        if inicio >= esperado:
             break
-        inicio += pagina
+    if not partes:
+        raise ValueError("iluminacao: nenhuma pagina recebida")
     df = pd.concat(partes, ignore_index=True).drop_duplicates("fid")[["lat", "lng"]]
+    if len(df) != esperado:
+        raise ValueError(f"iluminacao incompleta: {len(df)} pontos baixados, servidor informa {esperado}")
     destino.parent.mkdir(parents=True, exist_ok=True)
     tmp = destino.with_suffix(".tmp")
     df.to_csv(tmp, index=False, lineterminator="\n")
