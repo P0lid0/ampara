@@ -346,4 +346,10 @@ Resultado: 33 testes do painel passando e build sem erro; sem migration; confer�
 
 Resultado: 6 testes do `SignalRSinkTests` passando, suíte inteira com 421 aprovados (o cenário de alerta ao vivo do plano 02 segue verde); sem migration.
 
+### 55. Cyber: moderação do texto livre dos relatos (Task 18b do plano 03)
+
+> Executar a Task 18b do plano 03 (Cyber): escrever primeiro os testes do `ClaudeModeradorRelato` com Claude falso (texto neutro volta limpo, CPF e telefone viram `[dado removido]` antes de sair e no texto aprovado, resposta ABUSIVO vira `relato-abusivo` 422, fallback sem texto em 6 cenários de falha dentro de 5 s, vazio não chama a API e texto longo é cortado em 280); implementar o moderador (scrub de PII, prompt de classificação, `max_tokens` 5) e registrá-lo no `AddCyber` no lugar do `ModeradorTextoDescartado`.
+
+Resultado: 16 testes do `ModeradorRelatoTests` passando, suíte inteira com 440 aprovados; sem migration; sem `ANTHROPIC_API_KEY` o relato é aceito sem texto.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->

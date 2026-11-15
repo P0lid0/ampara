@@ -74,6 +74,8 @@ public class AmparaFactory : WebApplicationFactory<Program>
         {
             services.RemoveAll<TimeProvider>();
             services.AddSingleton<TimeProvider>(Tempo);
+            services.RemoveAll<IModeradorRelato>();   // plano 02: texto livre descartado; a moderacao real tem testes proprios (ModeradorRelatoTests)
+            services.AddSingleton<IModeradorRelato, Ampara.Infrastructure.Cyber.ModeradorTextoDescartado>();
             services.RemoveAll<IAcessoIndevido>();
             services.AddSingleton<IAcessoIndevido>(Acesso);
             services.RemoveAll<IChaveiroGateway>();

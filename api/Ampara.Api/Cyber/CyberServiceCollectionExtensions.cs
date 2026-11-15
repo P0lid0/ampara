@@ -64,6 +64,9 @@ public static class CyberServiceCollectionExtensions
         AddLogProtegido(services);
         services.AddMemoryCache();
         services.TryAddScoped<ITradutorRisco, ClaudeTradutorRisco>();   // Scoped: depende do guard
+        // Moderador real (scrub de PII + Claude) no lugar do ModeradorTextoDescartado do plano 02. Scoped: usa o HttpClient com o handler de taint.
+        services.RemoveAll<IModeradorRelato>();
+        services.AddScoped<IModeradorRelato, ClaudeModeradorRelato>();
         services.TryAddScoped<IIndiceRiscoService, IndiceRiscoService>();
         services.TryAddScoped<SimuladorDeAtaque>();
         services.TryAddScoped<ICorrelacao>(sp => sp.GetRequiredService<Correlacao>());
