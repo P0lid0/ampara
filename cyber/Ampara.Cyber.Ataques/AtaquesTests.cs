@@ -91,7 +91,7 @@ public class AtaquesTests(ResumoAtaques resumo) : IClassFixture<ResumoAtaques>
 
     [Fact]
     public Task A02_cpf_ofuscado_fullwidth_nbsp_e_escape_unicode_e_detectado() => Ataque(
-        "A02", "CPF ofuscado (fullwidth, NBSP, zero-width, escape unicode no JSON)", "todas as formas bloqueadas, nenhum digito na resposta", async () =>
+        "A02", "CPF ofuscado (fullwidth, NBSP, zero-width, hifen suave, travessao, marca de direcao, digitos arabe-indicos, escape unicode no JSON)", "todas as formas bloqueadas, nenhum digito na resposta", async () =>
     {
         await using var f = new FabricaDeAtaque();
         var c = f.CreateClient();
@@ -101,6 +101,10 @@ public class AtaquesTests(ResumoAtaques resumo) : IClassFixture<ResumoAtaques>
             ["fullwidth-com-separador-largo"] = """{"doc":"５２９．９８２．２４７－２５"}""",
             ["nbsp"] = "{\"doc\":\"529 982 247 25\"}",
             ["zero-width"] = "{\"doc\":\"529​.982​.247-25\"}",
+            ["hifen-suave"] = "{\"doc\":\"529\u00AD982\u00AD247\u00AD25\"}",
+            ["travessao-curto"] = "{\"doc\":\"529.982.247\u201325\"}",
+            ["marca-de-direcao"] = "{\"doc\":\"529\u200E.982\u2063.247-25\"}",
+            ["digitos-arabe-indicos"] = "{\"doc\":\"\u0665\u0662\u0669.\u0669\u0668\u0662.\u0662\u0664\u0667-\u0662\u0665\"}",
             ["escape-unicode"] = JsonComEscape(Cpf, soDigitos: true),
             ["escape-unicode-total"] = JsonComEscape(Cpf, soDigitos: false),
         };
@@ -114,7 +118,7 @@ public class AtaquesTests(ResumoAtaques resumo) : IClassFixture<ResumoAtaques>
             Assert.Contains("urn:ampara:taint:bloqueado", corpo);
             Assert.False(Regex.IsMatch(SemCorrelacao(corpo), @"529|982|247"), $"{nome}: a resposta tem um pedaco do CPF");
             Assert.DoesNotContain("u0035", corpo);
-            foreach (var pedaco in new[] { "９", "２", "982", "247" }) Assert.DoesNotContain(pedaco, SemCorrelacao(corpo));
+            foreach (var pedaco in new[] { "９", "２", "982", "247", "\u0669\u0668\u0662" }) Assert.DoesNotContain(pedaco, SemCorrelacao(corpo));
         }
         Assert.True(f.Rastro.Eventos.Count(e => e.Classe == PiiClasse.Cpf && e.Sink == Sink.HttpNaoAutenticada) >= formas.Count);
         return $"{formas.Count} formas ofuscadas, todas bloqueadas com 500 problem+json";

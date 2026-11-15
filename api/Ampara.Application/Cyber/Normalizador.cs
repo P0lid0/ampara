@@ -1,10 +1,13 @@
+using System.Globalization;
 using System.Text;
 
 namespace Ampara.Application.Cyber;
 
 /// <summary>
 /// Deixa o texto numa forma única antes dos detectores: dígitos de largura total viram ASCII (FormKC),
-/// caracteres invisíveis somem e espaços especiais viram espaço comum.
+/// dígitos de outras escritas (árabe-índicos, devanágari...) viram ASCII, caracteres de formatação invisíveis
+/// (hífen suave, marcas de direção, separadores invisíveis, seletores de variação) somem, traços Unicode viram '-'
+/// e espaços especiais viram espaço comum. Sem isso, um CPF com hífen suave (U+00AD) ou travessão curto (U+2013) passaria por todos os sinks.
 /// </summary>
 public static class Normalizador
 {
@@ -13,19 +16,26 @@ public static class Normalizador
         if (string.IsNullOrEmpty(s)) return string.Empty;
 
         var sb = new StringBuilder(s.Length);
-        foreach (var ch in SanearSubstitutos(s).Normalize(NormalizationForm.FormKC))
+        foreach (var r in SanearSubstitutos(s).Normalize(NormalizationForm.FormKC).EnumerateRunes())
         {
-            switch (ch)
+            var v = r.Value;
+            switch (Rune.GetUnicodeCategory(r))
             {
-                case '\u200B' or '\u200C' or '\u200D' or '\u2060' or '\uFEFF':
-                    break;
-                case '\u00A0' or '\u202F' or '\u205F' or '\u3000' or (>= '\u2000' and <= '\u200A'):
+                case UnicodeCategory.Format:                          // U+00AD, U+200B-200F, U+202A-202E, U+2060-2069, U+FEFF, U+180E, tags...
+                    continue;
+                case UnicodeCategory.DashPunctuation:                 // U+2010-2015, U+FE58, U+FE63...
+                    sb.Append('-');
+                    continue;
+                case UnicodeCategory.DecimalDigitNumber when v > 0x7F: // U+0660-0669, U+06F0-06F9, U+0966-096F...
+                    sb.Append((char)('0' + (int)Rune.GetNumericValue(r)));
+                    continue;
+                case UnicodeCategory.SpaceSeparator:                  // U+00A0, U+2000-200A, U+202F, U+205F, U+3000
                     sb.Append(' ');
-                    break;
-                default:
-                    sb.Append(ch);
-                    break;
+                    continue;
             }
+            if (v == 0x2212) { sb.Append('-'); continue; }           // sinal de menos (categoria Sm)
+            if (v is (>= 0xFE00 and <= 0xFE0F) or (>= 0xE0100 and <= 0xE01EF) or 0x034F) continue;   // seletores de variação e CGJ
+            sb.Append(r.ToString());
         }
         return sb.ToString();
     }

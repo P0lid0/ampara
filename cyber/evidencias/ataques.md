@@ -6,7 +6,7 @@ Este arquivo e regravado a cada execucao de `dotnet test cyber/Ampara.Cyber.Ataq
 | id | vetor | esperado | resultado |
 |---|---|---|---|
 | A01 | CPF em JSON ecoado por endpoint anonimo | 500 problem+json, CPF ausente, evento HttpNaoAutenticada/Bloqueado | OK: bloqueado com 500 problem+json, 1 evento, CPF ausente do corpo e do log |
-| A02 | CPF ofuscado (fullwidth, NBSP, zero-width, escape unicode no JSON) | todas as formas bloqueadas, nenhum digito na resposta | OK: 6 formas ofuscadas, todas bloqueadas com 500 problem+json |
+| A02 | CPF ofuscado (fullwidth, NBSP, zero-width, hifen suave, travessao, marca de direcao, digitos arabe-indicos, escape unicode no JSON) | todas as formas bloqueadas, nenhum digito na resposta | OK: 10 formas ofuscadas, todas bloqueadas com 500 problem+json |
 | A03 | CPF em cabecalho, query string e formulario, registrados por um endpoint de depuracao | nenhuma linha de log contem o CPF | OK: 3 linhas de log do endpoint, CPF ausente de todas |
 | A04 | excecao com laudo e CPF na mensagem | 500 problem+json com frase humana, sem 'Error 500', sem stack, sem CPF | OK: 500 problem+json com detalheCidadao em linguagem simples; eventos Erro/Bloqueado de CPF e Saude |
 | A05 | mensagem MQTT do chaveiro com CPF no campo livre | o servico recebe o payload com o CPF mascarado; deviceId e eventId intactos | OK: payload entregue com ***.982.***-25, evento Mqtt/Banco/Mascarado, CPF ausente do log |

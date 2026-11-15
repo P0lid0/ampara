@@ -122,4 +122,45 @@ public class DetectoresTests
         Assert.Single(new ImeiDetector().Detectar("490154203237518,12"));
         Assert.Single(new RgDetector().Detectar("5,12.345.678-9"));
         Assert.Single(new RgDetector().Detectar("12.345.678-9,4")); }
+
+    // Revisão final do plano 03 (vazamento-1): caracteres de formatação, traços Unicode e dígitos de outras escritas
+    // passavam pelo Normalizador e nenhum detector achava o dado. SINTETICO
+    public static TheoryData<string, PiiClasse> FormasDisfarcadas()
+    {
+        static string C(int cp) => char.ConvertFromUtf32(cp);
+        var arabe = string.Concat("529.982.247-25".Select(c => char.IsAsciiDigit(c) ? C(0x0660 + c - '0') : c.ToString()));
+        var devanagari = string.Concat("52998224725".Select(c => C(0x0966 + c - '0')));
+        return new()
+        {
+            { "cpf do vizinho 529" + C(0xAD) + "982" + C(0xAD) + "247" + C(0xAD) + "25", PiiClasse.Cpf },     // hífen suave
+            { "529" + C(0x2063) + ".982" + C(0x2063) + ".247-25", PiiClasse.Cpf },                          // separador invisível
+            { "529" + C(0x200E) + ".982.247-25", PiiClasse.Cpf },                                           // marca de direção
+            { "529" + C(0x202E) + ".982.247" + C(0x202C) + "-25", PiiClasse.Cpf },                          // override bidi
+            { "529" + C(0x2066) + ".982.247-25" + C(0x2069), PiiClasse.Cpf },                               // isolate bidi
+            { "529" + C(0xFE0F) + ".982.247-25", PiiClasse.Cpf },                                           // seletor de variação
+            { "529" + C(0x180E) + ".982.247-25", PiiClasse.Cpf },                                           // separador mongol
+            { "529" + C(0xE0041) + ".982.247-25", PiiClasse.Cpf },                                          // tag (fora do BMP)
+            { "529.982.247" + C(0x2013) + "25", PiiClasse.Cpf },                                            // travessão curto
+            { "529.982.247" + C(0x2011) + "25", PiiClasse.Cpf },                                            // hífen inseparável
+            { "529.982.247" + C(0x2212) + "25", PiiClasse.Cpf },                                            // sinal de menos
+            { "(11) 98765" + C(0x2013) + "4321", PiiClasse.Telefone },
+            { "(11) 98765" + C(0x2212) + "4321", PiiClasse.Telefone },
+            { arabe, PiiClasse.Cpf },                                                                         // árabe-índicos
+            { devanagari, PiiClasse.Cpf },
+            { "49" + C(0x2013) + "015420" + C(0x2013) + "323751" + C(0x2013) + "8", PiiClasse.Imei },
+            { "ana" + C(0xAD) + ".souza@exemplo.com.br", PiiClasse.Email },
+        };
+    }
+
+    [Theory, MemberData(nameof(FormasDisfarcadas))]
+    public void Formas_disfarcadas_sao_detectadas_apos_normalizar(string bruto, PiiClasse classe)
+    {
+        var norm = Normalizador.Normalizar(bruto);
+        Assert.Contains(TodosDetectores().SelectMany(d => d.Detectar(norm).Select(x => x.Classe)), c => c == classe);
+    }
+
+    [Fact] public void Normalizar_preserva_texto_comum_acentos_e_emoji() {
+        var emoji = char.ConvertFromUtf32(0x1F600);
+        Assert.Equal("Ação na praça - às 21h " + emoji, Normalizador.Normalizar("Ação na praça " + (char)0x2014 + " às 21h " + emoji));
+        Assert.Equal("a b", Normalizador.Normalizar("a" + (char)0x202F + "b")); }
 }
