@@ -14,7 +14,7 @@
 |---|---|
 | **Integrantes** | Pedro Martins (RM_____) · Vitor Cesarino Marchese (RM_____) |
 | **Disciplina** | Cyber Security |
-| **Data** | 14 de novembro de 2026 |
+| **Data** | 15 de novembro de 2026 |
 | **Repositório** | (link a preencher ao publicar o repositório) |
 
 <p class="aviso-sintetico"><strong>Dados sintéticos.</strong> Todo CPF, e-mail, senha, IMEI, laudo e usuário que aparece neste documento foi inventado para a demonstração. Nenhum dado de pessoa real foi usado em código, banco, prints ou testes.</p>
@@ -257,7 +257,7 @@ Sem chave da API, com erro, com tempo esgotado (5 s no total) ou com resposta fo
 
 > Tentaram usar um dado seu em um lugar inseguro, e nosso sistema bloqueou a ação para proteger sua privacidade. Você não precisa fazer nada agora.
 
-**Importante:** os prints deste documento foram feitos **sem `ANTHROPIC_API_KEY`**, então todas as frases que aparecem nos prints do painel são essas frases padrão, não frases geradas pela IA. Com a chave definida, o mesmo fluxo troca a frase padrão pela da IA (resultado em cache por 1 hora).
+Os prints do painel deste documento foram feitos em 15/11 **com a chave da API definida** e o modelo `claude-haiku-5-5`: as frases dos cartões são as geradas pela IA (resultado em cache por 1 hora por combinação de categoria, sink e tipo). A frase padrão acima só aparece sem chave ou se a chamada falhar.
 
 ### 4.3 "Error 500" × frase humana
 
@@ -321,7 +321,7 @@ O simulador da demonstração (seção 5.4) aciona três cenários, na ordem: **
 |---|---|
 | ![Amarelo 65](evidencias/prints/painel-amarelo-65.png) | ![Vermelho](evidencias/prints/painel-vermelho.png) |
 
-O painel não usa só a cor: cada farol tem palavra (Seguro, Atenção, Risco alto) e ícone, e os contrastes de cor são cobertos por teste (`contraste.test.ts`). As frases dos cartões são as frases padrão, porque estes prints foram feitos sem chave da API de IA.
+O painel não usa só a cor: cada farol tem palavra (Seguro, Atenção, Risco alto) e ícone, e os contrastes de cor são cobertos por teste (`contraste.test.ts`). As frases dos cartões foram escritas pela IA (`claude-haiku-5-5`) a partir só da categoria, do sink e do tipo do evento.
 
 ### 5.3 Visão executiva (administrador)
 
@@ -378,6 +378,6 @@ Resultado da última execução completa: `api/Ampara.Tests` com 475 aprovados e
 - **Regra por chave é ampla.** Um campo chamado `cidade` indicaria Saúde (casa o prefixo `cid`). Por valor, 10 dígitos soltos não são telefone (confundem com data Unix), e 11 dígitos soltos com terceiro dígito 9 e dígito verificador de CPF inválido contam como telefone.
 - **Peso 10 para quase tudo.** Todo bloqueio que não seja resposta pública (25) nem acesso indevido (40) vale o mesmo peso (10), seja log, erro, Ponte, SignalR, IA ou banco. É uma simplificação: um vazamento para a polícia pesa o mesmo que uma linha de log.
 - **Broker MQTT público.** O chaveiro conversa com a API por um broker MQTT público (`broker.hivemq.com`); o payload tem o filtro de PII, mas o canal em si não é privado nem autenticado. Para produção seria preciso um broker próprio com TLS e credencial por dispositivo.
-- **Frases da IA nos prints.** Os prints foram feitos sem `ANTHROPIC_API_KEY`: as frases mostradas são as padrão. A chamada real à Claude só foi exercitada nos testes, com resposta simulada.
+- **Frases da IA variam.** Os prints de 15/11 mostram frases reais da IA; outra execução pode gerar frases diferentes (sempre 2 frases, sem dado pessoal, validadas por tamanho). Os testes automatizados usam resposta simulada.
 - **Escopo do taint.** O guard reconhece o valor marcado na entrada e o que o scanner reconhece por padrão. Um dado sensível que mude de forma no meio do caminho (por exemplo, cifrado por código novo e depois escrito em log) não é reconhecido.
 - **Demonstração.** O simulador, o usuário `admin` e a flag que desliga o taint só existem com `AMPARA_DEMO=true`; em produção esse valor deve ser `false`.
