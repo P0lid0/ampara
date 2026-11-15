@@ -51,7 +51,7 @@ Entregas que dependem de rodar a API e o painel:
 - **Quebra estranha no print do tradutor**: em `codigo-claude-tradutor-risco.png` a linha 77 (parâmetros do construtor) quebra com `) : ITradutorRisco` alinhado à direita. Legível, mas o `prints-codigo.mjs` não trata bem linha longa com quebra.
 - **Rótulo do acesso indevido no painel** (entrega-6): o cartão mostra "senha · resposta pública" porque o contrato grava assim; a documentação e o roteiro agora explicam, mas o painel não tem rótulo próprio (o `EventoCidadao` não traz o campo).
 - **Corpus sem marcador** (entrega-12, parte): `cyber/corpus/corpus.csv` não tem a linha `SINTETICO` (só o gerador); acrescentar mudaria o leitor do corpus e a evidência de precisão/recall.
-- **Teste intermitente sob carga**: em 2 de 3 execuções da suíte com a máquina carregada (48-59 s em vez de 25 s) caíram `LoggerProtegidoTests.Senha_no_corpo_nao_vai_ao_log` e um login 500 em `RelatoTests`; não reproduziu em 7 execuções sem carga (3 na base, 4 com as correções). Investigar antes de confiar na suíte em CI lento.
+- **Teste intermitente sob carga**: em 2 de 3 execuções da suíte com a máquina carregada (48-59 s em vez de 25 s) caíram `LoggerProtegidoTests.Senha_no_corpo_nao_vai_ao_log` e um login 500 em `RelatoTests` (em 15/11, com o ML carregando planilhas, também `ModeradorRelatoTests` cenário `lento`, 12 s contra o limite de 5 s; passou 3 de 3 isolado); não reproduziu em 7 execuções sem carga (3 na base, 4 com as correções). Investigar antes de confiar na suíte em CI lento.
 
 ### Já aceitas antes da revisão final
 

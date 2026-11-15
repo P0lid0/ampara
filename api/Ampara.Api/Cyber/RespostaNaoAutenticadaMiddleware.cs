@@ -23,7 +23,7 @@ public sealed class RespostaNaoAutenticadaMiddleware(RequestDelegate next, IPiiS
     public async Task InvokeAsync(HttpContext ctx, ITaintGuard guard, ITaintScope escopo, ITradutorRisco tradutor,
         IRastroSeguranca rastro, ICorrelacao correlacao)
     {
-        if (!guard.Ativo || ctx.Request.Path.StartsWithSegments("/hubs")) { await next(ctx); return; }
+        if (!guard.Ativo || ctx.Request.Path.StartsWithSegments("/hubs") || EhArquivoDoScalar(ctx.Request)) { await next(ctx); return; }
 
         var original = ctx.Response.Body;
         var limite = (long)opcoes.Value.LimiteCorpoBytes * FatorLimite;
@@ -117,6 +117,13 @@ public sealed class RespostaNaoAutenticadaMiddleware(RequestDelegate next, IPiiS
     /// <summary>Corpo grande demais para varrer: sem classe real, o evento vai como Senha/Bloqueado só para o tradutor.</summary>
     private static EventoSeguranca EventoSintetico(string cid) =>
         EventoSeguranca.Novo(TimeProvider.System.GetUtcNow(), cid, OrigemDado.Http, "resposta", PiiClasse.Senha, Sink.HttpNaoAutenticada, Decisao.Bloqueado, null);
+
+    /// <summary>
+    /// Arquivo estático da documentação interativa (/scalar/*.js, *.css...): conteúdo da biblioteca, sem dado de usuário, e grande
+    /// demais para o limite de varredura. Só GET com extensão de arquivo; a página /scalar/v1 e qualquer rota sem extensão continuam varridas.
+    /// </summary>
+    private static bool EhArquivoDoScalar(HttpRequest req) =>
+        HttpMethods.IsGet(req.Method) && req.Path.StartsWithSegments("/scalar") && Path.HasExtension(req.Path.Value);
 
     private static bool EhJson(string? ct) => ct is not null && ct.Contains("json", StringComparison.OrdinalIgnoreCase);
 

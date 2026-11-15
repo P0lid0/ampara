@@ -52,6 +52,9 @@ public class RespostaNaoAutenticadaTests
         });
         m.MapGet("/hubs/x/negotiate", () => Results.Json(new { cpf = "529.982.247-25" }));
         m.MapGet("/grande", () => Results.Text(new string('a', 500), "text/plain"));
+        // Arquivo estatico da documentacao interativa (Scalar): bundle grande, de biblioteca, sem dado de usuario.
+        m.MapGet("/scalar/scalar.js", () => Results.Text("var x = '" + new string('a', 500) + " 529.982.247-25';", "text/javascript")); // SINTETICO
+        m.MapGet("/scalar/vaza-cpf", () => Results.Json(new { cpf = "529.982.247-25" })); // SINTETICO
     }
 
     private static readonly string B = ((char)92).ToString();
@@ -174,6 +177,20 @@ public class RespostaNaoAutenticadaTests
         Assert.Contains(JwtFalso, t);
         Assert.Contains("-23.567249", t);   // o serializador descarta o zero final
         Assert.Empty(h.Rastro.Eventos);
+    }
+
+    [Fact] public async Task Arquivo_estatico_do_scalar_passa_mas_rota_sem_extensao_continua_varrida()
+    {
+        // Com AMPARA_DEMO o bundle /scalar/scalar.js (megabytes) estourava o limite e a documentacao abria em branco.
+        var (r1, _, h1) = await Get("/scalar/scalar.js", new() { ["Cyber:LimiteCorpoBytes"] = "100" });
+        await using var _1 = h1;
+        Assert.Equal(HttpStatusCode.OK, r1.StatusCode);
+        Assert.Equal("text/javascript", r1.Content.Headers.ContentType!.MediaType);
+
+        var (r2, t2, h2) = await Get("/scalar/vaza-cpf");
+        await using var _2 = h2;
+        Assert.Equal(HttpStatusCode.InternalServerError, r2.StatusCode);
+        Assert.DoesNotContain("529.982.247-25", t2); // SINTETICO
     }
 
     [Fact] public async Task Binario_e_hubs_sao_ignorados_e_corpo_gigante_e_bloqueado()
