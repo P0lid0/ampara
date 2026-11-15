@@ -23,6 +23,7 @@ app/ios/
 qa/spikes/gps-background/android/
 qa/spikes/**/saida/
 ml/dados/brutos/
+ml/dados/cache/
 infra/vm/
 *.qcow2
 *.img

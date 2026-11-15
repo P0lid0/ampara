@@ -412,4 +412,8 @@ Resultado: testes de `test_area.py` passando (16 do brief mais NaN e limite supe
 
 Resultado: 12 testes de `test_ssp.py` passando; carga real das planilhas 2022 a 2025: 828.618 linhas usadas (proxy de roubo e furto em via pública, capital, dentro da grade), 63,2 % da base, o que faz `decidir_resolucao` devolver `distrito` por causa de linhas com hora `NULL`, não de coordenada (93 % válidas entre as com data e hora). Decisão pendente do controlador; plano B não executado. Sem migration.
 
+> Executar a Task 3 do plano 06 (ML): escrever primeiro os testes de `classes.py` e `divisao.py` (cortes de classe só com contagens positivas do treino, rótulos 0/1/2, período trimestral, início do teste, divisão temporal e CV temporal por período único); implementar os dois módulos e cachear a carga limpa das planilhas SSP em `ml/dados/cache/` (git-ignorado).
+
+Resultado: 11 testes novos passando (43 na suíte de `ml/`); cortes calculados só no treino, CV de janela expansiva que nunca parte um período. Sem migration.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->
