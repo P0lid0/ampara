@@ -77,9 +77,15 @@ public sealed class ResumoAtaques : IDisposable
             if (ataques is null) return;
             var json = System.Text.Json.JsonSerializer.Serialize(System.Text.Json.JsonDocument.Parse(corpo).RootElement,
                 new System.Text.Json.JsonSerializerOptions { WriteIndented = true, Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
-            var texto = $"> {requisicao}{'\n'}HTTP {status}{'\n'}Content-Type: {tipo}{'\n'}{'\n'}{json}{'\n'}";
+            var texto = $"> {requisicao}{'\n'}HTTP {status}{'\n'}Content-Type: {tipo}{'\n'}{'\n'}{FixarCorrelacao(json)}{'\n'}";
             File.WriteAllText(Path.Combine(Path.GetDirectoryName(ataques)!, $"exemplo-{nome}.txt"), texto, new UTF8Encoding(false));
         }
         catch (Exception ex) { Console.Error.WriteLine("exemplo nao foi gravado: " + ex.Message); }
     }
+
+    public const string MarcadorCorrelacao = "(varia a cada execucao)";
+
+    /// <summary>O correlationId muda a cada execucao; no exemplo versionado vira um marcador fixo para a suite nao sujar a arvore.</summary>
+    public static string FixarCorrelacao(string json) =>
+        System.Text.RegularExpressions.Regex.Replace(json, """("correlationId"\s*:\s*")[^"]*(")""", "${1}" + MarcadorCorrelacao + "${2}");
 }

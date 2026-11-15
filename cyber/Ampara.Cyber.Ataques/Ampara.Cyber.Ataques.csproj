@@ -16,6 +16,8 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="11.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.15" />
+    <!-- Alinha com a versao que o Ampara.Api usa: sem isto o MSBuild escolhe a 10.0.4 trazida pelo Npgsql (MSB3277). -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.15" />
   </ItemGroup>
   <ItemGroup>
     <Using Include="Xunit" />

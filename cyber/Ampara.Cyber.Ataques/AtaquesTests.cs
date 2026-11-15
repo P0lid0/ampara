@@ -490,3 +490,18 @@ public class AtaquesTests(ResumoAtaques resumo) : IClassFixture<ResumoAtaques>
         protected override bool TryComputeLength(out long length) { length = -1; return false; }
     }
 }
+
+/// <summary>Revisao final do plano 03 (entrega-4): o exemplo versionado nao muda de uma execucao para outra.</summary>
+public class ExemploVersionadoTests
+{
+    private static string Corpo() => "{\n  \"status\": 500,\n  \"correlationId\": \"" + Guid.NewGuid() + "\",\n  \"x\": 1\n}";
+
+    [Fact]
+    public void Correlation_id_vira_marcador_fixo_no_exemplo()
+    {
+        var a = ResumoAtaques.FixarCorrelacao(Corpo());
+        Assert.Equal(a, ResumoAtaques.FixarCorrelacao(Corpo()));
+        Assert.Contains("\"correlationId\": \"" + ResumoAtaques.MarcadorCorrelacao + "\"", a);
+        Assert.Contains("\"x\": 1", a);
+    }
+}
