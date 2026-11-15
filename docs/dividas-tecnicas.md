@@ -9,6 +9,7 @@ Itens que a revisão final do plano encontrou, verificou como reais e deixou de 
 - **Gatilho pelo guardião** (contrato-3): o contrato prevê `POST /ocorrencias/gatilho {origem:"guardiao", vitimaId}`, mas o guardião não tem rota para listar quem ele protege. O plano 05 hoje só usa `origem:"web"`.
 - **Lote de rota tudo-ou-nada** (contrato-4): basta um ponto fora da janela (mais de 7 dias, ou mais de 5 min no futuro) para o lote inteiro voltar 422. A fila do app precisa tirar esse lote da fila, senão ele reenvia para sempre.
 - **Erros fora do problem+json** (contrato-5): 401, 404 e 405 de rota inexistente e 400 de binding saem sem `codigo`, `detalheCidadao` e `correlationId`.
+- **Frase genérica para recusa sem mapeamento** (re-revisão do plano 03): desde o commit b36a1e9, todo 4xx vem com `detalheCidadao` preenchido. Os códigos que não têm frase própria (`chaveiro-ja-pareado`, `guardiao-ja-vinculado` e as validações 422 como `nome-obrigatorio`) recebem "Confira os dados e tente de novo", e o app mostra essa frase no lugar da mensagem específica dele. O plano 05 decide: o app prefere a mensagem própria por `codigo`, ou a API ganha frases para esses códigos.
 
 ### Concorrência (só aparece com requisições simultâneas na mesma ocorrência)
 
@@ -42,6 +43,7 @@ Lacunas sem caminho concreto hoje (nenhum endpoint, contrato ou mensagem atual a
 - **Resposta anônima com tipo fora da lista** (vazamento-4): `RespostaNaoAutenticadaMiddleware` só varre text/json/xml/javascript; `octet-stream`, `x-www-form-urlencoded`, `yaml` e os cabeçalhos da resposta passam.
 - **Nomes de propriedade no SignalR e no MQTT** (vazamento-5): `TaintHubProtocol` e `MqttPiiFilter` olham só os valores; um dicionário indexado por telefone passaria. As mensagens do hub são records fixos.
 - **Chaves extras marcadas sem normalizar** (vazamento-6): `PiiRequestMiddleware.MarcarChavesExtras` guarda o valor cru; com dígitos de largura total o sink não acha o código. Nenhum caminho ecoa o código.
+- **Invisíveis que não são formatação** (re-revisão): o `Normalizador` não trata U+3164 (preenchimento hangul, que o NFKC transforma em U+1160), U+115F, U+2800 (braille vazio) e U+17B4/U+17B5. Por isso `529<U+3164>982<U+3164>247<U+3164>25` não casa no `CpfDetector`. A correção é trocar esses caracteres por espaço no `Normalizador` e acrescentar a forma ao A02.
 
 Entregas que dependem de rodar a API e o painel:
 
