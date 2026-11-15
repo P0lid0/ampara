@@ -186,7 +186,7 @@ O valor do dado nunca é gravado. Pesos do índice (24 h, teto 100): log bloquea
 
 **Área do mapa**: limites superiores exclusivos (`lat >= -23.35` ou `lng >= -46.36` → `fora`), igual em C# e Python.
 
-**ML**: `risco.csv` traz só as células ativas (≥ 20 ocorrências no treino) × 56 combinações de dia e faixa; área ausente = "sem dado" no mapa (cinza, com legenda). O arquivo representa o trimestre seguinte ao último trimestre completo dos dados. Plano B por distrito: cada distrito vira a célula da grade que contém seu ponto representativo. `ml/saida/risco.csv` é versionado.
+**ML**: `risco.csv` traz só as células ativas (≥ 120 ocorrências no treino; era 20, subiu no plano 06 para o painel caber em 2 milhões de linhas) × 56 combinações de dia e faixa; área ausente = "sem dado" no mapa (cinza, com legenda). O arquivo representa o trimestre seguinte ao último trimestre completo dos dados. Plano B por distrito: cada distrito vira a célula da grade que contém seu ponto representativo. `ml/saida/risco.csv` é versionado.
 
 **VM**: portas do host `8080→80` (nginx), `2222→22` (ssh), `8088` (seed do cloud-init). Rede da VM `10.0.2.15/24`, gateway `10.0.2.2`, DNS `10.0.2.3 1.1.1.1`. No emulador: `EXPO_PUBLIC_API_URL=http://10.0.2.2:5080` (API local) ou `http://10.0.2.2:8080` (API na VM). Units: `ampara-api.service`, `ampara-ponte.service`, `ampara-monitor.service`, `cloudflared.service`; limites em `/etc/ampara/monitor.conf`. Ponte roda como `app.main:app` (compatível com Python 3.12 do Ubuntu 24.04).
 

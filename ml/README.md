@@ -1,4 +1,4 @@
-# ml: risco de roubo e furto de celular por área, dia e faixa horária (São Paulo)
+# ml: risco de roubo e furto em via pública (proxy de celular) por área, dia e faixa horária (São Paulo)
 
 Projeto Ampara, Global Solution 2026.2 (CitizenTech), disciplina de Machine Learning.
 
@@ -45,7 +45,7 @@ Os dados brutos não são versionados. Onde baixar cada fonte, o período e as c
 ## Semântica do `saida/risco.csv`
 
 - Cabeçalho exato: `area_id,lat,lng,dia_semana,faixa,classe,prob_alto` (UTF-8, vírgula). `dia_semana` de 0 (segunda) a 6 (domingo); `faixa` de 0 (00h-03h) a 7 (21h-24h); `classe` em `baixo`, `medio`, `alto`; `prob_alto` em [0, 1] com 4 casas. `prob_alto` é a probabilidade bruta do modelo para a classe alto e não é calibrada.
-- Cobre só as células ativas (com pelo menos 20 ocorrências no treino) × 56 combinações de dia e faixa. Área ausente significa "sem dado" no mapa, não "sem risco".
+- Cobre só as células ativas (com pelo menos 120 ocorrências no treino: 1.949 células, em geral as centrais) × 56 combinações de dia e faixa. O mínimo subiu de 20 para 120 para o painel caber em menos de 2 milhões de linhas (com 20 seriam cerca de 3,2 milhões). Área ausente significa "sem dado" no mapa, não "sem risco".
 - Representa o trimestre seguinte ao último trimestre completo dos dados.
 - No plano B (resolução por distrito) haveria uma célula por distrito; com os dados reais a resolução escolhida foi a grade de 500 m.
 - O arquivo é versionado: a API lê `RISCO_CSV=ml/saida/risco.csv`.

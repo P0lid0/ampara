@@ -486,4 +486,10 @@ Resultado: `ml/RELATORIO_ML.md` (cerca de 780 palavras, 3 figuras, 2 páginas A4
 
 Resultado: `ml/README.md` (pergunta, F1 de teste do XGBoost e do Random Forest, integrantes, como rodar, semântica do `risco.csv`), `ml/requirements.txt` com as 13 versões instaladas, `dados/README.md` com seções `## SSP`, `## GeoSampa`, `## Open-Meteo` e `## IBGE`. Verificação com a API pendente (a API exige Postgres); o plano 08 repete.
 
+### 76. ML: correções da revisão final do plano 06
+
+> Revisar o plano 06 inteiro (vazamento temporal, números do relatório × `metricas.json` × notebook, `risco.csv` × leitor da API, ressalvas obrigatórias, higiene do repositório) e corrigir só o que for confirmado.
+
+Resultado: veredito "pronto com ressalvas", nenhum crítico. Corrigidos: ressalva de que 2025T4 está subcontado por atraso de registro (46.707 contra ~50 mil nos outros trimestres de 2025, conferido no cache); mínimo de 120 ocorrências por célula (não 20) no README e no contrato 00; diferença treino − teste 0.239/0.101; 825.021 ocorrências na janela; frase de vazamento restrita às variáveis defasadas; títulos dizem "proxy de celular"; linha do vídeo no relatório; `ml/saida/*.log` no `.gitignore`. 116 testes do ml passando.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->

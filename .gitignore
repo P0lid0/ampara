@@ -43,3 +43,4 @@ ml/.venv/
 ml/dados/processados/
 .ipynb_checkpoints/
 .taste-skill/
+ml/saida/*.log
