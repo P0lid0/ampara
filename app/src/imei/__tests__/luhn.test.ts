@@ -24,4 +24,10 @@ describe('imei', () => {
     expect(extrairImeiDeCodigo('IMEI 490154203237518')).toBe('490154203237518');
     expect(extrairImeiDeCodigo('490154203237519')).toBeNull();
   });
+
+  it('não extrai 15 dígitos do meio de um número maior', () => {
+    expect(extrairImeiDeCodigo('4901542032375188')).toBeNull();
+    expect(extrairImeiDeCodigo('IMEI 4901542032375188')).toBeNull();
+    expect(extrairImeiDeCodigo('IMEI 490154203237518.')).toBe('490154203237518');
+  });
 });

@@ -2,6 +2,7 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useEffect, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { cores } from '../theme/tokens';
+import { Texto } from './Texto';
 
 export type TipoCodigo = 'code128' | 'code39' | 'qr';
 
@@ -17,6 +18,7 @@ export function LeitorCodigo({ tipos, aoLer, aoNegar }: LeitorCodigoProps) {
   const lido = useRef(false);
   const negou = useRef(false);
   const atual = useRef({ pedir, aoNegar });
+  // Atribuição no render de propósito: o efeito lê sempre a versão mais recente sem depender de identidades instáveis.
   atual.current = { pedir, aoNegar };
 
   const carregada = permissao !== null;
@@ -42,7 +44,7 @@ export function LeitorCodigo({ tipos, aoLer, aoNegar }: LeitorCodigoProps) {
       .catch(negar);
   }, [carregada, concedida, podePedir]);
 
-  if (!concedida) return null;
+  if (!concedida) return <Texto accessibilityLiveRegion="polite">Abrindo a câmera...</Texto>;
 
   return (
     <View style={estilos.caixa} accessibilityLabel="Câmera aberta para ler o código de barras">

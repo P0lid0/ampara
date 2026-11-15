@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { Linking } from 'react-native';
 import { useCameraPermissions } from 'expo-camera';
 import OnboardingImei from '../imei';
@@ -18,6 +18,13 @@ jest.mock('../../../api/endpoints', () => ({ api: { aparelhos: { criar: jest.fn(
 // SINTETICO: IMEI de teste com Luhn valido, nunca de aparelho real.
 const IMEI = '490154203237518';
 const criar = jest.mocked(api.aparelhos.criar);
+
+const permissaoPadrao = jest.mocked(useCameraPermissions).getMockImplementation();
+
+afterEach(() => {
+  jest.mocked(useCameraPermissions).mockImplementation(permissaoPadrao!);
+  jest.restoreAllMocks();
+});
 
 beforeEach(() => {
   mockReplace.mockReset();
@@ -88,6 +95,42 @@ describe('onboarding do IMEI', () => {
     await fireEvent.press(screen.getByRole('button', { name: 'Digitar o número' }));
     await fireEvent.changeText(screen.getByLabelText('IMEI'), '49-015420-323751-8');
     expect(screen.getByLabelText('IMEI').props.value).toBe('49-015420-323751-8');
+    await fireEvent.press(screen.getByRole('button', { name: 'Continuar' }));
+    await fireEvent.changeText(screen.getByLabelText('Marca'), 'Marca Teste');
+    await fireEvent.changeText(screen.getByLabelText('Modelo'), 'Modelo Teste');
+    await fireEvent.press(screen.getByRole('button', { name: 'Confirmar' }));
+    await waitFor(() => expect(criar).toHaveBeenCalledWith({ imei: IMEI, marca: 'Marca Teste', modelo: 'Modelo Teste' }));
+  });
+
+  it('erro de IMEI inválido só aparece com 15 dígitos digitados', async () => {
+    await irParaPasso(2);
+    await fireEvent.press(screen.getByRole('button', { name: 'Digitar o número' }));
+    await fireEvent.changeText(screen.getByLabelText('IMEI'), '4901');
+    expect(screen.queryByText(/O IMEI tem 15 números/)).toBeNull();
+  });
+
+  it('câmera lê um IMEI válido: cai no campo de digitação para conferir', async () => {
+    await irParaPasso(2);
+    await fireEvent.press(screen.getByRole('button', { name: 'Ler pela câmera' }));
+    await act(async () => screen.getByTestId('camera').props.onBarcodeScanned({ data: IMEI }));
+    expect(screen.getByLabelText('IMEI').props.value).toBe('49-015420-323751-8');
+    expect(screen.getByRole('button', { name: 'Continuar' })).toBeEnabled();
+  });
+
+  it('câmera lê código que não é IMEI: avisa e volta à escolha; digitar limpa o aviso', async () => {
+    await irParaPasso(2);
+    await fireEvent.press(screen.getByRole('button', { name: 'Ler pela câmera' }));
+    await act(async () => screen.getByTestId('camera').props.onBarcodeScanned({ data: '7891000100103' }));
+    expect(screen.getByText(/Esse código não parece um IMEI/)).toBeTruthy();
+    await fireEvent.press(screen.getByRole('button', { name: 'Digitar o número' }));
+    expect(screen.queryByText(/Esse código não parece um IMEI/)).toBeNull();
+  });
+
+  it('sem discador: avisa para discar *#06# manualmente', async () => {
+    jest.spyOn(Linking, 'openURL').mockRejectedValue(new Error('sem discador'));
+    await irParaPasso(1);
+    await fireEvent.press(screen.getByRole('button', { name: 'Abrir o discador' }));
+    expect(await screen.findByText(/Não consegui abrir o discador/)).toBeTruthy();
   });
 
   it('422 mostra detalheCidadao da API', async () => {

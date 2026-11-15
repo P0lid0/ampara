@@ -24,13 +24,14 @@ export default function OnboardingImei() {
   const [modoNumero, setModoNumero] = useState<'escolha' | 'camera' | 'digitar'>('escolha');
   const [cameraNegada, setCameraNegada] = useState(false);
   const [avisoLeitura, setAvisoLeitura] = useState<string | undefined>();
+  const [avisoDiscador, setAvisoDiscador] = useState<string | undefined>();
   const [marca, setMarca] = useState('');
   const [modelo, setModelo] = useState('');
   const [erro, setErro] = useState<string | undefined>();
   const [enviando, setEnviando] = useState(false);
 
   const valido = imeiValido(imei);
-  const erroImei = imei.length > 0 && !valido ? MSG_IMEI_INVALIDO : undefined;
+  const erroImei = imei.length >= 15 && !valido ? MSG_IMEI_INVALIDO : undefined;
   const podeConfirmar = valido && marca.trim().length > 0 && modelo.trim().length > 0;
 
   function aoLer(valor: string) {
@@ -94,9 +95,13 @@ export default function OnboardingImei() {
             rotulo="Abrir o discador"
             variante="secundario"
             onPress={() => {
-              Linking.openURL('tel:*%2306%23').catch(() => undefined);
+              setAvisoDiscador(undefined);
+              Linking.openURL('tel:*%2306%23').catch(() =>
+                setAvisoDiscador('Não consegui abrir o discador. Disque *#06# você mesmo.'),
+              );
             }}
           />
+          {avisoDiscador ? <Texto accessibilityLiveRegion="polite">{`⚠ ${avisoDiscador}`}</Texto> : null}
           <Botao rotulo="Continuar" onPress={() => setPasso(2)} />
           <Botao rotulo="Voltar" variante="secundario" onPress={() => setPasso(0)} />
         </>
@@ -110,13 +115,13 @@ export default function OnboardingImei() {
           {modoNumero === 'escolha' ? (
             <View style={estilos.grupo}>
               <Botao rotulo="Ler pela câmera" onPress={() => setModoNumero('camera')} />
-              <Botao rotulo="Digitar o número" variante="secundario" onPress={() => setModoNumero('digitar')} />
+              <Botao rotulo="Digitar o número" variante="secundario" onPress={() => { setAvisoLeitura(undefined); setModoNumero('digitar'); }} />
             </View>
           ) : null}
           {modoNumero === 'camera' ? (
             <>
               <LeitorCodigo tipos={['code128', 'code39']} aoLer={aoLer} aoNegar={aoNegar} />
-              <Botao rotulo="Digitar o número" variante="secundario" onPress={() => setModoNumero('digitar')} />
+              <Botao rotulo="Digitar o número" variante="secundario" onPress={() => { setAvisoLeitura(undefined); setModoNumero('digitar'); }} />
             </>
           ) : null}
           {modoNumero === 'digitar' ? (
@@ -127,6 +132,7 @@ export default function OnboardingImei() {
               keyboardType="number-pad"
               autoComplete="off"
               autoCorrect={false}
+              accessibilityHint="O IMEI tem 15 números"
               erro={erroImei}
             />
           ) : null}

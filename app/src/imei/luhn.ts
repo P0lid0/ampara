@@ -25,7 +25,7 @@ export function imeiValido(entrada: string): boolean {
 export function extrairImeiDeCodigo(valor: string): string | null {
   const direto = limparImei(valor);
   if (imeiValido(direto)) return direto;
-  for (const m of valor.match(/\d{15}/g) ?? []) {
+  for (const m of valor.match(/(?<!\d)\d{15}(?!\d)/g) ?? []) {
     if (imeiValido(m)) return m;
   }
   return null;
