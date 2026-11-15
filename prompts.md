@@ -504,4 +504,10 @@ Resultado: 5 suítes e 48 testes passando, `tsc --noEmit` sem erros. RNTL 14 tem
 
 Resultado: 8 testes novos passando (56 no app), `tsc --noEmit` sem erros. O mock em `app/__mocks__/expo-sqlite.ts` usa `node:sqlite` em memória (mesmo nome devolve o mesmo banco, `__reiniciar()` zera); `@types/node` entrou como devDependency para o `tsc` enxergar `node:sqlite`. Sem migration de servidor.
 
+### 79. App: cliente da API, sessão e tela de entrada (Task 3 do plano 05)
+
+> Executar a Task 3 do plano 05 (app): escrever primeiro os testes do cliente da API (problem+json vira `ApiErro` com `detalheCidadao`, 204 devolve `undefined`, qualquer 2xx é sucesso, 401 fora de `/auth/*` chama `aoExpirar`, falha de rede vira status 0, cabeçalho `Authorization`), da sessão (login grava no SecureStore, token de emergência só em memória e expirando no `expiraEm`, `sair` limpa SecureStore e SQLite) e da tela de entrada (429 e 401/404 do modo emergência com as frases fixas); ver falhar; implementar `tipos.ts`, `cliente.ts`, `endpoints.ts`, `sessao.ts`, `entrar.tsx` (entrar, criar conta e "Estou no aparelho de outra pessoa") e o guard no `_layout.tsx`. Sem build Android nesta fase.
+
+Resultado: 29 testes novos passando (85 no app), `tsc --noEmit` sem erros. O guard de rotas ficou em função pura (`auth/guard.ts`, testada); as telas `historico`, `rota` e `bo` do modo emergência chegam nas próximas tarefas. Sem migration de servidor.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->
