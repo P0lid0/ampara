@@ -55,3 +55,13 @@ Entregas que dependem de rodar a API e o painel:
 ### Já aceitas antes da revisão final
 
 - **CPF com digitos soltos separados por espaco** (cyber-19): `5 2 9 9 ...` nao e detectado pelo `CpfDetector` (aceita so `.`/espaco entre grupos de 3). Fica fora do A02; a suite de ataques nao cobre essa forma.
+
+## ML (plano 06, revisão final de 15/11/2026)
+
+- **Modelo exportado não é o melhor**: o Random Forest venceu o XGBoost no teste (F1 macro 0,466 contra 0,440) e sobreajusta menos, mas o `risco.csv` usa o XGBoost, como o plano manda. O relatório declara. Trocar exige só reexecutar o treino final.
+- **2025T4 subcontado**: 46.707 ocorrências contra cerca de 50 mil nos outros trimestres de 2025 (atraso de registro). As defasagens do `risco.csv` de 2026T1 vêm desse trimestre, então o risco sai levemente subestimado. Hoje há só a ressalva escrita; o certo seria tratar o último trimestre como parcial.
+- **Modelo final sem 2025**: treinado até 2024T4; `prob_alto` não calibrada.
+- **Cobertura do mapa**: `MIN_OCORR_CELULA = 120` deixa 1.949 células, em geral as centrais; o resto aparece cinza. O plano 06 (`docs/superpowers/plans/2026-11-14-06-ml.md`, linhas 32 e 989) ainda fala em 20; o contrato 00 já diz 120.
+- **Variáveis externas não defasadas**: clima do próprio trimestre no treino e do ano anterior na previsão; cadastro do GeoSampa de 2026 aplicado a 2022–2024.
+- **`risco.csv` não testado na API de ponta a ponta** (Task 14, Step 5): só o formato foi conferido contra as regras do `RiscoService`. O plano 08 repete.
+- **Suíte do ml lenta**: `test_modelos.py` leva cerca de 1,5 min, e o brief previa menos de 1.
