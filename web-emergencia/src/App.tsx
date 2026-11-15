@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import { lerSessao, sair } from "./sessao/sessao";
 import { Login, MSG_SESSAO_VENCIDA } from "./telas/Login";
+import { LinhaDoTempo } from "./telas/LinhaDoTempo";
 import { Painel } from "./telas/Painel";
 
 type Tela = "login" | "painel" | "rota" | "bo";
@@ -37,13 +38,12 @@ export function App() {
         />
       )}
       {tela === "rota" && (
-        <main className="tela">
-          <h1>Onde foi roubado</h1>
-          <p>O mapa com o seu trajeto chega na próxima etapa.</p>
-          <p className="discreto">Ocorrência {ocorrenciaId}</p>
-          <button type="button" onClick={() => setTela("painel")}>Voltar</button>
-          <button type="button" className="secundario sair" onClick={sairDaAba}>Sair e apagar tudo desta aba</button>
-        </main>
+        <LinhaDoTempo
+          ocorrenciaId={ocorrenciaId}
+          aoVoltar={() => setTela("painel")}
+          aoSessaoVencida={vencida}
+          aoBo={(id) => { setOcorrenciaId(id); setTela("bo"); }}
+        />
       )}
       {tela === "bo" && (
         <main className="tela">
