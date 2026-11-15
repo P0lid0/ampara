@@ -151,6 +151,29 @@ public class TradutorRiscoTests
     public void Frases_padrao_tem_duas_frases_e_ninguem_diz_Error_500() =>
         Assert.All(FrasesPadrao.Todas, f => { Assert.Equal(2, f.Count(c => c == '.')); Assert.DoesNotContain("Error", f); Assert.DoesNotContain("500", f); });
 
+    // Revisão final do plano 03 (regressao-1): recusa de regra nunca vira "falha do nosso lado, tente em alguns minutos".
+    [Fact]
+    public void Frases_de_recusa_tem_duas_frases_e_nao_culpam_o_sistema() =>
+        Assert.All(FrasesPadrao.Recusas, f => { Assert.Equal(2, f.Count(c => c == '.')); Assert.DoesNotContain("nosso lado", f); Assert.DoesNotContain("Error", f); });
+
+    [Theory]
+    [InlineData("credenciais-invalidas", "CredenciaisInvalidas")] [InlineData("convite-invalido", "ConviteInvalido")]
+    [InlineData("convite-vencido", "ConviteVencido")] [InlineData("limite-guardioes", "LimiteGuardioes")]
+    [InlineData("relato-abusivo", "RelatoAbusivo")] [InlineData("limite-relatos", "MuitasTentativas")]
+    [InlineData("ocorrencia-nao-encontrada", "NaoEncontrado")] [InlineData("ocorrencia-de-outro-usuario", "SemPermissao")]
+    [InlineData("imei-invalido", "RecusaPadrao")]
+    public void Recusa_escolhe_frase_pelo_codigo(string codigo, string esperada) =>
+        Assert.Equal(typeof(FrasesPadrao).GetField(esperada)!.GetValue(null), FrasesPadrao.Para(EventoTecnico.Recusa(codigo)));
+
+    [Fact]
+    public async Task Recusa_com_chave_nao_chama_a_IA_e_devolve_a_frase_do_codigo()
+    {
+        var h = Handler("Algo deu errado do nosso lado. Tente de novo em alguns minutos.");
+        var t = Tradutor(h);
+        Assert.Equal(FrasesPadrao.ConviteInvalido, await t.TraduzirAsync(EventoTecnico.Recusa("convite-invalido")));
+        Assert.Equal(0, h.Chamadas);
+    }
+
     [Theory]
     [InlineData("Bloqueado", "Bloqueado")] [InlineData("Mascarado", "Protegido")] [InlineData("Cifrado", "Protegido")]
     [InlineData("Permitido", "Permitido")] [InlineData("AcessoIndevido", "AcessoIndevido")] [InlineData("Qualquer", "FalhaSistema")]

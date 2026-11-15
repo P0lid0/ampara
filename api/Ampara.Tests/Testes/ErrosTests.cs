@@ -1,3 +1,4 @@
+using System.Net.Http.Json;
 using System.Text.Json;
 using Ampara.Api.Middleware;
 using Ampara.Application.Comum;
@@ -129,5 +130,33 @@ public class ErrosTests(AmparaFactory f) : IClassFixture<AmparaFactory>
         Assert.Equal(("abc-1", "documento", PiiClasse.Cpf), (e.CorrelationId, e.Campo, e.Classe));
         Assert.Equal(new[] { "Campo", "Classe", "CorrelationId", "Decisao", "Em", "Id", "MensagemCidadao", "Sink", "Source", "UsuarioAlvoId" },
             typeof(EventoSeguranca).GetFields().Select(x => x.Name).OrderBy(n => n).ToArray());
+    }
+
+    // Revisão final do plano 03 (regressao-1): pelo host real, sem chave da IA. O app (plano 05) mostra o detalheCidadao
+    // quando ele vem preenchido; senha errada ou convite inválido não podem virar "falha do nosso lado, tente em alguns minutos".
+    [Fact]
+    public async Task Recusas_de_regra_pelo_host_real_trazem_frase_do_codigo_e_nao_culpam_o_sistema()
+    {
+        var u = await f.NovoUsuarioAsync();
+        var c = f.CreateClient();
+
+        var login = await c.PostAsJsonAsync("/api/v1/auth/login", new { email = u.Email, senha = "senha-errada-sintetica" });   // SINTETICO
+        Assert.Equal(401, (int)login.StatusCode);
+        var j1 = await login.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.Equal("credenciais-invalidas", j1.GetProperty("codigo").GetString());
+        Assert.Equal(FrasesPadrao.CredenciaisInvalidas, j1.GetProperty("detalheCidadao").GetString());
+
+        var convite = await u.Cliente.PostAsync("/api/v1/guardioes/convites/ZZZZZZ/aceitar", null);
+        Assert.Equal(404, (int)convite.StatusCode);
+        var j2 = await convite.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.Equal("convite-invalido", j2.GetProperty("codigo").GetString());
+        Assert.Equal(FrasesPadrao.ConviteInvalido, j2.GetProperty("detalheCidadao").GetString());
+
+        foreach (var j in new[] { j1, j2 })
+        {
+            var frase = j.GetProperty("detalheCidadao").GetString()!;
+            Assert.DoesNotContain("nosso lado", frase);
+            Assert.DoesNotContain("alguns minutos", frase);
+        }
     }
 }

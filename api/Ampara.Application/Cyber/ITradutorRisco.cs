@@ -7,6 +7,12 @@ public sealed record EventoTecnico(string Categoria, string Sink, string Tipo)
 {
     public const string AcessoIndevido = "AcessoIndevido";
 
+    /// <summary>Tipo das recusas de regra (4xx de dominio): a categoria e o codigo do erro, nunca dado da requisicao.</summary>
+    public const string Recusado = "Recusado";
+
+    /// <summary>Recusa de regra (senha errada, convite invalido, relato barrado...): nao e falha do sistema e tem frase propria por codigo.</summary>
+    public static EventoTecnico Recusa(string codigo) => new(codigo, "Erro", Recusado);
+
     public static EventoTecnico De(EventoSeguranca e) =>
         IndiceRisco.EhAcessoIndevido(e)
             ? new(AcessoIndevido, e.Sink.ToString(), AcessoIndevido)

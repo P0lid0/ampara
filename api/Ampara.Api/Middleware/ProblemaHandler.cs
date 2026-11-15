@@ -33,14 +33,16 @@ public sealed class ProblemaHandler(ILogger<ProblemaHandler> log) : IExceptionHa
         log.LogWarning("Falha tratada: tipo={Tipo} status={Status} correlationId={CorrelationId}", ex.GetType().Name, status, cid);
 
         // Frase humana para o cidadão; o tradutor nunca lança, mas a resposta não pode depender disso.
+        // 4xx é recusa de regra (senha errada, convite inválido, relato barrado): frase própria pelo código, nunca
+        // "falha do nosso lado, tente em alguns minutos". Só o 5xx (serviço fora) é falha do sistema.
+        var evento = status < 500 ? EventoTecnico.Recusa(codigo) : new EventoTecnico("FalhaSistema", "Erro", ex.GetType().Name);
         string? detalhe;
         try
         {
             var tradutor = ctx.RequestServices?.GetService<ITradutorRisco>();
-            detalhe = tradutor is null ? null
-                : await tradutor.TraduzirAsync(new EventoTecnico("FalhaSistema", "Erro", ex.GetType().Name), ct);
+            detalhe = tradutor is null ? null : await tradutor.TraduzirAsync(evento, ct);
         }
-        catch (Exception) { detalhe = FrasesPadrao.FalhaSistema; }
+        catch (Exception) { detalhe = FrasesPadrao.Para(evento); }
 
         ctx.Response.StatusCode = status;
         if (ex is LimiteExcedidoException l)

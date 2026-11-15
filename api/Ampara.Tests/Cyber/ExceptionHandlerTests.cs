@@ -98,13 +98,15 @@ public class ExceptionHandlerTests
 
     [Fact] public async Task Excecao_de_dominio_continua_com_o_status_do_plano_02_e_ganha_frase_humana()
     {
-        var (r, t, h) = await Get("/nao-existe-recurso", new TradutorFalso());
+        var tradutor = new TradutorFalso();
+        var (r, t, h) = await Get("/nao-existe-recurso", tradutor);
         await using var _ = h;
         Assert.Equal(HttpStatusCode.NotFound, r.StatusCode);
         Assert.Equal("application/problem+json", r.Content.Headers.ContentType!.MediaType);
         var raiz = JsonDocument.Parse(t).RootElement;
         Assert.Equal("x-codigo", raiz.GetProperty("codigo").GetString());
         Assert.Equal(TradutorFalso.Frase, raiz.GetProperty("detalheCidadao").GetString());
+        Assert.Equal(EventoTecnico.Recusa("x-codigo"), tradutor.Ultimo);   // recusa de regra, não "FalhaSistema"
         Assert.Empty(h.Rastro.Eventos);
     }
 
@@ -113,7 +115,7 @@ public class ExceptionHandlerTests
         var (r, t, h) = await Get("/nao-existe-recurso", new TradutorQueLanca());
         await using var _ = h;
         Assert.Equal(HttpStatusCode.NotFound, r.StatusCode);
-        Assert.Equal(FrasesPadrao.FalhaSistema, JsonDocument.Parse(t).RootElement.GetProperty("detalheCidadao").GetString());
+        Assert.Equal(FrasesPadrao.RecusaPadrao, JsonDocument.Parse(t).RootElement.GetProperty("detalheCidadao").GetString());
     }
 
     [Fact] public void Acesso_indevido_registra_evento_para_o_dono()
