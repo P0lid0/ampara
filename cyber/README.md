@@ -36,7 +36,7 @@ Fonte do PDF: `cyber/documentacao.md`, com os prints de `cyber/evidencias/prints
 | `prints-codigo.mjs <arquivo> <ini> <fim> <saida.png>` | renderiza o trecho (linhas ini a fim) com `highlight.js` e tira o print |
 | `prints-painel.mjs` | com API (`AMPARA_DEMO=true`) e painel no ar, zera o rastro, entra no painel, aciona os cenários e salva os prints (verde 0, amarelo 40 e 65, vermelho 75, executiva) |
 | `gerar-pdf.mjs` | converte `documentacao.md` em PDF A4 (`marked` + `page.pdf`) |
-| `gerar-zip.sh` | `git archive` de `api cyber web-painel-risco .env.example` e conferência (sem `.pdf`, `node_modules`, `.env`, nem `sk-ant-`) |
+| `gerar-zip.sh` | `git archive` de `api cyber web-painel-risco .env.example` e conferência (sem `.pdf`, `node_modules`, `.env`, nem chave da Anthropic) |
 | `zerar-demo.sh [email]` | apaga os eventos de segurança do usuário de demonstração (padrão `vitima@ampara.demo`; `--tudo` zera o rastro inteiro do banco de demonstração) |
 | `consulta-rastro.sh [trecho...]` | mostra o `evento_seguranca` e procura trechos de valores no rastro inteiro (o esperado é 0) |
 
