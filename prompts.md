@@ -522,4 +522,10 @@ Resultado: 13 testes novos passando (101 no app), `tsc --noEmit` sem erros. O IM
 
 Resultado: 32 testes novos passando (133 no app), `tsc --noEmit` sem erros. A tela inicial reconcilia com o servidor (GET /me, /aparelhos, /contas, /guardioes, /chaveiros) e leva ao próximo passo; as telas dos passos `contas`, `guardioes` e `chaveiro` chegam nas próximas tarefas. Permissões reais de localização no aparelho adiadas para a fase de build nativo. Sem migration de servidor.
 
+### 82. App: bancos e operadora, guardiões e convite por código/QR (Task 6 do plano 05)
+
+> Executar a Task 6 do plano 05 (app): escrever primeiro os testes das telas `onboarding/contas` (catálogo com "Conferido em 12/11/2026", vincula só os marcados por `catalogoId`, segue sem marcar nada), `onboarding/guardioes` (convite com código de 6 caracteres, QR `ampara://guardiao/aceitar?codigo=…` e prazo, 3 guardiões desabilitam "Convidar", subir/descer chama `ordenar`) e `guardiao/aceitar` (`normalizarCodigoConvite`, frases de 404/410/409 sem repetir o código, sucesso liga `guardiao_ativo`, deep link preenche o campo); ver falhar; instalar `react-native-qrcode-svg` e `react-native-svg` com `npx expo install` e implementar as três telas. Sem build Android nesta fase.
+
+Resultado: 28 testes novos passando (163 no app), `tsc --noEmit` sem erros. "Fazer depois" marca o passo como concluído no SQLite para o onboarding seguir. Câmera real (leitura do QR) adiada para a fase de build nativo. Sem migration de servidor.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->
