@@ -444,4 +444,10 @@ Resultado: 6 testes de `test_urbano.py` passando; 96 distritos com população (
 
 Resultado: 5 testes de `test_dataset.py` passando. Sem migration.
 
+### 70. ML: modelos XGBoost e Random Forest com busca e avaliação (Task 10 do plano 06)
+
+> Executar a Task 10 do plano 06 (ML): escrever primeiro os testes de `modelos.py` (grades, busca com CV temporal só no treino, limite ao tamanho da grade, avaliação com classe ausente, treino determinístico, curva de aprendizado); implementar XGBoost com 12 combinações sorteadas, Random Forest como baseline, F1 macro e matriz de confusão.
+
+Resultado: 9 testes de `test_modelos.py` passando. Sem migration.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->
