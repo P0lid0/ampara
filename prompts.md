@@ -516,4 +516,10 @@ Resultado: 29 testes novos passando (85 no app), `tsc --noEmit` sem erros. O gua
 
 Resultado: 13 testes novos passando (101 no app), `tsc --noEmit` sem erros. O IMEI vive só em estado de tela, vai à API só com dígitos e é limpo após o envio; nenhum `console.*` no fluxo. Câmera real e discador no aparelho adiados para a fase de build nativo. Sem migration de servidor.
 
+### 81. App: onboarding com retomada, consentimento da rota e código de emergência (Task 5 do plano 05)
+
+> Executar a Task 5 do plano 05 (app): escrever primeiro os testes de `passos` (ordem de `PASSOS`, `proximoPasso` com `fim`, retomada via SQLite, `reconciliarComServidor` só acrescentando passos e sem gravar `imeiMascarado`) e das telas `consentimento` (aceitar chama `consentimentoRota(true)` e pede localização em primeiro e segundo plano, cada uma depois de uma explicação; recusar não pede permissão; RF4 permissão negada mostra "Rota pausada: falta a permissão de localização."), `emergencia` (código de 6 números e palavra de 4+ caracteres) e `conta` (senha de 8+); ver falhar; implementar `onboarding/passos.ts`, a barra "Passo N de 7", as telas `onboarding/{conta,consentimento,emergencia}` e o redirecionamento da tela inicial ao próximo passo. Sem build Android nesta fase.
+
+Resultado: 32 testes novos passando (133 no app), `tsc --noEmit` sem erros. A tela inicial reconcilia com o servidor (GET /me, /aparelhos, /contas, /guardioes, /chaveiros) e leva ao próximo passo; as telas dos passos `contas`, `guardioes` e `chaveiro` chegam nas próximas tarefas. Permissões reais de localização no aparelho adiadas para a fase de build nativo. Sem migration de servidor.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->

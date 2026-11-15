@@ -40,6 +40,8 @@ export default function Layout() {
         headerTitleStyle: carregadas ? { fontFamily: fontes.bold } : undefined,
         contentStyle: { backgroundColor: cores.areia },
       }}
-    />
+    >
+      <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+    </Stack>
   );
 }
