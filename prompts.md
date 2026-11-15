@@ -492,4 +492,10 @@ Resultado: `ml/README.md` (pergunta, F1 de teste do XGBoost e do Random Forest, 
 
 Resultado: veredito "pronto com ressalvas", nenhum crítico. Corrigidos: ressalva de que 2025T4 está subcontado por atraso de registro (46.707 contra ~50 mil nos outros trimestres de 2025, conferido no cache); mínimo de 120 ocorrências por célula (não 20) no README e no contrato 00; diferença treino − teste 0.239/0.101; 825.021 ocorrências na janela; frase de vazamento restrita às variáveis defasadas; títulos dizem "proxy de celular"; linha do vídeo no relatório; `ml/saida/*.log` no `.gitignore`. Re-revisão: 9 resolvidos, 1 parcial (intervalo de datas do `dados/README.md`, corrigido para 01/2000 a 03/2026). O acréscimo levou o relatório a 3 páginas; texto enxugado (tabela de busca com as 3 melhores) e de volta a 2 páginas A4 (Pandoc + Chrome). 116 testes do ml passando.
 
+### 77. App: esqueleto Expo, tema com contraste testado e componentes base (Task 1 do plano 05)
+
+> Executar a Task 1 do plano 05 (app): criar o projeto Expo SDK 58 em `app/` (blank-typescript, Expo Router com rotas em `src/app`), instalar as dependências da Tech Stack com `npx expo install`; escrever primeiro os testes de contraste (`razaoContraste`, `paresDeTexto` >= 4.5:1, branco sobre esmeralda e sobre alarme reprovando) e dos componentes `Botao` (alvo >= 48 dp, papel button, desabilitado sem onPress), `Texto` (>= 16, sem travar a escala) e `EstadoBadge` (sempre texto + ícone); ver falhar; implementar tokens, componentes, `Campo`, `config.ts` (`EXPO_PUBLIC_API_URL`, padrão `http://10.0.2.2:5080`), `app.config.ts` (`br.fiap.ampara`, plugins e permissões Android), mocks nativos no `jest.setup.ts` e `.env.example`. Sem build Android nesta fase (verificação por jest + tsc).
+
+Resultado: 5 suítes e 48 testes passando, `tsc --noEmit` sem erros. RNTL 14 tem `render`/`fireEvent` assíncronos (testes com `await`); TypeScript 6 exige `types: ["jest"]` no tsconfig. Build nativo e conferência no emulador adiados para a fase de build.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->
