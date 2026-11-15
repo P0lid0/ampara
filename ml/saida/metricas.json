@@ -1,0 +1,87 @@
+{
+  "xgb": {
+    "melhores_params": {
+      "n_estimators": 400,
+      "max_depth": 9,
+      "learning_rate": 0.3
+    },
+    "f1_macro_treino": 0.6796373582539063,
+    "f1_macro_cv": 0.45874164211758295,
+    "f1_macro_teste": 0.44048028778525666,
+    "accuracy_teste": 0.8169390896430404,
+    "matriz_teste": [
+      [
+        347437,
+        49746,
+        10797
+      ],
+      [
+        11227,
+        5671,
+        2977
+      ],
+      [
+        2579,
+        2594,
+        3548
+      ]
+    ]
+  },
+  "rf": {
+    "melhores_params": {
+      "n_estimators": 100,
+      "min_samples_leaf": 5,
+      "max_depth": 16
+    },
+    "f1_macro_treino": 0.5664553257165971,
+    "f1_macro_cv": 0.4729867730847333,
+    "f1_macro_teste": 0.4656848756882314,
+    "accuracy_teste": 0.831202356519827,
+    "matriz_teste": [
+      [
+        352841,
+        45782,
+        9357
+      ],
+      [
+        10732,
+        5895,
+        3248
+      ],
+      [
+        2145,
+        2429,
+        4147
+      ]
+    ]
+  },
+  "cortes": [
+    1,
+    2
+  ],
+  "inicio_teste": "2025T1",
+  "n_treino": 1200584,
+  "n_teste": 436576,
+  "n_areas": 1949,
+  "periodos": [
+    "2022T1",
+    "2022T2",
+    "2022T3",
+    "2022T4",
+    "2023T1",
+    "2023T2",
+    "2023T3",
+    "2023T4",
+    "2024T1",
+    "2024T2",
+    "2024T3",
+    "2024T4",
+    "2025T1",
+    "2025T2",
+    "2025T3",
+    "2025T4"
+  ],
+  "periodo_previsto": "2026T1",
+  "n_combinacoes_xgb": 12,
+  "n_combinacoes_rf": 4
+}

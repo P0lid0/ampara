@@ -20,7 +20,7 @@ from ampara_ml.config import SEED
 GRADE_XGB = {"n_estimators": [100, 200, 400], "max_depth": [3, 5, 7, 9], "learning_rate": [0.03, 0.1, 0.3]}
 GRADE_RF = {"n_estimators": [100, 300], "max_depth": [8, 16, None], "min_samples_leaf": [1, 5, 20]}
 N_COMBINACOES_XGB = 12
-N_COMBINACOES_RF = 6
+N_COMBINACOES_RF = 4
 
 _LABELS = [0, 1, 2]
 

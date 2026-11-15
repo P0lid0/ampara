@@ -468,4 +468,10 @@ Resultado: levantamento das 8 disciplinas no PDF da GS e na explicação de Cybe
 
 Resultado: 18 testes novos passando; primeiro `ml/saida/risco.csv` real (XGBoost 200 árvores, 1.949 áreas ativas × 56 = 109.144 linhas, 5 MB, 0 linhas inválidas); `MIN_OCORR_CELULA` subiu de 20 para 120 para o painel caber em 2 milhões de linhas. Sem migration.
 
+### 73. ML: pipeline real e notebook executado com saídas (Task 12 do plano 06)
+
+> Executar a Task 12 do plano 06 (ML): escrever primeiro o teste de integração de `preparar_dados` com os dados reais; implementar `pipeline.py` encadeando SSP, painel, GeoSampa, clima e variáveis urbanas; montar o notebook `ampara_ml.ipynb` (seções 00 a 04), executá-lo com saídas, gravar `metricas.json`, as figuras e o `risco.csv` do modelo final; testar o notebook entregue.
+
+Resultado: `pipeline.py` (1 teste de integração com os dados reais, 9 min) e notebook `ml/notebooks/ampara_ml.ipynb` executado de ponta a ponta (35 células, 0 erros, 12 combinações XGBoost e 4 de Random Forest, cerca de 1h30); 1.949 áreas, 1.200.584 linhas de treino e 436.576 de teste (2025); F1 macro no teste 0,440 (XGBoost) e 0,466 (Random Forest); `metricas.json`, 8 figuras e `risco.csv` final (109.144 linhas, trimestre 2026T1). Duas correções no caminho: a janela da SSP passou a ser a dos anos das planilhas (fatos de 2000 em diante quebravam o clima) e a escolha dos melhores parâmetros por coluna (a linha inteira virava float). Sem migration.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->

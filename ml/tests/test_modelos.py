@@ -37,7 +37,7 @@ def test_grades_e_minimo_de_combinacoes():
     assert set(GRADE_XGB) == {"n_estimators", "max_depth", "learning_rate"}
     assert set(GRADE_RF) == {"n_estimators", "max_depth", "min_samples_leaf"}
     assert N_COMBINACOES_XGB >= 10 and N_COMBINACOES_XGB <= len(list(ParameterGrid(GRADE_XGB)))
-    assert N_COMBINACOES_RF == 6
+    assert N_COMBINACOES_RF == 4
 
 
 def test_busca_xgb():
