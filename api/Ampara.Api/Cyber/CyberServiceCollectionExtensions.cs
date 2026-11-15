@@ -56,7 +56,7 @@ public static class CyberServiceCollectionExtensions
         services.RemoveAll<IHubProtocol>();
         services.AddSingleton<IHubProtocol>(sp => new TaintHubProtocol(ActivatorUtilities.CreateInstance<JsonHubProtocol>(sp),
             sp.GetRequiredService<IPiiScanner>(), sp.GetRequiredService<IRastroSeguranca>(), sp.GetRequiredService<IOptions<CyberOptions>>(),
-            new CorrelacaoAmbiente(sp.GetRequiredService<IHttpContextAccessor>())));
+            new CorrelacaoAmbiente(sp.GetRequiredService<IHttpContextAccessor>()), sp.GetService<TimeProvider>()));
         services.AddHttpClient("anthropic");
         // Sinks Ponte e Claude: todo HttpClient passa pelo handler, que decide o sink pelo host do pedido.
         services.AddTransient<TaintHttpHandler>();

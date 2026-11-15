@@ -3,8 +3,11 @@ using Ampara.Api.Cyber;
 using Ampara.Application.Cyber;
 using Ampara.Domain.Cyber;
 using Ampara.Infrastructure.Cyber;
+using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SignalR.Protocol;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace Ampara.Tests.Cyber;
@@ -32,11 +35,60 @@ public class SignalRSinkTests
         Assert.DoesNotContain("529.982.247-25", texto); Assert.Contains("TaintBloqueado", texto);
         Assert.Equal((Sink.SignalR, Decisao.Bloqueado, PiiClasse.Cpf), (r.Eventos[0].Sink, r.Eventos[0].Decisao, r.Eventos[0].Classe)); }
 
-    [Fact] public void Cpf_escrito_com_escape_unicode_tambem_e_pego() {   // SINTETICO
-        var m = new InvocationMessage("AlertaDisparado", new object[]{ new { nota = "\u0035\u0032\u0039.982.247-25" } });
-        var texto = Texto(Embrulho(out var r), m);
-        Assert.Contains("TaintBloqueado", texto); Assert.DoesNotContain("982.247", texto);
-        Assert.Equal(PiiClasse.Cpf, Assert.Single(r.Eventos).Classe); }
+    // Protocolo interno de mentira: devolve JSON com os digitos do CPF como escape unicode, como um serializador poderia emitir.
+    private sealed class InternoComEscape : IHubProtocol {
+        private readonly JsonHubProtocol _j = new();
+        public string Name => _j.Name; public int Version => _j.Version; public TransferFormat TransferFormat => _j.TransferFormat;
+        public bool IsVersionSupported(int v) => _j.IsVersionSupported(v);
+        public bool TryParseMessage(ref System.Buffers.ReadOnlySequence<byte> i, IInvocationBinder b, out HubMessage? m) => _j.TryParseMessage(ref i, b, out m);
+        public void WriteMessage(HubMessage m, System.Buffers.IBufferWriter<byte> o) => System.Buffers.BuffersExtensions.Write(o, GetMessageBytes(m).Span);
+        public ReadOnlyMemory<byte> GetMessageBytes(HubMessage m) => m is InvocationMessage { Target: "AlertaDisparado" }
+            ? Encoding.UTF8.GetBytes("{\"type\":1,\"target\":\"AlertaDisparado\",\"arguments\":[{\"nota\":\"\\u0035\\u0032\\u0039.982.247-25\"}]}")
+            : _j.GetMessageBytes(m);
+    }
+
+    [Fact] public void Cpf_com_escape_unicode_no_json_e_decodificado_e_pego() {   // SINTETICO
+        var rastro = new RastroEmMemoria();
+        var p = new TaintHubProtocol(new InternoComEscape(), new PiiScanner(DetectoresTests.TodosDetectores()), rastro,
+            Options.Create(new CyberOptions { TaintAtivo = true }));
+        var m = new InvocationMessage("AlertaDisparado", new object[]{ new { nota = "qualquer" } });
+        var bruto = Texto(new InternoComEscape(), m);
+        Assert.Contains("\\u0035", bruto); Assert.DoesNotContain("529.982", bruto);   // em claro o scanner nao veria
+        var texto = Texto(p, m);
+        Assert.Contains("TaintBloqueado", texto); Assert.DoesNotContain("982.247", texto); Assert.DoesNotContain("u0035", texto);
+        Assert.Equal(PiiClasse.Cpf, Assert.Single(rastro.Eventos).Classe); }
+
+    private sealed class ScannerQueFalha : IPiiScanner {
+        public IReadOnlyList<AchadoPii> EscanearJson(System.Text.Json.JsonElement raiz) => throw new InvalidOperationException();
+        public IReadOnlyList<AchadoPii> EscanearPares(IEnumerable<KeyValuePair<string, string?>> pares, IReadOnlyCollection<string>? chavesExtras = null) => [];
+        public IReadOnlyList<AchadoPii> EscanearTexto(string texto, string campo = "texto") => [];
+        public IReadOnlyList<Deteccao> Localizar(string textoNormalizado) => [];
+    }
+
+    [Fact] public void Falha_ao_inspecionar_fecha_e_nada_do_original_sai() {   // SINTETICO
+        var m = new InvocationMessage("AlertaDisparado", new object[]{ new { nota = "conteudo-original" } });
+        var p = new TaintHubProtocol(Interno(), new ScannerQueFalha(), new RastroEmMemoria(), Options.Create(new CyberOptions { TaintAtivo = true }));
+        var texto = Texto(p, m);
+        Assert.Contains("TaintBloqueado", texto); Assert.DoesNotContain("conteudo-original", texto); }
+
+    [Fact] public void Completion_suja_vira_erro_e_ping_passa_direto() {   // SINTETICO
+        var e = Embrulho(out var r);
+        var texto = Texto(e, CompletionMessage.WithResult("1", new { cpf = "529.982.247-25" }));
+        Assert.DoesNotContain("529.982.247-25", texto); Assert.Contains("TaintBloqueado", texto); Assert.Contains("\"error\"", texto);
+        Assert.Single(r.Eventos);
+        Assert.Equal(Interno().GetMessageBytes(PingMessage.Instance).ToArray(), e.GetMessageBytes(PingMessage.Instance).ToArray()); }
+
+    [Fact] public void Container_resolve_o_embrulho_como_unico_protocolo_registrado() {
+        var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?> {
+            ["AMPARA_CRYPTO_KEY"] = Convert.ToBase64String(Enumerable.Range(1, 32).Select(i => (byte)i).ToArray()) }).Build();
+        var s = new ServiceCollection();
+        s.AddSingleton<IConfiguration>(config);
+        s.AddLogging();
+        s.AddSignalR();
+        s.AddCyber(config);
+        s.AddSingleton<IRastroSeguranca>(new RastroEmMemoria());
+        using var sp = s.BuildServiceProvider();
+        Assert.IsType<TaintHubProtocol>(Assert.Single(sp.GetServices<IHubProtocol>())); }
 
     [Fact] public void WriteMessage_tambem_protege_e_sem_separador_duplicado() {   // SINTETICO
         var m = new InvocationMessage("AlertaDisparado", new object[]{ new { cpf = "529.982.247-25" } });

@@ -17,7 +17,7 @@ namespace Ampara.Api.Cyber;
 /// Mensagem limpa sai byte a byte igual à do protocolo interno. Singleton: depende só de serviços singleton.
 /// </summary>
 public sealed class TaintHubProtocol(
-    IHubProtocol interno, IPiiScanner scanner, IRastroSeguranca rastro, IOptions<CyberOptions> opcoes, ICorrelacao? correlacao = null) : IHubProtocol
+    IHubProtocol interno, IPiiScanner scanner, IRastroSeguranca rastro, IOptions<CyberOptions> opcoes, ICorrelacao? correlacao = null, TimeProvider? relogio = null) : IHubProtocol
 {
     public const string AlvoBloqueado = "TaintBloqueado";
     private const byte SeparadorDeRegistro = 0x1E;
@@ -65,7 +65,7 @@ public sealed class TaintHubProtocol(
                 if (!vistos.Add((a.Campo, a.Classe))) continue;
                 try
                 {
-                    rastro.Registrar(EventoSeguranca.Novo(TimeProvider.System.GetUtcNow(), corr, OrigemDado.Http,
+                    rastro.Registrar(EventoSeguranca.Novo((relogio ?? TimeProvider.System).GetUtcNow(), corr, OrigemDado.Http,
                         string.IsNullOrEmpty(a.Campo) ? chave : chave + a.Campo, a.Classe, Sink.SignalR, Decisao.Bloqueado, null));
                 }
                 catch { /* falha do rastro nunca altera o resultado */ }
