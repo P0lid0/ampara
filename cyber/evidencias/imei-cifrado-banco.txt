@@ -1,0 +1,6 @@
+$ psql -d ampara_dev -c 'SELECT left("ImeiCifrado",32) || '...' AS imei_cifrado, "ImeiFinal" FROM "Aparelhos"'
+            imei_cifrado             | ImeiFinal 
+-------------------------------------+-----------
+ XBa0johFJ3KeK3PUOVK/nRROdzIkunUq... | 7518
+(1 linha)
+

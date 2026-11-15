@@ -64,4 +64,22 @@ public sealed class ResumoAtaques : IDisposable
                 return Path.Combine(d.FullName, "cyber", "evidencias", "ataques.md");
         return null;
     }
+
+    /// <summary>
+    /// Grava a resposta real de um ataque em <c>cyber/evidencias/exemplo-&lt;nome&gt;.txt</c> (usada no PDF).
+    /// So recebe respostas ja bloqueadas: o corpo nunca tem o valor. Falha ao gravar nao derruba a suite.
+    /// </summary>
+    public static void GravarExemplo(string nome, string requisicao, int status, string? tipo, string corpo)
+    {
+        try
+        {
+            var ataques = CaminhoDoArquivo();
+            if (ataques is null) return;
+            var json = System.Text.Json.JsonSerializer.Serialize(System.Text.Json.JsonDocument.Parse(corpo).RootElement,
+                new System.Text.Json.JsonSerializerOptions { WriteIndented = true, Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
+            var texto = $"> {requisicao}{'\n'}HTTP {status}{'\n'}Content-Type: {tipo}{'\n'}{'\n'}{json}{'\n'}";
+            File.WriteAllText(Path.Combine(Path.GetDirectoryName(ataques)!, $"exemplo-{nome}.txt"), texto, new UTF8Encoding(false));
+        }
+        catch (Exception ex) { Console.Error.WriteLine("exemplo nao foi gravado: " + ex.Message); }
+    }
 }

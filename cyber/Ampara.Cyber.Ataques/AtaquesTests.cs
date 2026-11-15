@@ -82,6 +82,7 @@ public class AtaquesTests(ResumoAtaques resumo) : IClassFixture<ResumoAtaques>
 
         AssertBloqueioProblem(r, corpo);
         SemCpf(corpo, "corpo");
+        ResumoAtaques.GravarExemplo("a01-resposta-bloqueada", "POST /eco  {\"nome\":\"Pessoa Teste\",\"documento\":\"<CPF sintetico>\"}", (int)r.StatusCode, r.Content.Headers.ContentType?.MediaType, corpo);
         Assert.Contains("detalheCidadao", corpo);
         Assert.Single(f.Rastro.Eventos, e => (e.Sink, e.Decisao, e.Classe) == (Sink.HttpNaoAutenticada, Decisao.Bloqueado, PiiClasse.Cpf));
         SemCpfNoLog(f);
@@ -153,6 +154,7 @@ public class AtaquesTests(ResumoAtaques resumo) : IClassFixture<ResumoAtaques>
         Assert.Equal(HttpStatusCode.InternalServerError, r.StatusCode);
         Assert.Equal(TipoProblema, r.Content.Headers.ContentType!.MediaType);
         SemCpf(corpo, "corpo");
+        ResumoAtaques.GravarExemplo("a04-erro-500", "GET /explode  (excecao com laudo e CPF na mensagem)", (int)r.StatusCode, r.Content.Headers.ContentType?.MediaType, corpo);
         foreach (var tecnico in new[] { "Error 500", "InvalidOperation", "Exception", "at Ampara", "StackTrace", "laudo", "diagnostico", "F32" })
             Assert.DoesNotContain(tecnico, SemCorrelacao(corpo), StringComparison.OrdinalIgnoreCase);
         var frase = JsonDocument.Parse(corpo).RootElement.GetProperty("detalheCidadao").GetString();

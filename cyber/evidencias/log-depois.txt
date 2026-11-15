@@ -1,0 +1,4 @@
+# Depois: taint ligado (padrao). Mesmo cenario, mesmo CPF sintetico, mesmo codigo.
+$ grep -A1 "Ampara.Simulador" api.log
+info: Ampara.Simulador[0]
+      Simulador: cadastro recebido com CPF [BLOQUEADO:Cpf]

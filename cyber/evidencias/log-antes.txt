@@ -1,0 +1,4 @@
+# Antes: Cyber__TaintAtivo=false (so vale com AMPARA_DEMO=true). Log da API apos POST /api/v1/seguranca/simular-ataque {"cenario":"cpf-no-log"}
+$ grep -A1 "Ampara.Simulador" api.log
+info: Ampara.Simulador[0]
+      Simulador: cadastro recebido com CPF 529.982.247-25

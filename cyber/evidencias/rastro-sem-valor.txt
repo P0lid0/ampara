@@ -1,0 +1,27 @@
+$ psql -d ampara_dev -c 'SELECT "Source","Campo","Classe","Sink","Decisao","CorrelationId" FROM evento_seguranca ORDER BY "Em"'
+ Source |       Campo       | Classe |        Sink        |  Decisao  |            CorrelationId             
+--------+-------------------+--------+--------------------+-----------+--------------------------------------
+ Http   | codigo-emergencia | Senha  | HttpNaoAutenticada | Bloqueado | d94a6c7c-de22-4768-94f1-3aac48041452
+ Http   | senha             | Senha  | HttpNaoAutenticada | Bloqueado | d250b4cd-2b64-499f-a5ee-2d561047f690
+ Http   | texto             | Cpf    | Log                | Bloqueado | 137eb2c4-8846-4181-9c37-24d07aa2a9a8
+(3 linhas)
+
+
+$ psql -d ampara_dev -c 'colunas de evento_seguranca'   (nenhuma guarda o valor)
+     coluna      |           tipo           
+-----------------+--------------------------
+ Id              | uuid
+ Campo           | character varying
+ Classe          | text
+ CorrelationId   | character varying
+ Decisao         | text
+ Em              | timestamp with time zone
+ MensagemCidadao | character varying
+ Sink            | text
+ Source          | text
+ UsuarioAlvoId   | uuid
+(10 linhas)
+
+ocorrencias de '529' no rastro inteiro: 0
+ocorrencias de '982.247' no rastro inteiro: 0
+ocorrencias de 'Sintetica' no rastro inteiro: 0

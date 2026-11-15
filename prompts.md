@@ -358,4 +358,10 @@ Resultado: 16 testes do `ModeradorRelatoTests` passando, suíte inteira com 440 
 
 Resultado: 13 ataques passando. O A02, com escape unicode de verdade, revelou um vazamento real: respostas JSON com o CPF escrito em escapes passavam pelo guard de resposta anônima. O `RespostaNaoAutenticadaMiddleware` passou a varrer também nomes e valores decodificados (mascarando os valores de classes permitidas por contrato), com 2 testes novos em `RespostaNaoAutenticadaTests`; suíte da API com 445 aprovados e a de ataques com 13; sem migration. Dígitos soltos separados por espaço (`5 2 9 ...`) não são detectados por desenho do `CpfDetector` e ficaram de fora do A02.
 
+### 57. Cyber: entregas do professor, PDF, ZIP e roteiro do vídeo (Task 20 do plano 03)
+
+> Executar a Task 20 do plano 03 (Cyber): começar pelo `evidencias.sh`, que falha enquanto faltar qualquer print de código (8 ou mais), print do painel (verde, amarelo, vermelho, executiva) ou título obrigatório da documentação; depois gerar os prints de código com `highlight.js` e `playwright-core` usando o Edge já instalado (sem baixar navegador), rodar a API em modo demonstração e o painel para tirar os prints do farol (0, 40, 65, 75) e da visão executiva, escrever `cyber/documentacao.md` com os 4 pontos do professor, gerar o PDF em `cyber/saida/` e o ZIP só com o código versionado (sem PDF, `node_modules`, `.env` nem chave), e escrever o roteiro de 2 a 3 minutos do vídeo do painel.
+
+Resultado: `evidencias.sh` falhou antes e passou depois; PDF de 30 páginas e ZIP gerados fora do git; 445 testes da API e 13 ataques passando. Sem `ANTHROPIC_API_KEY`, as frases do painel nos prints são as frases padrão (regravar com a chave se quiser a frase da IA).
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->

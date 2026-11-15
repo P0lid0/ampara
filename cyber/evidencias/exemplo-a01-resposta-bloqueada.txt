@@ -1,0 +1,11 @@
+> POST /eco  {"nome":"Pessoa Teste","documento":"<CPF sintetico>"}
+HTTP 500
+Content-Type: application/problem+json
+
+{
+  "type": "urn:ampara:taint:bloqueado",
+  "title": "Resposta bloqueada para proteger seus dados",
+  "status": 500,
+  "correlationId": "c7341166-a384-4288-815f-10131f07ca0c",
+  "detalheCidadao": "Frase de teste da IA sobre o aviso. Segunda frase de teste para o cidadao."
+}
