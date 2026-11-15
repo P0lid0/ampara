@@ -39,6 +39,8 @@ def ajustar(estimador, X: pd.DataFrame, y: np.ndarray):
     """Treina; o XGBoost nao tem class_weight, entao usa sample_weight balanceado."""
     y = np.asarray(y)
     if isinstance(estimador, XGBClassifier):
+        if not np.array_equal(np.unique(y), _LABELS):
+            raise ValueError(f"XGBoost exige as 3 classes {_LABELS} no treino; recebeu {np.unique(y).tolist()}")
         estimador.fit(X, y, sample_weight=compute_sample_weight("balanced", y))
     else:
         estimador.fit(X, y)
@@ -52,7 +54,7 @@ def _f1(y, pred) -> float:
 def buscar_hiperparametros(fabrica: Callable[[dict], Any], grade: dict, X: pd.DataFrame, y: np.ndarray,
                            splits: list[tuple[np.ndarray, np.ndarray]], n_combinacoes: int,
                            seed: int = SEED) -> pd.DataFrame:
-    n = min(n_combinacoes, len(list(ParameterGrid(grade))))
+    n = min(n_combinacoes, len(ParameterGrid(grade)))
     y = np.asarray(y)
     linhas = []
     for params in ParameterSampler(grade, n_iter=n, random_state=seed):

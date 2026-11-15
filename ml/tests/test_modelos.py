@@ -3,6 +3,8 @@ import numpy as np
 import pandas as pd
 import pytest
 from sklearn.model_selection import ParameterGrid
+from sklearn.utils.class_weight import compute_sample_weight
+from xgboost import XGBClassifier
 
 from ampara_ml.divisao import cv_temporal
 from ampara_ml.modelos import (
@@ -89,8 +91,28 @@ def test_treino_deterministico(fabrica, params):
 
 def test_ajustar_xgb_usa_peso_balanceado():
     X, y, _ = _dados()
-    m = ajustar(fabrica_xgb({"n_estimators": 5, "max_depth": 2, "learning_rate": 0.3}), X, y)
-    assert set(np.unique(m.predict(X))) <= {0, 1, 2}
+    y = np.where(np.arange(len(y)) % 10 == 0, 2, np.where(y == 2, 1, y))  # classe 2 rara
+    visto = {}
+
+    class _Espia(XGBClassifier):
+        def fit(self, X, y, sample_weight=None, **kw):
+            visto["w"] = sample_weight
+            visto["y"] = np.asarray(y)
+            return super().fit(X, y, sample_weight=sample_weight, **kw)
+
+    ajustar(_Espia(n_estimators=3, max_depth=2, objective="multi:softprob", num_class=3), X, y)
+    w, yy = visto["w"], visto["y"]
+    assert w is not None
+    assert w[yy == 2][0] > w[yy == 0][0]
+    assert w[yy == 2][0] > w[yy == 1][0]
+    assert np.allclose(w, compute_sample_weight("balanced", yy))
+
+
+def test_ajustar_xgb_classe_ausente_da_erro_claro():
+    X, y, _ = _dados()
+    mask = y != 1
+    with pytest.raises(ValueError, match="classes"):
+        ajustar(fabrica_xgb({"n_estimators": 3, "max_depth": 2, "learning_rate": 0.3}), X[mask], y[mask])
 
 
 def test_curva_aprendizado():
