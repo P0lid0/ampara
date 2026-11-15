@@ -15,7 +15,7 @@
 | **Integrantes** | Pedro Martins (RM_____) · Vitor Cesarino Marchese (RM_____) |
 | **Disciplina** | Cyber Security |
 | **Data** | 15 de novembro de 2026 |
-| **Repositório** | (link a preencher ao publicar o repositório) |
+| **Repositório** | https://github.com/P0lid0/ampara |
 
 <p class="aviso-sintetico"><strong>Dados sintéticos.</strong> Todo CPF, e-mail, senha, IMEI, laudo e usuário que aparece neste documento foi inventado para a demonstração. Nenhum dado de pessoa real foi usado em código, banco, prints ou testes.</p>
 
