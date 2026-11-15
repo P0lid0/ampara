@@ -4,7 +4,7 @@
 
 | Campo | Valor |
 |---|---|
-| Nome | **Ampara** — "Levaram seu celular. Não levam o resto." [Pedro] |
+| Nome | **Ampara** — "Levaram seu celular. Não levam o resto." |
 | Cidade e bairro | São Paulo, capital: eixo da CPTM Linha 9-Esmeralda (Pinheiros como estação crítica) e corredores de quebra-vidro (ex.: Av. do Estado) |
 | Cidadão beneficiado | Quem anda com o celular em SP (passageiro de trem/metrô, motorista parado no trânsito) e o **guardião** (parente ou amigo que age por ele na hora) |
 | Problema, em uma frase | Depois de um roubo de celular, a vítima fica de 30 a 90 minutos sem aparelho e em choque até chegar em casa ou no trabalho, e é nessa janela que os criminosos entram no banco e nas contas. |
