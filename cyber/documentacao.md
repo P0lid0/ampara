@@ -343,7 +343,7 @@ Pré-requisitos: SDK .NET 11 (`api/global.json`), PostgreSQL, Node 20+ e o Edge 
 # no Git Bash (Windows): o SDK 11 do scoop vem antes do dotnet do sistema
 export PATH="$HOME/scoop/apps/dotnet-sdk/current:$PATH" DOTNET_ROOT="$HOME/scoop/apps/dotnet-sdk/current"
 
-# 1) testes da API (motor de PII, taint, painel): 475 testes, sem banco nem rede
+# 1) testes da API (motor de PII, taint, painel): 480 testes, sem banco nem rede
 dotnet test api/Ampara.sln
 
 # 2) suíte de ataque (13 ataques + 1 teste do exemplo versionado; regrava cyber/evidencias/ataques.md)
@@ -368,7 +368,7 @@ bash cyber/scripts/evidencias.sh                            # confere se nada fa
 bash cyber/scripts/gerar-zip.sh                             # ZIP do código
 ```
 
-Resultado da última execução completa: `api/Ampara.Tests` com 475 aprovados e 0 falhas; `cyber/Ampara.Cyber.Ataques` com 14 aprovados (13 ataques + 1 teste do exemplo versionado) e 0 falhas; painel com 36 testes.
+Resultado da última execução completa (15/11): `api/Ampara.Tests` com 480 aprovados e 0 falhas; `cyber/Ampara.Cyber.Ataques` com 14 aprovados (13 ataques + 1 teste do exemplo versionado) e 0 falhas; painel com 36 testes.
 
 <div class="quebra"></div>
 

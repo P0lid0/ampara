@@ -40,7 +40,19 @@ Fonte do PDF: `cyber/documentacao.md`, com os prints de `cyber/evidencias/prints
 | `zerar-demo.sh [email]` | apaga os eventos de segurança do usuário de demonstração (padrão `vitima@ampara.demo`) |
 | `consulta-rastro.sh [trecho...]` | mostra o `evento_seguranca` e procura trechos de valores no rastro inteiro (o esperado é 0) |
 
-As frases da IA nos prints são a **frase padrão**, porque os prints foram feitos sem `ANTHROPIC_API_KEY`. Para regravá-los com a frase da IA, defina a chave no ambiente da API antes de subir e rode `node cyber/scripts/prints-painel.mjs` e `node cyber/scripts/gerar-pdf.mjs` de novo.
+Os prints do painel de 15/11 têm as frases reais da IA (`claude-haiku-5-5`, chave definida no ambiente da API). Sem a chave, os cartões mostram a frase padrão.
+
+## Onde está o módulo de proteção de dados (para o professor)
+
+| Requisito | Onde |
+|---|---|
+| Parsing de PII (CPF, RG, IMEI, telefone, e-mail, placa, senha, saúde) | `api/Ampara.Infrastructure/Cyber/PiiScanner.cs`, `Detectores/`, `PiiProtetor.cs` (mascara ou cifra) |
+| Interceptação na entrada (formulário e JSON) | `api/Ampara.Api/Middleware/PiiRequestMiddleware.cs` |
+| Taint Analysis (marca o dado e bloqueia saída insegura) | `TaintScope.cs`, `TaintGuard.cs`, `PoliticaTaint.cs` em `api/Ampara.Infrastructure/Cyber/` |
+| Saídas protegidas | log (`GuardedLogger.cs`), banco (`TaintSaveChangesInterceptor.cs`), HTTP de saída (`TaintHttpHandler.cs`), MQTT (`MqttPiiFilter.cs`), resposta anônima (`api/Ampara.Api/Cyber/RespostaNaoAutenticadaMiddleware.cs`), SignalR (`TaintHubProtocol.cs`) |
+| Tradução por IA para o cidadão | `ClaudeTradutorRisco.cs`, `AnthropicMensagens.cs` |
+| Indicador Risco Cidadão (farol) | `IndiceRiscoService.cs`, rotas em `api/Ampara.Api/Cyber/SegurancaEndpoints.cs`, tela em `web-painel-risco/` |
+| Auditoria (ataques reais contra a API) | `cyber/Ampara.Cyber.Ataques/`, resultados em `cyber/evidencias/` |
 
 ## Integrantes
 
