@@ -6,7 +6,7 @@ import { Mensagens } from "./Mensagens";
 
 const INTERVALO_MS = 5000;
 
-export function VisaoCidadao({ token, aoExpirar }: { token: string; aoExpirar?: () => void }) {
+export function VisaoCidadao({ token, aoExpirar, recarregar = 0 }: { token: string; aoExpirar?: () => void; recarregar?: number }) {
   const [dados, setDados] = useState<MeuRisco | null>(null);
   const [falhou, setFalhou] = useState(false);
   const expirar = useRef(aoExpirar);
@@ -34,7 +34,7 @@ export function VisaoCidadao({ token, aoExpirar }: { token: string; aoExpirar?: 
       ativo = false;
       clearInterval(id);
     };
-  }, [token]);
+  }, [token, recarregar]);
 
   return (
     <section aria-labelledby="titulo-cidadao">

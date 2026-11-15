@@ -33,3 +33,17 @@ test("401 vira NaoAutorizado; 500 e rede caída viram FalhaDeRede", async () => 
   vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("Failed to fetch")));
   await expect(meuRisco("t")).rejects.toBeInstanceOf(FalhaDeRede);
 });
+
+test("403, 404 e 422 viram erros próprios; simular manda o cenário", async () => {
+  const { Proibido, NaoEncontrado, Recusado, executivo, simular } = await import("./api");
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(resp(403)));
+  await expect(executivo("t")).rejects.toBeInstanceOf(Proibido);
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(resp(404)));
+  await expect(simular("t", "acesso-indevido")).rejects.toBeInstanceOf(NaoEncontrado);
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(resp(422)));
+  await expect(simular("t", "x")).rejects.toBeInstanceOf(Recusado);
+  const f = vi.fn().mockResolvedValue(resp(202));
+  vi.stubGlobal("fetch", f);
+  await simular("t", "cpf-no-log");
+  expect(f).toHaveBeenCalledWith("/api/v1/seguranca/simular-ataque", expect.objectContaining({ method: "POST", body: JSON.stringify({ cenario: "cpf-no-log" }) }));
+});

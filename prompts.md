@@ -334,4 +334,10 @@ Resultado: 7 testes novos passando, suíte inteira com 415 aprovados; sem migrat
 
 Resultado: 14 testes do painel passando e build sem erro; sem migration; tela conferida com Playwright contra uma API simulada (print em `cyber/evidencias/painel-cidadao-vermelho.png`).
 
+### 53. Cyber: Painel Risco Cidadão, visão executiva e simulador de ataque (Task 17 do plano 03)
+
+> Executar a Task 17 do plano 03 (Cyber): escrever primeiro os testes da visão executiva (total das 24 h, barras por classe e por sink com número ao lado, 24 barras por hora com `role="img"` e `aria-label` "Há N horas: X eventos", 403 com aviso de administrador, atualização a cada 5 s) e do simulador (4 botões com o cenário do contrato, 404 com "Demonstração desligada neste servidor.", altura mínima de 48 px); implementar `VisaoExecutiva`, `Simulador` e `Abas` (`role="tablist"`), ligar as abas "Meu risco" e "Visão executiva" no `App.tsx` e separar 403, 404 e 422 em `api.ts`.
+
+Resultado: 33 testes do painel passando e build sem erro; sem migration; conferência no navegador contra a API real não feita nesta rodada.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->

@@ -1,6 +1,9 @@
 import { useCallback, useState } from "react";
 import { Login } from "./componentes/Login";
+import { Abas } from "./componentes/Abas";
+import { Simulador } from "./componentes/Simulador";
 import { VisaoCidadao } from "./componentes/VisaoCidadao";
+import { VisaoExecutiva } from "./componentes/VisaoExecutiva";
 
 const CHAVE = "ampara.painel.token";
 
@@ -24,6 +27,8 @@ export function gravarToken(t: string | null) {
 export default function App() {
   const [token, setToken] = useState<string | null>(lerToken);
   const [aviso, setAviso] = useState("");
+  const [aba, setAba] = useState("cidadao");
+  const [recarregar, setRecarregar] = useState(0);
 
   const entrar = (t: string) => {
     gravarToken(t);
@@ -34,12 +39,33 @@ export default function App() {
     gravarToken(null);
     setAviso("Sua sessão terminou. Entre de novo.");
     setToken(null);
+    setAba("cidadao");
   }, []);
 
   return (
     <main>
       <header className="topo">Ampara · Risco Cidadão</header>
-      {token ? <VisaoCidadao token={token} aoExpirar={sair} /> : <Login aoEntrar={entrar} aviso={aviso} />}
+      {token ? (
+        <Abas
+          ativa={aba}
+          aoMudar={setAba}
+          abas={[
+            {
+              id: "cidadao",
+              rotulo: "Meu risco",
+              conteudo: (
+                <>
+                  <VisaoCidadao token={token} aoExpirar={sair} recarregar={recarregar} />
+                  <Simulador token={token} aoExpirar={sair} aoSimular={() => setRecarregar((n) => n + 1)} />
+                </>
+              ),
+            },
+            { id: "executiva", rotulo: "Visão executiva", conteudo: <VisaoExecutiva token={token} aoExpirar={sair} /> },
+          ]}
+        />
+      ) : (
+        <Login aoEntrar={entrar} aviso={aviso} />
+      )}
     </main>
   );
 }
