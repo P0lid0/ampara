@@ -30,7 +30,7 @@ export function Simulador({ token, aoSimular, aoExpirar }: { token: string; aoSi
   return (
     <section className="simulador" aria-labelledby="titulo-simulador">
       <h2 id="titulo-simulador">Simular um ataque</h2>
-      <p>Para a demonstração: cada botão cria um evento de segurança de mentira e o farol reage.</p>
+      <p>Para a demonstração: cada botão aciona o fluxo real de proteção com dados sintéticos e o farol reage.</p>
       <div className="simulador-botoes">
         {CENARIOS.map((c) => (
           <button key={c.id} type="button" className="botao" disabled={ocupado} onClick={() => void disparar(c.id)}>

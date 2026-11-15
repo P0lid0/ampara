@@ -10,7 +10,7 @@ test("login guarda o token no sessionStorage e mostra a visão do cidadão", asy
   vi.spyOn(api, "login").mockResolvedValue("tok");
   vi.spyOn(api, "meuRisco").mockResolvedValue({ indice: 5, farol: "verde", eventos: [] });
   render(<App />);
-  fireEvent.change(screen.getByLabelText("E-mail"), { target: { value: "a@b.com" } });
+  fireEvent.change(screen.getByLabelText("E-mail"), { target: { value: "pessoa@exemplo.test" } });
   fireEvent.change(screen.getByLabelText("Senha"), { target: { value: "x" } });
   await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Entrar" })); });
   expect(await screen.findByRole("status")).toHaveTextContent("5/100");
@@ -23,7 +23,7 @@ test("sessionStorage indisponível não derruba o login", async () => {
   vi.spyOn(api, "login").mockResolvedValue("tok");
   vi.spyOn(api, "meuRisco").mockResolvedValue({ indice: 5, farol: "verde", eventos: [] });
   render(<App />);
-  fireEvent.change(screen.getByLabelText("E-mail"), { target: { value: "a@b.com" } });
+  fireEvent.change(screen.getByLabelText("E-mail"), { target: { value: "pessoa@exemplo.test" } });
   fireEvent.change(screen.getByLabelText("Senha"), { target: { value: "x" } });
   await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Entrar" })); });
   expect(await screen.findByRole("status")).toHaveTextContent("5/100");
@@ -33,7 +33,9 @@ test("401 no meu-risco limpa o token e volta ao login com aviso", async () => {
   sessionStorage.setItem("ampara.painel.token", "velho");
   vi.spyOn(api, "meuRisco").mockRejectedValue(new api.NaoAutorizado());
   render(<App />);
-  expect(await screen.findByText(/Sua sessão terminou/)).toBeInTheDocument();
+  const aviso = await screen.findByText(/Sua sessão terminou/);
+  expect(aviso.closest("[aria-live='polite']")).not.toBeNull();   // anunciado pelo leitor de tela
+  expect(document.activeElement).toBe(screen.getByRole("heading", { level: 1 }));
   expect(screen.getByRole("button", { name: "Entrar" })).toBeInTheDocument();
   expect(sessionStorage.getItem("ampara.painel.token")).toBeNull();
 });

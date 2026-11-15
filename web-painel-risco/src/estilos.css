@@ -38,5 +38,5 @@ input { display: block; width: 100%; border: 2px solid var(--petroleo); padding:
 .barra-numero { font-weight: 700; text-align: right; }
 .horas { display: flex; align-items: flex-end; gap: 3px; height: 96px; margin: 0 0 8px; }
 .hora { flex: 1; background: var(--petroleo); border-radius: 3px 3px 0 0; min-height: 2px; }
-.horas-legenda { display: flex; justify-content: space-between; margin: 0 0 24px; opacity: .8; font-size: .875rem; }
+.horas-legenda { display: flex; justify-content: space-between; margin: 0 0 24px; opacity: .8; }
 @media (max-width: 480px) { .barra { grid-template-columns: 7rem 1fr 2.5rem; } }

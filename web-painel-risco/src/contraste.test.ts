@@ -30,3 +30,11 @@ test("texto de erro tem contraste >= 4,5:1 sobre areia e branco", () => {
 test("amarelo do farol tem contraste >= 4,5:1 com texto branco", () => {
   expect(razao("#FFFFFF", cor("amarelo"))).toBeGreaterThanOrEqual(4.5);
 });
+
+// Revisão final do plano 03 (painel-3): Global Constraints pedem texto >= 16 px.
+test("nenhum texto abaixo de 16 px (1rem)", () => {
+  for (const m of css.matchAll(/font-size:\s*([\d.]+)(px|rem|em)/g)) {
+    const px = m[2] === "px" ? Number(m[1]) : Number(m[1]) * 16;
+    expect(px, m[0]).toBeGreaterThanOrEqual(16);
+  }
+});

@@ -14,7 +14,7 @@ export function Mensagens({ eventos }: { eventos: EventoCidadao[] }) {
             {rotuloClasse(e.classe)} · {rotuloSink(e.sink)} · {rotuloDecisao(e.decisao)}
           </p>
           <time className="mensagem-hora" dateTime={e.em}>
-            {new Date(e.em).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
+            {new Date(e.em).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Sao_Paulo" })}
           </time>
         </li>
       ))}

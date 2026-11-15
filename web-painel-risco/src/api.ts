@@ -12,12 +12,19 @@ export class NaoEncontrado extends Error {}
 /** 422: o servidor recusou o conteúdo enviado. */
 export class Recusado extends Error {}
 
-const BASE = "/api/v1";
+/**
+ * Rodada 2 do contrato ("Pastas web"): VITE_API_URL (ou EXPO_PUBLIC_API_URL) aponta a API; vazio = mesma origem,
+ * como a VM serve o painel. Sempre concatena /api/v1. Lido a cada chamada para os testes poderem trocar o valor.
+ */
+export function base(): string {
+  const env = import.meta.env as Record<string, string | undefined>;
+  return `${(env.VITE_API_URL || env.EXPO_PUBLIC_API_URL || "").replace(/\/+$/, "")}/api/v1`;
+}
 
 async function chamar<T>(caminho: string, init: RequestInit): Promise<T> {
   let r: Response;
   try {
-    r = await fetch(`${BASE}${caminho}`, init);
+    r = await fetch(`${base()}${caminho}`, init);
   } catch {
     throw new FalhaDeRede();
   }
@@ -39,7 +46,7 @@ const auth = (token: string): RequestInit => ({ headers: { Authorization: `Beare
 export async function login(email: string, senha: string): Promise<string> {
   let r: Response;
   try {
-    r = await fetch(`${BASE}/auth/login`, {
+    r = await fetch(`${base()}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, senha }),

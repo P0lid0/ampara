@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { NaoAutorizado, login } from "../api";
 
 export function Login({ aoEntrar, aviso }: { aoEntrar: (token: string) => void; aviso?: string }) {
@@ -6,6 +6,12 @@ export function Login({ aoEntrar, aviso }: { aoEntrar: (token: string) => void; 
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState("");
   const [enviando, setEnviando] = useState(false);
+  const titulo = useRef<HTMLHeadingElement>(null);
+
+  // A tela anterior foi desmontada (sessão vencida): o foco vai ao título para o leitor de tela anunciar o aviso.
+  useEffect(() => {
+    if (aviso) titulo.current?.focus();
+  }, [aviso]);
 
   async function enviar(ev: FormEvent) {
     ev.preventDefault();
@@ -26,8 +32,8 @@ export function Login({ aoEntrar, aviso }: { aoEntrar: (token: string) => void; 
 
   return (
     <form className="login" onSubmit={enviar}>
-      <h1>Risco Cidadão</h1>
-      {aviso && <p className="aviso">{aviso}</p>}
+      <h1 ref={titulo} tabIndex={-1}>Risco Cidadão</h1>
+      <div aria-live="polite">{aviso && <p className="aviso">{aviso}</p>}</div>
       <label>
         E-mail
         <input type="email" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} required />
