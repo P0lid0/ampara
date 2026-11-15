@@ -42,6 +42,7 @@ export function App() {
           ocorrenciaId={ocorrenciaId}
           aoVoltar={() => setTela("painel")}
           aoSessaoVencida={vencida}
+          aoSair={sairDaAba}
           aoBo={(id) => { setOcorrenciaId(id); setTela("bo"); }}
         />
       )}

@@ -56,13 +56,45 @@ describe("LinhaDoTempo", () => {
     expect(screen.queryByRole("button", { name: "17:41" })).not.toBeInTheDocument();
   });
 
-  it('escolher o horário "17:41" e clicar "Foi aqui que me roubaram" envia momento(id,{em,lat,lng}) do ponto escolhido', async () => {
+  it('escolher o horário "17:30" e clicar "Foi aqui que me roubaram" envia momento(id,{em,lat,lng}) do ponto escolhido', async () => {
     const momento = vi.spyOn(api.ocorrencias, "momento").mockResolvedValue(undefined);
     const u = userEvent.setup();
     render(<LinhaDoTempo {...props()} />);
-    await u.click(await screen.findByRole("button", { name: "17:41" }));
+    await u.click(await screen.findByRole("button", { name: "17:30" })); // não é o padrão (17:41)
     await u.click(screen.getByRole("button", { name: "Foi aqui que me roubaram" }));
-    expect(momento).toHaveBeenCalledWith("o1", { em: "2026-11-12T20:41:00Z", lat: -23.56, lng: -46.64 });
+    expect(momento).toHaveBeenCalledWith("o1", { em: "2026-11-12T20:30:00Z", lat: -23.55, lng: -46.63 });
+  });
+
+  it("dia padrão é o da ocorrência, não o mais recente; trocar de dia envia o ponto do outro dia", async () => {
+    vi.spyOn(api.ocorrencias, "listar").mockResolvedValue([oc("o1", "2026-11-11T13:05:00Z")]);
+    const momento = vi.spyOn(api.ocorrencias, "momento").mockResolvedValue(undefined);
+    const u = userEvent.setup();
+    render(<LinhaDoTempo {...props()} />);
+    expect(await screen.findByRole("button", { name: "10:00" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "17:41" })).not.toBeInTheDocument();
+    await u.click(screen.getByRole("button", { name: "Foi aqui que me roubaram" }));
+    expect(momento).toHaveBeenLastCalledWith("o1", { em: "2026-11-11T13:00:00Z", lat: -23.57, lng: -46.65 });
+    await u.click(screen.getByRole("button", { name: "12/11" }));
+    await u.click(screen.getByRole("button", { name: "17:30" }));
+    await u.click(screen.getByRole("button", { name: "Foi aqui que me roubaram" }));
+    expect(momento).toHaveBeenLastCalledWith("o1", { em: "2026-11-12T20:30:00Z", lat: -23.55, lng: -46.63 });
+  });
+
+  it("401 ao marcar chama aoSessaoVencida", async () => {
+    vi.spyOn(api.ocorrencias, "momento").mockRejectedValue(new ApiErro(401));
+    const p = props();
+    const u = userEvent.setup();
+    render(<LinhaDoTempo {...p} />);
+    await u.click(await screen.findByRole("button", { name: "Foi aqui que me roubaram" }));
+    await vi.waitFor(() => expect(p.aoSessaoVencida).toHaveBeenCalled());
+  });
+
+  it("com aoSair mostra o botão de sair e apagar a aba", async () => {
+    const aoSair = vi.fn();
+    const u = userEvent.setup();
+    render(<LinhaDoTempo {...props()} aoSair={aoSair} />);
+    await u.click(await screen.findByRole("button", { name: "Sair e apagar tudo desta aba" }));
+    expect(aoSair).toHaveBeenCalled();
   });
 
   it("sem ocorrência: mostra o aviso e não envia o momento", async () => {
@@ -82,14 +114,14 @@ describe("LinhaDoTempo", () => {
     expect(screen.queryByTestId("mapa")).not.toBeInTheDocument();
   });
 
-  it("depois de marcar mostra 'Momento marcado às 17:41.' e o botão 'Gerar o BO'", async () => {
+  it("depois de marcar mostra 'Momento marcado às 17:30.' e o botão 'Gerar o BO'", async () => {
     vi.spyOn(api.ocorrencias, "momento").mockResolvedValue(undefined);
     const aoBo = vi.fn();
     const u = userEvent.setup();
     render(<LinhaDoTempo {...props()} aoBo={aoBo} />);
-    await u.click(await screen.findByRole("button", { name: "17:41" }));
+    await u.click(await screen.findByRole("button", { name: "17:30" })); // não é o padrão (17:41)
     await u.click(screen.getByRole("button", { name: "Foi aqui que me roubaram" }));
-    expect(await screen.findByText("Momento marcado às 17:41.")).toBeInTheDocument();
+    expect(await screen.findByText("Momento marcado às 17:30.")).toBeInTheDocument();
     await u.click(screen.getByRole("button", { name: "Gerar o BO" }));
     expect(aoBo).toHaveBeenCalledWith("o1");
   });

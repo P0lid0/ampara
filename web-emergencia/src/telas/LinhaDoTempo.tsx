@@ -15,12 +15,14 @@ export function LinhaDoTempo({
   aoVoltar,
   aoSessaoVencida,
   aoBo,
+  aoSair,
   agora = () => new Date(),
 }: {
   ocorrenciaId: string | null;
   aoVoltar: () => void;
   aoSessaoVencida: () => void;
   aoBo: (ocorrenciaId: string) => void;
+  aoSair?: () => void;
   agora?: () => Date;
 }) {
   const [dados, setDados] = useState<{ ocorrencias: OcorrenciaDto[]; rota: PontoRota[] } | null>(null);
@@ -65,7 +67,14 @@ export function LinhaDoTempo({
     ocorrencias.find((o) => o.id === escolhida) ?? ocorrencias.find((o) => o.id === ocorrenciaId) ?? ocorrencias[0] ?? null;
 
   const dias = useMemo(() => agruparPorDia(dados?.rota ?? []), [dados]);
-  const diaAtual = dias.find((d) => d.dia === dia) ?? dias[0] ?? null;
+  // Dia padrão: o do ponto mais perto do início da ocorrência (nunca um dia sem relação com o roubo).
+  const diaPadrao = useMemo(() => {
+    if (!ocorrenciaAtual) return dias[0] ?? null;
+    const todos = dias.flatMap((d) => d.pontos);
+    const i = pontoMaisProximo(todos, ocorrenciaAtual.iniciadaEm);
+    return (i >= 0 ? dias.find((d) => d.pontos.includes(todos[i])) : null) ?? dias[0] ?? null;
+  }, [dias, ocorrenciaAtual]);
+  const diaAtual = dias.find((d) => d.dia === dia) ?? diaPadrao;
   const pontos = useMemo(() => diaAtual?.pontos ?? [], [diaAtual]);
   const idxPadrao = ocorrenciaAtual ? Math.max(0, pontoMaisProximo(pontos, ocorrenciaAtual.iniciadaEm)) : 0;
   const idx = indice >= 0 && indice < pontos.length ? indice : idxPadrao;
@@ -118,6 +127,8 @@ export function LinhaDoTempo({
                 value={ocorrenciaAtual?.id}
                 onChange={(e) => {
                   setEscolhida(e.target.value);
+                  setDia(null);
+                  setIndice(-1);
                   setMarcadoEm(null);
                   setErroMarcar(false);
                 }}
@@ -157,7 +168,7 @@ export function LinhaDoTempo({
                 <div className="chips">
                   {pontos.map((p, i) => (
                     <button
-                      key={p.em}
+                      key={`${p.em}-${i}`}
                       type="button"
                       className={i === idx ? "" : "secundario"}
                       aria-pressed={i === idx}
@@ -190,6 +201,9 @@ export function LinhaDoTempo({
       )}
 
       <button type="button" className="secundario" onClick={aoVoltar}>Voltar</button>
+      {aoSair && (
+        <button type="button" className="secundario sair" onClick={aoSair}>Sair e apagar tudo desta aba</button>
+      )}
     </main>
   );
 }

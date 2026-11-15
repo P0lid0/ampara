@@ -39,7 +39,7 @@ export function Mapa({
     const m = L.map(el.current, { zoomControl: true }).setView([-23.55, -46.63], 15);
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,
-      attribution: "© OpenStreetMap",
+      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     }).addTo(m);
     camada.current = L.layerGroup().addTo(m);
     mapa.current = m;
@@ -71,7 +71,7 @@ export function Mapa({
     ).addTo(g);
     pontos.forEach((p, i) => {
       // Raio de 14 px: alvo de toque confortável no iPhone (sem hover).
-      L.circleMarker([p.lat, p.lng], { radius: 14, color: "#0f4c4a", fillColor: "#14b88a", fillOpacity: 0.85, weight: 2 })
+      L.circleMarker([p.lat, p.lng], { radius: 24, color: "#0f4c4a", fillColor: "#14b88a", fillOpacity: 0.85, weight: 2 })
         .on("click", () => aoSelRef.current(i))
         .addTo(g);
     });
