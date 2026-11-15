@@ -262,7 +262,10 @@ def carregar_ssp(
 
 def decidir_resolucao(resumo: dict) -> Literal["grade", "distrito"]:
     lidas = resumo.get("linhas_lidas", 0)
-    base = lidas - resumo.get("descartadas_municipio", 0) - resumo.get("descartadas_objeto", 0)
+    # Base = linhas com municipio, objeto, data e hora validos: sem hora a linha nao serve a faixa
+    # horaria, entao nao deve contar contra a qualidade da coordenada.
+    base = lidas - sum(resumo.get(k, 0) for k in (
+        "descartadas_municipio", "descartadas_objeto", "descartadas_data", "descartadas_hora"))
     usadas = resumo.get("usadas", 0)
     if base > 0 and usadas / base >= COORD_MIN_FRACAO and usadas >= MIN_USADAS:
         return "grade"

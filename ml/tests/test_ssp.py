@@ -122,6 +122,20 @@ def test_decidir_resolucao():
     assert decidir_resolucao({"linhas_lidas": 15000, "usadas": 15000}) == "distrito"
 
 
+def test_decidir_resolucao_hora_nula_nao_derruba_a_grade():
+    # Caso real (SSP 2022-2025): 32 % da base com hora NULL; entre as datadas ~93 % tem coordenada.
+    real = {"linhas_lidas": 4792984, "descartadas_municipio": 2859804, "descartadas_objeto": 621392,
+            "descartadas_data": 356, "descartadas_hora": 420058, "descartadas_coord": 59866,
+            "descartadas_grade": 2890, "usadas": 828618}
+    assert decidir_resolucao(real) == "grade"
+
+
+def test_decidir_resolucao_coordenada_insuficiente_entre_datadas_da_distrito():
+    r = {"linhas_lidas": 200000, "descartadas_municipio": 40000, "descartadas_data": 100,
+         "descartadas_hora": 50000, "descartadas_coord": 60000, "usadas": 49900}
+    assert decidir_resolucao(r) == "distrito"
+
+
 def test_data_com_ano_absurdo_conta_como_data(tmp_path):
     df, r = carregar_ssp([_escrever(tmp_path, [LINHAS[0], LINHA_ANO_ABSURDO])])
     assert r["linhas_lidas"] == 2 and r["usadas"] == 1 and r["descartadas_data"] == 1
