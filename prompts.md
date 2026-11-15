@@ -498,4 +498,10 @@ Resultado: veredito "pronto com ressalvas", nenhum crítico. Corrigidos: ressalv
 
 Resultado: 5 suítes e 48 testes passando, `tsc --noEmit` sem erros. RNTL 14 tem `render`/`fireEvent` assíncronos (testes com `await`); TypeScript 6 exige `types: ["jest"]` no tsconfig. Build nativo e conferência no emulador adiados para a fase de build.
 
+### 78. App: banco SQLite local com migrações e repositórios (Task 2 do plano 05)
+
+> Executar a Task 2 do plano 05 (app): escrever primeiro os testes do banco local (migrações idempotentes com `user_version`, evento repetido 5x devolvendo `[true,false,false,false,false]`, lote de rota de até 500 em ordem de `em`, retenção de 7 dias, `apagarTudo` esvaziando as 8 tabelas, nenhuma tabela de aparelho ou IMEI) sobre um mock de `expo-sqlite` feito com `node:sqlite`; ver falhar; implementar `schema.ts` (`MIGRACOES`), `db.ts` (`abrirBanco`, interface `Banco`) e `repos.ts` (sessão, evento, ocorrência, rota e relato). Sem build Android nesta fase.
+
+Resultado: 8 testes novos passando (56 no app), `tsc --noEmit` sem erros. O mock em `app/__mocks__/expo-sqlite.ts` usa `node:sqlite` em memória (mesmo nome devolve o mesmo banco, `__reiniciar()` zera); `@types/node` entrou como devDependency para o `tsc` enxergar `node:sqlite`. Sem migration de servidor.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->
