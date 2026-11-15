@@ -17,6 +17,11 @@ export class ApiErro extends Error {
   }
 }
 
+/** Mensagem para o cidadão: o detalhe da API quando houver, senão a padrão. */
+export function mensagemDeErro(e: unknown): string {
+  return e instanceof ApiErro ? (e.detalheCidadao ?? e.message) : MSG_PADRAO;
+}
+
 export type Metodo = 'GET' | 'POST' | 'PUT' | 'DELETE';
 export type OpcoesChamada = { metodo?: Metodo; corpo?: unknown; semAuth?: boolean };
 

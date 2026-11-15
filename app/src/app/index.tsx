@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 import { useSessao } from '../auth/sessao';
 import { abrirBanco } from '../db/db';
-import { concluirPasso, proximoPasso, reconciliarComServidor, rotaDoPasso } from '../onboarding/passos';
+import { concluirPassoSeguro, proximoPasso, reconciliarComServidor, rotaDoPasso } from '../onboarding/passos';
 import { espacos } from '../theme/tokens';
 import { Texto } from '../ui/Texto';
 
@@ -14,12 +14,16 @@ export default function Inicio() {
   const [verificado, setVerificado] = useState(false);
 
   useEffect(() => {
-    if (!autenticado || escopo !== 'usuario') return;
+    if (!autenticado) return;
+    if (escopo !== 'usuario') {
+      setVerificado(true); // modo emergência não tem onboarding
+      return;
+    }
     let ativo = true;
     (async () => {
       try {
+        await concluirPassoSeguro('conta'); // quem chegou aqui autenticado já tem conta
         const db = await abrirBanco();
-        await concluirPasso(db, 'conta'); // quem chegou aqui autenticado já tem conta
         const proximo = proximoPasso(await reconciliarComServidor(db));
         if (ativo && proximo !== 'fim') {
           router.replace(rotaDoPasso(proximo) as never);

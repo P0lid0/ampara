@@ -1,10 +1,9 @@
 import { Stack, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
-import { ApiErro, MSG_PADRAO } from '../../api/cliente';
+import { mensagemDeErro } from '../../api/cliente';
 import { api } from '../../api/endpoints';
-import { abrirBanco } from '../../db/db';
-import { concluirPasso } from '../../onboarding/passos';
+import { concluirPassoSeguro } from '../../onboarding/passos';
 import { espacos } from '../../theme/tokens';
 import { Botao } from '../../ui/Botao';
 import { Campo } from '../../ui/Campo';
@@ -13,12 +12,16 @@ import { Texto } from '../../ui/Texto';
 
 // Tamanhos são regras do app (o contrato não fixa): código de 6 números, palavra de 4+ caracteres.
 export const MSG_CODIGO = 'O código tem 6 números.';
+export const MSG_CODIGO_DIFERENTE = 'Os dois códigos precisam ser iguais.';
+export const MSG_PALAVRA_DIFERENTE = 'As duas palavras secretas precisam ser iguais.';
 export const MSG_PALAVRA = 'A palavra secreta precisa de 4 caracteres ou mais.';
 
 export default function OnboardingEmergencia() {
   const router = useRouter();
   const [codigo, setCodigo] = useState('');
+  const [codigo2, setCodigo2] = useState('');
   const [palavra, setPalavra] = useState('');
+  const [palavra2, setPalavra2] = useState('');
   const [erroCodigo, setErroCodigo] = useState<string | undefined>();
   const [erroPalavra, setErroPalavra] = useState<string | undefined>();
   const [erro, setErro] = useState<string | undefined>();
@@ -28,22 +31,22 @@ export default function OnboardingEmergencia() {
     setErro(undefined);
     const codigoOk = /^\d{6}$/.test(codigo);
     const palavraOk = palavra.trim().length >= 4;
-    setErroCodigo(codigoOk ? undefined : MSG_CODIGO);
-    setErroPalavra(palavraOk ? undefined : MSG_PALAVRA);
-    if (!codigoOk || !palavraOk) return;
+    const codigoIgual = codigo === codigo2;
+    const palavraIgual = palavra.trim() === palavra2.trim();
+    setErroCodigo(!codigoOk ? MSG_CODIGO : codigoIgual ? undefined : MSG_CODIGO_DIFERENTE);
+    setErroPalavra(!palavraOk ? MSG_PALAVRA : palavraIgual ? undefined : MSG_PALAVRA_DIFERENTE);
+    if (!codigoOk || !palavraOk || !codigoIgual || !palavraIgual) return;
     setEnviando(true);
     try {
       await api.me.definirEmergencia({ codigo, palavraSecreta: palavra.trim() });
       setCodigo('');
+      setCodigo2('');
       setPalavra('');
-      try {
-        await concluirPasso(await abrirBanco(), 'emergencia');
-      } catch {
-        // o servidor já guardou; a reconciliação (emergenciaConfigurada) marca o passo na próxima abertura
-      }
+      setPalavra2('');
+      await concluirPassoSeguro('emergencia');
       router.replace('/');
     } catch (e) {
-      setErro(e instanceof ApiErro ? (e.detalheCidadao ?? e.message) : MSG_PADRAO);
+      setErro(mensagemDeErro(e));
     } finally {
       setEnviando(false);
     }
@@ -56,7 +59,7 @@ export default function OnboardingEmergencia() {
       <Texto variante="titulo">Seu código de emergência</Texto>
       <Texto>
         Se o seu celular for roubado, você poderá usar o Ampara no aparelho de outra pessoa. Para isso, crie um código de 6 números e uma
-        palavra secreta. Anote os dois em um lugar seguro: o Ampara não mostra o código de novo.
+        palavra secreta. Anote os dois em um lugar seguro: o Ampara não mostra o código de novo. Digite cada um duas vezes para não errar.
       </Texto>
       <Campo
         rotulo="Código de emergência"
@@ -70,6 +73,16 @@ export default function OnboardingEmergencia() {
         erro={erroCodigo}
       />
       <Campo
+        rotulo="Repita o código"
+        valor={codigo2}
+        onChangeText={(t) => setCodigo2(t.replace(/\D/g, '').slice(0, 6))}
+        keyboardType="number-pad"
+        secureTextEntry
+        autoComplete="off"
+        autoCorrect={false}
+        importantForAutofill="no"
+      />
+      <Campo
         rotulo="Palavra secreta"
         valor={palavra}
         onChangeText={setPalavra}
@@ -79,6 +92,16 @@ export default function OnboardingEmergencia() {
         autoComplete="off"
         importantForAutofill="no"
         erro={erroPalavra}
+      />
+      <Campo
+        rotulo="Repita a palavra secreta"
+        valor={palavra2}
+        onChangeText={setPalavra2}
+        secureTextEntry
+        autoCapitalize="none"
+        autoCorrect={false}
+        autoComplete="off"
+        importantForAutofill="no"
       />
       {erro ? <Texto accessibilityRole="alert" accessibilityLiveRegion="polite">{`⚠ ${erro}`}</Texto> : null}
       <Botao rotulo="Salvar" onPress={salvar} carregando={enviando} />

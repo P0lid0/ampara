@@ -1,5 +1,5 @@
 import { api } from '../api/endpoints';
-import type { Banco } from '../db/db';
+import { abrirBanco, type Banco } from '../db/db';
 import { sessaoRepo } from '../db/repos';
 
 export const PASSOS = ['conta', 'consentimento', 'imei', 'contas', 'guardioes', 'chaveiro', 'emergencia'] as const;
@@ -37,6 +37,16 @@ export async function concluirPasso(db: Banco, p: PassoOnboarding): Promise<void
   if (atuais.has(p)) return;
   atuais.add(p);
   await sessaoRepo(db).set(CHAVE, JSON.stringify([...atuais]));
+}
+
+/** Marca o passo sem nunca lançar: se o SQLite falhar, a reconciliação com o servidor cobre depois. Devolve se gravou. */
+export async function concluirPassoSeguro(p: PassoOnboarding): Promise<boolean> {
+  try {
+    await concluirPasso(await abrirBanco(), p);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 // Consulta uma rota; falha de rede ou de servidor conta como "não sei" (undefined), nunca como "vazio".

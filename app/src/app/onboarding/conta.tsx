@@ -1,10 +1,9 @@
 import { Stack, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
-import { ApiErro, MSG_PADRAO } from '../../api/cliente';
+import { mensagemDeErro } from '../../api/cliente';
 import { criarConta } from '../../auth/sessao';
-import { abrirBanco } from '../../db/db';
-import { concluirPasso } from '../../onboarding/passos';
+import { concluirPassoSeguro } from '../../onboarding/passos';
 import { espacos } from '../../theme/tokens';
 import { Botao } from '../../ui/Botao';
 import { Campo } from '../../ui/Campo';
@@ -32,14 +31,10 @@ export default function OnboardingConta() {
     setEnviando(true);
     try {
       await criarConta(nome.trim(), email.trim(), senha);
-      try {
-        await concluirPasso(await abrirBanco(), 'conta');
-      } catch {
-        // a tela inicial marca "conta" de novo ao abrir com sessão ativa
-      }
+      await concluirPassoSeguro('conta');
       router.replace('/');
     } catch (e) {
-      setErro(e instanceof ApiErro ? (e.detalheCidadao ?? e.message) : MSG_PADRAO);
+      setErro(mensagemDeErro(e));
     } finally {
       setEnviando(false);
     }

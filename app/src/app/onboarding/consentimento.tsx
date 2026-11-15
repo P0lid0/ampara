@@ -2,10 +2,9 @@ import { Stack, useRouter } from 'expo-router';
 import * as Location from 'expo-location';
 import { useState } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
-import { ApiErro, MSG_PADRAO } from '../../api/cliente';
+import { mensagemDeErro } from '../../api/cliente';
 import { api } from '../../api/endpoints';
-import { abrirBanco } from '../../db/db';
-import { concluirPasso } from '../../onboarding/passos';
+import { concluirPassoSeguro } from '../../onboarding/passos';
 import { espacos } from '../../theme/tokens';
 import { Botao } from '../../ui/Botao';
 import { ProgressoPassos } from '../../ui/ProgressoPassos';
@@ -23,11 +22,7 @@ export default function OnboardingConsentimento() {
   const [ocupado, setOcupado] = useState(false);
 
   async function concluirEIr() {
-    try {
-      await concluirPasso(await abrirBanco(), 'consentimento');
-    } catch {
-      // a reconciliação com o servidor (consentimentoRota) acrescenta o passo na próxima abertura
-    }
+    await concluirPassoSeguro('consentimento');
     router.replace('/');
   }
 
@@ -37,7 +32,7 @@ export default function OnboardingConsentimento() {
     try {
       await api.me.consentimentoRota(aceito);
     } catch (e) {
-      setErro(e instanceof ApiErro ? (e.detalheCidadao ?? e.message) : MSG_PADRAO);
+      setErro(mensagemDeErro(e));
       setOcupado(false);
       return;
     }

@@ -1,11 +1,10 @@
 import { Stack, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Linking, ScrollView, StyleSheet, View } from 'react-native';
-import { ApiErro, MSG_PADRAO } from '../../api/cliente';
+import { mensagemDeErro } from '../../api/cliente';
 import { api } from '../../api/endpoints';
-import { abrirBanco } from '../../db/db';
 import { extrairImeiDeCodigo, imeiValido } from '../../imei/luhn';
-import { concluirPasso } from '../../onboarding/passos';
+import { concluirPassoSeguro } from '../../onboarding/passos';
 import { espacos } from '../../theme/tokens';
 import { Botao } from '../../ui/Botao';
 import { Campo } from '../../ui/Campo';
@@ -61,14 +60,10 @@ export default function OnboardingImei() {
     try {
       await api.aparelhos.criar({ imei, marca: marca.trim(), modelo: modelo.trim() });
       setImei(''); // depois de enviado o IMEI não fica em estado nem em tela
-      try {
-        await concluirPasso(await abrirBanco(), 'imei');
-      } catch {
-        // a reconciliação (GET /aparelhos) marca o passo na próxima abertura
-      }
+      await concluirPassoSeguro('imei');
       router.replace('/');
     } catch (e) {
-      setErro(e instanceof ApiErro ? (e.detalheCidadao ?? e.message) : MSG_PADRAO);
+      setErro(mensagemDeErro(e));
     } finally {
       setEnviando(false);
     }
