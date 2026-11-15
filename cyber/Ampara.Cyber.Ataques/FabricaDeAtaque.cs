@@ -6,6 +6,7 @@ using System.Text.Json;
 using Ampara.Application.Cyber;
 using Ampara.Domain.Cyber;
 using Ampara.Infrastructure;
+using Ampara.Tests.Cyber;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -22,43 +23,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Ampara.Cyber.Ataques;
 
-/// <summary>
-/// Rastro síncrono: guarda o evento na lista (para o ataque conferir) e o grava no repositório, num escopo próprio.
-/// Sem fila nem worker, o evento já existe quando a resposta HTTP volta. O tradutor aqui é o REAL (Claude falso na rede).
-/// </summary>
-public sealed class RastroSincrono(IServiceScopeFactory escopos) : IRastroSeguranca
-{
-    public ConcurrentQueue<EventoSeguranca> Eventos { get; } = new();
-
-    public void Registrar(EventoSeguranca e)
-    {
-        Eventos.Enqueue(e);
-        try
-        {
-            using var escopo = escopos.CreateScope();
-            var tradutor = escopo.ServiceProvider.GetService<ITradutorRisco>();
-            if (tradutor is not null) e.MensagemCidadao = tradutor.TraduzirAsync(EventoTecnico.De(e)).GetAwaiter().GetResult();
-            escopo.ServiceProvider.GetRequiredService<IEventoSegurancaRepository>().AdicionarAsync(e).GetAwaiter().GetResult();
-        }
-        catch { /* o rastro nunca derruba quem o chama */ }
-    }
-}
-
-/// <summary>Provedor de log que guarda cada linha formatada, para provar que o valor não chega ao log.</summary>
-public sealed class LogCapturado : ILoggerProvider
-{
-    public ConcurrentQueue<string> Linhas { get; } = new();
-    public ILogger CreateLogger(string categoria) => new L(Linhas);
-    public void Dispose() { }
-
-    private sealed class L(ConcurrentQueue<string> linhas) : ILogger
-    {
-        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
-        public bool IsEnabled(LogLevel logLevel) => true;
-        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
-            => linhas.Enqueue(formatter(state, exception) + (exception is null ? "" : " " + exception));
-    }
-}
+// RastroSincrono, LogCapturado e CyberTestHelpers vem de api/Ampara.Tests/Cyber/CyberApiFactory.cs (compartilhado por link no csproj).
 
 /// <summary>
 /// Rede de mentira, no fim da cadeia de todo HttpClient (depois do handler de taint): guarda o que de fato SAIRIA da API.
@@ -197,52 +162,5 @@ public sealed class FabricaDeAtaque(Dictionary<string, string?>? config = null) 
                 }
             });
         };
-    }
-}
-
-public sealed record VitimaAtaque(Guid UsuarioId, string Email, HttpClient Cliente, Guid OcorrenciaId);
-public sealed record UsuarioAtaque(Guid UsuarioId, string Email, HttpClient Cliente);
-
-/// <summary>Monta cenários só com rotas do contrato (nada de escrever direto no banco). Mesmo padrão do CyberTestHelpers da API.</summary>
-public static class AtaqueHelpers
-{
-    public const string Imei = "490154203237518";   // SINTETICO (Luhn válido)
-    public const string CodigoEmergencia = "123456";   // SINTETICO
-    public const string PalavraSecreta = "palavra-sintetica";   // SINTETICO
-    public const string Senha = "senha-sintetica-1";   // SINTETICO
-
-    public static async Task<UsuarioAtaque> CriarUsuarioAsync(HttpClient c, string nome = "Pessoa Teste")
-    {
-        var email = $"u{Guid.NewGuid():N}@ampara.demo";
-        var reg = await c.PostAsJsonAsync("/api/v1/auth/registrar", new { nome, email, senha = Senha });
-        reg.EnsureSuccessStatusCode();
-        var id = (await reg.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("usuarioId").GetGuid();
-        var login = await c.PostAsJsonAsync("/api/v1/auth/login", new { email, senha = Senha });
-        login.EnsureSuccessStatusCode();
-        var token = (await login.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("token").GetString()!;
-        c.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-        return new UsuarioAtaque(id, email, c);
-    }
-
-    /// <summary>Cria a vítima (registrar, login, emergência, aparelho com IMEI) e dispara o gatilho web com o token de emergência.</summary>
-    public static async Task<VitimaAtaque> CriarVitimaComOcorrenciaAsync(HttpClient cliente)
-    {
-        var u = await CriarUsuarioAsync(cliente, "Vitima Teste");
-        (await cliente.PutAsJsonAsync("/api/v1/me/emergencia", new { codigo = CodigoEmergencia, palavraSecreta = PalavraSecreta })).EnsureSuccessStatusCode();
-        (await cliente.PostAsJsonAsync("/api/v1/aparelhos", new { imei = Imei, marca = "MarcaTeste", modelo = "ModeloTeste" })).EnsureSuccessStatusCode();
-
-        var r = await cliente.PostAsJsonAsync("/api/v1/auth/emergencia", new { email = u.Email, codigo = CodigoEmergencia, palavraSecreta = PalavraSecreta });
-        r.EnsureSuccessStatusCode();
-        var token = (await r.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("token").GetString()!;
-        var web = new HttpRequestMessage(HttpMethod.Post, "/api/v1/ocorrencias/gatilho") { Content = JsonContent.Create(new { origem = "web" }) };
-        web.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-        var g = await cliente.SendAsync(web);
-        g.EnsureSuccessStatusCode();
-        var id = (await g.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("ocorrenciaId").GetGuid();
-
-        // O BO só sai com o momento do roubo informado.
-        var m = await cliente.PostAsJsonAsync($"/api/v1/ocorrencias/{id}/momento", new { em = DateTime.UtcNow.AddMinutes(-5), lat = -23.5672490, lng = -46.7019515 });
-        m.EnsureSuccessStatusCode();
-        return new VitimaAtaque(u.UsuarioId, u.Email, cliente, id);
     }
 }

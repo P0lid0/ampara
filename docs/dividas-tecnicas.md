@@ -32,3 +32,4 @@ Itens que a revisão final do plano encontrou, verificou como reais e deixou de 
 - **Limite de tamanho do corpo** (seguranca-1, parcial): a regex quadrática foi corrigida e a varredura saiu do event loop. O limite (413) fica para o nginx da VM, com `client_max_body_size`, no plano 07.
 - **Print do Swagger desatualizado**: `ponte-policia/evidencias/openapi-docs.png` é de antes dos modelos de erro. Recapturar antes de usar no PDF.
 - **Miúdos sem cenário na demo**: o limite de 200 itens não aparece na descrição de `GET /ocorrencias`; um `area_id` malformado gravado fora da API vira 500; os enums não têm CHECK no banco; o nome em texto livre sem prefixo nem acento não é detectado; o painel não tem timeout no fetch; `_postar` do seed não tem teste.
+- **CPF com digitos soltos separados por espaco** (cyber-19): `5 2 9 9 ...` nao e detectado pelo `CpfDetector` (aceita so `.`/espaco entre grupos de 3). Fica fora do A02; a suite de ataques nao cobre essa forma.

@@ -53,7 +53,7 @@ public sealed class ResumoAtaques : IDisposable
             foreach (var l in todas.Values) sb.Append(l).Append('\n');
             File.WriteAllText(caminho, sb.ToString(), new UTF8Encoding(false));
         }
-        catch { /* a evidencia e um extra: nunca derruba a suite */ }
+        catch (Exception ex) { Console.Error.WriteLine("ataques.md nao foi gravado: " + ex.Message); }   // a evidencia e um extra: nunca derruba a suite, mas avisa
     }
 
     // Sobe a partir da pasta do binario ate achar a raiz do repositorio (a que tem api/Ampara.sln).

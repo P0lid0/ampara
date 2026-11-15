@@ -9,6 +9,7 @@ using Ampara.Application.Cyber;
 using Ampara.Domain.Cyber;
 using Ampara.Infrastructure.Cyber;
 using Ampara.Infrastructure.Mqtt;
+using Ampara.Tests.Cyber;
 using Microsoft.AspNetCore.SignalR.Protocol;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -52,6 +53,13 @@ public class AtaquesTests(ResumoAtaques resumo) : IClassFixture<ResumoAtaques>
 
     private Task Ataque(string id, string vetor, string esperado, Func<Task<string>> corpo) => resumo.RodarAsync(id, vetor, esperado, corpo);
 
+    // A barra e montada em runtime: um "\u" escrito no fonte seria decodificado pelas ferramentas de edicao e viraria texto puro.
+    private static readonly string Barra = ((char)92).ToString();
+
+    /// <summary>JSON {"doc":"..."} com o valor escrito em sequencias de escape (so os digitos, ou todos os caracteres).</summary>
+    private static string JsonComEscape(string valor, bool soDigitos) =>
+        "{\"doc\":\"" + string.Concat(valor.Select(c => !soDigitos || char.IsAsciiDigit(c) ? Barra + "u" + ((int)c).ToString("x4") : c.ToString())) + "\"}";
+
     private static async Task<(HttpResponseMessage R, string Corpo)> PostEco(HttpClient c, string json)
     {
         var r = await c.PostAsync("/eco", Json(json));
@@ -92,11 +100,13 @@ public class AtaquesTests(ResumoAtaques resumo) : IClassFixture<ResumoAtaques>
             ["fullwidth-com-separador-largo"] = """{"doc":"５２９．９８２．２４７－２５"}""",
             ["nbsp"] = "{\"doc\":\"529 982 247 25\"}",
             ["zero-width"] = "{\"doc\":\"529​.982​.247-25\"}",
-            ["escape-unicode"] = """{"doc":"529.982.247-25"}""",
-            ["escape-unicode-total"] = """{"doc":"529.982.247-25"}""",
+            ["escape-unicode"] = JsonComEscape(Cpf, soDigitos: true),
+            ["escape-unicode-total"] = JsonComEscape(Cpf, soDigitos: false),
         };
         foreach (var (nome, json) in formas)
         {
+            if (nome.StartsWith("escape-unicode", StringComparison.Ordinal))
+                Assert.Contains(Barra + "u0035", json);   // controle: o corpo enviado traz mesmo a sequencia de escape (nao o CPF em texto puro)
             var (r, corpo) = await PostEco(c, json);
             Assert.True(r.StatusCode == HttpStatusCode.InternalServerError, $"{nome}: status {(int)r.StatusCode}");
             Assert.Equal(TipoProblema, r.Content.Headers.ContentType!.MediaType);
@@ -217,23 +227,23 @@ public class AtaquesTests(ResumoAtaques resumo) : IClassFixture<ResumoAtaques>
         "A07", "IMEI no BO: dono, anonimo e outro usuario autenticado", "so o dono ve o IMEI; o intruso leva 403 e vira acesso indevido (peso 40) para a vitima", async () =>
     {
         await using var f = new FabricaDeAtaque();
-        var v = await AtaqueHelpers.CriarVitimaComOcorrenciaAsync(f.CreateClient());
+        var v = await CyberTestHelpers.CriarVitimaComOcorrenciaAsync(f.CreateClient());
 
         var doDono = await v.Cliente.GetFromJsonAsync<JsonElement>($"/api/v1/ocorrencias/{v.OcorrenciaId}/bo");
-        Assert.Contains(AtaqueHelpers.Imei, doDono.GetProperty("texto").GetString());
+        Assert.Contains(CyberTestHelpers.Imei, doDono.GetProperty("texto").GetString());
 
         var anonimo = await f.CreateClient().GetAsync($"/api/v1/ocorrencias/{v.OcorrenciaId}/bo");
         Assert.Equal(HttpStatusCode.Unauthorized, anonimo.StatusCode);
-        Assert.DoesNotContain(AtaqueHelpers.Imei, await anonimo.Content.ReadAsStringAsync());
+        Assert.DoesNotContain(CyberTestHelpers.Imei, await anonimo.Content.ReadAsStringAsync());
 
-        var intruso = await AtaqueHelpers.CriarUsuarioAsync(f.CreateClient(), "Intruso Teste");
+        var intruso = await CyberTestHelpers.CriarUsuarioAsync(f.CreateClient(), "Intruso Teste");
         var negado = await intruso.Cliente.GetAsync($"/api/v1/ocorrencias/{v.OcorrenciaId}/bo");
         Assert.Equal(HttpStatusCode.Forbidden, negado.StatusCode);
         Assert.Equal(TipoProblema, negado.Content.Headers.ContentType?.MediaType);
-        Assert.DoesNotContain(AtaqueHelpers.Imei, await negado.Content.ReadAsStringAsync());
+        Assert.DoesNotContain(CyberTestHelpers.Imei, await negado.Content.ReadAsStringAsync());
 
         // A rota que lista aparelhos mostra só os 4 últimos dígitos.
-        Assert.DoesNotContain(AtaqueHelpers.Imei, await v.Cliente.GetStringAsync("/api/v1/aparelhos"));
+        Assert.DoesNotContain(CyberTestHelpers.Imei, await v.Cliente.GetStringAsync("/api/v1/aparelhos"));
 
         var indevidos = (await f.EventosNoBancoAsync(v.UsuarioId)).Where(IndiceRisco.EhAcessoIndevido).ToList();
         Assert.Single(indevidos);
@@ -241,7 +251,7 @@ public class AtaquesTests(ResumoAtaques resumo) : IClassFixture<ResumoAtaques>
         var permitidos = f.Rastro.Eventos.Where(e => e.Campo == "bo.imei" && e.UsuarioAlvoId == v.UsuarioId).ToList();
         Assert.Single(permitidos);   // só a leitura do dono foi "Permitido"; a do intruso nunca aparece como permitida
         Assert.Equal(Decisao.Permitido, permitidos[0].Decisao);
-        Assert.DoesNotContain(f.Log.Linhas, l => l.Contains(AtaqueHelpers.Imei, StringComparison.Ordinal));
+        Assert.DoesNotContain(f.Log.Linhas, l => l.Contains(CyberTestHelpers.Imei, StringComparison.Ordinal));
         return "dono recebe; anonimo 401; intruso 403; 1 acesso indevido de peso 40 para a vitima; IMEI fora do log";
     });
 
@@ -254,7 +264,7 @@ public class AtaquesTests(ResumoAtaques resumo) : IClassFixture<ResumoAtaques>
         await PostEco(c, $$"""{"documento":"{{Cpf}}"}""");
         await PostEco(c, $$"""{"senha":"{{SenhaSintetica}}"}""");
         await c.GetAsync("/explode");
-        var u = await AtaqueHelpers.CriarUsuarioAsync(f.CreateClient());
+        var u = await CyberTestHelpers.CriarUsuarioAsync(f.CreateClient());
         foreach (var cenario in new[] { "cpf-no-log", "senha-na-resposta", "laudo-no-erro", "acesso-indevido" })
             Assert.Equal(HttpStatusCode.Accepted, (await u.Cliente.PostAsJsonAsync("/api/v1/seguranca/simular-ataque", new { cenario })).StatusCode);
 
@@ -451,6 +461,7 @@ public class AtaquesTests(ResumoAtaques resumo) : IClassFixture<ResumoAtaques>
         Assert.Equal(HttpStatusCode.BadRequest, invalido.Status);
 
         var normal = await Enviar(Json("""{"email":"ninguem@ampara.demo","senha":"senha-sintetica-1"}"""));
+        Assert.Equal(HttpStatusCode.Unauthorized, normal.Status);
         Assert.NotEqual(HttpStatusCode.RequestEntityTooLarge, normal.Status);
         Assert.NotEqual(HttpStatusCode.BadRequest, normal.Status);   // chegou ao endpoint: 401 de credencial, não bloqueio do pipeline
         return $"profundo {(int)fundo.Status}, gigante {(int)gigante.Status}, gigante sem tamanho {(int)semTamanho.Status}, invalido {(int)invalido.Status}, normal {(int)normal.Status}";

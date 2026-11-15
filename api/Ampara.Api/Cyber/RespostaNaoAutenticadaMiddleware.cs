@@ -51,9 +51,12 @@ public sealed class RespostaNaoAutenticadaMiddleware(RequestDelegate next, IPiiS
         var norm = Normalizador.Normalizar(texto);
 
         // 1) o que fica de fora do guard: valores das classes que o endpoint permite por contrato
-        var achados = EhJson(ctx.Response.ContentType) && TentaJson(texto, out var raiz)
-            ? scanner.EscanearJson(raiz) : scanner.EscanearTexto(norm);
+        JsonElement raiz = default;
+        var json = EhJson(ctx.Response.ContentType) && TentaJson(texto, out raiz);
+        var achados = json ? scanner.EscanearJson(raiz) : scanner.EscanearTexto(norm);
         var mascarado = norm;
+        // JSON com escapes unicode esconde o valor do texto cru: o cliente decodifica, entao o guard tambem olha os valores decodificados.
+        var decodificado = json && texto.Contains('\\') ? Normalizador.Normalizar(ValoresDecodificados(raiz)) : null;
         var permitidosVistos = new Dictionary<(PiiClasse, string), string>();
         if (permitidas.Count > 0)
         {
@@ -65,13 +68,18 @@ public sealed class RespostaNaoAutenticadaMiddleware(RequestDelegate next, IPiiS
             }
             foreach (var a in achados.Where(a => permitidas.Contains(a.Classe))) permitidosVistos.TryAdd((a.Classe, a.Valor), a.Campo);
             foreach (var valor in permitidosVistos.Keys.Select(k => k.Item2).OrderByDescending(v => v.Length))
-                if (valor.Length > 0) mascarado = mascarado.Replace(valor, new string('_', valor.Length), StringComparison.Ordinal);
+                if (valor.Length > 0)
+                {
+                    mascarado = mascarado.Replace(valor, new string('_', valor.Length), StringComparison.Ordinal);
+                    decodificado = decodificado?.Replace(valor, new string('_', valor.Length), StringComparison.Ordinal);
+                }
         }
 
         // 2) o resto: achados por chave (ex.: "senha") entram no escopo para o guard reconhecê-los
         foreach (var a in achados.Where(a => !permitidas.Contains(a.Classe) && a.Valor.Length >= 4))
             escopo.Marcar(a.Valor, OrigemDado.Http, a.Campo, a.Classe);
 
+        if (decodificado is not null) mascarado += "\n" + decodificado;
         var r = guard.Sanitizar(mascarado, Sink.HttpNaoAutenticada, new SanitizarOpcoes(OrigemDado.Http, "resposta", null, cid));
         if (r.Bloqueado)
         {
@@ -111,6 +119,25 @@ public sealed class RespostaNaoAutenticadaMiddleware(RequestDelegate next, IPiiS
         EventoSeguranca.Novo(TimeProvider.System.GetUtcNow(), cid, OrigemDado.Http, "resposta", PiiClasse.Senha, Sink.HttpNaoAutenticada, Decisao.Bloqueado, null);
 
     private static bool EhJson(string? ct) => ct is not null && ct.Contains("json", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>Nomes de propriedade e valores de texto do JSON ja decodificados, um por linha.</summary>
+    private static string ValoresDecodificados(JsonElement raiz)
+    {
+        var sb = new StringBuilder();
+        void Visitar(JsonElement e)
+        {
+            switch (e.ValueKind)
+            {
+                case JsonValueKind.String: sb.Append(e.GetString()).Append('\n'); break;
+                case JsonValueKind.Array: foreach (var i in e.EnumerateArray()) Visitar(i); break;
+                case JsonValueKind.Object:
+                    foreach (var p in e.EnumerateObject()) { sb.Append(p.Name).Append('\n'); Visitar(p.Value); }
+                    break;
+            }
+        }
+        Visitar(raiz);
+        return sb.ToString();
+    }
 
     private static bool TentaJson(string texto, out JsonElement raiz)
     {

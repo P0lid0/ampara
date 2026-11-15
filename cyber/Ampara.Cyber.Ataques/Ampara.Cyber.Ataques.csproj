@@ -22,6 +22,10 @@
     <Using Include="System.Net" />
   </ItemGroup>
   <ItemGroup>
+    <!-- Rastro sincrono, log capturado e helpers de cenario: uma so copia, a da suite da API. -->
+    <Compile Include="..\..\api\Ampara.Tests\Cyber\CyberApiFactory.cs" Link="Compartilhado\CyberApiFactory.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <!-- Os mesmos arquivos de apoio da suite da API: delegacias e risco de teste. -->
     <None Include="..\..\api\Ampara.Tests\Fixtures\delegacias-teste.json" Link="Fixtures\delegacias-teste.json" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\..\api\Ampara.Tests\Fixtures\risco-teste.csv" Link="Fixtures\risco-teste.csv" CopyToOutputDirectory="PreserveNewest" />

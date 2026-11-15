@@ -23,6 +23,12 @@ public class RespostaNaoAutenticadaTests
             c.Response.Headers["Set-Cookie"] = "s=529.982.247-25";
             return Results.Json(new { cpf = "529.982.247-25" });
         });
+        // O CPF escrito em sequencias de escape (a barra e montada em runtime: um escape literal no fonte seria decodificado pelas ferramentas de edicao).
+        m.MapGet("/vaza-cpf-escapado", () => Results.Text(
+            "{\"doc\":\"" + string.Concat("529.982.247-25".Select(ch => B + "u" + ((int)ch).ToString("x4"))) + "\"}", "application/json"));
+        m.MapGet("/catalogo-acento", () => Results.Text(
+            "{\"nome\":\"Jo" + B + "u00e3o\",\"telefone\":\"(11) 4004-0000\"}", "application/json"))
+            .WithMetadata(new PiiPermitidaAttribute(PiiClasse.Telefone));
         m.MapGet("/vaza-senha", () => Results.Json(new { senha = "abc12345" }));
         m.MapGet("/autenticado", (HttpContext c) =>
         {
@@ -48,6 +54,8 @@ public class RespostaNaoAutenticadaTests
         m.MapGet("/grande", () => Results.Text(new string('a', 500), "text/plain"));
     }
 
+    private static readonly string B = ((char)92).ToString();
+
     private sealed record Corpo(Guid Id);
 
     private static async Task<(HttpResponseMessage R, string Corpo, CyberTestHost H)> Get(string rota, Dictionary<string, string?>? cfg = null, HttpMethod? metodo = null, HttpContent? conteudo = null)
@@ -68,6 +76,24 @@ public class RespostaNaoAutenticadaTests
         Assert.Contains("urn:ampara:taint:bloqueado", t);
         var e = Assert.Single(h.Rastro.Eventos);
         Assert.Equal((Sink.HttpNaoAutenticada, Decisao.Bloqueado), (e.Sink, e.Decisao));
+    }
+
+    [Fact] public async Task Cpf_escrito_em_escapes_unicode_no_json_e_bloqueado()
+    {
+        var (r, t, h) = await Get("/vaza-cpf-escapado");
+        await using var _ = h;
+        Assert.Equal(HttpStatusCode.InternalServerError, r.StatusCode);
+        Assert.Equal("application/problem+json", r.Content.Headers.ContentType!.MediaType);
+        Assert.DoesNotContain(B + "u0035", t);
+        Assert.Contains(h.Rastro.Eventos, e => (e.Sink, e.Decisao, e.Classe) == (Sink.HttpNaoAutenticada, Decisao.Bloqueado, PiiClasse.Cpf));
+    }
+
+    [Fact] public async Task Catalogo_com_acento_escapado_continua_passando()
+    {
+        var (r, t, h) = await Get("/catalogo-acento");
+        await using var _ = h;
+        Assert.Equal(HttpStatusCode.OK, r.StatusCode);
+        Assert.Contains("4004-0000", t);
     }
 
     [Fact] public async Task Senha_na_resposta_e_bloqueada_por_chave()
