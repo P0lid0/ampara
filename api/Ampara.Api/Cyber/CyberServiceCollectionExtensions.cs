@@ -2,6 +2,8 @@ using Ampara.Api.Middleware;
 using Ampara.Application.Cyber;
 using Ampara.Infrastructure.Cyber;
 using Ampara.Infrastructure.Cyber.Detectores;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.SignalR.Protocol;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
@@ -50,6 +52,11 @@ public static class CyberServiceCollectionExtensions
         services.AddScoped<ITaintGuard, TaintGuard>();
         // Filtro de PII das mensagens MQTT: singleton (cria um escopo por mensagem para resolver o guard).
         services.TryAddSingleton<IMqttPiiFilter, MqttPiiFilter>();
+        // Sink SignalR: o protocolo JSON do hub passa a varrer cada mensagem antes de ir ao cliente (AddSignalR já rodou).
+        services.RemoveAll<IHubProtocol>();
+        services.AddSingleton<IHubProtocol>(sp => new TaintHubProtocol(ActivatorUtilities.CreateInstance<JsonHubProtocol>(sp),
+            sp.GetRequiredService<IPiiScanner>(), sp.GetRequiredService<IRastroSeguranca>(), sp.GetRequiredService<IOptions<CyberOptions>>(),
+            new CorrelacaoAmbiente(sp.GetRequiredService<IHttpContextAccessor>())));
         services.AddHttpClient("anthropic");
         // Sinks Ponte e Claude: todo HttpClient passa pelo handler, que decide o sink pelo host do pedido.
         services.AddTransient<TaintHttpHandler>();

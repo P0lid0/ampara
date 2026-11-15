@@ -340,4 +340,10 @@ Resultado: 14 testes do painel passando e build sem erro; sem migration; tela co
 
 Resultado: 33 testes do painel passando e build sem erro; sem migration; conferência no navegador contra a API real não feita nesta rodada.
 
+### 54. Cyber: sink SignalR via protocolo de hub protegido (Task 18 do plano 03)
+
+> Executar a Task 18 do plano 03 (Cyber): escrever primeiro os testes do sink SignalR (alerta do contrato sai byte a byte igual e sem evento, mensagem com CPF vira `TaintBloqueado` com evento `SignalR/Bloqueado/Cpf`, CPF escrito com escape unicode também é pego); implementar `TaintHubProtocol`, que embrulha o `JsonHubProtocol`, varre os argumentos já decodificados e troca a mensagem suja, e registrá-lo no `AddCyber` no lugar do `IHubProtocol` padrão.
+
+Resultado: 6 testes do `SignalRSinkTests` passando, suíte inteira com 421 aprovados (o cenário de alerta ao vivo do plano 02 segue verde); sem migration.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->
