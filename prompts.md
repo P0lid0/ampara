@@ -416,4 +416,8 @@ Resultado: 12 testes de `test_ssp.py` passando; carga real das planilhas 2022 a 
 
 Resultado: 11 testes novos passando (43 na suíte de `ml/`); cortes calculados só no treino, CV de janela expansiva que nunca parte um período. Sem migration.
 
+> Executar a Task 4 do plano 06 (ML): escrever primeiro os testes de `painel.py` (defasagens `cont_ant_1`, `cont_ant_4` e `area_ant_4` com dados sintéticos, produto cartesiano com zeros, período futuro, anti-vazamento do próprio alvo, seleção de áreas só no treino, descarte do trimestre parcial); implementar `periodos_completos`, `selecionar_areas` e `montar_painel`.
+
+Resultado: 8 testes novos em `test_painel.py` passando; defasagens calculadas por `shift` + janela de 4 dentro de cada grupo, antes de remover o primeiro período. Sem migration.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->
