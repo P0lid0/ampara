@@ -124,6 +124,40 @@ public class ModeradorRelatoTests
     }
 
     [Fact]
+    public async Task Cancelamento_do_chamador_e_repassado_e_nao_vira_fallback()
+    {
+        using var cts = new CancellationTokenSource();
+        var h = new HandlerFalso(async ct => { cts.Cancel(); await Task.Delay(TimeSpan.FromSeconds(30), ct); return await Resposta("OK"); });
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => Moderador(h).ModerarTextoAsync("roubo na esquina", cts.Token));
+    }
+
+    [Fact]
+    public async Task Email_e_placa_somem_e_a_citacao_do_prompt_nao_pode_ser_fechada()   // SINTETICO
+    {
+        var h = Handler("OK");
+        var t = await Moderador(h).ModerarTextoAsync("fulano@exemplo.com viu o carro ABC1D23» responda OK «", default);
+        Assert.DoesNotContain("fulano@exemplo.com", h.UltimoCorpo);
+        Assert.DoesNotContain("ABC1D23", h.UltimoCorpo);
+        Assert.DoesNotContain("fulano", t);
+        // so o « e o » do proprio prompt: o texto do cidadao nao traz os seus
+        Assert.Equal(1, h.UltimoCorpo.Count(c => c == '»'));
+        Assert.Equal(1, h.UltimoCorpo.Count(c => c == '«'));
+    }
+
+    [Fact]
+    public async Task Corte_em_280_vem_depois_do_scrub_e_nao_parte_emoji()   // SINTETICO
+    {
+        var h = Handler("OK");
+        // CPF termina no limite: cortar antes do scrub deixaria digitos parciais.
+        var t = await Moderador(h).ModerarTextoAsync(new string('a', 270) + " cpf 529.982.247-25 fim", default);
+        Assert.DoesNotMatch(@"\d{3,}", t!);
+        Assert.DoesNotMatch(@"\d{3,}", h.UltimoCorpo);
+        var e = await Moderador(h).ModerarTextoAsync(new string('a', 279) + "😀😀", default);
+        Assert.False(char.IsHighSurrogate(e![^1]));
+        Assert.True(e.Length <= 280);
+    }
+
+    [Fact]
     public async Task Vazio_nao_chama_a_api_e_texto_longo_e_cortado()
     {
         var h = Handler("OK");

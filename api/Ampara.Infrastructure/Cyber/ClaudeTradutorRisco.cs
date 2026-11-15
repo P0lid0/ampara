@@ -1,5 +1,3 @@
-using System.Net.Http.Json;
-using System.Text.Json;
 using Ampara.Application.Cyber;
 using Ampara.Domain.Cyber;
 using Microsoft.Extensions.Caching.Memory;
@@ -36,21 +34,16 @@ public static class FrasesPadrao
 public sealed class ClaudeTradutorRisco(
     IHttpClientFactory http, IConfiguration config, ITaintGuard guard, IMemoryCache cache, ILogger<ClaudeTradutorRisco> log) : ITradutorRisco
 {
-    public const string ModeloPadrao = "claude-haiku-5-5";
-    private const string Url = "https://api.anthropic.com/v1/messages";
+    public const string ModeloPadrao = AnthropicMensagens.ModeloPadrao;
     private const string Sistema = "Você escreve avisos curtos e calmos em português do Brasil.";
-    private static readonly TimeSpan Limite = TimeSpan.FromSeconds(5);
     private static readonly TimeSpan Validade = TimeSpan.FromHours(1);
-    // Sem escape de unicode: aspas simples e acentos seguem legiveis no corpo (e nada vira sequencia de digitos).
-    private static readonly JsonSerializerOptions Json = new() { Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
 
     public async Task<string> TraduzirAsync(EventoTecnico evento, CancellationToken ct = default)
     {
         var padrao = FrasesPadrao.Para(evento.Tipo);
         try
         {
-            var chave = config["ANTHROPIC_API_KEY"];
-            if (string.IsNullOrWhiteSpace(chave)) return padrao;
+            if (AnthropicMensagens.Chave(config) is null) return padrao;
 
             var prompt = $"Traduza a falha técnica '{evento.Categoria} no {evento.Sink}: {evento.Tipo}' para um cidadão leigo de 60 anos, em 2 frases: a primeira diz o que aconteceu e a segunda diz o que a pessoa deve fazer. Não use termos técnicos e não repita nenhum dado pessoal.";
             var limpo = guard.Sanitizar(prompt, Sink.Llm);
@@ -60,29 +53,7 @@ public sealed class ClaudeTradutorRisco(
             var cacheKey = $"{evento.Categoria}|{evento.Sink}|{evento.Tipo}";
             if (cache.TryGetValue(cacheKey, out string? guardada) && guardada is not null) return guardada;
 
-            var modelo = config["ANTHROPIC_MODEL"];
-            if (string.IsNullOrWhiteSpace(modelo)) modelo = ModeloPadrao;
-
-            using var prazo = CancellationTokenSource.CreateLinkedTokenSource(ct);
-            prazo.CancelAfter(Limite);
-            using var req = new HttpRequestMessage(HttpMethod.Post, Url)
-            {
-                Content = JsonContent.Create(new
-                {
-                    model = modelo, max_tokens = 200, system = Sistema,
-                    messages = new[] { new { role = "user", content = limpo.Texto } },
-                }, options: Json),
-            };
-            req.Headers.Add("x-api-key", chave);
-            req.Headers.Add("anthropic-version", "2023-06-01");
-
-            using var resp = await http.CreateClient("anthropic").SendAsync(req, prazo.Token);
-            if (!resp.IsSuccessStatusCode)
-            {
-                log.LogWarning("Tradutor de risco: Anthropic respondeu {Status}", (int)resp.StatusCode);
-                return padrao;
-            }
-            var texto = Extrair(await resp.Content.ReadAsStringAsync(prazo.Token))?.Trim();
+            var texto = (await AnthropicMensagens.EnviarAsync(http, config, limpo.Texto, 200, Sistema, log, "Tradutor de risco", ct))?.Trim();
             if (texto is null || texto.Length is < 20 or > 300) return padrao;
 
             cache.Set(cacheKey, texto, Validade);
@@ -94,12 +65,5 @@ public sealed class ClaudeTradutorRisco(
             log.LogWarning("Tradutor de risco caiu na frase padrao: {Tipo}", ex.GetType().Name);
             return padrao;
         }
-    }
-
-    private static string? Extrair(string json)
-    {
-        using var doc = JsonDocument.Parse(json);
-        var c = doc.RootElement.GetProperty("content");
-        return c.ValueKind == JsonValueKind.Array && c.GetArrayLength() > 0 && c[0].TryGetProperty("text", out var t) ? t.GetString() : null;
     }
 }
