@@ -438,4 +438,10 @@ Resultado: 4 testes passando mais o de rede (72 linhas em 3 dias); 35.064 linhas
 
 Resultado: 6 testes de `test_urbano.py` passando; 96 distritos com população (11.451.999 hab.) e densidade sem NaN e sem aliases; 662.945 pontos de iluminação baixados em CSV enxuto (~25 MB) e contados por célula. Sem migration.
 
+### 69. ML: dataset de modelagem com cortes só no treino e X_futuro (Task 9 do plano 06)
+
+> Executar a Task 9 do plano 06 (ML): escrever primeiro os testes de `dataset.py` (features base e extra, divisão temporal com X_futuro de 56 linhas, cortes de classe só do treino, erro "sem feature" para NaN, ausência de NaN e inf); implementar `montar_dataset` juntando clima, GeoSampa e dados urbanos ao painel.
+
+Resultado: 5 testes de `test_dataset.py` passando. Sem migration.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->
