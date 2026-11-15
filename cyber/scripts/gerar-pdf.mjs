@@ -12,7 +12,7 @@ const raiz = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const saidaDir = resolve(raiz, "cyber/saida");
 mkdirSync(saidaDir, { recursive: true });
 
-// o HTML fica ao lado das imagens relativas do markdown (cyber/), entao e gravado la e apagado nunca: fica em saida/ com <base>.
+// o HTML intermediario fica em cyber/saida/ (fora do git), com <base> apontando para as imagens do markdown.
 const md = readFileSync(resolve(raiz, "cyber/documentacao.md"), "utf8");
 const corpo = marked.parse(md, { gfm: true });
 
@@ -72,11 +72,7 @@ try {
     headerTemplate: "<span></span>",
     footerTemplate: `<div style="width:100%;font:8px 'Segoe UI',Arial,sans-serif;color:#5a6b69;padding:0 16mm;display:flex;justify-content:space-between"><span>Ampara · Cyber Security · dados sintéticos</span><span>Página <span class="pageNumber"></span> de <span class="totalPages"></span></span></div>`,
   });
-  console.log(`ok ${destino} (${[...document_imagens(corpo)].length} imagens)`);
+  console.log(`ok ${destino} (${(corpo.match(/<img /g) ?? []).length} imagens)`);
 } finally {
   await nav.close();
-}
-
-function* document_imagens(h) {
-  for (const m of h.matchAll(/<img /g)) yield m;
 }

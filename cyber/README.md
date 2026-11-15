@@ -37,7 +37,7 @@ Fonte do PDF: `cyber/documentacao.md`, com os prints de `cyber/evidencias/prints
 | `prints-painel.mjs` | com API (`AMPARA_DEMO=true`) e painel no ar, zera o rastro, entra no painel, aciona os cenários e salva os prints (verde 0, amarelo 40 e 65, vermelho 75, executiva) |
 | `gerar-pdf.mjs` | converte `documentacao.md` em PDF A4 (`marked` + `page.pdf`) |
 | `gerar-zip.sh` | `git archive` de `api cyber web-painel-risco .env.example` e conferência (sem `.pdf`, `node_modules`, `.env`, nem chave da Anthropic) |
-| `zerar-demo.sh [email]` | apaga os eventos de segurança do usuário de demonstração (padrão `vitima@ampara.demo`; `--tudo` zera o rastro inteiro do banco de demonstração) |
+| `zerar-demo.sh [email]` | apaga os eventos de segurança do usuário de demonstração (padrão `vitima@ampara.demo`) |
 | `consulta-rastro.sh [trecho...]` | mostra o `evento_seguranca` e procura trechos de valores no rastro inteiro (o esperado é 0) |
 
 As frases da IA nos prints são a **frase padrão**, porque os prints foram feitos sem `ANTHROPIC_API_KEY`. Para regravá-los com a frase da IA, defina a chave no ambiente da API antes de subir e rode `node cyber/scripts/prints-painel.mjs` e `node cyber/scripts/gerar-pdf.mjs` de novo.

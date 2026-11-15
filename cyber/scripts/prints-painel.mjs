@@ -15,7 +15,7 @@ const painel = process.env.PAINEL_URL ?? "http://localhost:5174/painel-risco/";
 const senha = process.env.DEMO_SENHA ?? "Demo!2026-sintetico";
 mkdirSync(saida, { recursive: true });
 
-execFileSync("bash", [resolve(raiz, "cyber/scripts/zerar-demo.sh"), "--tudo"], { stdio: "inherit" });
+execFileSync("bash", [resolve(raiz, "cyber/scripts/zerar-demo.sh")], { stdio: "inherit" });
 
 const nav = await abrirNavegador();
 try {
