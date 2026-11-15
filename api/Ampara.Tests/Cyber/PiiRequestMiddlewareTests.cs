@@ -12,7 +12,7 @@ namespace Ampara.Tests.Cyber;
 
 public class PiiRequestMiddlewareTests
 {
-    // Todos os dados abaixo são sintéticos.
+    // SINTETICO: todos os dados abaixo são sintéticos.
     [Fact] public async Task Json_marca_documento_e_o_endpoint_ainda_le_o_corpo() {
         await using var h = await CyberTestHost.IniciarAsync(autenticado: true, mapa: m => m.MapPost("/eco", async (HttpContext c, ITaintScope s) => {
             var corpo = await new StreamReader(c.Request.Body).ReadToEndAsync();

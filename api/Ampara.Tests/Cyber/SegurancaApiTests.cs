@@ -139,7 +139,7 @@ public class SegurancaApiTests(CyberApiFactory f) : IClassFixture<CyberApiFactor
         var u = await Usuario();
         foreach (var c in new[] { "cpf-no-log", "senha-na-resposta", "laudo-no-erro", "acesso-indevido" }) await Simular(u, c);
         var texto = await (await u.Cliente.GetAsync("/api/v1/seguranca/meu-risco")).Content.ReadAsStringAsync();
-        Assert.DoesNotContain("529.982.247-25", texto); Assert.DoesNotContain("52998224725", texto);
+        Assert.DoesNotContain("529.982.247-25", texto); Assert.DoesNotContain("52998224725", texto);   // SINTETICO
         Assert.DoesNotContain("Sintetica!2026", texto);
         Assert.DoesNotContain("laudo medico", texto, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain(u.UsuarioId.ToString(), texto);

@@ -52,8 +52,8 @@ O valor do dado nunca é gravado em lugar nenhum de apoio: o rastro guarda só *
     <text x="70" y="48" font-weight="700">1. Fontes</text><text x="70" y="66">JSON, form, query,</text><text x="70" y="82">cabeçalho, MQTT</text>
     <text x="225" y="48" font-weight="700">2. Scanner</text><text x="225" y="66">8 detectores + chave</text><text x="225" y="82">(PiiScanner)</text>
     <text x="385" y="48" font-weight="700">3. Escopo</text><text x="385" y="66">marca o valor visto</text><text x="385" y="82">(ITaintScope)</text>
-    <text x="545" y="48" font-weight="700">4. Sinks</text><text x="545" y="66">TaintGuard decide:</text><text x="545" y="82">bloqueia, mascara, cifra</text>
-    <text x="695" y="48" font-weight="700">5. Rastro</text><text x="695" y="66">evento sem valor</text><text x="695" y="82">(evento_seguranca)</text>
+    <text x="545" y="48" font-weight="700">4. Sinks</text><text x="545" y="66">bloqueia, mascara</text><text x="545" y="82">ou cifra</text>
+    <text x="695" y="48" font-weight="700">5. Rastro</text><text x="695" y="66">evento sem valor</text><text x="695" y="82" font-size="11">(evento_seguranca)</text>
   </g>
   <g fill="#e3f1ea" stroke="#1b5e45" stroke-width="1.5">
     <rect x="480" y="160" width="130" height="70" rx="8"/><rect x="640" y="160" width="110" height="70" rx="8"/>
@@ -64,7 +64,7 @@ O valor do dado nunca é gravado em lugar nenhum de apoio: o rastro guarda só *
   </g>
   <g stroke="#16324f" stroke-width="1.8" fill="none" marker-end="url(#seta)">
     <path d="M130,55 L158,55"/><path d="M290,55 L318,55"/><path d="M450,55 L478,55"/><path d="M610,55 L638,55"/>
-    <path d="M695,90 L695,158"/><path d="M640,195 L612,195"/>
+    <path d="M695,90 L695,158"/><path d="M610,195 L638,195"/>
   </g>
   <text x="380" y="150" fill="#16324f" text-anchor="middle" font-size="12">O rastro alimenta o tradutor (IA) e o painel; o valor original nunca sai do sink.</text>
 </svg>
@@ -72,7 +72,7 @@ O valor do dado nunca é gravado em lugar nenhum de apoio: o rastro guarda só *
 | Etapa | O que faz | Onde está |
 |---|---|---|
 | Fonte → escopo | Lê corpo JSON, formulário, query e cabeçalhos e marca cada dado sensível, sem bloquear | `PiiRequestMiddleware`, `MqttPiiFilter` |
-| Scanner | Normaliza o texto (largura total, espaços invisíveis, escapes) e roda 8 detectores por valor e por chave | `PiiScanner`, `Normalizador`, `Detectores/*` |
+| Scanner | Normaliza o texto (largura total, caracteres de formatação invisíveis, traços Unicode, dígitos de outras escritas, escapes) e roda 8 detectores por valor e por chave | `PiiScanner`, `Normalizador`, `Detectores/*` |
 | Sinks | Antes de qualquer saída, troca ou cifra o que for sensível conforme a política | `TaintGuard`, `PoliticaTaint` |
 | Rastro | Grava `{source, campo, classe, sink, decisão, correlationId}` sem o valor | `RastroSeguranca`, tabela `evento_seguranca` |
 | IA | Traduz o evento para 2 frases simples | `ClaudeTradutorRisco` |
@@ -220,7 +220,7 @@ O taint não é um "bloqueia tudo": o dono precisa ver o próprio IMEI para faze
 | id | Vetor | Esperado | Resultado |
 |---|---|---|---|
 | A01 | CPF em JSON ecoado por endpoint anônimo | 500 problem+json, CPF ausente, evento HttpNaoAutenticada/Bloqueado | OK |
-| A02 | CPF ofuscado (largura total, NBSP, caractere invisível, escape unicode) | todas as formas bloqueadas | OK: 6 formas, todas bloqueadas |
+| A02 | CPF ofuscado (largura total, NBSP, caractere invisível, hífen suave, travessão, marca de direção, dígitos árabe-índicos, escape unicode) | todas as formas bloqueadas | OK: 10 formas, todas bloqueadas |
 | A03 | CPF em cabeçalho, query e formulário num endpoint de depuração | nenhuma linha de log contém o CPF | OK: 3 linhas, CPF ausente |
 | A04 | Exceção com laudo e CPF na mensagem | 500 com frase humana, sem "Error 500", sem stack | OK |
 | A05 | Mensagem MQTT do chaveiro com CPF no campo livre | serviço recebe o CPF mascarado; `deviceId` e `eventId` intactos | OK: `***.982.***-25` |
@@ -323,7 +323,7 @@ O painel não usa só a cor: cada farol tem palavra (Seguro, Atenção, Risco al
 
 ### 5.3 Visão executiva (administrador)
 
-Totais das últimas 24 horas por tipo de dado e por ponto de saída, e eventos por hora. É a visão de quem acompanha a plataforma inteira; só o papel `admin` a vê (as outras contas recebem 403 e uma mensagem). O usuário `admin` só existe no modo de demonstração.
+Totais das últimas 24 horas por tipo de dado e por ponto de saída, e eventos por hora. Pelo contrato, o acesso indevido é gravado como classe `Senha` no ponto de saída `HttpNaoAutenticada` (o contrato não cria uma classe só para ele; o campo `codigo-emergencia` ou `recurso-de-outro-usuario` é que o distingue); por isso, depois de um acesso indevido e de uma senha ecoada, as barras mostram "senha 2" e "resposta pública 2". É a visão de quem acompanha a plataforma inteira; só o papel `admin` a vê (as outras contas recebem 403 e uma mensagem). O usuário `admin` só existe no modo de demonstração.
 
 ![Visão executiva](evidencias/prints/painel-executiva.png)
 
@@ -341,16 +341,19 @@ Pré-requisitos: SDK .NET 11 (`api/global.json`), PostgreSQL, Node 20+ e o Edge 
 # no Git Bash (Windows): o SDK 11 do scoop vem antes do dotnet do sistema
 export PATH="$HOME/scoop/apps/dotnet-sdk/current:$PATH" DOTNET_ROOT="$HOME/scoop/apps/dotnet-sdk/current"
 
-# 1) testes da API (motor de PII, taint, painel): 445 testes, sem banco nem rede
+# 1) testes da API (motor de PII, taint, painel): 475 testes, sem banco nem rede
 dotnet test api/Ampara.sln
 
-# 2) suíte de ataque (13 ataques; regrava cyber/evidencias/ataques.md)
+# 2) suíte de ataque (13 ataques + 1 teste do exemplo versionado; regrava cyber/evidencias/ataques.md)
 dotnet test cyber/Ampara.Cyber.Ataques
 
 # 3) painel: testes e build
 cd web-painel-risco && npx vitest --run && npm run build && cd ..
 
 # 4) subir tudo para a demonstração (AMPARA_DEMO=true semeia admin@ampara.demo e vitima@ampara.demo)
+#    a API não lê o .env sozinha: copiar o exemplo, preencher e exportar antes do dotnet run
+cp .env.example .env                                        # preencher AMPARA_DB, AMPARA_JWT_SECRET, AMPARA_CRYPTO_KEY
+set -a; . ./.env; set +a
 dotnet run --project api/Ampara.Api -- --migrar
 AMPARA_DEMO=true dotnet run --project api/Ampara.Api        # porta 5080
 cd web-painel-risco && npm run dev                          # porta 5174
@@ -363,7 +366,7 @@ bash cyber/scripts/evidencias.sh                            # confere se nada fa
 bash cyber/scripts/gerar-zip.sh                             # ZIP do código
 ```
 
-Resultado da última execução completa: `api/Ampara.Tests` com 445 aprovados e 0 falhas; `cyber/Ampara.Cyber.Ataques` com 13 aprovados e 0 falhas.
+Resultado da última execução completa: `api/Ampara.Tests` com 475 aprovados e 0 falhas; `cyber/Ampara.Cyber.Ataques` com 14 aprovados (13 ataques + 1 teste do exemplo versionado) e 0 falhas; painel com 36 testes.
 
 <div class="quebra"></div>
 

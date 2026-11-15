@@ -364,4 +364,40 @@ Resultado: 13 ataques passando. O A02, com escape unicode de verdade, revelou um
 
 Resultado: `evidencias.sh` falhou antes e passou depois; PDF de 30 páginas e ZIP gerados fora do git; 445 testes da API e 13 ataques passando. Sem `ANTHROPIC_API_KEY`, as frases do painel nos prints são as frases padrão (regravar com a chave se quiser a frase da IA).
 
+### 58. Cyber: persistência e fila do rastro (Task 2 do plano 03)
+
+> Executar a Task 2 do plano 03 (Cyber): escrever primeiro os testes do rastro (`Registrar` nunca lança com a fila cheia e guarda no máximo 1000 eventos, o worker sobrevive à falha do banco e registra só id, classe e sink, a tabela `evento_seguranca` não tem coluna de valor); implementar `IRastroSeguranca`, `IEventoSegurancaRepository`, `EventoSegurancaConfig` (índice `UsuarioAlvoId, Em`), `RastroSeguranca` (Channel de 1000, `DropOldest`) e `RastroSegurancaWorker`, com a migration `AdicionarEventoSeguranca`.
+
+Resultado: 4 testes do `RastroSegurancaTests` passando, suíte inteira com 284 aprovados; migration `AdicionarEventoSeguranca` aplicada no `ampara_dev` (porta 5436), com 10 colunas e o índice, nenhuma de valor. (Entrada registrada na revisão final do plano 03.)
+
+### 59. Cyber: protetor, máscara e cifra AES-GCM (Task 4 do plano 03)
+
+> Executar a Task 4 do plano 03 (Cyber): escrever primeiro os testes do `PiiProtetor` (máscaras da spec por classe, incluindo o exemplo do professor `***.456.***-00`; cifra de ida e volta com nonce aleatório e prefixo `enc:v1:`; adulteração lança `CryptographicException`; chave ausente ou inválida falha na subida sem ecoar a chave; formato antigo do `CifradorAesGcm` continua legível); implementar `IPiiProtetor` e `PiiProtetor`, que também passa a ser o `ICifrador` registrado.
+
+Resultado: 6 testes do `PiiProtetorTests` passando, suíte inteira com 305 aprovados; sem migration; IMEI e contas gravados a partir daqui saem com `enc:v1:`. (Entrada registrada na revisão final do plano 03.)
+
+### 60. Cyber: sink Erro, handler global de exceções e acesso indevido (Task 11 do plano 03)
+
+> Executar a Task 11 do plano 03 (Cyber): escrever primeiro os testes do `TaintExceptionHandler` (exceção com laudo e CPF vira 500 `problem+json` com frase humana, sem `Exception.Message`, stack nem nome de tipo, e eventos `Erro/Bloqueado` por classe; tradutor chamado só com categoria, sink e tipo; tradutor que estoura ainda devolve 500 amigável; exceção de domínio continua com o status do plano 02 e ganha `detalheCidadao`) e do `AcessoIndevido` (evento `Senha/HttpNaoAutenticada/Bloqueado` para o dono, peso 40); implementar os dois, registrar o handler antes do `ProblemaHandler` e trocar o `NoopAcessoIndevido`.
+
+Resultado: 10 testes do `ExceptionHandlerTests` passando e 1 ignorado (o teste de API ficou para a Task 14), suíte inteira com 387 aprovados; sem migration. (Entrada registrada na revisão final do plano 03.)
+
+### 61. Cyber: sinks Ponte, Claude API e Banco (Task 12 do plano 03)
+
+> Executar a Task 12 do plano 03 (Cyber): escrever primeiro os testes do `TaintHttpHandler` (payload válido da Ponte passa; CPF no corpo para a Ponte ou para `api.anthropic.com` lança `TaintBloqueadoException` antes do envio) e do `TaintSaveChangesInterceptor` (`[TextoLivre]` gravado mascarado, `[PiiCifrado]` em texto puro cifrado com evento `Banco/Cifrado`, já cifrado fica como está); implementar os dois, registrar o handler em todos os `HttpClient` e o interceptor no `AmparaDbContext`, e marcar `Relato.Texto` e `Aparelho.ImeiCifrado`.
+
+Resultado: 6 testes do `SinksPonteLlmBancoTests` passando, suíte inteira com 393 aprovados e 1 ignorado; sem migration (atributos não mudam o esquema). O relatório da tarefa registra que a implementação veio antes da primeira execução dos testes. (Entrada registrada na revisão final do plano 03.)
+
+### 62. Cyber: filtro de PII das mensagens MQTT (Task 13 do plano 03)
+
+> Executar a Task 13 do plano 03 (Cyber): escrever primeiro os testes do `MqttPiiFilter` (CPF no campo livre sai mascarado com rastro `mqtt`, payload limpo volta como a mesma string, JSON inválido vira `[payload inválido]` sem lançar, `deviceId`, `type`, `eventId`, `ts` e `battery` intactos); implementar o filtro com a política `Banco` (mascara; IMEI cifra) e ligá-lo no `DespacharAsync` do `MqttChaveiroGateway` antes de logar ou despachar, nunca com o texto do sink `Log`.
+
+Resultado: 8 testes do `MqttPiiFilterTests` passando (os 4 do brief, `ts` Unix de 10 dígitos intacto, array aninhado, senha só pela chave e IMEI cifrado), suíte inteira com 401 aprovados e 1 ignorado; sem migration. (Entrada registrada na revisão final do plano 03.)
+
+### 63. Revisão final do plano 03 (Cyber, branch inteiro, 3f49f58..29b665d)
+
+> Revisão final do plano 03 (Cyber: motor de PII, `Sensitive<T>`, taint com sinks reais, tradutor de risco, moderação, índice e farol, rotas `/seguranca/*`, simulador, Painel Risco Cidadão, suíte de ataques e entregas em `cyber/`), como único corretor: corrigir todos os achados confirmados Critical/Important com teste que falharia sem a correção, e os Minor triviais e seguros; o resto vira dívida. Fontes de verdade: índice e contratos (rodada 2 vence), spec, plano 03 (Global Constraints e Review Focus) e `global-constraints.md`. Commits pequenos na main, suíte completa antes de cada um.
+
+Resultado: corrigidos os cinco Important. O `Normalizador` passou a descartar todo caractere de formatação (hífen suave, marcas e overrides de direção, separadores invisíveis, tags), seletores de variação, a trocar traços Unicode e o sinal de menos por `-` e dígitos de outras escritas por ASCII: um CPF com hífen suave, travessão curto ou dígitos árabe-índicos passava por todos os sinks (17 casos novos nos detectores e 4 formas novas no A02, que agora tem 10). As recusas de regra (4xx de domínio) deixaram de receber "algo deu errado do nosso lado, tente em alguns minutos": o `ProblemaHandler` manda ao tradutor `EventoTecnico.Recusa(codigo)` e o tradutor devolve uma frase fixa por código (senha errada, convite inválido ou vencido, limite de guardiões, relato barrado, limite de tentativas), sem chamar a IA; só o 5xx segue como falha do sistema (teste novo pelo host real). O `TaintGuard` passou a ler o dono pela claim `sub`, que é a que o `TokenService` emite (antes eventos Log, Erro, Ponte, Llm e Banco de sessões autenticadas ficavam sem `UsuarioAlvoId` e fora do `/seguranca/meu-risco`). A legenda do gráfico por hora do painel subiu para 16 px (teste que varre o CSS). Este registro ganhou as entradas 58 a 62, que faltavam. Minors corrigidos: `VITE_API_URL`/`EXPO_PUBLIC_API_URL` no painel, aviso de sessão encerrada em região `aria-live` com foco no título, hora das mensagens em `America/Sao_Paulo`, texto do simulador ("fluxo real de proteção com dados sintéticos", no lugar de "de mentira"), exemplos da suíte de ataque com `correlationId` fixo (a suíte não suja mais a árvore), `Microsoft.EntityFrameworkCore.Relational` 10.0.15 na suíte de ataques (fim do MSB3277), README do `web-painel-risco`, fala do vídeo para o caso sem chave, explicação de "senha / resposta pública" no acesso indevido, export do `.env` na seção de execução, seta e textos do diagrama, print simulado da Task 16 removido e marcadores `SINTETICO`. Suítes: 475 testes da API, 14 da suíte de ataques (13 ataques + 1 do exemplo versionado) e 36 do painel, build do painel sem erro; sem migration (o modelo EF não mudou). Os prints do painel e o PDF precisam ser regravados (`node cyber/scripts/prints-painel.mjs` e `gerar-pdf.mjs`) para mostrar o texto novo do simulador.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->

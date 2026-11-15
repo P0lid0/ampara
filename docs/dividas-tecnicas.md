@@ -33,6 +33,25 @@ Itens que a revisão final do plano encontrou, verificou como reais e deixou de 
 - **Print do Swagger desatualizado**: `ponte-policia/evidencias/openapi-docs.png` é de antes dos modelos de erro. Recapturar antes de usar no PDF.
 - **Miúdos sem cenário na demo**: o limite de 200 itens não aparece na descrição de `GET /ocorrencias`; um `area_id` malformado gravado fora da API vira 500; os enums não têm CHECK no banco; o nome em texto livre sem prefixo nem acento não é detectado; o painel não tem timeout no fetch; `_postar` do seed não tem teste.
 
-## Cyber (plano 03)
+## Cyber (plano 03, revisão final de 14/11/2026)
+
+Lacunas sem caminho concreto hoje (nenhum endpoint, contrato ou mensagem atual as alcança):
+
+- **Ponte/Llm sem decodificar escapes JSON** (vazamento-2): o `TaintHttpHandler` varre o corpo cru; com `JsonSerializerDefaults.Web`, `+` e não ASCII saem escapados e não casam. O caminho da URL não é varrido e `multipart`/`octet-stream` passam. O contrato da Ponte não tem texto livre e o Llm usa `UnsafeRelaxedJsonEscaping`.
+- **Atalho do prefixo `enc:v1:`** (vazamento-3): `TaintGuard` (sink Banco) e `TaintSaveChangesInterceptor` pulam qualquer texto que comece com o prefixo, sem conferir se a cifra é válida. Exige entrada forjada (ex.: `nota` MQTT começando com `enc:v1:`).
+- **Resposta anônima com tipo fora da lista** (vazamento-4): `RespostaNaoAutenticadaMiddleware` só varre text/json/xml/javascript; `octet-stream`, `x-www-form-urlencoded`, `yaml` e os cabeçalhos da resposta passam.
+- **Nomes de propriedade no SignalR e no MQTT** (vazamento-5): `TaintHubProtocol` e `MqttPiiFilter` olham só os valores; um dicionário indexado por telefone passaria. As mensagens do hub são records fixos.
+- **Chaves extras marcadas sem normalizar** (vazamento-6): `PiiRequestMiddleware.MarcarChavesExtras` guarda o valor cru; com dígitos de largura total o sink não acha o código. Nenhum caminho ecoa o código.
+
+Entregas que dependem de rodar a API e o painel:
+
+- **Prints e PDF a regravar**: os prints do painel (`cyber/evidencias/prints/painel-*.png`) ainda mostram o texto antigo do simulador ("de mentira") e o PDF, o diagrama antigo. Regravar com `node cyber/scripts/prints-painel.mjs` e `gerar-pdf.mjs`.
+- **IMEI da evidência sem `enc:v1:`** (entrega-5): o aparelho da vítima foi semeado antes do prefixo. Ressemear no `ampara_dev` (5436), refazer `imei-cifrado-banco.txt` e o print e tirar a ressalva da seção 2.1.
+- **Print do tradutor cortado** (entrega-10, parte): a assinatura da linha 35 sai cortada em `codigo-claude-tradutor-risco.png`.
+- **Rótulo do acesso indevido no painel** (entrega-6): o cartão mostra "senha · resposta pública" porque o contrato grava assim; a documentação e o roteiro agora explicam, mas o painel não tem rótulo próprio (o `EventoCidadao` não traz o campo).
+- **Corpus sem marcador** (entrega-12, parte): `cyber/corpus/corpus.csv` não tem a linha `SINTETICO` (só o gerador); acrescentar mudaria o leitor do corpus e a evidência de precisão/recall.
+- **Teste intermitente sob carga**: em 2 de 3 execuções da suíte com a máquina carregada (48-59 s em vez de 25 s) caíram `LoggerProtegidoTests.Senha_no_corpo_nao_vai_ao_log` e um login 500 em `RelatoTests`; não reproduziu em 7 execuções sem carga (3 na base, 4 com as correções). Investigar antes de confiar na suíte em CI lento.
+
+### Já aceitas antes da revisão final
 
 - **CPF com digitos soltos separados por espaco** (cyber-19): `5 2 9 9 ...` nao e detectado pelo `CpfDetector` (aceita so `.`/espaco entre grupos de 3). Fica fora do A02; a suite de ataques nao cobre essa forma.
