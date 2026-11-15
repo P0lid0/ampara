@@ -6,7 +6,7 @@ export function Mensagens({ eventos }: { eventos: EventoCidadao[] }) {
     return <p className="vazio">Nada de estranho nas últimas 24 horas. Está tudo certo com seus dados.</p>;
   }
   return (
-    <ol className="mensagens" aria-live="polite">
+    <ol className="mensagens">
       {eventos.map((e) => (
         <li key={e.id} className="mensagem">
           <p className="mensagem-texto">{e.mensagemCidadao}</p>

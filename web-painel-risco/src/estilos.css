@@ -1,4 +1,4 @@
-:root { --petroleo: #0F4C4A; --esmeralda: #14B88A; --areia: #F4EFE6; --alarme: #E5484D; --amarelo: #8A5A00; }
+:root { --petroleo: #0F4C4A; --esmeralda: #14B88A; --areia: #F4EFE6; --alarme: #E5484D; --amarelo: #8A5A00; --alarme-texto: #B3202A; --sobre-alarme: #111111; }
 * { box-sizing: border-box; }
 body { margin: 0; font-family: "Manrope", system-ui, sans-serif; font-size: 16px; line-height: 1.5; background: var(--areia); color: var(--petroleo); }
 main { max-width: 720px; margin: 0 auto; padding: 0 16px 32px; }
@@ -11,14 +11,14 @@ button:disabled { opacity: .6; }
 input { display: block; width: 100%; border: 2px solid var(--petroleo); padding: 0 12px; background: #fff; margin-top: 4px; }
 .login { display: grid; gap: 16px; max-width: 420px; }
 .aviso { background: #fff; border-left: 6px solid var(--amarelo); padding: 12px; margin: 0 0 16px; }
-.erro { color: var(--alarme); font-weight: 700; margin: 0; }
+.erro { color: var(--alarme-texto); font-weight: 700; margin: 0; }
 .farol { display: flex; align-items: center; gap: 16px; padding: 16px 20px; border-radius: 12px; color: #fff; font-size: 1.5rem; font-weight: 700; margin-bottom: 24px; }
 .farol-icone { font-size: 2rem; width: 2.5rem; text-align: center; }
 .farol-indice { margin-left: auto; }
 .farol-verde { background: var(--petroleo); }
 .farol-verde .farol-icone { color: var(--esmeralda); }
 .farol-amarelo { background: var(--amarelo); }
-.farol-vermelho { background: var(--alarme); }
+.farol-vermelho { background: var(--alarme); color: var(--sobre-alarme); } /* #111 sobre #E5484D = 4,82:1; #B3202A sobre areia = 5,81:1 */
 .mensagens { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
 .mensagem { background: #fff; border-radius: 12px; padding: 16px; }
 .mensagem-texto { margin: 0 0 8px; font-weight: 700; }

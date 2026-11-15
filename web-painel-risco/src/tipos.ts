@@ -6,7 +6,7 @@ export interface EventoCidadao {
   classe: string;
   sink: string;
   decisao: string;
-  mensagemCidadao: string | null;
+  mensagemCidadao: string;
 }
 
 export interface MeuRisco {

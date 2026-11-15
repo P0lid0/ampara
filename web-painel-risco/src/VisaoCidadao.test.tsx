@@ -77,3 +77,25 @@ test("401 chama aoExpirar para voltar ao login", async () => {
   await act(async () => {});
   expect(aoExpirar).toHaveBeenCalledTimes(1);
 });
+
+test("região aria-live fica montada desde o carregamento e contém as mensagens", async () => {
+  vi.spyOn(api, "meuRisco").mockResolvedValue(amarelo);
+  const { container } = render(<VisaoCidadao token="t" />);
+  const regiao = container.querySelector('[aria-live="polite"]');
+  expect(regiao).not.toBeNull();
+  await act(async () => {});
+  expect(container.querySelector('[aria-live="polite"]')).toBe(regiao);
+  expect(regiao).toHaveTextContent(/Tentaram usar seu CPF/);
+});
+
+test("resposta antiga que chega depois da nova não sobrescreve", async () => {
+  let resolverLenta!: (r: MeuRisco) => void;
+  const lenta = new Promise<MeuRisco>((res) => (resolverLenta = res));
+  const rapida: MeuRisco = { indice: 75, farol: "vermelho", eventos: [] };
+  vi.spyOn(api, "meuRisco").mockReturnValueOnce(lenta).mockResolvedValue(rapida);
+  render(<VisaoCidadao token="t" />);
+  await act(async () => { await vi.advanceTimersByTimeAsync(5000); });
+  expect(screen.getByRole("status")).toHaveTextContent("75/100");
+  await act(async () => { resolverLenta({ ...amarelo }); });
+  expect(screen.getByRole("status")).toHaveTextContent("75/100");
+});
