@@ -23,11 +23,42 @@ function envolver(bruto: Bruto): Banco {
   };
 }
 
+const filas = new WeakMap<Banco, Promise<unknown>>();
+
+/**
+ * Executa `fn` numa transação (BEGIN/COMMIT, ROLLBACK em erro) e serializa as transações da mesma
+ * conexão por uma fila de promessas: nunca há BEGIN aninhado nem transação zumbi.
+ */
+export function transacao<T>(db: Banco, fn: () => Promise<T>): Promise<T> {
+  const anterior = filas.get(db) ?? Promise.resolve();
+  const executar = async (): Promise<T> => {
+    await db.exec('BEGIN');
+    try {
+      const r = await fn();
+      await db.exec('COMMIT');
+      return r;
+    } catch (e) {
+      try {
+        await db.exec('ROLLBACK');
+      } catch {
+        // engole só o erro do rollback; o erro original é o que importa
+      }
+      throw e;
+    }
+  };
+  const atual = anterior.then(executar, executar);
+  filas.set(db, atual.catch(() => undefined));
+  return atual;
+}
+
 /** Aplica as migrações pendentes, cada uma numa transação, e grava user_version. */
 export async function migrar(db: Banco): Promise<void> {
   const atual = (await db.first<{ user_version: number }>('PRAGMA user_version'))?.user_version ?? 0;
   for (let v = atual; v < MIGRACOES.length; v++) {
-    await db.exec(`BEGIN;\n${MIGRACOES[v]}\nPRAGMA user_version = ${v + 1};\nCOMMIT;`);
+    await transacao(db, async () => {
+      await db.exec(MIGRACOES[v]);
+      await db.exec(`PRAGMA user_version = ${v + 1}`);
+    });
   }
 }
 

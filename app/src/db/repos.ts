@@ -1,4 +1,4 @@
-import type { Banco } from './db';
+import { transacao, type Banco } from './db';
 import { TABELAS } from './schema';
 
 /** ISO-8601 UTC com Z (contrato L1). */
@@ -30,7 +30,10 @@ export function sessaoRepo(db: Banco) {
     },
     /** Esvazia todas as tabelas (logout / apagar meus dados). */
     async apagarTudo(): Promise<void> {
-      await db.exec(`BEGIN;\n${TABELAS.map((t) => `DELETE FROM ${t};`).join('\n')}\nDELETE FROM sqlite_sequence;\nCOMMIT;`);
+      await transacao(db, async () => {
+        for (const t of TABELAS) await db.exec(`DELETE FROM ${t}`);
+        await db.exec('DELETE FROM sqlite_sequence');
+      });
     },
   };
 }
@@ -105,16 +108,11 @@ export function rotaRepo(db: Banco) {
   return {
     async adicionar(pts: PontoRota[]): Promise<void> {
       if (pts.length === 0) return;
-      await db.exec('BEGIN');
-      try {
+      await transacao(db, async () => {
         for (const p of pts) {
           await db.run('INSERT INTO rota_pendente (lat, lng, precisao, em) VALUES (?, ?, ?, ?)', [p.lat, p.lng, p.precisao, p.em]);
         }
-        await db.exec('COMMIT');
-      } catch (e) {
-        await db.exec('ROLLBACK');
-        throw e;
-      }
+      });
     },
     async proximoLote(max = 500): Promise<PontoRotaComId[]> {
       return db.all<PontoRotaComId>('SELECT id, lat, lng, precisao, em FROM rota_pendente ORDER BY em ASC, id ASC LIMIT ?', [max]);
