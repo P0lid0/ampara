@@ -474,4 +474,10 @@ Resultado: 18 testes novos passando; primeiro `ml/saida/risco.csv` real (XGBoost
 
 Resultado: `pipeline.py` (1 teste de integração com os dados reais, 9 min) e notebook `ml/notebooks/ampara_ml.ipynb` executado de ponta a ponta (35 células, 0 erros, 12 combinações XGBoost e 4 de Random Forest, cerca de 1h30); 1.949 áreas, 1.200.584 linhas de treino e 436.576 de teste (2025); F1 macro no teste 0,440 (XGBoost) e 0,466 (Random Forest); `metricas.json`, 8 figuras e `risco.csv` final (109.144 linhas, trimestre 2026T1). Duas correções no caminho: a janela da SSP passou a ser a dos anos das planilhas (fatos de 2000 em diante quebravam o clima) e a escolha dos melhores parâmetros por coluna (a linha inteira virava float). Sem migration.
 
+### 74. ML: relatório de 2 páginas e roteiro do vídeo (Task 13 do plano 06)
+
+> Executar a Task 13 do plano 06 (ML): escrever primeiro o teste que confere o `RELATORIO_ML.md` (seis seções, 3 a 4 figuras, 700 a 1.200 palavras, F1 de treino e teste iguais aos do `metricas.json`) e o roteiro do vídeo (intervalos contíguos, até 5 minutos); depois escrever o relatório e o roteiro com os números reais do notebook e conferir que o relatório cabe em 2 páginas A4.
+
+Resultado: `ml/RELATORIO_ML.md` (cerca de 780 palavras, 3 figuras, 2 páginas A4 conferidas em PDF) dizendo com todas as letras que o Random Forest venceu o XGBoost no teste (0.466 contra 0.440) e que o `risco.csv` usa o XGBoost por decisão do projeto; `ml/ROTEIRO_VIDEO.md` com 7 blocos de 0:00 a 4:55; 2 testes novos passando (109 na suíte do ml). Sem migration.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->
