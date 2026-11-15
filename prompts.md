@@ -450,4 +450,16 @@ Resultado: 5 testes de `test_dataset.py` passando. Sem migration.
 
 Resultado: 9 testes de `test_modelos.py` passando. Sem migration.
 
+### 71. Página de apresentação e IA mais barata (Pedro, 15/11)
+
+> faça uma web page que apresente o sistema, quero algum front para poder apresentar, subi a api key tb ja faça o que precisa usando a ia mais barata
+
+Resultado: `apresentacao/` (página estática com indicador ao vivo dos serviços, capturas reais com dados sintéticos e fotos de acervo aberto com crédito), revisada em fatos, visual e acessibilidade. Ao testar a IA, o `claude-haiku-5-5` (modelo mais barato) gastava os 200 tokens pensando e a API caía sempre na frase padrão; o pedido passou a desligar o `thinking` e o sistema ganhou o contexto do Ampara (commit 440871b). O Scalar abria em branco com `AMPARA_DEMO` porque o bundle estourava a varredura de resposta anônima (commit d71abd3).
+
+### 72. Pastas de entrega por disciplina (Pedro, 15/11)
+
+> além disso verifique o que cada entrega de cada materia solicita e crie uma pasta com cada entrega completa para eu so enviar
+
+Resultado: levantamento das 8 disciplinas no PDF da GS e na explicação de Cyber, conferido contra o plano 08, e uma pasta por disciplina em `entrega/` (fora do git) com o que enviar, o texto pronto e o que ainda falta.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->

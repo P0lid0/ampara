@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ampara: levaram seu celular, não levam o resto</title>
+<meta name="description" content="Ampara ajuda quem teve o celular roubado em São Paulo a agir nos 30 a 90 minutos em que está sem aparelho. Apresentação do projeto para a Global Solution FIAP, tema CitizenTech.">
+<meta name="theme-color" content="#0f1f10">
+<link rel="preload" href="fonts/bebas-neue.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/style.css">
+<script>document.documentElement.classList.add("js");</script>
+</head>
+<body>
+<a class="skip" href="#problema">Pular para o conteúdo</a>
+
+<!-- ====== 1. Heroi: a ficha de ocorrencia ====== -->
+<header class="hero" id="topo">
+  <div class="bar">
+    <a class="mark" href="#topo" aria-label="Ampara, início">Ampara</a>
+    <nav aria-label="Seções">
+      <ul>
+        <li><a href="#problema">Problema</a></li>
+        <li><a href="#como">Como funciona</a></li>
+        <li><a href="#estado">Estado</a></li>
+        <li><a href="#demo">Demo</a></li>
+        <li><a href="#equipe">Equipe</a></li>
+      </ul>
+    </nav>
+    <details class="mnav"><summary>Menu</summary>
+      <ul>
+        <li><a href="#problema">Problema</a></li>
+        <li><a href="#como">Como funciona</a></li>
+        <li><a href="#estado">Estado</a></li>
+        <li><a href="#demo">Demo</a></li>
+        <li><a href="#equipe">Equipe</a></li>
+      </ul>
+    </details>
+    <a class="btn on-dark" href="#demo">Abrir a demo</a>
+  </div>
+  <div class="grid">
+    <div class="card">
+      <h1><span>Levaram seu celular.</span><span>Não levam o resto.</span></h1>
+      <div class="cl">
+      <p class="lead">O Ampara avisa quem pode bloquear suas contas e sua linha. Ele não bloqueia o celular.</p>
+      <p class="where"><span>São Paulo</span><i class="dia" aria-hidden="true"></i><span>Linha 9-Esmeralda</span><i class="dia" aria-hidden="true"></i><span>Pinheiros</span></p>
+      <div class="live-card">
+        <p class="live-title">Serviços locais</p>
+        <a class="leader-row" href="http://localhost:5174/painel-risco/" target="_blank" rel="noopener" data-svc="painel" data-estado="wait"><span class="nm">Painel de risco<span class="sr"> (abre em nova aba)</span></span><span class="ld"></span><span class="vl st"><i class="dia" aria-hidden="true"></i><span class="st-text">verificando</span></span></a>
+        <a class="leader-row" href="http://localhost:5080/scalar" target="_blank" rel="noopener" data-svc="api" data-estado="wait"><span class="nm">API Ampara<span class="sr"> (abre em nova aba)</span></span><span class="ld"></span><span class="vl st"><i class="dia" aria-hidden="true"></i><span class="st-text">verificando</span></span></a>
+        <a class="leader-row" href="http://localhost:8000/docs" target="_blank" rel="noopener" data-svc="ponte" data-estado="wait"><span class="nm">Ponte Polícia<span class="sr"> (abre em nova aba)</span></span><span class="ld"></span><span class="vl st"><i class="dia" aria-hidden="true"></i><span class="st-text">verificando</span></span></a>
+      </div>
+      </div>
+      <div class="cr"><img src="img/pinheiros-linha9.jpg" width="1920" height="1213" alt="Passageiros na plataforma da estação Pinheiros, Linha 9-Esmeralda, em preto e branco"><a class="btn" href="#demo">Ver a demo</a></div>
+    </div>
+  </div>
+</header>
+
+<main id="conteudo">
+
+<!-- ====== 2. Problema ====== -->
+<section class="field f-white problema" id="problema" aria-labelledby="h-problema">
+  <div class="grid">
+    <div class="left">
+      <h2 id="h-problema" data-rv>Trinta a noventa minutos sem celular.</h2>
+      <p class="lead note" data-rv style="--i:1">É a janela em que a vítima está em choque a caminho de casa. É nela que os criminosos entram no banco e nas contas.</p>
+      <p class="casos" data-rv style="--i:2">Um amigo teve o celular roubado no trem da Linha 9, com o aparelho ainda sendo pago. Uma mãe, num quebra-vidro, não lembrou das senhas, e os criminosos entraram no banco. Os dois só agiram ao chegar ao destino.</p>
+      <div class="total" data-rv style="--i:3">
+        <span class="big" aria-hidden="true">30–90</span>
+        <p>minutos entre o roubo e a primeira chance de agir. Número da spec do projeto, não medido em estudo.</p>
+      </div>
+    </div>
+    <div class="slipwrap">
+    <aside class="slip" aria-labelledby="h-slip">
+      <h3 id="h-slip">Os números do problema</h3>
+      <p class="sub">Cada linha diz de onde vem.</p>
+      <p data-rv style="--i:1" class="grp">Citados na spec (imprensa e Banco Central), links ainda a registrar</p>
+      <div data-rv style="--i:2" class="leader-row"><span class="nm">Furtos de celular em trens e metrô, 2025</span><span class="ld"></span><span class="vl">~24 mil</span></div>
+      <div data-rv style="--i:3" class="leader-row"><span class="nm">Quebra-vidros na Av. do Estado, 2025</span><span class="ld"></span><span class="vl">314</span></div>
+      <div data-rv style="--i:4" class="leader-row"><span class="nm">Pix contestados, abril de 2025</span><span class="ld"></span><span class="vl">~1,39 mi</span></div>
+      <div data-rv style="--i:5" class="leader-row"><span class="nm">Não devolvidos por saldo insuficiente</span><span class="ld"></span><span class="vl">~R$ 334 mi</span></div>
+      <p data-rv style="--i:6" class="grp">Base da SSP-SP, acesso em 14/11/2026</p>
+      <div data-rv style="--i:7" class="leader-row"><span class="nm">Linhas lidas nas planilhas de 2022 a 2025</span><span class="ld"></span><span class="vl">4.792.984</span></div>
+      <div data-rv style="--i:0" class="leader-row"><span class="nm">Linhas da capital usadas, 2022 a 2025<span class="sub">Proxy de roubo e furto em via pública. Não é só celular.</span></span><span class="ld"></span><span class="vl">828.618</span></div>
+    </aside>
+    </div>
+  </div>
+</section>
+
+<figure class="band" data-parallax>
+  <img src="img/pinheiros-linha9.jpg" width="1920" height="1213" alt="Passageiros descendo a escada para a plataforma da estação Pinheiros, Linha 9-Esmeralda, em preto e branco">
+  <figcaption>Estação Pinheiros, Linha 9-Esmeralda da CPTM.</figcaption>
+</figure>
+
+<!-- ====== 3. Como funciona ====== -->
+<section class="como f-black" id="como" aria-labelledby="h-como">
+  <div class="head">
+    <div class="h"><h2 id="h-como" data-rv>Antes, durante e depois.</h2></div>
+    <div class="m"><p class="lead" data-rv style="--i:1">Cada passo traz o que roda hoje e o que ainda está em construção. Fotos em preto e branco ilustram o lugar. Capturas coloridas são do sistema.</p></div>
+  </div>
+  <ul class="row" role="list">
+    <li class="mom">
+      <h3>Antes: o que você não lembraria</h3>
+      <p>O app guarda IMEI, bancos, operadora, até 3 guardiões e a rota dos últimos 7 dias.</p>
+      <p class="estado plan"><i></i><span>Só planejado: o app ainda não existe.</span></p>
+      <div class="pic"><img src="img/integracao-metro-linha9.jpg" width="1920" height="1272" loading="lazy" alt="Trem da CPTM chegando à plataforma da Linha 9-Esmeralda em Pinheiros" style="object-position:82% 50%"></div>
+      <p class="cap">Plataforma da Linha 9, em Pinheiros.</p>
+    </li>
+    <li class="mom">
+      <h3>Durante: um clique</h3>
+      <p>O chaveiro (ESP32) manda um evento por MQTT. Outra opção é um código digitado em outro aparelho.</p>
+      <p class="estado cons"><i></i><span>No repositório do Vitor. O ciclo até a API foi provado por script, com broker MQTT público.</span></p>
+      <div class="pic"><div class="fob">
+        <svg viewBox="0 0 200 300" role="img" aria-label="Desenho do chaveiro com um botão e uma luz vermelha">
+          <circle cx="100" cy="34" r="22" fill="none" stroke="#0f1f10" stroke-width="10"/>
+          <rect x="52" y="64" width="96" height="214" rx="30" fill="#0f1f10"/>
+          <circle cx="100" cy="116" r="9" fill="#ff5a4d"/>
+          <circle cx="100" cy="200" r="38" fill="#c6f19d"/>
+        </svg></div></div>
+      <p class="cap">Desenho do chaveiro. Ainda não há foto do protótipo.</p>
+    </li>
+    <li class="mom">
+      <h3>A API recebe</h3>
+      <p>Cria a ocorrência uma vez só, mesmo que o evento chegue cinco vezes, e responde ao chaveiro com um ack.</p>
+      <p class="estado"><i></i><span>Roda hoje. 480 testes e 14 ataques simulados passando em 15/11.</span></p>
+      <div class="pic"><img src="img/scalar-rotas.png" width="1034" height="742" loading="lazy" alt="Documentação Scalar da API do Ampara com os grupos de rotas: alertas, aparelhos, auth, BO, chaveiros, ocorrências, polícia, risco, rota e segurança" style="object-position:0 0"></div>
+      <p class="cap">Rotas da API no Scalar.</p>
+    </li>
+    <li class="mom">
+      <h3>O guardião é acionado</h3>
+      <p>Alarme insistente. Sem um “Estou ciente” em 60 segundos, o alerta escala ao próximo guardião.</p>
+      <p class="estado cons"><i></i><span>Em construção. A API manda por SignalR, a tela cheia depende do app.</span></p>
+      <div class="pic"><div class="draw-card">
+        <h4>Passo a passo do guardião</h4>
+        <ol>
+          <li><span>Banco</span><span class="ld"></span><span class="hh">--:--</span></li>
+          <li><span>Celular Seguro</span><span class="ld"></span><span class="hh">--:--</span></li>
+          <li><span>Operadora</span><span class="ld"></span><span class="hh">--:--</span></li>
+          <li><span>Senhas</span><span class="ld"></span><span class="hh">--:--</span></li>
+          <li><span>BO</span><span class="ld"></span><span class="hh">--:--</span></li>
+        </ol>
+        <p class="nt">Esboço. Cada passo recebe o horário em que foi feito.</p>
+      </div></div>
+      <p class="cap">Esboço da lista que o guardião segue.</p>
+    </li>
+    <li class="mom">
+      <h3>Depois: o BO</h3>
+      <p>Por outro aparelho, a vítima marca na rota onde e quando foi roubada. A API gera o texto com local, hora, IMEI e a delegacia mais próxima.</p>
+      <p class="estado cons"><i></i><span>A API gera o BO. A marcação na rota depende do app.</span></p>
+      <div class="pic"><img src="img/avenida-do-estado.jpg" width="1920" height="1080" loading="lazy" alt="Cruzamento da Avenida do Estado com ônibus e um canal ao fundo" style="object-position:30% 50%"></div>
+      <p class="cap">Avenida do Estado, corredor de quebra-vidros.</p>
+    </li>
+    <li class="mom">
+      <h3>A polícia recebe o mínimo</h3>
+      <p>Com consentimento, a Ponte recebe área de cerca de 500 m, hora e tipo. Sem CPF, nome nem IMEI. O andamento volta ao cidadão.</p>
+      <p class="estado"><i></i><span>Roda hoje. 225 testes na evidência de 14/11.</span></p>
+      <div class="pic"><img src="img/painel-policia.png" width="1265" height="2090" loading="lazy" alt="Painel da polícia com mapa de pontos quentes de São Paulo e tabela de áreas" style="object-position:0 0"></div>
+      <p class="cap">Painel da polícia, com dados sintéticos.</p>
+    </li>
+    <li class="mom">
+      <h3>O mapa avisa o risco</h3>
+      <p>Risco por área e horário, a partir de dados da SSP-SP, mais relatos das últimas 2 horas com proteção contra abuso.</p>
+      <p class="estado cons"><i></i><span>Em construção. Sem modelo treinado ainda.</span></p>
+      <div class="pic"><img src="img/pinheiros-linha9.jpg" width="1920" height="1213" loading="lazy" alt="Plataforma da estação Pinheiros vista de cima, em preto e branco" style="object-position:60% 30%"></div>
+      <p class="cap">Pinheiros, a estação crítica do eixo.</p>
+    </li>
+    <li class="mom">
+      <h3>A segurança em volta de tudo</h3>
+      <p>Um motor detecta dado pessoal e uma IA traduz cada bloqueio em frase clara no Painel Risco Cidadão.</p>
+      <p class="estado"><i></i><span>Roda hoje, com dados sintéticos.</span></p>
+      <div class="pic"><img src="img/painel/painel-amarelo.png" width="2000" height="1650" loading="lazy" alt="Painel Risco Cidadão mostrando o farol amarelo com índice 40 de 100" style="object-position:0 0"></div>
+      <p class="cap">Painel Risco Cidadão, farol amarelo.</p>
+    </li>
+  </ul>
+</section>
+
+<!-- ====== 4. Estado de cada parte ====== -->
+<section class="field f-bg estado-sec" id="estado" aria-labelledby="h-estado">
+  <div class="grid">
+    <div class="menu" data-rv>
+      <h2 id="h-estado">Estado de cada parte</h2>
+      <p class="intro">Conferido em 15/11/2026, lendo o repositório. “Roda” quer dizer que roda na máquina de desenvolvimento, não que está publicado. As contagens de testes vêm das evidências de 14/11.</p>
+
+      <p class="grp">Roda hoje</p>
+      <div class="item"><div class="leader-row"><span class="nm">API Ampara, C# e .NET 11</span><span class="ld"></span><span class="vl">roda</span></div><p>Rotas, tempo real e escuta do chaveiro por MQTT. Em 15/11: 480 testes e 14 ataques simulados, 0 falhas.</p></div>
+      <div class="item"><div class="leader-row"><span class="nm">Painel Risco Cidadão</span><span class="ld"></span><span class="vl">roda</span></div><p>Farol de 0 a 100, visão executiva e simulador de ataque.</p></div>
+      <div class="item"><div class="leader-row"><span class="nm">Ponte Polícia, Python e FastAPI</span><span class="ld"></span><span class="vl">roda</span></div><p>Recebe ocorrências sem dado pessoal. Evidência de 14/11: 225 testes.</p></div>
+      <div class="item"><div class="leader-row"><span class="nm">Motor PII e taint</span><span class="ld"></span><span class="vl">roda</span></div><p>Precisão e recall de 100% no corpus sintético de 387 linhas. Mede regressão.</p></div>
+
+      <p class="grp">Em construção</p>
+      <div class="item"><div class="leader-row"><span class="nm">Chaveiro, ESP32</span><span class="ld"></span><span class="vl">no repositório</span></div><p>Sketch, diagrama e contrato MQTT prontos. Link do Wokwi e vídeo ainda vazios. A descrição do README do submódulo está antiga: o Ampara não bloqueia o celular.</p></div>
+      <div class="item"><div class="leader-row"><span class="nm">Modelo de risco, ML</span><span class="ld"></span><span class="vl">em construção</span></div><p>Carga e limpeza da base da SSP, painel por área, período, dia e faixa com divisão temporal, e features de clima, GeoSampa, população e iluminação. 68 funções de teste. Sem modelo treinado e sem mapa ainda.</p></div>
+      <div class="item"><div class="leader-row"><span class="nm">VM Linux</span><span class="ld"></span><span class="vl">parcial</span></div><p>Spike montado, com scripts de execução e verificação. Não há evidência versionada de que passou.</p></div>
+      <div class="item"><div class="leader-row"><span class="nm">Qualidade, QA</span><span class="ld"></span><span class="vl">em preparo</span></div><p>Roteiro e verificação da fundação. A matriz de casos de teste ainda está por preencher.</p></div>
+
+      <p class="grp">Só planejado</p>
+      <div class="item"><div class="leader-row"><span class="nm">App, Expo</span><span class="ld"></span><span class="vl">planejado</span></div><p>Só existe o README da pasta.</p></div>
+      <div class="item"><div class="leader-row"><span class="nm">Página de emergência</span><span class="ld"></span><span class="vl">planejada</span></div><p>Só existe o README da pasta.</p></div>
+    </div>
+
+    <div class="aovivo on-dark">
+      <h2 data-rv>Ao vivo agora</h2>
+      <p class="lead" data-rv style="--i:1">Os serviços sobem na máquina de quem apresenta. A página pergunta a cada um se responde e, sem resposta em 2,5 segundos, diz que não. Isso mostra servidor de pé, não fluxo completo. Do painel, só confere se o Vite responde.</p>
+      <p class="sr" role="status" aria-live="polite" data-anuncio></p>
+      <div class="svcs">
+      <a class="svc s1" href="http://localhost:5080/scalar" target="_blank" rel="noopener" data-svc="api" data-estado="wait" data-rv style="--i:2">
+        <span class="t"><span class="n">API Ampara</span><span class="go">Scalar →<span class="sr"> (abre em nova aba)</span></span></span>
+        <span class="stt st"><i class="dia" aria-hidden="true"></i><span class="st-text">verificando</span><span class="st-ms"></span></span>
+        <span class="url">localhost:5080/scalar</span>
+      </a>
+      <a class="svc s2" href="http://localhost:5174/painel-risco/" target="_blank" rel="noopener" data-svc="painel" data-estado="wait" data-rv style="--i:3">
+        <span class="t"><span class="n">Painel de risco</span><span class="go">Abrir →<span class="sr"> (abre em nova aba)</span></span></span>
+        <span class="stt st"><i class="dia" aria-hidden="true"></i><span class="st-text">verificando</span><span class="st-ms"></span></span>
+        <span class="url">localhost:5174/painel-risco/</span>
+      </a>
+      <a class="svc s3" href="http://localhost:8000/docs" target="_blank" rel="noopener" data-svc="ponte" data-estado="wait" data-rv style="--i:4">
+        <span class="t"><span class="n">Ponte Polícia</span><span class="go">Swagger →<span class="sr"> (abre em nova aba)</span></span></span>
+        <span class="stt st"><i class="dia" aria-hidden="true"></i><span class="st-text">verificando</span><span class="st-ms"></span></span>
+        <span class="url">localhost:8000/docs</span>
+      </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== 5. Demo ====== -->
+<section class="demo" id="demo" aria-labelledby="h-demo">
+  <div class="plate">
+    <div class="sq">
+      <img data-shot="painel" src="img/painel/painel-vermelho.png" width="2000" height="2224" alt="Painel Risco Cidadão com farol vermelho, índice 75 de 100, e três mensagens de bloqueio">
+      <img data-shot="api" src="img/scalar-rotas.png" width="1034" height="742" alt="Documentação Scalar da API do Ampara" hidden>
+      <img data-shot="ponte" src="img/swagger-ponte.png" width="2184" height="1350" alt="Swagger da Ponte Polícia com as rotas de saúde, ocorrências e hotspots" hidden>
+      <img data-shot="policia" src="img/painel-policia.png" width="1265" height="2090" alt="Painel da polícia com mapa de pontos quentes e tabela de ocorrências" hidden>
+    </div>
+  </div>
+  <div class="info">
+    <div>
+      <h2 id="h-demo">Demo ao vivo</h2>
+      <div class="tabs" role="tablist" aria-label="Partes que rodam" data-rv style="--i:1">
+        <button role="tab" type="button" id="tab-painel" aria-controls="painel-demo" tabindex="0" aria-selected="true" data-tab="painel">Painel de risco</button>
+        <button role="tab" type="button" id="tab-api" aria-controls="painel-demo" tabindex="-1" aria-selected="false" data-tab="api">API</button>
+        <button role="tab" type="button" id="tab-ponte" aria-controls="painel-demo" tabindex="-1" aria-selected="false" data-tab="ponte">Ponte</button>
+        <button role="tab" type="button" id="tab-policia" aria-controls="painel-demo" tabindex="-1" aria-selected="false" data-tab="policia">Painel da polícia</button>
+      </div>
+    </div>
+    <div role="tabpanel" id="painel-demo" aria-labelledby="tab-painel">
+      <h3 data-t-title>Painel Risco Cidadão</h3>
+      <p class="lead desc" data-t-desc></p>
+      <p class="desc2" data-t-desc2></p>
+    </div>
+    <div class="cells">
+      <a class="cell a" data-t-open href="http://localhost:5174/painel-risco/" target="_blank" rel="noopener">Abrir o painel de risco</a>
+      <a class="cell b" data-t-health data-svc="painel" data-estado="wait" href="http://localhost:5174/painel-risco/" target="_blank" rel="noopener"><span class="st"><i class="dia" aria-hidden="true"></i><span class="st-text">verificando</span></span></a>
+    </div>
+  </div>
+</section>
+
+<!-- ====== 6. Seguranca ====== -->
+<section class="field f-black seg" id="seguranca" aria-labelledby="h-seg">
+  <div class="grid">
+    <div class="left">
+      <h2 id="h-seg" data-rv>O que protege os dados</h2>
+      <p class="lead" data-rv style="--i:1">Cada linha da folha aponta para o ataque automatizado ou para o arquivo que a sustenta. Os limites também estão listados.</p>
+      <div class="fig" data-rv style="--i:2"><b>13</b><span>ataques automatizados na suíte de segurança.</span></div>
+    </div>
+    <div class="sheet" data-rv>
+      <h3>Folha de segurança</h3>
+      <p class="nota">Dentro da API, na Ponte e em volta.</p>
+
+      <p class="grp">Dentro da API</p>
+      <div class="it"><span>Dado pessoal detectado por chave e por valor, em JSON, formulário, query e cabeçalhos</span><span class="v">PiiRequestMiddleware</span></div>
+      <div class="it"><span>CPF disfarçado com caracteres invisíveis ou largos continua barrado</span><span class="v">ataque A02</span></div>
+      <div class="it"><span>A API barra e-mail e CPF antes de enviar à Ponte</span><span class="v">ataque A09</span></div>
+      <div class="it"><span>Dado sensível marcado nunca chega a log, erro, banco ou IA</span><span class="v">Sensitive&lt;T&gt;</span></div>
+      <div class="it"><span>IMEI cifrado no banco</span><span class="v">AES-GCM</span></div>
+      <div class="it"><span>IMEI só visível ao dono, e o intruso recebe 403</span><span class="v">ataque A07</span></div>
+      <div class="it"><span>A IA recebe categoria e tipo, nunca o valor</span><span class="v">ataque A08</span></div>
+      <div class="it"><span>CPF no campo livre do chaveiro sai mascarado</span><span class="v">ataque A05</span></div>
+
+      <p class="grp">Na Ponte Polícia</p>
+      <div class="it"><span>Rejeita dado pessoal com 422</span><span class="v">testes da Ponte, pii.py</span></div>
+      <div class="it"><span>Só aceita chave de serviço, e o painel pede a chave da polícia</span><span class="v">security.py</span></div>
+
+      <p class="grp">Em volta de tudo</p>
+      <div class="it"><span>Erros sem stack e sem CPF, em frase humana</span><span class="v">ataque A04</span></div>
+      <div class="it"><span>A rota some depois de 7 dias e os relatos depois de 2 horas, com varredura a cada hora</span><span class="v">RetencaoWorker</span></div>
+      <div class="it"><span>Segredos de produção só em variável de ambiente</span><span class="v">README da API</span></div>
+
+      <p class="grp">Limites que reconhecemos</p>
+      <div class="it"><span>Sem limite de tentativas por IP em /auth</span><span class="v">dívida</span></div>
+      <div class="it"><span>E-mail das tentativas de emergência em claro por 24 h</span><span class="v">dívida</span></div>
+      <div class="it"><span>Credenciais de demonstração versionadas, válidas só com AMPARA_DEMO</span><span class="v">dívida</span></div>
+      <div class="it"><span>Broker MQTT público, por isso o chaveiro não envia dado pessoal</span><span class="v">decisão</span></div>
+
+      <p class="fim">Precisão e recall de 100% medem regressão no corpus sintético. Não medem dado real.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ====== 7. Quem ajuda ====== -->
+<section class="field f-white quem" id="equipe" aria-labelledby="h-quem">
+  <div class="top">
+    <h2 id="h-quem" data-rv>Quem age por você</h2>
+    <p class="lead" data-rv style="--i:1">Ninguém age sozinho na janela de 30 a 90 minutos. O Ampara junta quem pode.</p>
+  </div>
+  <div class="mosaic">
+    <div class="blk g" data-rv><h3>O guardião</h3><p>Parente ou amigo que age por você na hora. Recebe o alarme, segue o passo a passo e bloqueia contas e linha.</p></div>
+    <div class="blk p" data-rv style="--i:1"><h3>A polícia</h3><p>Recebe a ocorrência mínima, vê os pontos quentes e devolve o andamento ao cidadão.</p></div>
+    <div class="blk c" data-rv style="--i:2"><h3>O cidadão</h3><p>Quem anda com o celular em São Paulo: passageiro de trem e metrô, motorista parado no trânsito.</p></div>
+    <div class="team" data-rv>
+      <div class="who"><h3>Pedro Martins</h3><p>Todas as partes, menos o chaveiro.</p></div>
+      <div class="who"><h3>Vitor Cesarino Marchese</h3><p>Chaveiro ESP32 e simulação no Wokwi.</p></div>
+      <p class="cop">Claude foi o copiloto de código. Todos os prompts estão em prompts.md.</p>
+    </div>
+  </div>
+  <div class="ods">
+    <div class="o11" data-rv><b>11</b><p>Cidades e comunidades sustentáveis<span class="meta">Metas 11.2 e 11.7</span></p></div>
+    <div class="o10" data-rv style="--i:1"><b>10</b><p>Redução das desigualdades<span class="meta">Meta 10.2</span></p></div>
+    <div class="o9" data-rv style="--i:2"><b>9</b><p>Indústria, inovação e infraestrutura<span class="meta">Meta 9.c</span></p></div>
+    <div class="o16" data-rv style="--i:3"><b>16</b><p>Paz, justiça e instituições eficazes<span class="meta">Metas 16.1 e 16.6. ODS adicional, fora da lista do briefing.</span></p></div>
+  </div>
+</section>
+
+<!-- ====== 8. CTA ====== -->
+<section class="cta" id="comecar" aria-labelledby="h-cta">
+  <div class="grid">
+    <div class="txt">
+      <h2 id="h-cta" data-rv>Comece pela demo</h2>
+      <p data-rv style="--i:1">Três serviços sobem em localhost, na máquina de quem apresenta, com dados sintéticos. Abra cada um e confira o estado agora.</p>
+    </div>
+    <div class="reply" data-rv style="--i:2">
+      <h3>Abrir a demo</h3>
+      <p>Painel de risco, Scalar da API e Swagger da Ponte.</p>
+      <a class="go" href="http://localhost:5174/painel-risco/" target="_blank" rel="noopener">Abrir o painel de risco</a>
+      <p class="mais"><a href="http://localhost:5080/scalar" target="_blank" rel="noopener">Scalar da API</a><a href="http://localhost:8000/docs" target="_blank" rel="noopener">Swagger da Ponte</a></p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ====== Rodape: as costas do cartao ====== -->
+<footer class="foot" id="rodape" data-foot>
+  <div class="grid">
+    <div class="back">
+      <div class="stamp"><img src="img/pinheiros-linha9.jpg" width="300" height="400" loading="lazy" alt="Plataforma da estação Pinheiros em preto e branco" style="object-position:45% 40%"></div>
+      <div class="cols">
+        <div>
+          <h2>Ampara</h2>
+          <p class="msg">Levaram seu celular. Não levam o resto. Projeto da Global Solution FIAP, tema CitizenTech.</p>
+        </div>
+        <ul>
+          <li><a href="http://localhost:5174/painel-risco/" target="_blank" rel="noopener">Painel de risco<span class="sr"> (abre em nova aba)</span></a></li>
+          <li><a href="http://localhost:5080/scalar" target="_blank" rel="noopener">API, Scalar<span class="sr"> (abre em nova aba)</span></a></li>
+          <li><a href="http://localhost:8000/docs" target="_blank" rel="noopener">Ponte, Swagger<span class="sr"> (abre em nova aba)</span></a></li>
+          <li>Repositório: a publicar</li>
+        </ul>
+      </div>
+      <p class="imp">Ampara, FIAP Global Solution 2026. Dados de demonstração sintéticos.</p>
+    </div>
+  </div>
+  <p class="cred">Fotos: “Pinheiros, Linha 9-Esmeralda da CPTM” por Wilfredor, CC0. “Integração metrô-linha 9” por Rovena Rosa, Agência Brasil, CC BY 3.0. “Avenida do Estado com Rua Pedro Vicente” por Richard Melo da Silva, CC BY-SA 4.0. Todas via Wikimedia Commons. Mapa do painel da polícia: © colaboradores do OpenStreetMap.</p>
+  <span class="word" aria-hidden="true">Ampara</span>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>
