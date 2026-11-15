@@ -95,6 +95,43 @@ public class TradutorRiscoTests
     }
 
     [Fact]
+    public async Task Pedido_desliga_o_thinking_para_os_200_tokens_irem_para_o_texto()
+    {
+        // claude-haiku-5-5 pensa por padrao: sem isto, os 200 tokens iam todos para o bloco thinking e nunca vinha texto.
+        var h = Handler("Tentaram acessar seu documento, mas bloqueamos. Você não precisa fazer nada.");
+        await Tradutor(h).TraduzirAsync(new("Cpf", "Log", "Bloqueado"));
+        using var doc = System.Text.Json.JsonDocument.Parse(h.UltimoCorpo);
+        Assert.Equal("disabled", doc.RootElement.GetProperty("thinking").GetProperty("type").GetString());
+    }
+
+    [Fact]
+    public async Task Texto_depois_de_um_bloco_thinking_e_usado()
+    {
+        const string frase = "Tentaram usar um dado seu num lugar inseguro e o Ampara barrou. Você não precisa fazer nada.";
+        var h = new HandlerFalso(_ => Ok("{\"content\":[{\"type\":\"thinking\",\"thinking\":\"\",\"signature\":\"x\"},{\"type\":\"text\",\"text\":"
+            + System.Text.Json.JsonSerializer.Serialize(frase) + "}]}"));
+        Assert.Equal(frase, await Tradutor(h).TraduzirAsync(new("Cpf", "Log", "Bloqueado")));
+    }
+
+    [Fact]
+    public async Task So_thinking_sem_texto_cai_na_frase_padrao()
+    {
+        var h = new HandlerFalso(_ => Ok("{\"stop_reason\":\"max_tokens\",\"content\":[{\"type\":\"thinking\",\"thinking\":\"\",\"signature\":\"x\"}]}"));
+        Assert.Equal(FrasesPadrao.Bloqueado, await Tradutor(h).TraduzirAsync(new("Cpf", "Log", "Bloqueado")));
+    }
+
+    [Fact]
+    public async Task Sistema_explica_o_contexto_e_proibe_inventar_canais()
+    {
+        var h = Handler("Tentaram acessar seu documento, mas bloqueamos. Você não precisa fazer nada.");
+        await Tradutor(h).TraduzirAsync(new("Cpf", "Log", "Bloqueado"));
+        using var doc = System.Text.Json.JsonDocument.Parse(h.UltimoCorpo);
+        var sistema = doc.RootElement.GetProperty("system").GetString()!;
+        Assert.Contains("Ampara", sistema);
+        Assert.Contains("Não invente", sistema);
+    }
+
+    [Fact]
     public async Task Modelo_vem_da_configuracao()
     {
         var h = Handler("Tentaram acessar seu documento, mas bloqueamos. Você não precisa fazer nada.");

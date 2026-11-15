@@ -37,9 +37,12 @@ public static class AnthropicMensagens
         using var prazo = CancellationTokenSource.CreateLinkedTokenSource(ct);
         prazo.CancelAfter(Limite);
         var mensagens = new[] { new { role = "user", content = prompt } };
+        // claude-haiku-5-5 pensa por padrao e gastaria os poucos tokens do aviso no bloco thinking, sem texto. Desligado e aceito
+        // no Haiku 5.5 (esforco padrao medium); Opus 5.5 e Sonnet 5.5 recusam com 400 e o chamador cai na frase padrao.
+        var thinking = new { type = "disabled" };
         object corpo = sistema is null
-            ? new { model = modelo, max_tokens = maxTokens, messages = mensagens }
-            : new { model = modelo, max_tokens = maxTokens, system = sistema, messages = mensagens };
+            ? new { model = modelo, max_tokens = maxTokens, thinking, messages = mensagens }
+            : new { model = modelo, max_tokens = maxTokens, thinking, system = sistema, messages = mensagens };
         using var req = new HttpRequestMessage(HttpMethod.Post, Url) { Content = JsonContent.Create(corpo, options: Json) };
         req.Headers.Add("x-api-key", chave);
         req.Headers.Add("anthropic-version", Versao);
@@ -52,6 +55,11 @@ public static class AnthropicMensagens
         }
         using var doc = JsonDocument.Parse(await resp.Content.ReadAsStringAsync(prazo.Token));
         var c = doc.RootElement.GetProperty("content");
-        return c.ValueKind == JsonValueKind.Array && c.GetArrayLength() > 0 && c[0].TryGetProperty("text", out var t) ? t.GetString() : null;
+        if (c.ValueKind != JsonValueKind.Array) return null;
+        // O texto pode vir depois de blocos thinking: procura o primeiro bloco do tipo text.
+        foreach (var bloco in c.EnumerateArray())
+            if (bloco.TryGetProperty("type", out var tipo) && tipo.GetString() == "text" && bloco.TryGetProperty("text", out var t))
+                return t.GetString();
+        return null;
     }
 }

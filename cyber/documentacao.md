@@ -245,6 +245,8 @@ O `ClaudeTradutorRisco` monta este prompt com **somente categoria, sink e tipo**
 
 > Traduza a falha técnica '{Categoria} no {Sink}: {Tipo}' para um cidadão leigo de 60 anos, em 2 frases: a primeira diz o que aconteceu e a segunda diz o que a pessoa deve fazer. Não use termos técnicos e não repita nenhum dado pessoal.
 
+A instrução de sistema dá ao modelo só o contexto fixo (o Ampara bloqueou, escondeu ou embaralhou o dado sozinho e nada foi exposto) e proíbe inventar telefones, centrais, links ou passos que o app não oferece. O pedido desliga o raciocínio estendido (`thinking`) do `claude-haiku-5-5`, que vem ligado por padrão e consumiria os 200 tokens antes da resposta; o cliente lê o primeiro bloco de texto da resposta.
+
 Antes de enviar, o próprio prompt passa pelo `TaintGuard` (sink Llm): se qualquer parte dele for trocada ou bloqueada, nada sai e vale a frase padrão. A chamada HTTP ainda passa pelo `TaintHttpHandler` (segunda barreira). O ataque A08 captura os prompts reais e prova que nenhum tem valor.
 
 ![ClaudeTradutorRisco](evidencias/prints/codigo-claude-tradutor-risco.png)

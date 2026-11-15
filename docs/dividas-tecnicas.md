@@ -47,9 +47,8 @@ Lacunas sem caminho concreto hoje (nenhum endpoint, contrato ou mensagem atual a
 
 Entregas que dependem de rodar a API e o painel:
 
-- **Prints e PDF a regravar**: os prints do painel (`cyber/evidencias/prints/painel-*.png`) ainda mostram o texto antigo do simulador ("de mentira") e o PDF, o diagrama antigo. Regravar com `node cyber/scripts/prints-painel.mjs` e `gerar-pdf.mjs`.
 - **IMEI da evidência sem `enc:v1:`** (entrega-5): o aparelho da vítima foi semeado antes do prefixo. Ressemear no `ampara_dev` (5436), refazer `imei-cifrado-banco.txt` e o print e tirar a ressalva da seção 2.1.
-- **Print do tradutor cortado** (entrega-10, parte): a assinatura da linha 35 sai cortada em `codigo-claude-tradutor-risco.png`.
+- **Quebra estranha no print do tradutor**: em `codigo-claude-tradutor-risco.png` a linha 77 (parâmetros do construtor) quebra com `) : ITradutorRisco` alinhado à direita. Legível, mas o `prints-codigo.mjs` não trata bem linha longa com quebra.
 - **Rótulo do acesso indevido no painel** (entrega-6): o cartão mostra "senha · resposta pública" porque o contrato grava assim; a documentação e o roteiro agora explicam, mas o painel não tem rótulo próprio (o `EventoCidadao` não traz o campo).
 - **Corpus sem marcador** (entrega-12, parte): `cyber/corpus/corpus.csv` não tem a linha `SINTETICO` (só o gerador); acrescentar mudaria o leitor do corpus e a evidência de precisão/recall.
 - **Teste intermitente sob carga**: em 2 de 3 execuções da suíte com a máquina carregada (48-59 s em vez de 25 s) caíram `LoggerProtegidoTests.Senha_no_corpo_nao_vai_ao_log` e um login 500 em `RelatoTests`; não reproduziu em 7 execuções sem carga (3 na base, 4 com as correções). Investigar antes de confiar na suíte em CI lento.

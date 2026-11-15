@@ -77,7 +77,9 @@ public sealed class ClaudeTradutorRisco(
     IHttpClientFactory http, IConfiguration config, ITaintGuard guard, IMemoryCache cache, ILogger<ClaudeTradutorRisco> log) : ITradutorRisco
 {
     public const string ModeloPadrao = AnthropicMensagens.ModeloPadrao;
-    private const string Sistema = "Você escreve avisos curtos e calmos em português do Brasil.";
+    private const string Sistema = "Você escreve avisos curtos e calmos em português do Brasil para quem usa o Ampara, um app de segurança. "
+        + "Cada aviso explica um evento de proteção: o próprio Ampara bloqueou, escondeu ou embaralhou o dado sozinho, ou barrou um acesso, e nada foi exposto. "
+        + "Não invente telefones, centrais de atendimento, links nem passos que o app não oferece; responda só com as 2 frases.";
     private static readonly TimeSpan Validade = TimeSpan.FromHours(1);
 
     public async Task<string> TraduzirAsync(EventoTecnico evento, CancellationToken ct = default)
