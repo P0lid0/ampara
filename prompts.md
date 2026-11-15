@@ -462,4 +462,10 @@ Resultado: `apresentacao/` (página estática com indicador ao vivo dos serviço
 
 Resultado: levantamento das 8 disciplinas no PDF da GS e na explicação de Cyber, conferido contra o plano 08, e uma pasta por disciplina em `entrega/` (fora do git) com o que enviar, o texto pronto e o que ainda falta.
 
+### 71. ML: exportação do risco.csv validado e gráficos (Task 11 do plano 06)
+
+> Executar a Task 11 do plano 06 (ML): escrever primeiro os testes de `exportar.py` (gerar_risco com a classe alto localizada por `classes_`, formato do CSV em UTF-8 sem BOM com LF e 4 casas em `prob_alto`, 56 combinações exatas por área, rejeição de linhas inválidas) e de `graficos.py` (matriz de confusão, F1 por conjunto, curva de aprendizado, importância e busca); implementar os dois módulos e gerar o primeiro `ml/saida/risco.csv` real com XGBoost.
+
+Resultado: 18 testes novos passando; primeiro `ml/saida/risco.csv` real (XGBoost 200 árvores, 1.949 áreas ativas × 56 = 109.144 linhas, 5 MB, 0 linhas inválidas); `MIN_OCORR_CELULA` subiu de 20 para 120 para o painel caber em 2 milhões de linhas. Sem migration.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->

@@ -59,7 +59,7 @@ def test_selecionar_areas():
     d = pd.Timestamp("2024-01-01")
     oc = pd.DataFrame({"data": [d] * 44, "hora": 1,
                        "area_id": ["g001_001"] * 25 + ["g001_002"] * 19})
-    assert selecionar_areas(oc) == ["g001_001"]
+    assert selecionar_areas(oc, min_ocorrencias=20) == ["g001_001"]
 
 
 def test_periodos_completos_descarta_parcial():

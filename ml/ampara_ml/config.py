@@ -17,5 +17,5 @@ RAIZ_ML = Path(__file__).resolve().parent.parent
 DIR_BRUTOS = RAIZ_ML / "dados" / "brutos"
 DIR_SAIDA = RAIZ_ML / "saida"
 
-# Celulas com menos ocorrencias que isto no treino nao entram no risco.csv.
-MIN_OCORR_CELULA = 20
+# Celulas com menos ocorrencias que isto no treino nao entram no risco.csv (120 mantem o painel abaixo de 2 milhoes de linhas).
+MIN_OCORR_CELULA = 120
