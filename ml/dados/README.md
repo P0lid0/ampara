@@ -55,3 +55,12 @@ Os dados brutos ficam em `ml/dados/brutos/` e **não são versionados** (git-ign
 - Os arquivos baixados ficam em `ml/dados/brutos/geosampa/` (git-ignorado, ~200 KB); `baixar_camada` reaproveita o arquivo se já existir.
 - **Feature de iluminação:** fica de fora até o Pedro autorizar o download (Tarefa 9 trata a ausência).
 - **Features produzidas** (`features_celulas`): `dist_estacao_m` e `dist_delegacia_m`, distância haversine (raio 6.371.008,8 m) do centro da célula à feição mais próxima.
+
+## Clima histórico (Open-Meteo)
+
+- **Fonte:** Open-Meteo Historical Weather API (dado aberto, sem chave), `https://archive-api.open-meteo.com/v1/archive`; documentação em `https://open-meteo.com/en/docs/historical-weather-api`. Data de acesso: 15/11/2026.
+- **Período baixado:** 01/01/2022 a 31/12/2025 (uma requisição por ano), série horária de `temperature_2m` e `precipitation` em `America/Sao_Paulo`: 35.064 linhas (4 anos, 1.461 dias × 24 h), sem nenhum valor ausente. Arquivo: `ml/dados/brutos/clima_horario.csv` (git-ignorado, ~0,9 MB); `baixar_clima` reaproveita o arquivo se já existir.
+- **Ponto único:** a cidade inteira usa um ponto só (`LAT_CLIMA = -23.5505`, `LNG_CLIMA = -46.6333`, Sé). O clima não varia entre as áreas; só entre período, dia da semana e faixa. É uma limitação, registrada no relatório.
+- **INMET não foi usado:** a API do INMET exige cadastro e a série horária das estações da capital tem lacunas; o Open-Meteo não pede chave e entrega a série horária completa.
+- **Agregação** (`agregar_clima`): por `(periodo, dia_semana, faixa)`, `clima_temp_media` é a média das horas da faixa e `clima_chuva_mm` é a chuva total da faixa dividida pelo número de datas distintas do grupo (mm por dia). Resultado real: 896 linhas (16 trimestres × 7 dias × 8 faixas); temperatura média de 11,7 a 28,6 °C e chuva de 0 a 4,5 mm por dia.
+- **Período futuro** (`juntar_clima`): o trimestre que ainda não aconteceu recebe o clima do mesmo trimestre do ano anterior; se esse também faltar, a função levanta `ValueError`.

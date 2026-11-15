@@ -426,4 +426,10 @@ Resultado: 8 testes novos em `test_painel.py` passando; defasagens calculadas po
 
 Resultado: 8 testes de `test_geosampa.py` passando mais o de rede; 203 estações e 93 delegacias baixadas; iluminação (662.945 feições) mapeada e não baixada, à espera do ok do Pedro. Sem migration.
 
+### 67. ML: clima histórico do Open-Meteo (Task 6 do plano 06)
+
+> Executar a Task 6 do plano 06 (ML): escrever primeiro os testes de `clima.py` (URL da API de arquivo, agregação por período, dia e faixa com chuva dividida pelas datas distintas, junção com o painel usando o mesmo trimestre do ano anterior para o futuro, erro sem ano anterior); implementar o módulo, baixar 2022 a 2025 e registrar fonte, período, ponto único e o porquê de não usar o INMET em `ml/dados/README.md`.
+
+Resultado: 4 testes passando mais o de rede (72 linhas em 3 dias); 35.064 linhas horárias baixadas sem valores ausentes, agregadas em 896 linhas. Sem migration.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->
