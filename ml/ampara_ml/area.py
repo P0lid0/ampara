@@ -9,6 +9,8 @@ import numpy as np
 from ampara_ml.config import LAT_MAX, LAT_MIN, LNG_MAX, LNG_MIN, PASSO_LAT, PASSO_LNG
 
 FORA = "fora"
+_MAX_LINHA = round((LAT_MAX - LAT_MIN) / PASSO_LAT) - 1
+_MAX_COLUNA = round((LNG_MAX - LNG_MIN) / PASSO_LNG) - 1
 _PADRAO = re.compile(r"^g(\d{3})_(\d{3})$")
 
 
@@ -19,12 +21,17 @@ def area_ids(lat: np.ndarray, lng: np.ndarray) -> np.ndarray:
     fora = (lat < LAT_MIN) | (lat >= LAT_MAX) | (lng < LNG_MIN) | (lng >= LNG_MAX) | np.isnan(lat) | np.isnan(lng)
     lat_ok = np.where(fora, LAT_MIN, lat)
     lng_ok = np.where(fora, LNG_MIN, lng)
-    linha = np.floor((lat_ok - LAT_MIN) / PASSO_LAT).astype(int)
-    coluna = np.floor((lng_ok - LNG_MIN) / PASSO_LNG).astype(int)
-    saida = np.empty(lat.shape, dtype=object)
-    for i in np.ndindex(lat.shape):
-        saida[i] = FORA if fora[i] else f"g{linha[i]:03d}_{coluna[i]:03d}"
-    return saida
+    # np.minimum: protege o indice contra arredondamento de ponto flutuante
+    # logo abaixo do limite superior (grade de 100 x 96 celulas).
+    linha = np.minimum(np.floor((lat_ok - LAT_MIN) / PASSO_LAT).astype(int), _MAX_LINHA)
+    coluna = np.minimum(np.floor((lng_ok - LNG_MIN) / PASSO_LNG).astype(int), _MAX_COLUNA)
+    nomes = [
+        FORA if f else f"g{li:03d}_{co:03d}"
+        for f, li, co in zip(fora.ravel().tolist(), linha.ravel().tolist(), coluna.ravel().tolist())
+    ]
+    saida = np.empty(len(nomes), dtype=object)
+    saida[:] = nomes
+    return saida.reshape(lat.shape)
 
 
 def area_id(lat: float, lng: float) -> str:

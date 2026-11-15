@@ -72,3 +72,16 @@ def test_casos_de_referencia_csv():
     assert len(linhas) == 5
     for r in linhas:
         assert area_id(float(r["lat"]), float(r["lng"])) == r["area_id"]
+
+
+def test_nan_vira_fora():
+    assert area_id(float("nan"), -46.5) == "fora"
+    assert area_id(-23.5, float("nan")) == "fora"
+
+
+def test_um_ulp_abaixo_do_limite_superior_nao_sai_da_grade():
+    import numpy as np
+    lat = np.nextafter(-23.35, -24.0)
+    lng = np.nextafter(-46.36, -47.0)
+    nome = area_id(float(lat), float(lng))
+    assert nome == "fora" or (int(nome[1:4]) <= 99 and int(nome[5:8]) <= 95)
