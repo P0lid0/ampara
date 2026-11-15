@@ -1,8 +1,8 @@
 import { Stack, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
-import { ApiErro } from '../api/cliente';
-import { criarConta, entrar, entrarComoEmergencia } from '../auth/sessao';
+import { ApiErro, MSG_PADRAO } from '../api/cliente';
+import { criarConta, entrar, entrarComoEmergencia, limparMotivoSaida, useMotivoSaida } from '../auth/sessao';
 import { espacos } from '../theme/tokens';
 import { Botao } from '../ui/Botao';
 import { Campo } from '../ui/Campo';
@@ -25,11 +25,12 @@ function mensagemErro(e: unknown, modo: Modo): string {
     }
     return e.detalheCidadao ?? e.message;
   }
-  return 'Não foi possível concluir agora. Tente de novo.';
+  return MSG_PADRAO;
 }
 
 export default function Entrar() {
   const router = useRouter();
+  const motivoSaida = useMotivoSaida();
   const [modo, setModo] = useState<Modo>('entrar');
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
@@ -46,6 +47,7 @@ export default function Entrar() {
 
   async function enviar() {
     setErro(undefined);
+    limparMotivoSaida();
     setCarregando(true);
     try {
       if (modo === 'entrar') await entrar(email.trim(), senha);
@@ -69,6 +71,12 @@ export default function Entrar() {
         <Texto>Use os dados de emergência que você cadastrou. Nada fica salvo neste aparelho e a sessão dura 30 minutos.</Texto>
       ) : null}
 
+      {motivoSaida === 'expirou' ? (
+        <Texto accessibilityRole="alert" accessibilityLiveRegion="polite">
+          Sua sessão terminou. Entre de novo.
+        </Texto>
+      ) : null}
+
       {modo === 'criar' ? <Campo rotulo="Nome" valor={nome} onChangeText={setNome} autoComplete="name" /> : null}
       <Campo
         rotulo="E-mail"
@@ -77,12 +85,13 @@ export default function Entrar() {
         keyboardType="email-address"
         autoCapitalize="none"
         autoCorrect={false}
-        autoComplete="email"
+        autoComplete={modo === 'emergencia' ? 'off' : 'email'}
+        importantForAutofill={modo === 'emergencia' ? 'no' : 'auto'}
       />
       {modo === 'emergencia' ? (
         <>
-          <Campo rotulo="Código de emergência" valor={codigo} onChangeText={setCodigo} autoCapitalize="none" autoCorrect={false} />
-          <Campo rotulo="Palavra secreta" valor={palavra} onChangeText={setPalavra} secureTextEntry autoCapitalize="none" autoCorrect={false} />
+          <Campo rotulo="Código de emergência" valor={codigo} onChangeText={setCodigo} autoCapitalize="none" autoCorrect={false} autoComplete="off" importantForAutofill="no" />
+          <Campo rotulo="Palavra secreta" valor={palavra} onChangeText={setPalavra} secureTextEntry autoCapitalize="none" autoCorrect={false} autoComplete="off" importantForAutofill="no" />
         </>
       ) : (
         <Campo rotulo="Senha" valor={senha} onChangeText={setSenha} secureTextEntry autoCapitalize="none" autoComplete="password" />

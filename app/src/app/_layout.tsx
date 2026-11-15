@@ -20,15 +20,15 @@ export default function Layout() {
       .finally(() => setSessaoPronta(true));
   }, []);
 
-  const primeiro = (segmentos[0] as string | undefined) ?? 'index';
+  const chave = segmentos.join('/');
   const pronto = Boolean(navegacao?.key) && sessaoPronta;
 
   // Sem token vai para /entrar; no modo emergência só Histórico, rota e BO.
   useEffect(() => {
     if (!pronto) return;
-    const destino = destinoGuard(autenticado, escopo, primeiro);
+    const destino = destinoGuard(autenticado, escopo, chave ? chave.split('/') : []);
     if (destino) router.replace(destino as never);
-  }, [pronto, autenticado, escopo, primeiro, router]);
+  }, [pronto, autenticado, escopo, chave, router]);
 
   if ((!carregadas && !erro) || !sessaoPronta) return null;
 

@@ -3,7 +3,8 @@ import { renderHook, act } from '@testing-library/react-native';
 import { abrirBanco } from '../../db/db';
 import { sessaoRepo } from '../../db/repos';
 import { definirToken } from '../../api/cliente';
-import { aoSair, criarConta, entrar, entrarComoEmergencia, restaurar, sair, useSessao } from '../sessao';
+import { chamar } from '../../api/cliente';
+import { aoSair, criarConta, entrar, entrarComoEmergencia, limparMotivoSaida, restaurar, sair, useMotivoSaida, useSessao } from '../sessao';
 
 const fetchMock = jest.fn();
 const json = (corpo: unknown, status = 200) =>
@@ -72,6 +73,40 @@ describe('sessão', () => {
       await jest.advanceTimersByTimeAsync(1_800_001);
     });
     expect(result.current.autenticado).toBe(false);
+    const motivo = await renderHook(() => useMotivoSaida());
+    expect(motivo.result.current).toBe('expirou');
+  });
+
+  it('401 em rota autenticada derruba a sessão com motivo "expirou"', async () => {
+    fetchMock.mockResolvedValueOnce(json({ token: 'jwt-1', expiraEm: amanha() }));
+    await entrar('ana@exemplo.test', 'senha-teste');
+    fetchMock.mockResolvedValueOnce(new Response(null, { status: 401 }));
+    await expect(chamar('/me')).rejects.toMatchObject({ status: 401 });
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 0));
+    });
+    expect((await renderHook(() => useSessao())).result.current.autenticado).toBe(false);
+    expect((await renderHook(() => useMotivoSaida())).result.current).toBe('expirou');
+    limparMotivoSaida();
+    expect((await renderHook(() => useMotivoSaida())).result.current).toBeNull();
+  });
+
+  it('sair é robusta: falha no SecureStore não impede limpar o SQLite nem rodar os callbacks', async () => {
+    fetchMock.mockResolvedValue(json({ token: 'jwt-1', expiraEm: amanha() }));
+    await entrar('ana@exemplo.test', 'senha-teste');
+    const db = await abrirBanco();
+    await sessaoRepo(db).set('qualquer', 'x');
+    const aviso = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+    jest.mocked(SecureStore.deleteItemAsync).mockRejectedValueOnce(new Error('falha simulada'));
+    const cb = jest.fn();
+    const remover = aoSair(cb);
+    await expect(sair()).resolves.toBeUndefined();
+    expect(await sessaoRepo(db).get('qualquer')).toBeNull();
+    expect(cb).toHaveBeenCalledTimes(1);
+    remover();
+    await sair();
+    expect(cb).toHaveBeenCalledTimes(1);
+    aviso.mockRestore();
   });
 
   it('sair apaga SecureStore, esvazia o SQLite e executa os callbacks de aoSair', async () => {

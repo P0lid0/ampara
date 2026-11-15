@@ -8,12 +8,14 @@ import { sessaoRepo } from '../db/repos';
 
 export type Escopo = 'usuario' | 'emergencia';
 export type EstadoSessao = { autenticado: boolean; escopo: Escopo | null; expiraEm: string | null };
+export type MotivoSaida = 'expirou' | 'manual';
 
 const CHAVE_TOKEN = 'ampara.token';
 const MAX_TIMER_MS = 2 ** 31 - 1;
 const SEM_SESSAO: EstadoSessao = { autenticado: false, escopo: null, expiraEm: null };
 
 let estado: EstadoSessao = SEM_SESSAO;
+let motivoSaida: MotivoSaida | null = null;
 const ouvintes = new Set<() => void>();
 const callbacksSair: (() => void)[] = [];
 let timerExpiracao: ReturnType<typeof setTimeout> | null = null;
@@ -33,11 +35,12 @@ function agendarExpiracao(expiraEm: string): void {
   limparTimer();
   const ms = Math.max(0, new Date(expiraEm).getTime() - Date.now());
   timerExpiracao = setTimeout(() => {
-    void sair();
+    void sair('expirou');
   }, Math.min(ms, MAX_TIMER_MS));
 }
 
 function ativar(t: Token, escopo: Escopo): void {
+  motivoSaida = null;
   definirToken(t.token);
   agendarExpiracao(t.expiraEm);
   publicar({ autenticado: true, escopo, expiraEm: t.expiraEm });
@@ -76,17 +79,50 @@ export async function restaurar(): Promise<void> {
   await SecureStore.deleteItemAsync(CHAVE_TOKEN);
 }
 
-export async function sair(): Promise<void> {
+// Nunca rejeita: cada etapa roda por conta própria (aparelho emprestado precisa apagar o máximo possível)
+// e os callbacks de aoSair rodam sempre. Falhas vão para o log sem dado pessoal.
+export async function sair(motivo: MotivoSaida = 'manual'): Promise<void> {
   limparTimer();
   definirToken(null);
+  motivoSaida = motivo;
   publicar(SEM_SESSAO);
-  await SecureStore.deleteItemAsync(CHAVE_TOKEN);
-  await sessaoRepo(await abrirBanco()).apagarTudo();
-  callbacksSair.forEach((cb) => cb());
+  try {
+    await SecureStore.deleteItemAsync(CHAVE_TOKEN);
+  } catch {
+    console.warn('sessao: falha ao apagar o token salvo');
+  }
+  try {
+    await sessaoRepo(await abrirBanco()).apagarTudo();
+  } catch {
+    console.warn('sessao: falha ao limpar o banco local');
+  }
+  for (const cb of [...callbacksSair]) {
+    try {
+      cb();
+    } catch {
+      console.warn('sessao: callback de saida falhou');
+    }
+  }
 }
 
-export function aoSair(cb: () => void): void {
+/** Registra um callback de saída; devolve a função que o remove. */
+export function aoSair(cb: () => void): () => void {
   callbacksSair.push(cb);
+  return () => {
+    const i = callbacksSair.indexOf(cb);
+    if (i >= 0) callbacksSair.splice(i, 1);
+  };
+}
+
+/** Por que a sessão terminou ('expirou' = tempo ou servidor), até a próxima entrada. */
+export function useMotivoSaida(): MotivoSaida | null {
+  return useSyncExternalStore(assinar, () => motivoSaida, () => motivoSaida);
+}
+
+export function limparMotivoSaida(): void {
+  if (motivoSaida === null) return;
+  motivoSaida = null;
+  ouvintes.forEach((l) => l());
 }
 
 function assinar(l: () => void): () => void {
@@ -100,5 +136,5 @@ export function useSessao(): EstadoSessao {
 
 // 401 fora de /auth/*: a sessão venceu no servidor.
 aoExpirar(() => {
-  void sair();
+  void sair('expirou');
 });

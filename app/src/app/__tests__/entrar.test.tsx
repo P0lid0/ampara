@@ -1,5 +1,6 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import Entrar from '../entrar';
+import { sair } from '../../auth/sessao';
 
 jest.setTimeout(60000);
 const mockReplace = jest.fn();
@@ -64,5 +65,14 @@ describe('tela de entrada', () => {
     await fireEvent.changeText(screen.getByLabelText('Senha'), 'errada');
     await fireEvent.press(screen.getByRole('button', { name: 'Entrar' }));
     expect(await screen.findByText(/E-mail ou senha incorretos\./)).toBeTruthy();
+  });
+
+  it('depois de a sessão expirar mostra "Sua sessão terminou. Entre de novo."', async () => {
+    await render(<Entrar />);
+    expect(screen.queryByText(/Sua sessão terminou/)).toBeNull();
+    await act(async () => {
+      await sair('expirou');
+    });
+    expect(await screen.findByText('Sua sessão terminou. Entre de novo.')).toBeTruthy();
   });
 });

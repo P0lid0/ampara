@@ -1,6 +1,6 @@
 import { API_URL } from '../config';
 
-const MSG_PADRAO = 'Não foi possível concluir agora. Tente de novo.';
+export const MSG_PADRAO = 'Não foi possível concluir agora. Tente de novo.';
 const MSG_SEM_REDE = 'Sem conexão com a internet.';
 const TIMEOUT_MS = 15000;
 
