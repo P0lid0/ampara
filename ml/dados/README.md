@@ -35,3 +35,23 @@ Os dados brutos ficam em `ml/dados/brutos/` e **não são versionados** (git-ign
 - **Decisão `decidir_resolucao`:** a base é `lidas − fora da capital − fora do proxy − sem data − sem hora` = 4.792.984 − 2.859.804 − 621.392 − 356 − 420.058 = 891.374; `usadas / base` = 828.618 / 891.374 = **93,0 %**, acima de `COORD_MIN_FRACAO = 0,70`, e `usadas` é 40 vezes `MIN_USADAS`, então a função devolve `"grade"` (GRADE_500M). A primeira versão contava as linhas sem hora na base e dava 63,2 % (`"distrito"`), um artefato da métrica: hora `NULL` nada tem a ver com coordenada.
 - **Ressalva:** as 420.058 linhas com hora `NULL` (cerca de 32 % das linhas da capital com o proxy) ficam fora do modelo, porque não têm como entrar numa faixa horária. O risco estimado vale para os boletins com hora registrada.
 - Custo da leitura: ~20 a 30 minutos por planilha (openpyxl somente leitura, 4 processos em paralelo), pico de ~1,2 GB de memória no 2023.
+
+## GeoSampa (WFS): distância à estação e à delegacia
+
+- **Fonte:** GeoSampa, Prefeitura de São Paulo (dado aberto). WFS 2.0.0 em `https://wfs.geosampa.prefeitura.sp.gov.br/geoserver/ows` (o mesmo servidor responde em `/geoserver/wfs`; 488 camadas no `GetCapabilities`). Data de acesso: 14/11/2026. As camadas não trazem data de atualização nos atributos; a defasagem é a do servidor da Prefeitura.
+- **Coordenadas:** pedidas em `srsName=EPSG:4326`; `carregar_pontos` troca os eixos quando vêm invertidos e usa o centróide para polígonos e linhas.
+- **Camadas** (`ampara_ml/geosampa.CAMADAS`):
+
+| Chave | Camada | Feições | Situação |
+|---|---|---|---|
+| `estacao` | `geoportal:estacao_metro` + `geoportal:estacao_trem` | 94 + 109 = 203 (todas `OPERANDO`) | baixada |
+| `delegacia` | `geoportal:equipamento_policia_civil` | 93 | baixada |
+| `iluminacao` | `geoportal:iluminacao_publica` | 662.945 (`resultType=hits`) | **não baixada**: passa de 500 mil feições e o plano manda pedir o ok do Pedro antes |
+| `distrito` | `geoportal:distrito_municipal` | 96 (polígonos) | mapeada, não baixada (só serve ao plano B por distrito, pulado) |
+
+- **Delegacia:** `geoportal:delegacia_policia_civil` existe, mas é o polígono da área de cada DP, não o ponto da delegacia; por isso a feature usa `equipamento_policia_civil` (pontos), a mesma camada de `docs/fontes.md`.
+- **Estações:** a camada de trem inclui estações fora da capital (lat até -23,195), o que é desejado: a distância à estação mais próxima de uma célula na borda da grade pode ser uma estação de fora. Intervalo real: lat -23,770 a -23,195, lng -46,984 a -46,185.
+- **Delegacias:** lat -23,826 a -23,404, lng -46,796 a -46,397.
+- Os arquivos baixados ficam em `ml/dados/brutos/geosampa/` (git-ignorado, ~200 KB); `baixar_camada` reaproveita o arquivo se já existir.
+- **Feature de iluminação:** fica de fora até o Pedro autorizar o download (Tarefa 9 trata a ausência).
+- **Features produzidas** (`features_celulas`): `dist_estacao_m` e `dist_delegacia_m`, distância haversine (raio 6.371.008,8 m) do centro da célula à feição mais próxima.

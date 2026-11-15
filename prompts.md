@@ -420,4 +420,10 @@ Resultado: 11 testes novos passando (43 na suíte de `ml/`); cortes calculados s
 
 Resultado: 8 testes novos em `test_painel.py` passando; defasagens calculadas por `shift` + janela de 4 dentro de cada grupo, antes de remover o primeiro período. Sem migration.
 
+### 66. ML: features do GeoSampa, distância à estação e à delegacia (Task 5 do plano 06)
+
+> Executar a Task 5 do plano 06 (ML): escrever primeiro os testes de `geosampa.py` (parse do GetCapabilities, URL do GetFeature paginada, centróide e correção de eixos invertidos, distância mínima haversine, alvo vazio, features por célula); descobrir as camadas do WFS, implementar `geosampa.py`, baixar estações e delegacias e registrar camadas, contagens e a camada de iluminação não baixada em `ml/dados/README.md`.
+
+Resultado: 8 testes de `test_geosampa.py` passando mais o de rede; 203 estações e 93 delegacias baixadas; iluminação (662.945 feições) mapeada e não baixada, à espera do ok do Pedro. Sem migration.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->
