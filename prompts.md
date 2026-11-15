@@ -352,4 +352,10 @@ Resultado: 6 testes do `SignalRSinkTests` passando, suíte inteira com 421 aprov
 
 Resultado: 16 testes do `ModeradorRelatoTests` passando, suíte inteira com 440 aprovados; sem migration; sem `ANTHROPIC_API_KEY` o relato é aceito sem texto.
 
+### 56. Cyber: suíte de testes de ataque (Task 19 do plano 03)
+
+> Executar a Task 19 do plano 03 (Cyber): criar `cyber/Ampara.Cyber.Ataques` com 13 ataques automatizados contra a API real (CPF ecoado em endpoint anônimo, CPF ofuscado em fullwidth/NBSP/escape unicode, PII em cabeçalho/query/formulário no log, exceção com laudo e CPF, MQTT, senha na resposta, IMEI de outro usuário, prompt ao Claude, payload da Ponte, frame SignalR, flag de demonstração antes/depois, 50 requisições paralelas e entrada hostil), só com banco, Claude e rede falsos; a fixture grava `cyber/evidencias/ataques.md` (id, vetor, esperado, resultado). Se um ataque revelar vazamento real, corrigir o sink, não o teste.
+
+Resultado: 13 ataques passando (nenhum vazamento real encontrado, então nenhum sink foi alterado); suíte da API segue com 443 aprovados; sem migration. Dígitos soltos separados por espaço (`5 2 9 ...`) não são detectados por desenho do `CpfDetector` e ficaram de fora do A02.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->
