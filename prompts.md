@@ -432,4 +432,10 @@ Resultado: 8 testes de `test_geosampa.py` passando mais o de rede; 203 estaçõe
 
 Resultado: 4 testes passando mais o de rede (72 linhas em 3 dias); 35.064 linhas horárias baixadas sem valores ausentes, agregadas em 896 linhas. Sem migration.
 
+### 68. ML: população IBGE por distrito e iluminação por célula (Task 7 do plano 06)
+
+> Executar a Task 7 do plano 06 (ML): escrever primeiro os testes de `urbano.py` (normalização de nomes, densidade em EPSG:31983, erro listando distritos sem população, distrito de cada célula com fallback ao mais próximo, contagem de iluminação, features urbanas sem NaN); baixar distritos do GeoSampa, população do Censo 2022 (SIDRA) e a iluminação pública, e registrar fontes, links e datas em `ml/dados/README.md`.
+
+Resultado: 6 testes de `test_urbano.py` passando; 96 distritos com população (11.451.999 hab.) e densidade sem NaN e sem aliases; 662.945 pontos de iluminação baixados em CSV enxuto (~25 MB) e contados por célula. Sem migration.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->
