@@ -600,4 +600,22 @@ Resultado: 27 testes novos passando (467 no app), `tsc --noEmit` sem erros. A fi
 
 Resultado: 69 testes novos passando (536 no app), `tsc --noEmit` sem erros. A suíte reprovou 6 pontos, todos corrigidos: alvo de toque sem `minWidth` de 48 no Histórico, BO (opções e consentimento), contas, relato e rota (lista de horários), e hexadecimais soltos no mapa e no `MapaBase`, agora em `coresRisco` e `coresApoio` de `tokens.ts` (mesmos valores). O controle deslizante da rota ganhou `accessibilityRole="adjustable"`. TalkBack e fonte do sistema no máximo no aparelho adiados para a fase de build nativo. Sem migration de servidor.
 
+### 95. Página de emergência web: sessão, entrada e painel (Task 15 do plano 05)
+
+> Crie web-emergencia/ (Vite + React + TS, porta 5173, proxy /api e /hubs para localhost:5080, envPrefix VITE_ e EXPO_PUBLIC_). Sessão só em sessionStorage (chave ampara.emergencia, expira em 30 min, sair() limpa). Cliente chamar<T> com base VITE_API_URL || EXPO_PUBLIC_API_URL || '' + /api/v1, qualquer 2xx é sucesso, ApiErro com status e detalheCidadao, 401 volta ao login com a mensagem de 30 minutos. Telas Login (e-mail, código numérico, palavra secreta; 429 e 401/404 com frases fixas) e Painel (botão "Preciso de ajuda agora" com confirmação, gatilho origem web, "Seus guardiões foram avisados." com hora, lista de ocorrências com estado em texto, "Sair e apagar tudo desta aba"). TDD com vitest + Testing Library; fonte Manrope, campos 16px, alvos >= 48px.
+
+Resultado: 26 testes passando, `tsc --noEmit` sem erros. Na revisão, falha ao listar ocorrências deixou de virar lista vazia: agora mostra "Não foi possível carregar suas ocorrências. Tente de novo." com botão para tentar de novo.
+
+### 96. Página de emergência web: linha do tempo da rota e marcar o momento (Task 16 do plano 05)
+
+> Na página de emergência (web-emergencia), crie a tela de linha do tempo da rota no mapa e a marcação do momento do roubo. Copie a lógica pura agruparPorDia/pontoMaisProximo/formatarHora (fuso America/Sao_Paulo, sem imports), crie o componente Mapa (Leaflet + tiles OSM, ícones do marcador importados do pacote, único lugar que importa leaflet) e a tela LinhaDoTempo (rota dos últimos 7 dias em ISO UTC; botões por dia e por horário; seletor "Qual ocorrência?" quando houver mais de uma; botão "Foi aqui que me roubaram" que envia momento(id,{em,lat,lng}); depois "Momento marcado às HH:mm." e "Gerar o BO"; estados sem ocorrência e sem pontos). Funciona por toque no iPhone, alvos >= 48 px. TDD com Mapa mockado; verificar com vitest, tsc e npm run build.
+
+Resultado: 44 testes passando, `tsc --noEmit` e build sem erros. Na revisão, o dia padrão passou a ser o do ponto mais perto do início da ocorrência. Fica como dívida: marcar o momento numa ocorrência Cancelada ou Encerrada mostra erro genérico.
+
+### 97. Página de emergência web: BO, copiar e enviar à polícia (Task 17 do plano 05)
+
+> Implemente a tela de BO da web-emergencia: busque o BO da ocorrência (texto, delegacia, link da Delegacia Eletrônica), mostre o texto em <pre> só em estado React (nunca em storage), ofereça Copiar texto com `copiarTexto` (clipboard e fallback textarea+execCommand para Safari/iPhone sem HTTPS), link para a Delegacia Eletrônica com target=_blank e rel=noopener noreferrer, e Enviar à polícia só após consentimento explícito, exibindo o protocolo. Erros mostram detalheCidadao, nunca Error 500. TDD com vitest.
+
+Resultado: testes passando, revisão limpa na primeira rodada. Cópia no Safari do iPhone e mapa real ficam para a verificação ponta a ponta.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->
