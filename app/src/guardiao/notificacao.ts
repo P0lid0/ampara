@@ -19,9 +19,10 @@ const ORIGENS: Record<string, string> = {
   chaveiro: 'Chaveiro',
   web: 'Página de emergência',
   guardiao: 'Outro guardião',
+  impacto: 'Impacto detectado',
 };
 
-/** Origem do alerta em português (contrato: chaveiro | web | guardiao). */
+/** Origem do alerta em português (contrato: chaveiro | web | guardiao | impacto). */
 export function rotuloOrigem(origem: string): string {
   return ORIGENS[origem] ?? origem;
 }

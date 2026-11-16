@@ -150,6 +150,22 @@ describe('tela de alarme', () => {
     expect(tocador.play).toHaveBeenCalledTimes(1);
   });
 
+  it('modo demonstração: alerta de ocorrência demo-… confirma sem chamar a API (funciona sem internet) e vai ao passo a passo', async () => {
+    ciente.mockRejectedValue(new ApiErro(0, 'Sem conexão.'));
+    await act(async () => {
+      useAlarmes.getState().aplicar({
+        tipo: 'AlertaDisparado',
+        dado: { alertaId: 'a1', ocorrenciaId: 'demo-a1', vitimaNome: 'Pessoa Demo', origem: 'chaveiro', em: '2026-11-14T17:05:00Z' },
+      });
+    });
+    await render(<Alarme />);
+    await fireEvent.press(screen.getByRole('button', { name: 'Estou ciente' }));
+    await drenar();
+    expect(ciente).not.toHaveBeenCalled();
+    expect(useAlarmes.getState().estado.ativos.a1?.cienteEnviado).toBe(true);
+    expect(mockReplace).toHaveBeenCalledWith('/guardiao/passo-a-passo?ocorrenciaId=demo-a1');
+  });
+
   it('erro 4xx no ciente não fica repetindo e oferece tentar de novo', async () => {
     ciente.mockRejectedValueOnce(new ApiErro(403, 'proibido', undefined, 'Você não é guardião deste alerta.'));
     await disparar();

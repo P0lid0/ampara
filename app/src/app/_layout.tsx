@@ -51,6 +51,7 @@ export default function Layout() {
         contentStyle: { backgroundColor: cores.areia },
       }}
     >
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="onboarding" options={{ headerShown: false }} />
     </Stack>
   );

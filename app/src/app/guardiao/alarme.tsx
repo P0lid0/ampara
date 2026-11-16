@@ -7,6 +7,7 @@ import { AccessibilityInfo, ActivityIndicator, AppState, BackHandler, ScrollView
 import { ApiErro, mensagemDeErro } from '../../api/cliente';
 import { api } from '../../api/endpoints';
 import type { AlertaAtivo, MotivoEncerramento } from '../../guardiao/alarmeEstado';
+import { PREFIXO_DEMO } from '../../guardiao/eventos';
 import { cancelarAlarme, exibirAlarme, horaLocal, marcarAlarmeEmTela, rotuloOrigem } from '../../guardiao/notificacao';
 import { useAlarmes } from '../../guardiao/store';
 import { cores, espacos } from '../../theme/tokens';
@@ -159,7 +160,8 @@ export default function Alarme() {
     const a = ultimo.current;
     if (!a) return;
     try {
-      await api.alertas.ciente(a.alertaId);
+      // Modo demonstração (ocorrência demo-…): o ciente é só local, sem servidor nem internet.
+      if (!a.ocorrenciaId.startsWith(PREFIXO_DEMO)) await api.alertas.ciente(a.alertaId);
     } catch (e) {
       if (!montada.current || !enviando.current) return;
       if (e instanceof ApiErro && e.status >= 400 && e.status < 500 && !TRANSITORIOS.includes(e.status)) {
