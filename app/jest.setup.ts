@@ -151,3 +151,6 @@ afterEach(() => {
   const store = jest.requireMock('expo-secure-store') as { __memoria: Map<string, string> };
   store.__memoria.clear();
 });
+
+// Área segura sem provedor: zero de margem (BarraAcao e telas com cabeçalho próprio usam o hook).
+jest.mock('react-native-safe-area-context', () => require('react-native-safe-area-context/jest/mock').default);

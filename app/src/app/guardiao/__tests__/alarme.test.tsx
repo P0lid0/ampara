@@ -20,7 +20,7 @@ jest.mock('expo-router', () => ({
 jest.mock('../../../api/endpoints', () => ({ api: { alertas: { ciente: jest.fn(), ativos: jest.fn() } } }));
 
 const ciente = jest.mocked(api.alertas.ciente);
-const FRASE = 'Alerta. Pessoa Demo precisa de ajuda. Toque em Estou ciente para assumir.';
+const FRASE = 'Alerta. Pessoa Demo precisa de ajuda. Toque em Estou ciente para avisar que você vai ajudar.';
 
 // Tocador estável (o mock padrão cria um novo a cada render).
 const tocador = { play: jest.fn(), pause: jest.fn(), remove: jest.fn(), seekTo: jest.fn(), replace: jest.fn(), loop: false, volume: 1, playing: false };
@@ -77,7 +77,7 @@ afterEach(() => {
 });
 
 describe('tela de alarme', () => {
-  it('ao montar, announceForAccessibility é chamado com "Alerta. Pessoa Demo precisa de ajuda. Toque em Estou ciente para assumir." e repete a cada 10 s', async () => {
+  it('ao montar, announceForAccessibility é chamado com "Alerta. Pessoa Demo precisa de ajuda. Toque em Estou ciente para avisar que você vai ajudar." e repete a cada 10 s', async () => {
     await disparar();
     await render(<Alarme />);
     await drenar();
@@ -88,21 +88,37 @@ describe('tela de alarme', () => {
     await avancar(10000);
     expect(anunciar).toHaveBeenCalledTimes(3);
     // título, origem em português e hora local
-    expect(screen.getByText('Alerta: Pessoa Demo precisa de ajuda')).toBeTruthy();
-    expect(screen.getByText(/Chaveiro.*14:05/)).toBeTruthy();
+    expect(screen.getByText('Pessoa Demo precisa de ajuda')).toBeTruthy();
+    expect(screen.getByText('Toque em Estou ciente para avisar que você vai ajudar.')).toBeTruthy();
+    expect(screen.getByText('Origem do aviso: Chaveiro.')).toBeTruthy();
+    expect(screen.getByText('Às 14:05')).toBeTruthy();
+    expect(screen.getByText('Ampara')).toBeTruthy();
     // sirene em loop e vibração repetida
     expect(tocador.play).toHaveBeenCalled();
     expect(tocador.loop).toBe(true);
     expect(vibrar).toHaveBeenCalledWith([0, 500, 300, 500], true);
   });
 
-  it('o botão "Estou ciente" tem >= 48 dp, role button, e a tela é um ScrollView (RF: fonte 200% não corta o botão)', async () => {
+  it('o botão "Estou ciente" tem 64 dp, role button, fica na base fora do ScrollView, e o conteúdo rola (fonte 200% não corta o botão)', async () => {
     await disparar();
     await render(<Alarme />);
     const tela = screen.getByTestId('tela-alarme');
     expect(tela.type).toBe('RCTScrollView');
-    const botao = within(tela).getByRole('button', { name: 'Estou ciente' });
-    expect(StyleSheet.flatten(botao.props.style).minHeight).toBeGreaterThanOrEqual(48);
+    const botao = screen.getByRole('button', { name: 'Estou ciente' });
+    expect(within(tela).queryByRole('button', { name: 'Estou ciente' })).toBeNull();
+    expect(StyleSheet.flatten(botao.props.style).minHeight).toBeGreaterThanOrEqual(64);
+    expect(screen.getByText('O botão voltar fica travado até você confirmar.')).toBeTruthy();
+  });
+
+  it('o toque em "Estou ciente" dá uma batida forte de háptica depois de calar a sirene', async () => {
+    const Haptics = jest.requireMock('expo-haptics') as { impactAsync: jest.Mock };
+    Haptics.impactAsync.mockClear();
+    await disparar();
+    await render(<Alarme />);
+    await fireEvent.press(screen.getByRole('button', { name: 'Estou ciente' }));
+    expect(Haptics.impactAsync).toHaveBeenCalledTimes(1);
+    expect(Haptics.impactAsync).toHaveBeenCalledWith('heavy');
+    expect(tocador.pause).toHaveBeenCalled();
   });
 
   it('RF3: toque duplo em "Estou ciente" chama api.alertas.ciente UMA vez', async () => {

@@ -141,7 +141,7 @@ describe('passo a passo do guardião', () => {
     concluir.mockRejectedValue(new ApiErro(0, 'Sem conexão com a internet.', undefined, 'Sem conexão com a internet.'));
     await montar();
     await fireEvent.press(cartao('Senhas').getByRole('button', { name: 'Marcar como feito' }));
-    expect(await screen.findByText('⚠ Sem conexão. Tente de novo.')).toBeTruthy();
+    expect(await screen.findByText('Sem conexão. Tente de novo.')).toBeTruthy();
     const botao = cartao('Senhas').getByRole('button', { name: 'Marcar como feito' });
     expect(botao.props.accessibilityState?.disabled).toBeFalsy();
     expect(screen.getByText('0 de 5 feitos')).toBeTruthy();
@@ -150,7 +150,7 @@ describe('passo a passo do guardião', () => {
   it('falha ao carregar mostra o erro e "Tentar de novo" recarrega', async () => {
     obter.mockRejectedValueOnce(new ApiErro(0, 'x', undefined, 'x'));
     await render(<PassoAPasso />);
-    expect(await screen.findByText('⚠ Sem conexão. Tente de novo.')).toBeTruthy();
+    expect(await screen.findByText('Sem conexão. Tente de novo.')).toBeTruthy();
     await fireEvent.press(screen.getByRole('button', { name: 'Tentar de novo' }));
     expect(await screen.findByText('0 de 5 feitos')).toBeTruthy();
   });

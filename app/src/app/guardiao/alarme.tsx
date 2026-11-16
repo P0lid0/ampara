@@ -3,7 +3,10 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { setAudioModeAsync, useAudioPlayer } from 'expo-audio';
 import { useEffect, useRef, useState } from 'react';
-import { AccessibilityInfo, ActivityIndicator, AppState, BackHandler, ScrollView, StyleSheet, Vibration } from 'react-native';
+import * as Haptics from 'expo-haptics';
+import { StatusBar } from 'expo-status-bar';
+import { AccessibilityInfo, AppState, BackHandler, ScrollView, StyleSheet, Vibration, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ApiErro, mensagemDeErro } from '../../api/cliente';
 import { api } from '../../api/endpoints';
 import type { AlertaAtivo, MotivoEncerramento } from '../../guardiao/alarmeEstado';
@@ -12,7 +15,9 @@ import { cancelarAlarme, exibirAlarme, horaLocal, marcarAlarmeEmTela, rotuloOrig
 import { useAlarmes } from '../../guardiao/store';
 import { cores, espacos } from '../../theme/tokens';
 import { BannerAlarme } from '../../ui/BannerAlarme';
+import { BarraAcao } from '../../ui/BarraAcao';
 import { Botao } from '../../ui/Botao';
+import { Icone } from '../../ui/Icone';
 import { Texto } from '../../ui/Texto';
 
 const SIRENE = require('../../../assets/sirene.wav');
@@ -28,6 +33,9 @@ const MSG_ENCERRADO: Record<MotivoEncerramento, string> = {
   encerrado: 'Alerta encerrado. Você não precisa agir.',
 };
 
+/** O que o toque faz, dito antes do toque (também é a frase anunciada ao leitor de tela). */
+export const FRASE_ACAO = 'Toque em Estou ciente para avisar que você vai ajudar.';
+
 type Fase = 'tocando' | 'enviando' | 'erro' | 'encerrado' | 'confirmado' | 'ausente';
 
 /** 408 e 429 são transitórios: tratados como rede, com nova tentativa. */
@@ -37,6 +45,7 @@ const passoAPasso = (ocorrenciaId: string) => `/guardiao/passo-a-passo?ocorrenci
 
 export default function Alarme() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { alertaId: param } = useLocalSearchParams<{ alertaId?: string }>();
   const alertaId = typeof param === 'string' ? param : '';
   const ativo = useAlarmes((s) => s.estado.ativos[alertaId]);
@@ -75,7 +84,7 @@ export default function Alarme() {
   const montada = useRef(true);
 
   const nome = alerta?.vitimaNome ?? '';
-  const frase = `Alerta. ${nome} precisa de ajuda. Toque em Estou ciente para assumir.`;
+  const frase = `Alerta. ${nome} precisa de ajuda. ${FRASE_ACAO}`;
   const fraseRef = useRef(frase);
   fraseRef.current = frase;
 
@@ -187,81 +196,122 @@ export default function Alarme() {
     enviando.current = true;
     tentativa.current = 0;
     pararSom();
+    // Uma batida forte e curta confirma o toque, depois de calar a sirene.
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy).catch(() => undefined);
     setErro(undefined);
     setFase('enviando');
     void cancelarAlarme(alertaId).catch(() => undefined);
     void enviar();
   }
 
-  const corTexto = { color: cores.sobreAlarme };
+
   const hora = alerta ? horaLocal(alerta.em) : '';
+  const fimDeLinha = fase === 'encerrado' || fase === 'ausente';
+
+  // Uma ação por fase, sempre no mesmo lugar (base, 64 dp): o polegar não procura o botão.
+  let acao: { rotulo: string; dica?: string; onPress?: () => void; carregando?: boolean };
+  if (fase === 'tocando') {
+    acao = { rotulo: 'Estou ciente', dica: 'Para a sirene e avisa que você vai ajudar.', onPress: estouCiente };
+  } else if (fase === 'enviando') {
+    acao = { rotulo: 'Enviando…', carregando: true };
+  } else if (fase === 'erro') {
+    acao = { rotulo: 'Tentar de novo', onPress: estouCiente };
+  } else if (fase === 'confirmado' && alerta) {
+    acao = { rotulo: 'Abrir o passo a passo', onPress: () => router.replace(passoAPasso(alerta.ocorrenciaId) as never) };
+  } else {
+    acao = { rotulo: 'Voltar ao início', onPress: () => router.replace('/') };
+  }
 
   return (
-    <ScrollView testID="tela-alarme" style={estilos.fundo} contentContainerStyle={estilos.tela}>
+    <View style={estilos.fundo}>
+      <StatusBar style="dark" />
       <Stack.Screen options={{ headerShown: false, gestureEnabled: false }} />
-      <BannerAlarme />
-      <Texto variante="titulo" style={[estilos.titulo, corTexto]}>
-        {alerta ? `Alerta: ${nome} precisa de ajuda` : 'Alerta'}
-      </Texto>
-      {alerta ? <Texto style={corTexto}>{`${rotuloOrigem(alerta.origem)} · ${hora}`}</Texto> : null}
 
-      {fase === 'tocando' ? (
+      {/* Faixa de cima: quem fala e quando. */}
+      <View style={[estilos.topo, { paddingTop: insets.top + espacos.m }]}>
+        <Texto variante="rotulo" style={estilos.sobre}>
+          Ampara
+        </Texto>
+        {alerta && hora ? <Texto variante="rotulo" style={estilos.sobre}>{`Às ${hora}`}</Texto> : null}
+      </View>
+
+      {/* Faixa do meio: o que aconteceu e o que fazer. Rola com fonte grande; a base não sai do lugar. */}
+      <ScrollView testID="tela-alarme" style={estilos.meio} contentContainerStyle={estilos.conteudo}>
+        <BannerAlarme />
+
+        {fimDeLinha ? (
+          <>
+            <Icone nome={fase === 'encerrado' ? 'ok' : 'info'} tamanho={40} cor={cores.sobreAlarme} />
+            <Texto variante="exibicao" style={estilos.sobre} accessibilityLiveRegion="assertive">
+              {fase === 'encerrado' && motivo ? MSG_ENCERRADO[motivo] : 'Este alerta não está mais ativo.'}
+            </Texto>
+          </>
+        ) : (
+          <>
+            <Icone nome="alerta" tamanho={40} cor={cores.sobreAlarme} />
+            <Texto variante="exibicao" style={estilos.sobre}>
+              {alerta ? `${nome} precisa de ajuda` : 'Alerta'}
+            </Texto>
+
+            {fase === 'tocando' ? (
+              <Texto variante="corpoForte" style={estilos.sobre}>
+                {FRASE_ACAO}
+              </Texto>
+            ) : null}
+            {fase === 'enviando' ? (
+              <Texto variante="corpoForte" style={estilos.sobre} accessibilityLiveRegion="polite">
+                Enviando sua confirmação…
+              </Texto>
+            ) : null}
+            {fase === 'erro' ? (
+              <View style={estilos.linha} accessibilityLiveRegion="assertive">
+                <Icone nome="alerta" tamanho={24} cor={cores.sobreAlarme} />
+                <Texto variante="corpoForte" style={[estilos.sobre, estilos.fluxo]}>
+                  {erro ?? ''}
+                </Texto>
+              </View>
+            ) : null}
+            {fase === 'confirmado' ? (
+              <Texto variante="corpoForte" style={estilos.sobre}>
+                Você já confirmou este alerta.
+              </Texto>
+            ) : null}
+
+            {alerta ? <Texto style={estilos.sobre}>{`Origem do aviso: ${rotuloOrigem(alerta.origem)}.`}</Texto> : null}
+            {fase === 'tocando' || fase === 'enviando' ? (
+              <Texto style={estilos.sobre}>O botão voltar fica travado até você confirmar.</Texto>
+            ) : null}
+          </>
+        )}
+      </ScrollView>
+
+      {/* Faixa de baixo: a ação, ancorada sob o polegar e acima da barra de gestos. */}
+      <BarraAcao semSombra>
         <Botao
-          rotulo="Estou ciente"
-          variante="secundario"
-          dica="Para a sirene e avisa que você vai ajudar."
-          onPress={estouCiente}
+          rotulo={acao.rotulo}
+          variante="sobreAlarme"
+          dica={acao.dica}
+          carregando={acao.carregando}
+          onPress={acao.onPress ?? (() => undefined)}
+          haptica={false}
         />
-      ) : null}
-
-      {fase === 'enviando' ? (
-        <>
-          <ActivityIndicator color={cores.sobreAlarme} accessibilityLabel="Enviando" />
-          <Texto style={corTexto} accessibilityLiveRegion="polite">
-            Enviando sua confirmação…
-          </Texto>
-        </>
-      ) : null}
-
-      {fase === 'erro' ? (
-        <>
-          <Texto style={corTexto} accessibilityLiveRegion="assertive">{`⚠ ${erro ?? ''}`}</Texto>
-          <Botao rotulo="Tentar de novo" variante="secundario" onPress={estouCiente} />
-        </>
-      ) : null}
-
-      {fase === 'encerrado' && motivo ? (
-        <>
-          <Texto style={corTexto} accessibilityLiveRegion="assertive">
-            {MSG_ENCERRADO[motivo]}
-          </Texto>
-          <Botao rotulo="Voltar ao início" variante="secundario" onPress={() => router.replace('/')} />
-        </>
-      ) : null}
-
-      {fase === 'confirmado' && alerta ? (
-        <>
-          <Texto style={corTexto}>Você já confirmou este alerta.</Texto>
-          <Botao
-            rotulo="Abrir o passo a passo"
-            variante="secundario"
-            onPress={() => router.replace(passoAPasso(alerta.ocorrenciaId) as never)}
-          />
-        </>
-      ) : null}
-
-      {fase === 'ausente' || (fase === 'encerrado' && !motivo) ? (
-        <>
-          <Texto style={corTexto}>Este alerta não está mais ativo.</Texto>
-          <Botao rotulo="Voltar ao início" variante="secundario" onPress={() => router.replace('/')} />
-        </>
-      ) : null}
-    </ScrollView>
+      </BarraAcao>
+    </View>
   );
 }
 
 const estilos = StyleSheet.create({
   fundo: { flex: 1, backgroundColor: cores.alarme },
-  tela: { flexGrow: 1, padding: espacos.g, gap: espacos.m, justifyContent: 'center' },
-  titulo: { fontSize: 32, lineHeight: 40 },
+  topo: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: espacos.m,
+    paddingBottom: espacos.p,
+  },
+  meio: { flex: 1 },
+  conteudo: { flexGrow: 1, paddingHorizontal: espacos.m, paddingVertical: espacos.g, gap: espacos.m, alignItems: 'flex-start' },
+  linha: { flexDirection: 'row', alignItems: 'flex-start', gap: espacos.p },
+  fluxo: { flex: 1 },
+  sobre: { color: cores.sobreAlarme },
 });
