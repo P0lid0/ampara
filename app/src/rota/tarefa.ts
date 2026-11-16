@@ -15,6 +15,9 @@ export type EstadoRota = 'ativa' | 'sem-consentimento' | 'sem-permissao' | 'paus
 /** Consentimento local (o servidor guarda o oficial; aqui é o que o aparelho sabe sem rede). */
 const CHAVE_CONSENTIMENTO = 'rota.consentimento';
 
+const temConsentimento = async (): Promise<boolean> =>
+  (await sessaoRepo(await abrirBanco()).get(CHAVE_CONSENTIMENTO)) === 'sim';
+
 type DadosTarefa = { locations?: Location.LocationObject[] } | undefined;
 
 // Posição sem precisão conhecida vira "infinita" e é descartada pela fila (limite de 150 m).
@@ -31,6 +34,11 @@ TaskManager.defineTask<DadosTarefa>(NOME_TAREFA, async ({ data, error }) => {
     return;
   }
   try {
+    // Sem consentimento local (logout apagou o banco, revogação): não grava nada e desliga a coleta.
+    if (!(await temConsentimento())) {
+      await pararRota(true);
+      return;
+    }
     const locais = data?.locations ?? [];
     // grava primeiro: se o envio falhar ou o processo morrer, nada se perde
     if (locais.length > 0) await registrarPontos(await abrirBanco(), locais.map(paraPonto));
@@ -54,6 +62,8 @@ export function sincronizarAgora(): Promise<void> {
         if (!sessaoAtual().autenticado) await restaurar();
         // O token de emergência (aparelho de outra pessoa) não envia rota.
         if (sessaoAtual().escopo !== 'usuario') return;
+        // Sem consentimento neste aparelho, a fila não sai (pode ser de outra conta ou de antes da revogação).
+        if (!(await temConsentimento())) return;
         await enviarPendentes(await abrirBanco(), (lote) => api.rota.enviarPontos(lote));
       } catch {
         console.warn('rota: falha ao sincronizar a fila');

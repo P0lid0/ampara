@@ -39,6 +39,7 @@ const contar = async () => rotaRepo(await abrirBanco()).contar();
 
 beforeEach(async () => {
   await sessaoRepo(await abrirBanco()).apagarTudo(); // o mock de expo-sqlite guarda o banco entre testes do mesmo arquivo
+  await sessaoRepo(await abrirBanco()).set('rota.consentimento', 'sim');
   consentir.mockReset().mockResolvedValue(undefined);
   enviarPontos.mockReset().mockResolvedValue(undefined);
   sessao.mockReset().mockReturnValue(USUARIO);
@@ -115,6 +116,7 @@ describe('tarefa da rota', () => {
 
   it('RF4: estadoRota é "sem-permissao" quando background negado, "sem-consentimento" quando recusou, "ativa" quando a tarefa está registrada', async () => {
     // recusou (nunca aceitou neste aparelho)
+    await sessaoRepo(await abrirBanco()).apagarTudo();
     expect(await estadoRota()).toBe('sem-consentimento');
 
     await iniciarRota();
@@ -129,11 +131,31 @@ describe('tarefa da rota', () => {
     expect(await estadoRota()).toBe('pausada');
   });
 
+  it('sem consentimento local o callback não grava, não envia e desliga a tarefa', async () => {
+    await sessaoRepo(await abrirBanco()).apagarTudo(); // como depois de um logout
+    jest.mocked(TaskManager.isTaskRegisteredAsync).mockResolvedValue(true);
+    await registrarPontos(await abrirBanco(), [{ lat: -23.56, lng: -46.7, precisao: 10, em: new Date().toISOString() }]);
+    await executor!({ data: { locations: [local(0)] }, error: null, executionInfo: { eventId: '9', taskName: 'ampara-rota' } });
+    expect(Location.stopLocationUpdatesAsync).toHaveBeenCalledWith('ampara-rota');
+    expect(enviarPontos).not.toHaveBeenCalled();
+    expect(await contar()).toBe(0); // fila antiga apagada, posição nova não gravada
+  });
+
+  it('sincronizarAgora sem consentimento local não envia a fila', async () => {
+    await sessaoRepo(await abrirBanco()).set('rota.consentimento', 'nao');
+    await registrarPontos(await abrirBanco(), [{ lat: -23.56, lng: -46.7, precisao: 10, em: new Date().toISOString() }]);
+    await sincronizarAgora();
+    expect(enviarPontos).not.toHaveBeenCalled();
+    expect(await contar()).toBe(1);
+  });
+
   it('callback da tarefa com erro de rede mantém os pontos (nenhum perdido)', async () => {
+    const aviso = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
     enviarPontos.mockRejectedValue(new ApiErro(0, 'Sem conexão com a internet.'));
     await executor!({ data: { locations: [local(120_000), local(60_000), local(0)] }, error: null, executionInfo: { eventId: '1', taskName: 'ampara-rota' } });
     expect(enviarPontos).toHaveBeenCalledTimes(1); // gravou primeiro e tentou enviar
     expect(await contar()).toBe(3);
+    aviso.mockRestore();
 
     // a rede voltou: a próxima rodada leva os 3 e mais o novo
     enviarPontos.mockReset().mockResolvedValue(undefined);
