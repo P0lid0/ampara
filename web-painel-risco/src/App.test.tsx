@@ -64,3 +64,23 @@ test("simular atualiza o meu-risco na hora", async () => {
   await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Acesso indevido" })); });
   expect(meu.mock.calls.length).toBeGreaterThan(antes);
 });
+
+test("cabeçalho tem a marca e Sair; Sair limpa o token e volta ao login", async () => {
+  sessionStorage.setItem("ampara.painel.token", "tok");
+  vi.spyOn(api, "meuRisco").mockResolvedValue({ indice: 5, farol: "verde", eventos: [] });
+  render(<App />);
+  expect(screen.getByRole("banner")).toHaveTextContent("Ampara");
+  await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Sair" })); });
+  expect(screen.getByRole("button", { name: "Entrar" })).toBeInTheDocument();
+  expect(screen.getByText("Você saiu do painel.")).toBeInTheDocument();
+  expect(sessionStorage.getItem("ampara.painel.token")).toBeNull();
+});
+
+test("login: mostrar senha alterna o tipo do campo", () => {
+  render(<App />);
+  const campo = screen.getByLabelText("Senha");
+  expect(campo).toHaveAttribute("type", "password");
+  fireEvent.click(screen.getByRole("button", { name: "Mostrar" }));
+  expect(campo).toHaveAttribute("type", "text");
+  expect(screen.getByRole("button", { name: "Ocultar" })).toBeInTheDocument();
+});

@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { Marca } from "./componentes/Marca";
 import { Login } from "./componentes/Login";
 import { Abas } from "./componentes/Abas";
 import { Simulador } from "./componentes/Simulador";
@@ -35,16 +36,30 @@ export default function App() {
     setAviso("");
     setToken(t);
   };
-  const sair = useCallback(() => {
+  const encerrar = useCallback((mensagem: string) => {
     gravarToken(null);
-    setAviso("Sua sessão terminou. Entre de novo.");
+    setAviso(mensagem);
     setToken(null);
     setAba("cidadao");
   }, []);
+  // Sessão vencida (401 em qualquer tela) ou saída pedida pela pessoa no cabeçalho.
+  const sair = useCallback(() => encerrar("Sua sessão terminou. Entre de novo."), [encerrar]);
+  const sairAgora = useCallback(() => encerrar("Você saiu do painel."), [encerrar]);
 
   return (
-    <main>
-      <header className="topo">Ampara · Risco Cidadão</header>
+    <>
+      <header className="topo">
+        <div className="topo-interno">
+          <Marca />
+          <span className="topo-visao">Painel de risco</span>
+          {token && (
+            <button type="button" className="sair" onClick={sairAgora}>
+              Sair
+            </button>
+          )}
+        </div>
+      </header>
+      <main className={token && aba === "executiva" ? "larga" : undefined}>
       {token ? (
         <Abas
           ativa={aba}
@@ -66,6 +81,7 @@ export default function App() {
       ) : (
         <Login aoEntrar={entrar} aviso={aviso} />
       )}
-    </main>
+      </main>
+    </>
   );
 }

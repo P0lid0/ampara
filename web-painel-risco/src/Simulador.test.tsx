@@ -46,3 +46,17 @@ test("botões têm altura mínima de 48 px (classe .botao e regra de button)", a
   expect(botoes).toHaveLength(4);
   botoes.forEach((b) => expect(b).toHaveClass("botao"));
 });
+
+test("recolhido por padrão, com a faixa DEMONSTRAÇÃO, e confirma o disparo em texto", async () => {
+  vi.spyOn(api, "simular").mockResolvedValue(undefined);
+  const { container } = render(<Simulador token="t" aoSimular={vi.fn()} />);
+  const detalhes = container.querySelector("details")!;
+  expect(detalhes.open).toBe(false);
+  expect(screen.getByText("DEMONSTRAÇÃO")).toBeInTheDocument();
+  await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Acesso indevido" })); });
+  expect(screen.getByText(/Disparado: Acesso indevido\. O farol atualiza em instantes\./)).toBeInTheDocument();
+});
+test("botões do simulador são em contorno, não o primário cheio", () => {
+  render(<Simulador token="t" aoSimular={vi.fn()} />);
+  screen.getAllByRole("button").forEach((b) => expect(b).toHaveClass("botao-contorno"));
+});

@@ -64,3 +64,30 @@ test("falha de rede mantém os dados e avisa; 401 chama aoExpirar", async () => 
   await act(async () => { await vi.advanceTimersByTimeAsync(5000); });
   expect(sair).toHaveBeenCalled();
 });
+
+test("barras saem em ordem decrescente, a maior em destaque, e o pico do gráfico tem rótulo", async () => {
+  const embaralhado: Executivo = {
+    porClasse: { Saude: 3, Cpf: 9, Senha: 6, Rg: 0, Imei: 9, Telefone: 0, Email: 0, Placa: 0 },
+    porSink: { Llm: 1, Log: 12, HttpNaoAutenticada: 0, Erro: 0, Banco: 0, Ponte: 0, SignalR: 0, HttpAutenticada: 0 },
+    porHora: [...Array(22).fill(0), 2, 9],
+    total24h: 21,
+  };
+  vi.spyOn(api, "executivo").mockResolvedValue(embaralhado);
+  const { container } = render(<VisaoExecutiva token="t" />);
+  await act(async () => {});
+  const lista = container.querySelector(".barras")!;
+  const valores = [...lista.querySelectorAll(".barra-numero")].map((n) => Number(n.textContent));
+  expect(valores).toEqual([...valores].sort((a, b) => b - a));
+  expect(lista.querySelectorAll(".barra-maior")).toHaveLength(1);
+  expect(container.querySelector(".hora-valor")).toHaveTextContent("9");
+  expect(container.querySelectorAll(".hora-pico")).toHaveLength(1);
+  expect(screen.getByText(/9 deles às \d{2}h/)).toBeInTheDocument();
+  expect(container.querySelector(".horas-marcas")).toHaveTextContent("agora");
+});
+test("total zero mostra frase tranquila no lugar da leitura do pico", async () => {
+  vi.spyOn(api, "executivo").mockResolvedValue({ porClasse: {}, porSink: {}, porHora: Array(24).fill(0), total24h: 0 });
+  const { container } = render(<VisaoExecutiva token="t" />);
+  await act(async () => {});
+  expect(screen.getByText(/Nenhum evento nas últimas 24 horas/)).toBeInTheDocument();
+  expect(container.querySelector(".hora-pico")).toBeNull();
+});

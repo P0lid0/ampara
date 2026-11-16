@@ -78,14 +78,40 @@ test("401 chama aoExpirar para voltar ao login", async () => {
   expect(aoExpirar).toHaveBeenCalledTimes(1);
 });
 
-test("região aria-live fica montada desde o carregamento e contém as mensagens", async () => {
+// Redesenho (critica P3 / DESIGN item 12): só o farol é região viva; a lista de mensagens não é relida a cada 5 s.
+test("região aria-live fica montada desde o carregamento e contém o farol, não a lista", async () => {
   vi.spyOn(api, "meuRisco").mockResolvedValue(amarelo);
   const { container } = render(<VisaoCidadao token="t" />);
   const regiao = container.querySelector('[aria-live="polite"]');
   expect(regiao).not.toBeNull();
   await act(async () => {});
   expect(container.querySelector('[aria-live="polite"]')).toBe(regiao);
-  expect(regiao).toHaveTextContent(/Tentaram usar seu CPF/);
+  expect(regiao).toHaveTextContent("40/100");
+  expect(regiao).not.toHaveTextContent(/Tentaram usar seu CPF/);
+  expect(screen.getByText(/Tentaram usar seu CPF/)).toBeInTheDocument();
+});
+
+test("risco alto mostra o próximo passo; seguro não", async () => {
+  vi.spyOn(api, "meuRisco").mockResolvedValue({ indice: 82, farol: "vermelho", eventos: [] });
+  const { unmount } = render(<VisaoCidadao token="t" />);
+  await act(async () => {});
+  expect(screen.getByText("O que fazer agora")).toBeInTheDocument();
+  expect(screen.getByText(/Quanto maior o número, mais exposto/)).toBeInTheDocument();
+  unmount();
+  vi.spyOn(api, "meuRisco").mockResolvedValue({ indice: 5, farol: "verde", eventos: [] });
+  render(<VisaoCidadao token="t" />);
+  await act(async () => {});
+  expect(screen.queryByText("O que fazer agora")).toBeNull();
+});
+
+test("hora da mensagem aparece em tempo relativo, com a data completa no title", async () => {
+  const recente = new Date(Date.now() - 4 * 60000).toISOString();
+  vi.spyOn(api, "meuRisco").mockResolvedValue({ ...amarelo, eventos: [{ ...amarelo.eventos[0], em: recente }] });
+  render(<VisaoCidadao token="t" />);
+  await act(async () => {});
+  const t = screen.getByText("há 4 min");
+  expect(t.tagName).toBe("TIME");
+  expect(t).toHaveAttribute("title");
 });
 
 test("resposta antiga que chega depois da nova não sobrescreve", async () => {
