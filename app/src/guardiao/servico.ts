@@ -10,6 +10,7 @@ import { abrirBanco } from '../db/db';
 import { sessaoRepo } from '../db/repos';
 import type { Efeito } from './alarmeEstado';
 import { criarHub } from './hub';
+import { emitirPasso } from './passosAoVivo';
 import { CANAL_SERVICO, cancelarAlarme, criarCanais, exibirAlarme, permissaoNotificacao } from './notificacao';
 import { useAlarmes } from './store';
 
@@ -56,7 +57,7 @@ async function executarEfeitos(efeitos: Efeito[]): Promise<void> {
       if (ef.tipo === 'tocar') await exibirAlarme(ef.alerta);
       else if (ef.tipo === 'parar') await cancelarAlarme(ef.alertaId);
       else if (ef.tipo === 'buscarAtivos') await buscarAtivos();
-      // 'passo': atualização do passo a passo, tratada pela tela do guardião
+      else if (ef.tipo === 'passo') emitirPasso({ ocorrenciaId: ef.ocorrenciaId, passo: ef.passo, concluidoEm: ef.concluidoEm });
     } catch {
       console.warn(`guardiao: efeito ${ef.tipo} falhou`);
     }

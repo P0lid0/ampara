@@ -6,6 +6,7 @@ import { API_URL } from '../../config';
 import { abrirBanco } from '../../db/db';
 import { sessaoRepo } from '../../db/repos';
 import { criarHub, type OpcoesHub } from '../hub';
+import { ouvirPassos } from '../passosAoVivo';
 import { ESPERAS_NOVA_CONEXAO_MS, ID_NOTIFICACAO_SERVICO, iniciarServicoGuardiao, pararServicoGuardiao } from '../servico';
 import { useAlarmes } from '../store';
 
@@ -141,6 +142,15 @@ describe('efeitos do hub', () => {
     opcoes.aoEvento({ tipo: 'AlertaEncerrado', dado: { alertaId: 'a1', motivo: 'cancelado' } });
     await drenar();
     expect(notifee.cancelNotification).toHaveBeenCalledWith('a1');
+  });
+
+  it('PassoAtualizado vai para a tela do passo a passo (passosAoVivo)', async () => {
+    const vistos: unknown[] = [];
+    const parar = ouvirPassos((e) => vistos.push(e));
+    opcoes.aoEvento({ tipo: 'PassoAtualizado', dado: { ocorrenciaId: 'o1', passo: 'Banco', concluidoEm: disparo.em } });
+    await drenar();
+    parar();
+    expect(vistos).toEqual([{ ocorrenciaId: 'o1', passo: 'Banco', concluidoEm: disparo.em }]);
   });
 
   it('AlertaEscalado desconhecido busca os ativos e toca o que veio', async () => {
