@@ -1,6 +1,6 @@
 import notifee, { AuthorizationStatus } from '@notifee/react-native';
 import { act, fireEvent, render, renderHook, screen, within } from '@testing-library/react-native';
-import { AccessibilityInfo, StyleSheet, Vibration } from 'react-native';
+import { AccessibilityInfo, AppState, StyleSheet, Vibration } from 'react-native';
 import Alarme from '../alarme';
 import { ApiErro } from '../../../api/cliente';
 import { api } from '../../../api/endpoints';
@@ -55,6 +55,8 @@ let cancelarVibracao: jest.SpyInstance;
 
 beforeEach(() => {
   jest.useFakeTimers();
+  // o mock do AppState no jest traz currentState como função; no aparelho é o texto 'active'
+  (AppState as unknown as { currentState: string }).currentState = 'active';
   useAlarmes.getState().limpar();
   mockReplace.mockReset();
   mockPush.mockReset();
@@ -109,8 +111,12 @@ describe('tela de alarme', () => {
     await disparar();
     await render(<Alarme />);
     const botao = screen.getByRole('button', { name: 'Estou ciente' });
-    await fireEvent.press(botao);
-    await fireEvent.press(botao);
+    // dois toques antes de qualquer re-renderização: só a trava (e não o botão sumir) barra o segundo
+    const aoTocar = botao.props.onClick as () => void;
+    await act(async () => {
+      aoTocar();
+      aoTocar();
+    });
     expect(ciente).toHaveBeenCalledTimes(1);
     expect(ciente).toHaveBeenCalledWith('a1');
     await act(async () => concluir());
@@ -177,6 +183,18 @@ describe('tela de alarme', () => {
     expect(anunciar.mock.calls.length).toBe(antes);
   });
 
+  it('408 e 429 no ciente são transitórios: repete em vez de parar no erro', async () => {
+    ciente.mockRejectedValueOnce(new ApiErro(429, 'muitas', undefined, 'x')).mockResolvedValue(undefined);
+    await disparar();
+    await render(<Alarme />);
+    await fireEvent.press(screen.getByRole('button', { name: 'Estou ciente' }));
+    await drenar();
+    expect(screen.queryByRole('button', { name: 'Tentar de novo' })).toBeNull();
+    await avancar(2000);
+    expect(ciente).toHaveBeenCalledTimes(2);
+    expect(mockReplace).toHaveBeenCalledWith('/guardiao/passo-a-passo?ocorrenciaId=oc-a1');
+  });
+
   it('AlertaEncerrado com motivo "ciente" disparado por outro guardião para a sirene e mostra "Outro guardião já assumiu. Você não precisa agir."', async () => {
     await disparar();
     await render(<Alarme />);
@@ -204,6 +222,74 @@ describe('tela de alarme', () => {
     await render(<Alarme />);
     await drenar();
     expect(screen.queryByText('Alarme desativado: permita notificações em Ajustes.')).toBeNull();
+  });
+});
+
+describe('tela de alarme e o estado do app', () => {
+  let mudar: (e: string) => void;
+  const definirEstado = (e: string) => {
+    (AppState as unknown as { currentState: string }).currentState = e;
+  };
+
+  beforeEach(() => {
+    mudar = () => undefined;
+    definirEstado('active');
+    jest.spyOn(AppState, 'addEventListener').mockImplementation(((_t: string, cb: (e: string) => void) => {
+      mudar = (e) => {
+        definirEstado(e);
+        cb(e);
+      };
+      return { remove: jest.fn() };
+    }) as never);
+    vibrar.mockClear();
+    jest.mocked(notifee.cancelNotification).mockClear();
+    jest.mocked(notifee.displayNotification).mockClear();
+  });
+
+  afterEach(() => definirEstado('active'));
+
+  it('em primeiro plano assume o alerta: cancela a notificação e toca a sirene da tela', async () => {
+    await disparar();
+    await render(<Alarme />);
+    await drenar();
+    expect(notifee.cancelNotification).toHaveBeenCalledWith('a1');
+    expect(tocador.play).toHaveBeenCalled();
+  });
+
+  it('montada em segundo plano não cancela a notificação nem toca a sirene da tela', async () => {
+    definirEstado('background');
+    await disparar();
+    await render(<Alarme />);
+    await drenar();
+    expect(notifee.cancelNotification).not.toHaveBeenCalled();
+    expect(tocador.play).not.toHaveBeenCalled();
+    expect(vibrar).not.toHaveBeenCalledWith([0, 500, 300, 500], true);
+    expect(screen.getByRole('button', { name: 'Estou ciente' })).toBeTruthy();
+  });
+
+  it('ao voltar para o primeiro plano a tela assume; ao ir para o segundo, a notificação volta', async () => {
+    definirEstado('background');
+    await disparar();
+    await render(<Alarme />);
+    await drenar();
+    await act(async () => mudar('active'));
+    await drenar();
+    expect(notifee.cancelNotification).toHaveBeenCalledWith('a1');
+    expect(tocador.play).toHaveBeenCalledTimes(1);
+
+    await act(async () => mudar('background'));
+    await drenar();
+    expect(tocador.pause).toHaveBeenCalled();
+    expect(jest.mocked(notifee.displayNotification).mock.calls.map((c) => c[0].id)).toEqual(['a1']);
+  });
+
+  it('sair da tela sem o ciente devolve a notificação', async () => {
+    await disparar();
+    const { unmount } = await render(<Alarme />);
+    await drenar();
+    await unmount();
+    await drenar();
+    expect(jest.mocked(notifee.displayNotification).mock.calls.map((c) => c[0].id)).toEqual(['a1']);
   });
 });
 

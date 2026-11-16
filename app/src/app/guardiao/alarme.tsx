@@ -3,7 +3,7 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { setAudioModeAsync, useAudioPlayer } from 'expo-audio';
 import { useEffect, useRef, useState } from 'react';
-import { AccessibilityInfo, ActivityIndicator, BackHandler, ScrollView, StyleSheet, Vibration } from 'react-native';
+import { AccessibilityInfo, ActivityIndicator, AppState, BackHandler, ScrollView, StyleSheet, Vibration } from 'react-native';
 import { ApiErro, mensagemDeErro } from '../../api/cliente';
 import { api } from '../../api/endpoints';
 import type { AlertaAtivo, MotivoEncerramento } from '../../guardiao/alarmeEstado';
@@ -29,6 +29,9 @@ const MSG_ENCERRADO: Record<MotivoEncerramento, string> = {
 
 type Fase = 'tocando' | 'enviando' | 'erro' | 'encerrado' | 'confirmado' | 'ausente';
 
+/** 408 e 429 são transitórios: tratados como rede, com nova tentativa. */
+const TRANSITORIOS = [408, 429];
+
 const passoAPasso = (ocorrenciaId: string) => `/guardiao/passo-a-passo?ocorrenciaId=${encodeURIComponent(ocorrenciaId)}`;
 
 export default function Alarme() {
@@ -51,6 +54,15 @@ export default function Alarme() {
   const [erro, setErro] = useState<string | undefined>();
   const faseRef = useRef(fase);
   faseRef.current = fase;
+
+  // Só assume o alerta (cala a notificação, toca a sirene da tela) com o app em primeiro plano. Em segundo
+  // plano ou com o aparelho bloqueado a notificação (tela cheia, som em loop) segue sozinha.
+  const [ativa, setAtiva] = useState(() => AppState.currentState === 'active');
+  useEffect(() => {
+    setAtiva(AppState.currentState === 'active');
+    const s = AppState.addEventListener('change', (e) => setAtiva(e === 'active'));
+    return () => s.remove();
+  }, []);
 
   const tocador = useAudioPlayer(SIRENE);
   const tocadorRef = useRef(tocador);
@@ -80,25 +92,30 @@ export default function Alarme() {
     timer.current = null;
   }
 
-  // A tela assume o alerta: a notificação sai (a sirene da tela toca no lugar). Saindo sem o ciente,
-  // a notificação volta para continuar insistindo.
   useEffect(() => {
     montada.current = true;
-    if (!alertaId) return;
-    marcarAlarmeEmTela(alertaId, true);
-    if (faseRef.current === 'tocando') void cancelarAlarme(alertaId).catch(() => undefined);
     return () => {
       montada.current = false;
       limparTimer();
+    };
+  }, []);
+
+  // A tela assume o alerta com o app ativo: a notificação sai (a sirene da tela toca no lugar). Indo
+  // para segundo plano ou saindo sem o ciente, a notificação volta para continuar insistindo.
+  useEffect(() => {
+    if (!alertaId || !ativa) return;
+    marcarAlarmeEmTela(alertaId, true);
+    if (faseRef.current === 'tocando') void cancelarAlarme(alertaId).catch(() => undefined);
+    return () => {
       marcarAlarmeEmTela(alertaId, false);
       const a = ultimo.current;
       if (faseRef.current === 'tocando' && a) void exibirAlarme(a).catch(() => undefined);
     };
-  }, [alertaId]);
+  }, [alertaId, ativa]);
 
-  const tocando = fase === 'tocando';
+  const tocando = fase === 'tocando' && ativa;
 
-  // Sirene, vibração e anúncio só enquanto toca.
+  // Sirene, vibração e anúncio só enquanto toca e o app está em primeiro plano.
   useEffect(() => {
     if (!tocando) return;
     void setAudioModeAsync({ playsInSilentMode: true, shouldPlayInBackground: true, interruptionMode: 'doNotMix' }).catch(
@@ -145,7 +162,7 @@ export default function Alarme() {
       await api.alertas.ciente(a.alertaId);
     } catch (e) {
       if (!montada.current || !enviando.current) return;
-      if (e instanceof ApiErro && e.status >= 400 && e.status < 500) {
+      if (e instanceof ApiErro && e.status >= 400 && e.status < 500 && !TRANSITORIOS.includes(e.status)) {
         // recusa do servidor: repetir não muda nada
         enviando.current = false;
         setErro(mensagemDeErro(e));
@@ -197,7 +214,7 @@ export default function Alarme() {
 
       {fase === 'enviando' ? (
         <>
-          <ActivityIndicator color={cores.sobreAlarme} />
+          <ActivityIndicator color={cores.sobreAlarme} accessibilityLabel="Enviando" />
           <Texto style={corTexto} accessibilityLiveRegion="polite">
             Enviando sua confirmação…
           </Texto>

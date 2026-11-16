@@ -10,7 +10,7 @@ import { abrirBanco } from '../db/db';
 import { sessaoRepo } from '../db/repos';
 import type { Efeito } from './alarmeEstado';
 import { criarHub } from './hub';
-import { CANAL_SERVICO, cancelarAlarme, criarCanais, exibirAlarme } from './notificacao';
+import { CANAL_SERVICO, cancelarAlarme, criarCanais, exibirAlarme, permissaoNotificacao } from './notificacao';
 import { useAlarmes } from './store';
 
 export const ID_NOTIFICACAO_SERVICO = 'ampara-guardiao-servico';
@@ -89,8 +89,12 @@ async function conectar(g: number): Promise<void> {
 
 async function iniciar(): Promise<void> {
   if (hub) return;
-  if ((await sessaoRepo(await abrirBanco()).get('guardiao_ativo')) !== '1') return;
   const g = geracao;
+  if ((await sessaoRepo(await abrirBanco()).get('guardiao_ativo')) !== '1') return;
+  if (g !== geracao) return;
+  // Android 13+: sem POST_NOTIFICATIONS nem o alarme nem o aviso fixo aparecem. Negada não impede o
+  // serviço (o BannerAlarme avisa e leva a Ajustes).
+  await permissaoNotificacao(true).catch(() => undefined);
   await criarCanais();
   await notifee.displayNotification({
     id: ID_NOTIFICACAO_SERVICO,
@@ -104,7 +108,12 @@ async function iniciar(): Promise<void> {
       pressAction: { id: 'default', launchActivity: 'default' },
     },
   });
-  if (g !== geracao || hub) return; // parado (logout) enquanto subia
+  if (g !== geracao) {
+    // parado (logout) enquanto subia: o serviço que acabou de subir não pode ficar sem dono
+    await derrubarServico();
+    return;
+  }
+  if (hub) return;
   hub = criarHub({
     baseUrl: API_URL,
     obterToken: () => tokenAtual() ?? '',
@@ -120,16 +129,29 @@ async function iniciar(): Promise<void> {
 /** Sobe o serviço e a conexão do guardião se `sessao.guardiao_ativo === '1'`. Chamadas repetidas são inócuas. */
 export function iniciarServicoGuardiao(): Promise<void> {
   if (!iniciando) {
-    iniciando = iniciar().finally(() => {
-      iniciando = null;
+    const p: Promise<void> = iniciar().finally(() => {
+      if (iniciando === p) iniciando = null;
     });
+    iniciando = p;
   }
   return iniciando;
+}
+
+async function derrubarServico(): Promise<void> {
+  try {
+    await notifee.stopForegroundService();
+    await notifee.cancelNotification(ID_NOTIFICACAO_SERVICO);
+  } catch {
+    console.warn('guardiao: falha ao parar o servico');
+  }
+  fimDoServico?.();
+  fimDoServico = null;
 }
 
 /** Fecha a conexão, derruba o serviço, cala os alarmes e esquece os alertas (logout). Nunca lança. */
 export async function pararServicoGuardiao(): Promise<void> {
   geracao += 1;
+  iniciando = null; // um novo login logo depois não reaproveita um início que já ficou velho
   if (timerConexao) clearTimeout(timerConexao);
   timerConexao = null;
   tentativa = 0;
@@ -149,14 +171,7 @@ export async function pararServicoGuardiao(): Promise<void> {
       // segue cancelando os outros
     }
   }
-  try {
-    await notifee.stopForegroundService();
-    await notifee.cancelNotification(ID_NOTIFICACAO_SERVICO);
-  } catch {
-    console.warn('guardiao: falha ao parar o servico');
-  }
-  fimDoServico?.();
-  fimDoServico = null;
+  await derrubarServico();
 }
 
 aoSair(() => {

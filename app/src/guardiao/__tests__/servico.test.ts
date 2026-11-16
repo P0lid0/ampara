@@ -77,6 +77,41 @@ it('com guardiao_ativo sobe a notificação do serviço (dataSync) e conecta o h
   definirToken(null);
 });
 
+it('pede a permissão de notificação ao subir; negada não impede o serviço', async () => {
+  jest.mocked(notifee.requestPermission).mockResolvedValueOnce({ authorizationStatus: 0 } as never);
+  await ligarGuardiao();
+  await iniciarServicoGuardiao();
+  expect(notifee.requestPermission).toHaveBeenCalledTimes(1);
+  expect(criarHub).toHaveBeenCalledTimes(1);
+});
+
+it('parar enquanto o serviço sobe derruba o serviço e não cria o hub', async () => {
+  await ligarGuardiao();
+  let liberar: () => void = () => undefined;
+  jest.mocked(notifee.displayNotification).mockImplementationOnce(() => new Promise<string>((r) => (liberar = () => r('x'))));
+  const subindo = iniciarServicoGuardiao();
+  await drenar();
+  await pararServicoGuardiao();
+  jest.mocked(notifee.stopForegroundService).mockClear();
+  liberar();
+  await subindo;
+  expect(criarHub).not.toHaveBeenCalled();
+  expect(notifee.stopForegroundService).toHaveBeenCalled();
+});
+
+it('login logo depois do logout não reaproveita o início velho: o novo sobe com hub', async () => {
+  await ligarGuardiao();
+  let liberar: () => void = () => undefined;
+  jest.mocked(notifee.displayNotification).mockImplementationOnce(() => new Promise<string>((r) => (liberar = () => r('x'))));
+  const velho = iniciarServicoGuardiao();
+  await drenar();
+  await pararServicoGuardiao();
+  const novo = iniciarServicoGuardiao();
+  liberar();
+  await Promise.all([velho, novo]);
+  expect(criarHub).toHaveBeenCalledTimes(1);
+});
+
 it('chamar de novo com o serviço no ar não abre outra conexão', async () => {
   await ligarGuardiao();
   await Promise.all([iniciarServicoGuardiao(), iniciarServicoGuardiao()]);
