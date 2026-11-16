@@ -1,17 +1,16 @@
-import { Stack, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
 import { mensagemDeErro } from '../../api/cliente';
 import { api } from '../../api/endpoints';
 import { deviceIdValido, ESPERA_PAREAMENTO_MS, INTERVALO_PAREAMENTO_MS } from '../../chaveiro/pareamento';
 import { rotuloStatus } from '../../chaveiro/status';
 import { concluirPassoSeguro } from '../../onboarding/passos';
-import { espacos } from '../../theme/tokens';
+import { Aviso } from '../../ui/Aviso';
 import { Botao } from '../../ui/Botao';
 import { Campo } from '../../ui/Campo';
 import { CartaoChaveiro } from '../../ui/CartaoChaveiro';
 import { LeitorCodigo } from '../../ui/LeitorCodigo';
-import { ProgressoPassos } from '../../ui/ProgressoPassos';
+import { TelaPasso } from '../../ui/TelaPasso';
 import { Texto } from '../../ui/Texto';
 
 const MSG_INVALIDO = 'O código do chaveiro não parece certo. Ele começa com "chaveiro-" e não tem espaços.';
@@ -104,47 +103,61 @@ export default function OnboardingChaveiro() {
 
   const entrada = fase === 'entrada';
   const erroNoCampo = erro === MSG_INVALIDO && modo === 'digitar';
+
+  const fazerDepois = <Botao rotulo="Fazer depois" variante="texto" onPress={() => void seguir()} />;
+  let acao;
+  if (!entrada) {
+    acao = <Botao rotulo="Continuar" desabilitado={fase === 'esperando'} onPress={() => void seguir()} />;
+  } else if (modo === 'escolha') {
+    acao = (
+      <>
+        <Botao rotulo="Ler o QR" onPress={() => { setErro(undefined); setAviso(undefined); setModo('camera'); }} />
+        {fazerDepois}
+      </>
+    );
+  } else if (modo === 'camera') {
+    acao = (
+      <>
+        <Botao rotulo="Digitar o código" variante="secundario" onPress={() => setModo('digitar')} />
+        {fazerDepois}
+      </>
+    );
+  } else {
+    acao = (
+      <>
+        <Botao rotulo="Parear" onPress={() => void parear(codigo)} />
+        {fazerDepois}
+      </>
+    );
+  }
+
   return (
-    <ScrollView contentContainerStyle={estilos.tela} keyboardShouldPersistTaps="handled">
-      <Stack.Screen options={{ title: 'Chaveiro' }} />
-      <ProgressoPassos passo="chaveiro" />
-      <Texto variante="titulo">Seu chaveiro</Texto>
-      <Texto>
-        O chaveiro do Ampara dispara o alerta com um clique. Leia o QR dele ou digite o código para parear. Você pode fazer isso depois.
-      </Texto>
-      <Texto variante="legenda">Na demonstração o código tem um final aleatório (chaveiro-ampara-xxxxxx).</Texto>
+    <TelaPasso passo="chaveiro" titulo="Seu chaveiro" acao={acao}>
+      <Texto variante="corpoForte">O chaveiro é um botão que você leva com você.</Texto>
+      <Texto>Um clique dispara o alerta aos seus guardiões. Leia o QR dele ou digite o código para parear. Pode fazer isso depois.</Texto>
 
       {entrada && modo === 'escolha' ? (
-        <>
-          <Botao rotulo="Ler o QR" onPress={() => { setErro(undefined); setAviso(undefined); setModo('camera'); }} />
-          <Botao rotulo="Digitar o código" variante="secundario" onPress={() => { setErro(undefined); setModo('digitar'); }} />
-        </>
+        <Botao rotulo="Digitar o código" variante="secundario" onPress={() => { setErro(undefined); setModo('digitar'); }} />
       ) : null}
 
-      {entrada && modo === 'camera' ? (
-        <>
-          <LeitorCodigo tipos={['qr']} aoLer={aoLer} aoNegar={aoNegar} />
-          <Botao rotulo="Digitar o código" variante="secundario" onPress={() => setModo('digitar')} />
-        </>
-      ) : null}
+      {entrada && modo === 'camera' ? <LeitorCodigo tipos={['qr']} aoLer={aoLer} aoNegar={aoNegar} /> : null}
 
       {entrada && modo === 'digitar' ? (
-        <>
-          <Campo
-            rotulo="Código do chaveiro"
-            valor={codigo}
-            onChangeText={setCodigo}
-            autoCapitalize="none"
-            autoCorrect={false}
-            autoComplete="off"
-            erro={erroNoCampo ? erro : undefined}
-          />
-          <Botao rotulo="Parear" onPress={() => void parear(codigo)} />
-        </>
+        <Campo
+          rotulo="Código do chaveiro"
+          valor={codigo}
+          onChangeText={setCodigo}
+          autoCapitalize="none"
+          autoCorrect={false}
+          autoComplete="off"
+          returnKeyType="done"
+          onSubmitEditing={() => void parear(codigo)}
+          erro={erroNoCampo ? erro : undefined}
+        />
       ) : null}
 
       {aviso && entrada ? <Texto accessibilityLiveRegion="polite">{aviso}</Texto> : null}
-      {erro && !erroNoCampo ? <Texto accessibilityRole="alert" accessibilityLiveRegion="polite">{`⚠ ${erro}`}</Texto> : null}
+      {erro && !erroNoCampo ? <Aviso mensagem={erro} /> : null}
 
       {fase === 'esperando' ? <Texto accessibilityLiveRegion="polite">Procurando o chaveiro...</Texto> : null}
       {fase === 'naoOuvi' ? (
@@ -154,16 +167,6 @@ export default function OnboardingChaveiro() {
         </>
       ) : null}
       {pareado && (fase === 'pareado' || fase === 'naoOuvi') ? <CartaoChaveiro deviceId={pareado} /> : null}
-
-      {entrada ? (
-        <Botao rotulo="Fazer depois" variante="secundario" onPress={() => void seguir()} />
-      ) : (
-        <Botao rotulo="Continuar" desabilitado={fase === 'esperando'} onPress={() => void seguir()} />
-      )}
-    </ScrollView>
+    </TelaPasso>
   );
 }
-
-const estilos = StyleSheet.create({
-  tela: { padding: espacos.m, gap: espacos.m },
-});

@@ -1,12 +1,14 @@
-import { Stack, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { abrirBanco } from '../../db/db';
 import { concluirPassoSeguro } from '../../onboarding/passos';
 import { ITENS_CHECKLIST, lerChecklist, marcarItem, type IdItemChecklist } from '../../prevencao/checklist';
-import { cores, espacos } from '../../theme/tokens';
+import { bordas, cores, espacos, raios } from '../../theme/tokens';
+import { Aviso } from '../../ui/Aviso';
 import { Botao } from '../../ui/Botao';
-import { ProgressoPassos } from '../../ui/ProgressoPassos';
+import { Icone } from '../../ui/Icone';
+import { TelaPasso } from '../../ui/TelaPasso';
 import { Texto } from '../../ui/Texto';
 
 type Feitos = Record<IdItemChecklist, boolean>;
@@ -37,7 +39,7 @@ export default function OnboardingChecklist() {
       await marcarItem(await abrirBanco(), id, novo);
     } catch {
       setFeitos((f) => ({ ...f, [id]: !novo }));
-      setAviso('⚠ Não foi possível salvar. Tente de novo.');
+      setAviso('Não foi possível salvar. Tente de novo.');
     }
   }
 
@@ -50,21 +52,25 @@ export default function OnboardingChecklist() {
   const n = ITENS_CHECKLIST.filter((i) => feitos[i.id]).length;
 
   return (
-    <ScrollView contentContainerStyle={estilos.tela}>
-      <Stack.Screen options={{ title: 'Prevenção' }} />
-      <ProgressoPassos passo="checklist" />
-      <Texto variante="titulo">Antes que aconteça</Texto>
+    <TelaPasso
+      passo="checklist"
+      titulo="Antes que aconteça"
+      acao={<Botao rotulo="Continuar" onPress={() => void continuar()} />}
+    >
       <Texto>Três cuidados simples deixam um roubo menos grave. Faça agora ou volte depois em Ajustes.</Texto>
-      <Texto accessibilityLiveRegion="polite">{`${n} de ${total} feitos`}</Texto>
+      <Texto variante="corpoForte" accessibilityLiveRegion="polite">{`${n} de ${total} feitos`}</Texto>
       {ITENS_CHECKLIST.map((i) => {
         const feito = feitos[i.id];
         return (
           <View key={i.id} style={estilos.caixa}>
-            <Texto variante="titulo" style={estilos.titulo}>
+            <Texto variante="secao" accessibilityRole="text">
               {i.titulo}
             </Texto>
             <Texto>{`Como fazer: ${i.comoFazer}`}</Texto>
-            <Texto>{feito ? 'Feito' : 'Falta fazer'}</Texto>
+            <View style={[estilos.estado, feito && estilos.estadoFeito]}>
+              <Icone nome={feito ? 'ok' : 'relogio'} tamanho={16} cor={cores.tinta} />
+              <Texto variante="rotulo">{feito ? 'Feito' : 'Falta fazer'}</Texto>
+            </View>
             <Botao
               rotulo={`${feito ? 'Desmarcar' : 'Marcar como feito'}: ${i.titulo}`}
               variante="secundario"
@@ -73,14 +79,32 @@ export default function OnboardingChecklist() {
           </View>
         );
       })}
-      {aviso ? <Texto accessibilityRole="alert" accessibilityLiveRegion="polite">{aviso}</Texto> : null}
-      <Botao rotulo="Continuar" onPress={() => void continuar()} />
-    </ScrollView>
+      {aviso ? <Aviso mensagem={aviso} /> : null}
+    </TelaPasso>
   );
 }
 
 const estilos = StyleSheet.create({
-  tela: { padding: espacos.m, gap: espacos.m },
-  caixa: { gap: espacos.p, borderWidth: 2, borderColor: cores.petroleo, borderRadius: 12, padding: espacos.m, backgroundColor: cores.branco },
-  titulo: { fontSize: 20, lineHeight: 28 },
+  caixa: {
+    gap: espacos.p,
+    borderWidth: bordas.fina,
+    borderColor: cores.bordaSuave,
+    borderRadius: raios.m,
+    padding: espacos.m,
+    backgroundColor: cores.branco,
+  },
+  // Estado sempre em texto e ícone; o fundo só reforça.
+  estado: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: espacos.p,
+    borderRadius: raios.pilula,
+    borderWidth: bordas.fina,
+    borderColor: cores.petroleo,
+    paddingHorizontal: espacos.pm,
+    paddingVertical: espacos.xs,
+    backgroundColor: cores.areia,
+  },
+  estadoFeito: { backgroundColor: cores.esmeraldaSuave },
 });

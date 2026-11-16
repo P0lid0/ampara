@@ -28,6 +28,13 @@ async function abrirEmergencia() {
 }
 
 describe('tela de entrada', () => {
+  it('"Estou no aparelho de outra pessoa" vem em bloco próprio, com a pergunta "Seu celular foi roubado?"', async () => {
+    await render(<Entrar />);
+    expect(screen.getByText('Seu celular foi roubado?')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Estou no aparelho de outra pessoa' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Entrar' })).toBeTruthy();
+  });
+
   it('429 em /auth/emergencia mostra "Muitas tentativas erradas. Aguarde 15 minutos."', async () => {
     fetchMock.mockResolvedValue(new Response(null, { status: 429 }));
     await abrirEmergencia();

@@ -1,13 +1,15 @@
-import { Stack, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { mensagemDeErro } from '../../api/cliente';
 import { api } from '../../api/endpoints';
 import type { ContaCatalogo } from '../../api/tipos';
 import { concluirPassoSeguro } from '../../onboarding/passos';
-import { cores, espacos, tamanhos } from '../../theme/tokens';
+import { bordas, cores, espacos, raios, tamanhos } from '../../theme/tokens';
+import { Aviso } from '../../ui/Aviso';
 import { Botao } from '../../ui/Botao';
-import { ProgressoPassos } from '../../ui/ProgressoPassos';
+import { Icone } from '../../ui/Icone';
+import { TelaPasso } from '../../ui/TelaPasso';
 import { Texto } from '../../ui/Texto';
 
 /** "2026-11-12" ou "2026-11-12T00:00:00Z" -> "12/11/2026" (sem passar por Date: não há fuso a errar). */
@@ -74,15 +76,18 @@ export default function OnboardingContas() {
     }
   }
 
+  const acao = (
+    <>
+      {lista !== null ? <Botao rotulo="Continuar" onPress={continuar} carregando={enviando} /> : null}
+      {lista === null && erro ? <Botao rotulo="Tentar de novo" onPress={() => void carregar()} /> : null}
+      <Botao rotulo="Fazer depois" variante="texto" desabilitado={enviando} onPress={() => void seguir()} />
+    </>
+  );
+
   return (
-    <ScrollView contentContainerStyle={estilos.tela} keyboardShouldPersistTaps="handled">
-      <Stack.Screen options={{ title: 'Bancos e operadora' }} />
-      <ProgressoPassos passo="contas" />
-      <Texto variante="titulo">Seus bancos e sua operadora</Texto>
-      <Texto>
-        Marque onde você tem conta e qual é a sua operadora. Se o celular for roubado, quem te ajuda vê aqui o telefone e o link para bloquear
-        cada um. Você pode fazer isso depois.
-      </Texto>
+    <TelaPasso passo="contas" titulo="Seus bancos e sua operadora" acao={acao}>
+      <Texto>Marque onde você tem conta e qual é a sua operadora.</Texto>
+      <Texto>Se o celular for roubado, você vê aqui o telefone e o link para bloquear cada um. Pode fazer isso depois.</Texto>
 
       {lista === null && !erro ? <Texto accessibilityLiveRegion="polite">Carregando...</Texto> : null}
 
@@ -100,12 +105,15 @@ export default function OnboardingContas() {
             ].join('. ')}
             accessibilityState={{ checked: marcado }}
             onPress={() => alternar(c.id)}
+            android_ripple={{ color: cores.areiaFunda }}
             style={[estilos.cartao, marcado && estilos.cartaoMarcado]}
           >
             <View style={estilos.linha}>
-              <Texto style={estilos.marca}>{marcado ? '☑' : '☐'}</Texto>
+              <View style={[estilos.caixa, marcado && estilos.caixaMarcada]}>
+                {marcado ? <Icone nome="ok" tamanho={20} cor={cores.areia} /> : null}
+              </View>
               <View style={estilos.texto}>
-                <Texto variante="titulo" style={estilos.nome} accessibilityRole="text">
+                <Texto variante="secao" accessibilityRole="text">
                   {c.nome}
                 </Texto>
                 <Texto variante="legenda">{TIPO_TEXTO[c.tipo]}</Texto>
@@ -118,29 +126,35 @@ export default function OnboardingContas() {
         );
       })}
 
-      {erro ? <Texto accessibilityRole="alert" accessibilityLiveRegion="polite">{`⚠ ${erro}`}</Texto> : null}
-      {lista === null && erro ? <Botao rotulo="Tentar de novo" variante="secundario" onPress={() => void carregar()} /> : null}
-
-      {lista !== null ? <Botao rotulo="Continuar" onPress={continuar} carregando={enviando} /> : null}
-      <Botao rotulo="Fazer depois" variante="secundario" desabilitado={enviando} onPress={() => void seguir()} />
-    </ScrollView>
+      {erro ? <Aviso mensagem={erro} /> : null}
+    </TelaPasso>
   );
 }
 
 const estilos = StyleSheet.create({
-  tela: { padding: espacos.m, gap: espacos.m },
   cartao: {
     minHeight: tamanhos.alvoMin,
     minWidth: tamanhos.alvoMin,
-    borderWidth: 2,
-    borderColor: cores.petroleo,
-    borderRadius: 12,
+    borderWidth: bordas.fina,
+    borderColor: cores.bordaSuave,
+    borderRadius: raios.m,
     padding: espacos.m,
     backgroundColor: cores.branco,
+    overflow: 'hidden',
   },
-  cartaoMarcado: { borderWidth: 4 },
+  // Marcado: contorno petróleo de 2 px, mais o ✓ dentro da caixa (nunca só cor).
+  cartaoMarcado: { borderWidth: bordas.padrao, borderColor: cores.petroleo },
   linha: { flexDirection: 'row', gap: espacos.m },
-  marca: { fontSize: 28, lineHeight: 32 },
-  texto: { flex: 1, gap: 2 },
-  nome: { fontSize: 20, lineHeight: 28 },
+  caixa: {
+    width: 28,
+    height: 28,
+    borderRadius: raios.p,
+    borderWidth: bordas.padrao,
+    borderColor: cores.petroleo,
+    backgroundColor: cores.branco,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  caixaMarcada: { backgroundColor: cores.petroleo },
+  texto: { flex: 1, gap: espacos.xs },
 });

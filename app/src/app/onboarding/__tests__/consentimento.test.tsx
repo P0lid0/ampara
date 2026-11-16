@@ -40,7 +40,9 @@ describe('onboarding: consentimento da rota', () => {
   it('mostra o texto simples e a barra "Passo 2 de 8"', async () => {
     await render(<OnboardingConsentimento />);
     expect(screen.getByText('Passo 2 de 8')).toBeTruthy();
-    expect(screen.getByText(/Guardamos por 7 dias por onde você andou, só para você marcar onde foi o roubo e gerar o BO\. Só você vê\. Pode desligar quando quiser em Ajustes\./)).toBeTruthy();
+    expect(screen.getByText('Só você vê a sua rota.')).toBeTruthy();
+    expect(screen.getByText(/Guardamos por 7 dias por onde você andou, para você marcar onde foi o roubo e gerar o BO\./)).toBeTruthy();
+    expect(screen.getByText('Você pode desligar quando quiser em Ajustes.')).toBeTruthy();
   });
 
   it('aceitar chama api.me.consentimentoRota(true) e depois pede localização em primeiro e segundo plano, cada uma depois de uma explicação', async () => {

@@ -44,6 +44,12 @@ async function irParaPasso(n: 1 | 2 | 3) {
 }
 
 describe('onboarding do IMEI', () => {
+  it('um contador só, "Passo 3 de 8", em todas as partes (nunca "de 4")', async () => {
+    await irParaPasso(1);
+    expect(screen.getByText('Passo 3 de 8')).toBeTruthy();
+    expect(screen.queryByText(/de 4/)).toBeNull();
+  });
+
   it('mostra 4 modos de obter: caixa/nota, *#06#, Ajustes, câmera', async () => {
     await irParaPasso(1);
     expect(screen.getByText(/caixa ou na nota fiscal/)).toBeTruthy();

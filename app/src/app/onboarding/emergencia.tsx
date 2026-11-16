@@ -1,13 +1,12 @@
-import { Stack, useRouter } from 'expo-router';
-import { useState } from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useRef, useState } from 'react';
 import { mensagemDeErro } from '../../api/cliente';
 import { api } from '../../api/endpoints';
 import { concluirPassoSeguro } from '../../onboarding/passos';
-import { espacos } from '../../theme/tokens';
+import { Aviso } from '../../ui/Aviso';
 import { Botao } from '../../ui/Botao';
-import { Campo } from '../../ui/Campo';
-import { ProgressoPassos } from '../../ui/ProgressoPassos';
+import { Campo, type InstanciaCampo } from '../../ui/Campo';
+import { TelaPasso } from '../../ui/TelaPasso';
 import { Texto } from '../../ui/Texto';
 
 // Tamanhos são regras do app (o contrato não fixa): código de 6 números, palavra de 4+ caracteres.
@@ -26,6 +25,7 @@ export default function OnboardingEmergencia() {
   const [erroPalavra, setErroPalavra] = useState<string | undefined>();
   const [erro, setErro] = useState<string | undefined>();
   const [enviando, setEnviando] = useState(false);
+  const refPalavra2 = useRef<InstanciaCampo>(null);
 
   async function salvar() {
     setErro(undefined);
@@ -53,20 +53,21 @@ export default function OnboardingEmergencia() {
   }
 
   return (
-    <ScrollView contentContainerStyle={estilos.tela} keyboardShouldPersistTaps="handled">
-      <Stack.Screen options={{ title: 'Código de emergência' }} />
-      <ProgressoPassos passo="emergencia" />
-      <Texto variante="titulo">Seu código de emergência</Texto>
-      <Texto>
-        Se o seu celular for roubado, você poderá usar o Ampara no aparelho de outra pessoa. Para isso, crie um código de 6 números e uma
-        palavra secreta. Anote os dois em um lugar seguro: o Ampara não mostra o código de novo. Digite cada um duas vezes para não errar.
-      </Texto>
+    <TelaPasso
+      passo="emergencia"
+      titulo="Seu código de emergência"
+      acao={<Botao rotulo="Salvar" onPress={salvar} carregando={enviando} />}
+    >
+      <Texto variante="corpoForte">Com ele você usa o Ampara no aparelho de outra pessoa, se o seu for roubado.</Texto>
+      <Texto>Crie um código de 6 números e uma palavra secreta. Digite cada um duas vezes.</Texto>
+      <Texto>Anote os dois em um lugar seguro: o Ampara não mostra o código de novo.</Texto>
       <Campo
         rotulo="Código de emergência"
         valor={codigo}
         onChangeText={(t) => setCodigo(t.replace(/\D/g, '').slice(0, 6))}
         keyboardType="number-pad"
         secureTextEntry
+        revelavel
         autoComplete="off"
         autoCorrect={false}
         importantForAutofill="no"
@@ -78,6 +79,7 @@ export default function OnboardingEmergencia() {
         onChangeText={(t) => setCodigo2(t.replace(/\D/g, '').slice(0, 6))}
         keyboardType="number-pad"
         secureTextEntry
+        revelavel
         autoComplete="off"
         autoCorrect={false}
         importantForAutofill="no"
@@ -87,28 +89,31 @@ export default function OnboardingEmergencia() {
         valor={palavra}
         onChangeText={setPalavra}
         secureTextEntry
+        revelavel
         autoCapitalize="none"
         autoCorrect={false}
         autoComplete="off"
         importantForAutofill="no"
+        returnKeyType="next"
+        onSubmitEditing={() => refPalavra2.current?.focus()}
+        submitBehavior="submit"
         erro={erroPalavra}
       />
       <Campo
+        entradaRef={refPalavra2}
         rotulo="Repita a palavra secreta"
         valor={palavra2}
         onChangeText={setPalavra2}
         secureTextEntry
+        revelavel
         autoCapitalize="none"
         autoCorrect={false}
         autoComplete="off"
         importantForAutofill="no"
+        returnKeyType="done"
+        onSubmitEditing={salvar}
       />
-      {erro ? <Texto accessibilityRole="alert" accessibilityLiveRegion="polite">{`⚠ ${erro}`}</Texto> : null}
-      <Botao rotulo="Salvar" onPress={salvar} carregando={enviando} />
-    </ScrollView>
+      {erro ? <Aviso mensagem={erro} /> : null}
+    </TelaPasso>
   );
 }
-
-const estilos = StyleSheet.create({
-  tela: { padding: espacos.m, gap: espacos.m },
-});

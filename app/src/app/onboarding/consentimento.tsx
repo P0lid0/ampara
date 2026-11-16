@@ -1,14 +1,14 @@
-import { Stack, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import * as Location from 'expo-location';
 import { useState } from 'react';
-import { Linking, ScrollView, StyleSheet } from 'react-native';
+import { Linking } from 'react-native';
 import { mensagemDeErro } from '../../api/cliente';
 import { api } from '../../api/endpoints';
 import { concluirPassoSeguro } from '../../onboarding/passos';
 import { iniciarRota } from '../../rota/tarefa';
-import { espacos } from '../../theme/tokens';
+import { Aviso } from '../../ui/Aviso';
 import { Botao } from '../../ui/Botao';
-import { ProgressoPassos } from '../../ui/ProgressoPassos';
+import { TelaPasso } from '../../ui/TelaPasso';
 import { Texto } from '../../ui/Texto';
 
 export const MSG_ROTA_PAUSADA = 'Rota pausada: falta a permissão de localização.';
@@ -94,61 +94,59 @@ export default function OnboardingConsentimento() {
     setEtapa('pronto');
   }
 
-  return (
-    <ScrollView contentContainerStyle={estilos.tela}>
-      <Stack.Screen options={{ title: 'Sua rota' }} />
-      <ProgressoPassos passo="consentimento" />
+  const TITULOS: Record<Etapa, string> = {
+    consentimento: 'Guardar a sua rota',
+    primeiroPlano: 'Localização com o app aberto',
+    segundoPlano: 'Localização o tempo todo',
+    pronto: 'Tudo certo',
+  };
 
+  const acao =
+    etapa === 'consentimento' ? (
+      <>
+        <Botao rotulo="Aceitar" onPress={() => decidir(true)} carregando={ocupado} />
+        <Botao rotulo="Agora não" variante="texto" onPress={() => decidir(false)} desabilitado={ocupado} />
+      </>
+    ) : etapa === 'primeiroPlano' ? (
+      <Botao rotulo="Permitir localização" onPress={pedirPrimeiroPlano} carregando={ocupado} />
+    ) : etapa === 'segundoPlano' ? (
+      <Botao rotulo="Permitir em segundo plano" onPress={pedirSegundoPlano} carregando={ocupado} />
+    ) : (
+      <Botao rotulo="Continuar" onPress={concluirEIr} />
+    );
+
+  return (
+    <TelaPasso passo="consentimento" titulo={TITULOS[etapa]} acao={acao}>
       {etapa === 'consentimento' ? (
         <>
-          <Texto variante="titulo">Guardar a sua rota</Texto>
-          <Texto>
-            Guardamos por 7 dias por onde você andou, só para você marcar onde foi o roubo e gerar o BO. Só você vê. Pode desligar quando
-            quiser em Ajustes.
-          </Texto>
-          {erro ? <Texto accessibilityRole="alert" accessibilityLiveRegion="polite">{`⚠ ${erro}`}</Texto> : null}
-          <Botao rotulo="Aceitar" onPress={() => decidir(true)} carregando={ocupado} />
-          <Botao rotulo="Agora não" variante="secundario" onPress={() => decidir(false)} desabilitado={ocupado} />
+          <Texto variante="corpoForte">Só você vê a sua rota.</Texto>
+          <Texto>Guardamos por 7 dias por onde você andou, para você marcar onde foi o roubo e gerar o BO.</Texto>
+          <Texto>Você pode desligar quando quiser em Ajustes.</Texto>
+          {erro ? <Aviso mensagem={erro} /> : null}
         </>
       ) : null}
 
       {etapa === 'primeiroPlano' ? (
-        <>
-          <Texto variante="titulo">Localização com o app aberto</Texto>
-          <Texto>Para guardar a rota, o Android vai perguntar se o Ampara pode usar a sua localização enquanto você usa o app.</Texto>
-          <Botao rotulo="Permitir localização" onPress={pedirPrimeiroPlano} carregando={ocupado} />
-        </>
+        <Texto>Para guardar a rota, o Android vai perguntar se o Ampara pode usar a sua localização enquanto você usa o app.</Texto>
       ) : null}
 
       {etapa === 'segundoPlano' ? (
         <>
-          <Texto variante="titulo">Localização o tempo todo</Texto>
-          <Texto>
-            Para a rota continuar guardada com a tela apagada, escolha "Permitir o tempo todo" na próxima pergunta do Android. Sem isso a rota
-            só é guardada com o app aberto.
-          </Texto>
-          <Botao rotulo="Permitir em segundo plano" onPress={pedirSegundoPlano} carregando={ocupado} />
+          <Texto>Para a rota continuar guardada com a tela apagada, escolha "Permitir o tempo todo" na próxima pergunta do Android.</Texto>
+          <Texto>Sem isso a rota só é guardada com o app aberto.</Texto>
         </>
       ) : null}
 
       {etapa === 'pronto' ? (
-        <>
-          <Texto variante="titulo">Tudo certo</Texto>
-          {pausada ? (
-            <>
-              <Texto accessibilityRole="alert" accessibilityLiveRegion="polite">{`⚠ ${MSG_ROTA_PAUSADA}`}</Texto>
-              <Texto>Você pode permitir depois, em Ajustes do celular.</Texto>
-            </>
-          ) : (
-            <Texto>A sua rota será guardada por 7 dias.</Texto>
-          )}
-          <Botao rotulo="Continuar" onPress={concluirEIr} />
-        </>
+        pausada ? (
+          <>
+            <Aviso mensagem={MSG_ROTA_PAUSADA} />
+            <Texto>Você pode permitir depois, em Ajustes do celular.</Texto>
+          </>
+        ) : (
+          <Texto>A sua rota será guardada por 7 dias.</Texto>
+        )
       ) : null}
-    </ScrollView>
+    </TelaPasso>
   );
 }
-
-const estilos = StyleSheet.create({
-  tela: { padding: espacos.m, gap: espacos.m },
-});

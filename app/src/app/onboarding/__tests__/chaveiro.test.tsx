@@ -49,10 +49,11 @@ async function digitarEParear(id = ID) {
 }
 
 describe('onboarding: chaveiro', () => {
-  it('mostra "Passo 6 de 8" e a ajuda do código de demonstração', async () => {
+  it('mostra "Passo 6 de 8", explica o que é o chaveiro e não mostra o código de demonstração', async () => {
     await render(<OnboardingChaveiro />);
     expect(screen.getByText('Passo 6 de 8')).toBeTruthy();
-    expect(screen.getByText(/chaveiro-ampara-xxxxxx/)).toBeTruthy();
+    expect(screen.getByText('O chaveiro é um botão que você leva com você.')).toBeTruthy();
+    expect(screen.queryByText(/xxxxxx/)).toBeNull();
   });
 
   it('parear digitado chama criar(deviceId) e, quando aparece em listar(), mostra o cartão e deixa continuar', async () => {

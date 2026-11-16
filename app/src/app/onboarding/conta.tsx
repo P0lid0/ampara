@@ -1,13 +1,12 @@
-import { Stack, useRouter } from 'expo-router';
-import { useState } from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useRef, useState } from 'react';
 import { mensagemDeErro } from '../../api/cliente';
 import { criarConta } from '../../auth/sessao';
 import { concluirPassoSeguro } from '../../onboarding/passos';
-import { espacos } from '../../theme/tokens';
+import { Aviso } from '../../ui/Aviso';
 import { Botao } from '../../ui/Botao';
-import { Campo } from '../../ui/Campo';
-import { ProgressoPassos } from '../../ui/ProgressoPassos';
+import { Campo, type InstanciaCampo } from '../../ui/Campo';
+import { TelaPasso } from '../../ui/TelaPasso';
 import { Texto } from '../../ui/Texto';
 
 export const MSG_SENHA_CURTA = 'Use pelo menos 8 caracteres.';
@@ -20,6 +19,8 @@ export default function OnboardingConta() {
   const [erroSenha, setErroSenha] = useState<string | undefined>();
   const [erro, setErro] = useState<string | undefined>();
   const [enviando, setEnviando] = useState(false);
+  const refEmail = useRef<InstanciaCampo>(null);
+  const refSenha = useRef<InstanciaCampo>(null);
 
   async function enviar() {
     setErro(undefined);
@@ -41,19 +42,48 @@ export default function OnboardingConta() {
   }
 
   return (
-    <ScrollView contentContainerStyle={estilos.tela} keyboardShouldPersistTaps="handled">
-      <Stack.Screen options={{ title: 'Sua conta' }} />
-      <ProgressoPassos passo="conta" />
-      <Texto variante="titulo">Crie sua conta</Texto>
-      <Campo rotulo="Nome" valor={nome} onChangeText={setNome} autoComplete="name" />
-      <Campo rotulo="E-mail" valor={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" autoCorrect={false} autoComplete="email" />
-      <Campo rotulo="Senha" valor={senha} onChangeText={setSenha} secureTextEntry autoCapitalize="none" autoComplete="new-password" erro={erroSenha} />
-      {erro ? <Texto accessibilityRole="alert" accessibilityLiveRegion="polite">{`⚠ ${erro}`}</Texto> : null}
-      <Botao rotulo="Criar conta" onPress={enviar} carregando={enviando} />
-    </ScrollView>
+    <TelaPasso
+      passo="conta"
+      titulo="Crie sua conta"
+      acao={<Botao rotulo="Criar conta" onPress={enviar} carregando={enviando} />}
+    >
+      <Texto>Com a conta, seus dados ficam guardados e você acessa de outro aparelho.</Texto>
+      <Campo
+        rotulo="Nome"
+        valor={nome}
+        onChangeText={setNome}
+        autoComplete="name"
+        returnKeyType="next"
+        onSubmitEditing={() => refEmail.current?.focus()}
+        submitBehavior="submit"
+      />
+      <Campo
+        entradaRef={refEmail}
+        rotulo="E-mail"
+        valor={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
+        autoCorrect={false}
+        autoComplete="email"
+        returnKeyType="next"
+        onSubmitEditing={() => refSenha.current?.focus()}
+        submitBehavior="submit"
+      />
+      <Campo
+        entradaRef={refSenha}
+        rotulo="Senha"
+        valor={senha}
+        onChangeText={setSenha}
+        secureTextEntry
+        revelavel
+        autoCapitalize="none"
+        autoComplete="new-password"
+        erro={erroSenha}
+        returnKeyType="done"
+        onSubmitEditing={enviar}
+      />
+      {erro ? <Aviso mensagem={erro} /> : null}
+    </TelaPasso>
   );
 }
-
-const estilos = StyleSheet.create({
-  tela: { padding: espacos.m, gap: espacos.m },
-});

@@ -1,14 +1,15 @@
-import { Stack, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import { mensagemDeErro } from '../../api/cliente';
 import { api } from '../../api/endpoints';
 import type { ConviteDto, GuardiaoDto } from '../../api/tipos';
 import { concluirPassoSeguro } from '../../onboarding/passos';
-import { cores, espacos } from '../../theme/tokens';
+import { bordas, cores, espacos, raios } from '../../theme/tokens';
+import { Aviso } from '../../ui/Aviso';
 import { Botao } from '../../ui/Botao';
-import { ProgressoPassos } from '../../ui/ProgressoPassos';
+import { TelaPasso } from '../../ui/TelaPasso';
 import { Texto } from '../../ui/Texto';
 
 const MAXIMO = 3;
@@ -99,30 +100,48 @@ export default function OnboardingGuardioes() {
     router.replace('/');
   }
 
-  return (
-    <ScrollView contentContainerStyle={estilos.tela} keyboardShouldPersistTaps="handled">
-      <Stack.Screen options={{ title: 'Guardiões' }} />
-      <ProgressoPassos passo="guardioes" />
-      <Texto variante="titulo">Seus guardiões</Texto>
-      <Texto>
-        Guardiões são até 3 pessoas de confiança que recebem o alerta se o seu celular for roubado. Para convidar, mostre o código ou o QR a
-        quem você escolher. Você pode fazer isso depois.
-      </Texto>
+  const temGuardiao = guardioes.length > 0;
+  const acao = (
+    <>
+      {temGuardiao ? <Botao rotulo="Continuar" onPress={() => void seguir()} /> : null}
+      <Botao
+        rotulo="Convidar"
+        variante={temGuardiao ? 'secundario' : 'primario'}
+        desabilitado={cheio}
+        carregando={ocupado}
+        onPress={() => void convidar()}
+      />
+      {!temGuardiao ? <Botao rotulo="Fazer depois" variante="texto" onPress={() => void seguir()} /> : null}
+    </>
+  );
 
-      {guardioes.length > 0 ? (
+  return (
+    <TelaPasso passo="guardioes" titulo="Seus guardiões" acao={acao}>
+      <Texto variante="corpoForte">Até 3 pessoas de confiança recebem o alerta se o seu celular for roubado.</Texto>
+      <Texto>Para convidar, mostre o código ou o QR a quem você escolher. Pode fazer isso depois.</Texto>
+
+      {temGuardiao ? (
         <View style={estilos.lista} accessibilityLabel="Guardiões, do primeiro a ser avisado ao último">
           {guardioes.map((g, i) => (
             <View key={g.guardiaoId} style={estilos.item}>
-              <Texto style={estilos.nomeGuardiao}>{`${i + 1}. `}</Texto>
-              <Texto style={estilos.nomeGuardiao}>{g.nome}</Texto>
+              <View style={estilos.nomeLinha}>
+                <Texto variante="secao">{`${i + 1}. `}</Texto>
+                <Texto variante="secao" style={estilos.nome}>
+                  {g.nome}
+                </Texto>
+              </View>
               <View style={estilos.ordem}>
-                <Botao rotulo={`Subir ${g.nome}`} variante="secundario" desabilitado={i === 0} onPress={() => void mover(i, -1)} />
-                <Botao
-                  rotulo={`Descer ${g.nome}`}
-                  variante="secundario"
-                  desabilitado={i === guardioes.length - 1}
-                  onPress={() => void mover(i, 1)}
-                />
+                <View style={estilos.metade}>
+                  <Botao rotulo={`Subir ${g.nome}`} variante="secundario" desabilitado={i === 0} onPress={() => void mover(i, -1)} />
+                </View>
+                <View style={estilos.metade}>
+                  <Botao
+                    rotulo={`Descer ${g.nome}`}
+                    variante="secundario"
+                    desabilitado={i === guardioes.length - 1}
+                    onPress={() => void mover(i, 1)}
+                  />
+                </View>
               </View>
             </View>
           ))}
@@ -131,12 +150,11 @@ export default function OnboardingGuardioes() {
       ) : null}
 
       {cheio ? <Texto accessibilityLiveRegion="polite">Você já tem 3 guardiões.</Texto> : null}
-      <Botao rotulo="Convidar" desabilitado={cheio} carregando={ocupado} onPress={() => void convidar()} />
 
       {convite ? (
         <View style={estilos.convite}>
           <Texto>Peça para a pessoa abrir o Ampara e digitar este código ou ler o QR:</Texto>
-          <Texto variante="titulo" style={estilos.codigo} accessibilityLabel={`Código ${convite.codigo.split('').join(' ')}`}>
+          <Texto variante="exibicao" style={estilos.codigo} accessibilityLabel={`Código ${convite.codigo.split('').join(' ')}`}>
             {convite.codigo}
           </Texto>
           <View
@@ -147,27 +165,43 @@ export default function OnboardingGuardioes() {
           >
             <QRCode value={payloadDoConvite(convite.codigo)} size={200} backgroundColor={cores.branco} color={cores.tinta} />
           </View>
-          <Texto accessibilityLiveRegion="polite">
-            {vencido ? '⚠ Esse código venceu. Toque em Convidar para gerar outro.' : `Vale por ${mmss(segundos)}`}
-          </Texto>
-          <Botao rotulo="Atualizar a lista" variante="secundario" onPress={() => void carregar()} />
+          {vencido ? (
+            <Aviso mensagem="Esse código venceu. Toque em Convidar para gerar outro." />
+          ) : (
+            <Texto variante="corpoForte" accessibilityLiveRegion="polite">{`Vale por ${mmss(segundos)}`}</Texto>
+          )}
+          <Botao rotulo="Atualizar a lista" variante="texto" onPress={() => void carregar()} />
         </View>
       ) : null}
 
-      {erro ? <Texto accessibilityRole="alert" accessibilityLiveRegion="polite">{`⚠ ${erro}`}</Texto> : null}
-
-      <Botao rotulo={guardioes.length > 0 ? 'Continuar' : 'Fazer depois'} variante={guardioes.length > 0 ? 'primario' : 'secundario'} onPress={() => void seguir()} />
-    </ScrollView>
+      {erro ? <Aviso mensagem={erro} /> : null}
+    </TelaPasso>
   );
 }
 
 const estilos = StyleSheet.create({
-  tela: { padding: espacos.m, gap: espacos.m },
-  lista: { gap: espacos.m },
-  item: { gap: espacos.p, borderWidth: 2, borderColor: cores.petroleo, borderRadius: 12, padding: espacos.m, backgroundColor: cores.branco },
-  nomeGuardiao: { fontSize: 20, lineHeight: 28 },
+  lista: { gap: espacos.pm },
+  item: {
+    gap: espacos.pm,
+    borderWidth: bordas.fina,
+    borderColor: cores.bordaSuave,
+    borderRadius: raios.m,
+    padding: espacos.m,
+    backgroundColor: cores.branco,
+  },
+  nomeLinha: { flexDirection: 'row', alignItems: 'baseline' },
+  nome: { flex: 1 },
   ordem: { flexDirection: 'row', gap: espacos.p },
-  convite: { gap: espacos.m, alignItems: 'center' },
-  codigo: { fontSize: 40, lineHeight: 48, letterSpacing: 6 },
-  qr: { padding: espacos.m, backgroundColor: cores.branco, borderRadius: 12 },
+  metade: { flex: 1 },
+  convite: {
+    gap: espacos.m,
+    alignItems: 'center',
+    padding: espacos.m,
+    borderRadius: raios.g,
+    backgroundColor: cores.branco,
+    borderWidth: bordas.fina,
+    borderColor: cores.bordaSuave,
+  },
+  codigo: { letterSpacing: 6, textAlign: 'center' },
+  qr: { padding: espacos.m, backgroundColor: cores.branco, borderRadius: raios.m },
 });

@@ -1,14 +1,16 @@
-import { Stack, useRouter } from 'expo-router';
-import { useState } from 'react';
-import { Linking, ScrollView, StyleSheet, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useRef, useState } from 'react';
+import { Linking, StyleSheet, View } from 'react-native';
 import { mensagemDeErro } from '../../api/cliente';
 import { api } from '../../api/endpoints';
 import { extrairImeiDeCodigo, imeiValido } from '../../imei/luhn';
 import { concluirPassoSeguro } from '../../onboarding/passos';
 import { espacos } from '../../theme/tokens';
+import { Aviso } from '../../ui/Aviso';
 import { Botao } from '../../ui/Botao';
-import { Campo } from '../../ui/Campo';
+import { Campo, type InstanciaCampo } from '../../ui/Campo';
 import { LeitorCodigo } from '../../ui/LeitorCodigo';
+import { TelaPasso } from '../../ui/TelaPasso';
 import { Texto } from '../../ui/Texto';
 
 const MSG_IMEI_INVALIDO = 'O IMEI tem 15 números e passa numa conferência. Confira os dígitos.';
@@ -30,6 +32,7 @@ export default function OnboardingImei() {
   const [modelo, setModelo] = useState('');
   const [erro, setErro] = useState<string | undefined>();
   const [enviando, setEnviando] = useState(false);
+  const refModelo = useRef<InstanciaCampo>(null);
 
   const valido = imeiValido(imei);
   const erroImei = imei.length >= 15 && !valido ? MSG_IMEI_INVALIDO : undefined;
@@ -69,25 +72,46 @@ export default function OnboardingImei() {
     }
   }
 
-  return (
-    <ScrollView contentContainerStyle={estilos.tela} keyboardShouldPersistTaps="handled">
-      <Stack.Screen options={{ title: 'IMEI do celular' }} />
-      <Texto variante="legenda">{`Passo ${passo + 1} de 4`}</Texto>
+  const titulos = ['Por que pedimos o IMEI', 'Onde achar o IMEI', 'Informe o número', 'Marca e modelo'];
+  const voltar = passo > 0 ? <Botao rotulo="Voltar" variante="texto" onPress={() => setPasso(passo - 1)} /> : null;
 
+  let acao;
+  if (passo === 0) {
+    acao = <Botao rotulo="Começar" onPress={() => setPasso(1)} />;
+  } else if (passo === 1) {
+    acao = (
+      <>
+        <Botao rotulo="Continuar" onPress={() => setPasso(2)} />
+        {voltar}
+      </>
+    );
+  } else if (passo === 2) {
+    acao = (
+      <>
+        <Botao rotulo="Continuar" desabilitado={!valido} onPress={() => setPasso(3)} />
+        {voltar}
+      </>
+    );
+  } else {
+    acao = (
+      <>
+        <Botao rotulo="Confirmar" desabilitado={!podeConfirmar} carregando={enviando} onPress={confirmar} />
+        {voltar}
+      </>
+    );
+  }
+
+  return (
+    <TelaPasso passo="imei" titulo={titulos[passo]} acao={acao}>
       {passo === 0 ? (
         <>
-          <Texto variante="titulo">Por que pedimos o IMEI</Texto>
-          <Texto>
-            O boletim de ocorrência eletrônico de roubo ou furto de celular exige o IMEI. Na hora do susto você não vai lembrar dele,
-            então guarde agora.
-          </Texto>
-          <Botao rotulo="Começar" onPress={() => setPasso(1)} />
+          <Texto variante="corpoForte">Na hora do susto você não vai lembrar do IMEI. Guarde agora.</Texto>
+          <Texto>O boletim de ocorrência eletrônico de roubo ou furto de celular exige esse número.</Texto>
         </>
       ) : null}
 
       {passo === 1 ? (
         <>
-          <Texto variante="titulo">Onde achar o IMEI</Texto>
           <Texto>1. Na caixa ou na nota fiscal do celular (código de barras).</Texto>
           <Texto>2. Discando *#06# no celular.</Texto>
           <Texto>3. Em Ajustes, Sobre o telefone.</Texto>
@@ -103,20 +127,17 @@ export default function OnboardingImei() {
               );
             }}
           />
-          {avisoDiscador ? <Texto accessibilityLiveRegion="polite">{`⚠ ${avisoDiscador}`}</Texto> : null}
-          <Botao rotulo="Continuar" onPress={() => setPasso(2)} />
-          <Botao rotulo="Voltar" variante="secundario" onPress={() => setPasso(0)} />
+          {avisoDiscador ? <Aviso mensagem={avisoDiscador} /> : null}
         </>
       ) : null}
 
       {passo === 2 ? (
         <>
-          <Texto variante="titulo">Informe o número</Texto>
           {cameraNegada ? <Texto accessibilityLiveRegion="polite">Sem a câmera, digite o número.</Texto> : null}
-          {avisoLeitura ? <Texto accessibilityLiveRegion="polite">{`⚠ ${avisoLeitura}`}</Texto> : null}
+          {avisoLeitura ? <Aviso mensagem={avisoLeitura} /> : null}
           {modoNumero === 'escolha' ? (
             <View style={estilos.grupo}>
-              <Botao rotulo="Ler pela câmera" onPress={() => setModoNumero('camera')} />
+              <Botao rotulo="Ler pela câmera" variante="secundario" onPress={() => setModoNumero('camera')} />
               <Botao rotulo="Digitar o número" variante="secundario" onPress={() => { setAvisoLeitura(undefined); setModoNumero('digitar'); }} />
             </View>
           ) : null}
@@ -139,26 +160,36 @@ export default function OnboardingImei() {
             />
           ) : null}
           {modoNumero === 'digitar' && valido ? <Texto variante="legenda">Confira se o número é o do seu celular.</Texto> : null}
-          <Botao rotulo="Continuar" desabilitado={!valido} onPress={() => setPasso(3)} />
-          <Botao rotulo="Voltar" variante="secundario" onPress={() => setPasso(1)} />
         </>
       ) : null}
 
       {passo === 3 ? (
         <>
-          <Texto variante="titulo">Marca e modelo</Texto>
-          <Campo rotulo="Marca" valor={marca} onChangeText={setMarca} autoCapitalize="words" />
-          <Campo rotulo="Modelo" valor={modelo} onChangeText={setModelo} autoCapitalize="words" />
-          {erro ? <Texto accessibilityRole="alert" accessibilityLiveRegion="polite">{`⚠ ${erro}`}</Texto> : null}
-          <Botao rotulo="Confirmar" desabilitado={!podeConfirmar} carregando={enviando} onPress={confirmar} />
-          <Botao rotulo="Voltar" variante="secundario" onPress={() => setPasso(2)} />
+          <Campo
+            rotulo="Marca"
+            valor={marca}
+            onChangeText={setMarca}
+            autoCapitalize="words"
+            returnKeyType="next"
+            onSubmitEditing={() => refModelo.current?.focus()}
+            submitBehavior="submit"
+          />
+          <Campo
+            entradaRef={refModelo}
+            rotulo="Modelo"
+            valor={modelo}
+            onChangeText={setModelo}
+            autoCapitalize="words"
+            returnKeyType="done"
+            onSubmitEditing={confirmar}
+          />
+          {erro ? <Aviso mensagem={erro} /> : null}
         </>
       ) : null}
-    </ScrollView>
+    </TelaPasso>
   );
 }
 
 const estilos = StyleSheet.create({
-  tela: { padding: espacos.m, gap: espacos.m },
   grupo: { gap: espacos.m },
 });
