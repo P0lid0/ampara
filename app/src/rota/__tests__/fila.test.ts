@@ -1,5 +1,6 @@
 import { abrirBanco, type Banco } from '../../db/db';
 import { rotaRepo, type PontoRota } from '../../db/repos';
+import { ApiErro } from '../../api/cliente';
 import { enviarPendentes, registrarPontos } from '../fila';
 
 let db: Banco;
@@ -122,5 +123,63 @@ describe('fila da rota', () => {
     const enviar = jest.fn(async (_lote: PontoRota[]) => undefined);
     expect(await enviarPendentes(db, enviar)).toEqual({ enviados: 0, restantes: 0 });
     expect(enviar).not.toHaveBeenCalled();
+  });
+
+  // Itens 5 e 20: o servidor recusa o lote inteiro (422 ponto-invalido) se um ponto estiver fora de
+  // [agora-7d, agora+5min]; a fila não pode travar por causa de um ponto.
+  it('item 5: ponto com "em" mais de 4 min no futuro (relógio adiantado) não é gravado', async () => {
+    expect(await registrarPontos(db, [ponto(-10 * MIN), ponto(-3 * MIN, 1), ponto(MIN, 2)])).toBe(2);
+    expect(await contarLinhas()).toBe(2);
+  });
+
+  it('item 5: antes de enviar, pontos que saíram da janela do servidor (mais de 7 dias ou no futuro) saem da fila', async () => {
+    await rotaRepo(db).adicionar([
+      { ...ponto(8 * DIA), lat: -23.1 },
+      { ...ponto(-10 * MIN), lat: -23.2 },
+      { ...ponto(MIN), lat: -23.3 },
+    ]);
+    const enviar = jest.fn(async (_lote: PontoRota[]) => undefined);
+    const r = await enviarPendentes(db, enviar);
+    expect(enviar).toHaveBeenCalledTimes(1);
+    expect(enviar.mock.calls[0][0].map((p) => p.lat)).toEqual([-23.3]);
+    expect(r).toEqual({ enviados: 1, restantes: 0 });
+  });
+
+  it.each([422, 400])('item 20: %i num lote com um ponto recusado: o lote é dividido, os válidos vão e só o recusado sai da fila', async (status) => {
+    const RUIM = -23.9999;
+    const lista = pontos(10);
+    lista[6] = { ...lista[6], lat: RUIM };
+    await rotaRepo(db).adicionar(lista);
+    const aceitos: number[] = [];
+    const enviar = jest.fn(async (lote: PontoRota[]) => {
+      if (lote.some((p) => p.lat === RUIM)) throw new ApiErro(status, 'Regra de negócio violada');
+      aceitos.push(...lote.map((p) => p.lat));
+    });
+    const r = await enviarPendentes(db, enviar);
+    expect(aceitos).toHaveLength(9);
+    expect(aceitos).not.toContain(RUIM);
+    expect(r).toEqual({ enviados: 9, restantes: 0 });
+  });
+
+  it('item 20: depois de dividir um lote cheio, a fila segue para o lote seguinte', async () => {
+    const RUIM = -23.9999;
+    const lista = pontos(12);
+    lista[0] = { ...lista[0], lat: RUIM };
+    await rotaRepo(db).adicionar(lista);
+    const enviar = jest.fn(async (lote: PontoRota[]) => {
+      if (lote.some((p) => p.lat === RUIM)) throw new ApiErro(422, 'Regra de negócio violada');
+    });
+    const r = await enviarPendentes(db, enviar, 5);
+    expect(r).toEqual({ enviados: 11, restantes: 0 });
+  });
+
+  it.each([0, 401, 403, 408, 429, 500, 503])('item 20: erro %i (transitório ou de sessão/consentimento) para e mantém o lote inteiro', async (status) => {
+    await registrarPontos(db, pontos(3));
+    const enviar = jest.fn(async (_lote: PontoRota[]) => {
+      throw new ApiErro(status, 'falha');
+    });
+    const r = await enviarPendentes(db, enviar);
+    expect(enviar).toHaveBeenCalledTimes(1);
+    expect(r).toEqual({ enviados: 0, restantes: 3 });
   });
 });

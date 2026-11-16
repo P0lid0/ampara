@@ -134,6 +134,10 @@ export function rotaRepo(db: Banco) {
     async apagarMaisAntigosQue(isoUtc: string): Promise<void> {
       await db.run('DELETE FROM rota_pendente WHERE em < ?', [isoUtc]);
     },
+    /** Mesmo formato de `apagarMaisAntigosQue`; tira pontos com data no futuro (relógio adiantado). */
+    async apagarMaisNovosQue(isoUtc: string): Promise<void> {
+      await db.run('DELETE FROM rota_pendente WHERE em > ?', [isoUtc]);
+    },
   };
 }
 
