@@ -540,4 +540,10 @@ Resultado: 42 testes novos passando, `tsc --noEmit` sem erros. `ChaveiroDto.bate
 
 Resultado: 22 testes novos e 3 ajustados na tela de consentimento, todos passando (235 no app), `tsc --noEmit` sem erros. Precisão alta por decisão do controlador (no spike, Balanced entregou 0 pontos no emulador). A conferência no emulador com `adb emu geo fix` ficou adiada para a fase de build nativo. Sem migration de servidor.
 
+### 85. App: estado do alarme e conexão SignalR do guardião (Task 9 do plano 05)
+
+> Executar a Task 9 do plano 05 (app): escrever primeiro os testes do reducer puro `reduzir` (RF3: o mesmo `alertaId` em `AlertaDisparado` toca uma vez; `AlertaEncerrado` remove, gera `parar` e um disparo repetido depois da reconexão é ignorado; encerramento de alerta desconhecido não quebra; `AlertaEscalado` conhecido não toca de novo e desconhecido pede `buscarAtivos`; motivo `ciente` de outro guardião preservado para a tela; `PassoAtualizado` vira efeito `passo`), de `alertaEmDestaque` (o mais antigo sem `cienteEnviado`), do store `useAlarmes` (`carregarAtivos` sem repetir os conhecidos) e do `criarHub` com um `HubLike` falso (assina os 4 eventos do hub `/hubs/guardiao`, reconectando/conectado com `aoReconectar` uma vez, `parar` chama `stop` e anuncia desconectado); ver falhar; implementar `guardiao/{alarmeEstado,store,hub}.ts` com `HubConnectionBuilder`, `accessTokenFactory` e reconexão `[0, 2000, 5000, 10000, 30000]`, `encerrados` limitado aos últimos 200 e o store só em memória (o nome da vítima nunca vai para o disco). Sem build Android nesta fase.
+
+Resultado: 27 testes novos passando (264 no app), `tsc --noEmit` sem erros. O efeito `parar` e o estado levam o motivo do encerramento (`motivos`) para a tela de alarme da Task 10; o store ganhou `limpar()` para o logout. Conexão real com a API e o alarme no aparelho ficam para a Task 10 e a fase de build nativo. Sem migration de servidor.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->
