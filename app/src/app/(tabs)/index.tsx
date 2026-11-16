@@ -167,6 +167,12 @@ export default function Inicio() {
         ) : null}
       </View>
 
+      <View style={estilos.caixa} accessibilityLabel="Relatar">
+        <Texto variante="titulo">Viu algo na rua?</Texto>
+        <Texto>Conte em poucas palavras o que e onde, sem descrever pessoas. Ajuda quem passa por perto.</Texto>
+        <Botao rotulo="Relatar um problema" variante="secundario" onPress={() => router.push('/relato' as never)} />
+      </View>
+
       <View style={estilos.caixa} accessibilityLabel="Último alerta">
         {ultimo ? (
           <>

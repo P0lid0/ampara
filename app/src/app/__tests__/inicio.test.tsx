@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen } from '@testing-library/react-native';
 import Inicio from '../(tabs)/index';
 import { api } from '../../api/endpoints';
 import { abrirBanco } from '../../db/db';
@@ -66,6 +66,13 @@ describe('aba Início', () => {
   it('sem consentimento a rota aparece desligada, com o motivo escrito', async () => {
     await render(<Inicio />);
     expect(await screen.findByText('Rota desligada: você não autorizou guardar a rota neste aparelho.')).toBeTruthy();
+  });
+
+  it('o botão Relatar um problema leva à tela de relato', async () => {
+    mockPush.mockClear();
+    await render(<Inicio />);
+    await fireEvent.press(await screen.findByRole('button', { name: 'Relatar um problema' }));
+    expect(mockPush).toHaveBeenCalledWith('/relato');
   });
 
   it('GET /guardioes vazio mostra "Você ainda não tem guardiões"', async () => {
