@@ -36,6 +36,7 @@ entrega/
 # painel Risco Cidadao
 web-painel-risco/node_modules
 web-painel-risco/dist
+web-emergencia/dist
 cyber/saida/
 
 # ML (Python)
