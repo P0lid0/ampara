@@ -32,4 +32,37 @@ export const paresDeTexto: { nome: string; texto: keyof typeof cores; fundo: key
   { nome: 'tinta sobre esmeralda', texto: 'tinta', fundo: 'esmeralda' },
   { nome: 'sobreAlarme sobre alarme', texto: 'sobreAlarme', fundo: 'alarme' },
   { nome: 'petróleo sobre areia', texto: 'petroleo', fundo: 'areia' },
+  { nome: 'tinta sobre branco', texto: 'tinta', fundo: 'branco' },
+  { nome: 'petróleo sobre branco', texto: 'petroleo', fundo: 'branco' },
+  { nome: 'textoSuave sobre areia', texto: 'textoSuave', fundo: 'areia' },
+  { nome: 'textoSuave sobre branco', texto: 'textoSuave', fundo: 'branco' },
+  { nome: 'textoSuave sobre areiaFunda', texto: 'textoSuave', fundo: 'areiaFunda' },
+  { nome: 'tinta sobre areiaFunda', texto: 'tinta', fundo: 'areiaFunda' },
+  { nome: 'petróleo sobre areiaFunda', texto: 'petroleo', fundo: 'areiaFunda' },
+  { nome: 'tinta sobre esmeraldaSuave', texto: 'tinta', fundo: 'esmeraldaSuave' },
+  { nome: 'petróleo sobre esmeraldaSuave', texto: 'petroleo', fundo: 'esmeraldaSuave' },
+  { nome: 'alarmeTexto sobre areia', texto: 'alarmeTexto', fundo: 'areia' },
+  { nome: 'alarmeTexto sobre branco', texto: 'alarmeTexto', fundo: 'branco' },
+  { nome: 'alarmeTexto sobre areiaFunda', texto: 'alarmeTexto', fundo: 'areiaFunda' },
+  { nome: 'alarmeTexto sobre alarmeSuave', texto: 'alarmeTexto', fundo: 'alarmeSuave' },
+  { nome: 'tinta sobre alarmeSuave', texto: 'tinta', fundo: 'alarmeSuave' },
+];
+
+// Limites de controle e formas (WCAG 1.4.11, >= 3:1). Não são texto; o rótulo escrito identifica o controle.
+export const paresNaoTexto: { nome: string; forma: keyof typeof cores | 'cinzaChave'; fundo: keyof typeof cores }[] = [
+  { nome: 'areia sobre alarme (silhueta do botão do alarme)', forma: 'areia', fundo: 'alarme' },
+  { nome: 'esmeralda sobre petróleo (botão no herói)', forma: 'esmeralda', fundo: 'petroleo' },
+  { nome: 'cinzaChave sobre areia (trilho do interruptor)', forma: 'cinzaChave', fundo: 'areia' },
+  { nome: 'petróleo sobre branco (contorno de campo)', forma: 'petroleo', fundo: 'branco' },
+];
+
+// Pares que reprovam de propósito: nunca entram em paresDeTexto (o teste confere que reprovam mesmo).
+export const paresReprovados: { nome: string; texto: keyof typeof cores; fundo: keyof typeof cores }[] = [
+  { nome: 'tinta sobre alarme', texto: 'tinta', fundo: 'alarme' },
+  { nome: 'branco sobre alarme', texto: 'branco', fundo: 'alarme' },
+  { nome: 'esmeralda sobre areia', texto: 'esmeralda', fundo: 'areia' },
+  { nome: 'esmeralda sobre branco', texto: 'esmeralda', fundo: 'branco' },
+  { nome: 'esmeralda sobre petróleo (como texto)', texto: 'esmeralda', fundo: 'petroleo' },
+  { nome: 'petróleo sobre alarme', texto: 'petroleo', fundo: 'alarme' },
+  { nome: 'alarme sobre areia (como texto)', texto: 'alarme', fundo: 'areia' },
 ];

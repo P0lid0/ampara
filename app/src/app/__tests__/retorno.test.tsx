@@ -115,10 +115,10 @@ describe('acompanhamento no BO', () => {
     await screen.findByText(NAO_ENVIADO);
     await fireEvent.changeText(screen.getByLabelText(NUMERO), 'AB 12');
     await fireEvent.press(screen.getByLabelText('Salvar acompanhamento'));
-    expect(await screen.findByText('⚠ Use até 30 letras, números, / ou -.')).toBeTruthy();
+    expect(await screen.findByText('Use até 30 letras, números, / ou -.')).toBeTruthy();
     await fireEvent.changeText(screen.getByLabelText(NUMERO), 'A'.repeat(31));
     await fireEvent.press(screen.getByLabelText('Salvar acompanhamento'));
-    expect(screen.getByText('⚠ Use até 30 letras, números, / ou -.')).toBeTruthy();
+    expect(screen.getByText('Use até 30 letras, números, / ou -.')).toBeTruthy();
     expect(acompanhamento).not.toHaveBeenCalled();
   });
 

@@ -55,7 +55,7 @@ describe('aceitar convite de guardião', () => {
     aceitar.mockRejectedValue(new ApiErro(status, PADRAO, undefined, PADRAO));
     await render(<AceitarConvite />);
     await digitarEAceitar('abc123');
-    const alerta = await screen.findByText(`⚠ ${frase}`);
+    const alerta = await screen.findByText(frase);
     expect(JSON.stringify(alerta.props.children)).not.toMatch(/ABC123/i);
     expect(mockReplace).not.toHaveBeenCalled();
   });
@@ -64,7 +64,7 @@ describe('aceitar convite de guardião', () => {
     aceitar.mockRejectedValue(new ApiErro(410, 'm', undefined, 'Convite encerrado pela pessoa.'));
     await render(<AceitarConvite />);
     await digitarEAceitar('ABC123');
-    expect(await screen.findByText('⚠ Convite encerrado pela pessoa.')).toBeTruthy();
+    expect(await screen.findByText('Convite encerrado pela pessoa.')).toBeTruthy();
   });
 
   it('código com tamanho errado mostra aviso e não chama a API', async () => {

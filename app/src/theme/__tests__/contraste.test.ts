@@ -1,5 +1,5 @@
-import { razaoContraste, paresDeTexto } from '../contraste';
-import { cores, tamanhos } from '../tokens';
+import { razaoContraste, paresDeTexto, paresNaoTexto, paresReprovados } from '../contraste';
+import { cores, coresApoio, tamanhos } from '../tokens';
 
 describe('cores da marca', () => {
   it('mantém as quatro cores da identidade', () => {
@@ -49,5 +49,35 @@ describe('pares de texto usados no app', () => {
 
   it.each(paresDeTexto)('$nome >= 4.5:1', (p) => {
     expect(razaoContraste(cores[p.texto], cores[p.fundo])).toBeGreaterThanOrEqual(4.5);
+  });
+});
+
+describe('pares novos do sistema de design', () => {
+  it('alvos de ação (56) e de alarme (64) acima do mínimo de 48', () => {
+    expect(tamanhos.alvoAcao).toBe(56);
+    expect(tamanhos.alvoAlarme).toBe(64);
+  });
+
+  it('cobre os pares do herói, do selo e do erro', () => {
+    const chaves = paresDeTexto.map((p) => `${p.texto}/${p.fundo}`);
+    expect(chaves).toEqual(
+      expect.arrayContaining([
+        'alarmeTexto/alarmeSuave',
+        'tinta/esmeraldaSuave',
+        'petroleo/areiaFunda',
+        'textoSuave/areiaFunda',
+        'tinta/branco',
+      ]),
+    );
+  });
+
+  it.each(paresNaoTexto)('$nome >= 3:1', (p) => {
+    const forma = p.forma === 'cinzaChave' ? coresApoio.cinzaChave : cores[p.forma];
+    expect(razaoContraste(forma, cores[p.fundo])).toBeGreaterThanOrEqual(3);
+  });
+
+  it.each(paresReprovados)('$nome reprova de propósito (< 4.5:1) e fica fora de paresDeTexto', (p) => {
+    expect(razaoContraste(cores[p.texto], cores[p.fundo])).toBeLessThan(4.5);
+    expect(paresDeTexto.some((x) => x.texto === p.texto && x.fundo === p.fundo)).toBe(false);
   });
 });

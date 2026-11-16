@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { StyleSheet, TextInput, View, type TextInputProps } from 'react-native';
-import { cores, espacos, fontes, tamanhos } from '../theme/tokens';
+import { bordas, cores, espacos, fontes, raios, tamanhos, tipo } from '../theme/tokens';
+import { Icone } from './Icone';
 import { Texto } from './Texto';
 
 export type CampoProps = Omit<TextInputProps, 'value' | 'onChangeText'> & {
@@ -9,11 +11,13 @@ export type CampoProps = Omit<TextInputProps, 'value' | 'onChangeText'> & {
   erro?: string;
 };
 
-// Erro nunca só por cor: borda vermelha + ícone + texto em tinta (alarme sobre areia reprova no contraste).
-export function Campo({ rotulo, valor, onChangeText, erro, style, ...resto }: CampoProps) {
+// Contorno de 2 px só no campo; 3 px no foco (petróleo) e no erro (alarme).
+// Erro nunca só por cor: borda de 3 px + ícone + texto em alarmeTexto sobre alarmeSuave (alarme sobre areia reprova).
+export function Campo({ rotulo, valor, onChangeText, erro, style, onFocus, onBlur, ...resto }: CampoProps) {
+  const [focado, setFocado] = useState(false);
   return (
     <View style={estilos.bloco}>
-      <Texto variante="legenda" style={estilos.rotulo}>
+      <Texto variante="rotulo" style={estilos.rotulo}>
         {rotulo}
       </Texto>
       <TextInput
@@ -22,14 +26,25 @@ export function Campo({ rotulo, valor, onChangeText, erro, style, ...resto }: Ca
         accessibilityHint={erro ?? resto.accessibilityHint}
         value={valor}
         onChangeText={onChangeText}
+        onFocus={(e) => {
+          setFocado(true);
+          onFocus?.(e);
+        }}
+        onBlur={(e) => {
+          setFocado(false);
+          onBlur?.(e);
+        }}
         allowFontScaling
-        placeholderTextColor={cores.petroleo}
-        style={[estilos.entrada, erro ? estilos.entradaErro : null, style]}
+        placeholderTextColor={cores.textoSuave}
+        style={[estilos.entrada, focado ? estilos.entradaFoco : null, erro ? estilos.entradaErro : null, style]}
       />
       {erro ? (
-        <Texto variante="legenda" accessibilityRole="alert" accessibilityLiveRegion="polite">
-          {`⚠ ${erro}`}
-        </Texto>
+        <View style={estilos.aviso} accessibilityRole="alert" accessibilityLiveRegion="polite">
+          <Icone nome="alerta" tamanho={20} cor={cores.alarmeTexto} />
+          <Texto variante="legenda" style={estilos.textoAviso}>
+            {erro}
+          </Texto>
+        </View>
       ) : null}
     </View>
   );
@@ -37,17 +52,28 @@ export function Campo({ rotulo, valor, onChangeText, erro, style, ...resto }: Ca
 
 const estilos = StyleSheet.create({
   bloco: { marginBottom: espacos.m },
-  rotulo: { fontFamily: fontes.semibold, marginBottom: 4 },
+  rotulo: { marginBottom: espacos.xs },
   entrada: {
     minHeight: tamanhos.alvoMin,
-    borderWidth: 2,
+    borderWidth: bordas.padrao,
     borderColor: cores.petroleo,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    fontSize: 18,
+    borderRadius: raios.m,
+    paddingHorizontal: espacos.pm,
+    fontSize: tipo.corpo.fontSize,
     fontFamily: fontes.regular,
     color: cores.tinta,
     backgroundColor: cores.branco,
   },
-  entradaErro: { borderColor: cores.alarme, borderWidth: 3 },
+  entradaFoco: { borderWidth: bordas.foco },
+  entradaErro: { borderColor: cores.alarme, borderWidth: bordas.foco },
+  aviso: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: espacos.p,
+    marginTop: espacos.p,
+    padding: espacos.p,
+    borderRadius: raios.p,
+    backgroundColor: cores.alarmeSuave,
+  },
+  textoAviso: { flex: 1, color: cores.alarmeTexto },
 });

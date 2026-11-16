@@ -1,6 +1,8 @@
 // Mocks dos módulos nativos: nada aqui fala com aparelho, rede ou disco.
 // Testes que precisarem de outro comportamento sobrescrevem com jest.mocked(...).mockResolvedValue(...).
 
+import 'react-native-gesture-handler/jestSetup';
+
 jest.mock('@notifee/react-native', () => require('@notifee/react-native/jest-mock'));
 
 jest.mock('@maplibre/maplibre-react-native', () => {
@@ -133,6 +135,17 @@ jest.mock('expo-clipboard', () => ({
   getStringAsync: jest.fn(async () => ''),
   hasStringAsync: jest.fn(async () => false),
 }));
+
+jest.mock('expo-haptics', () => ({
+  __esModule: true,
+  ImpactFeedbackStyle: { Light: 'light', Medium: 'medium', Heavy: 'heavy', Soft: 'soft', Rigid: 'rigid' },
+  NotificationFeedbackType: { Success: 'success', Warning: 'warning', Error: 'error' },
+  impactAsync: jest.fn(async () => undefined),
+  notificationAsync: jest.fn(async () => undefined),
+  selectionAsync: jest.fn(async () => undefined),
+}));
+
+jest.mock('react-native-reanimated', () => require('react-native-reanimated/mock'));
 
 afterEach(() => {
   const store = jest.requireMock('expo-secure-store') as { __memoria: Map<string, string> };

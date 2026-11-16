@@ -1,6 +1,8 @@
 import { Stack, useRootNavigationState, useRouter, useSegments } from 'expo-router';
 import { useFonts, Manrope_400Regular, Manrope_600SemiBold, Manrope_700Bold } from '@expo-google-fonts/manrope';
 import { useEffect, useState } from 'react';
+import { StyleSheet } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { destinoGuard } from '../auth/guard';
 import { restaurar, useSessao } from '../auth/sessao';
 import { useRedirecionarParaAlarme } from '../guardiao/redirecionar';
@@ -43,6 +45,7 @@ export default function Layout() {
   if ((!carregadas && !erro) || !sessaoPronta) return null;
 
   return (
+    <GestureHandlerRootView style={estilos.raiz}>
     <Stack
       screenOptions={{
         headerStyle: { backgroundColor: cores.petroleo },
@@ -54,5 +57,10 @@ export default function Layout() {
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="onboarding" options={{ headerShown: false }} />
     </Stack>
+    </GestureHandlerRootView>
   );
 }
+
+const estilos = StyleSheet.create({
+  raiz: { flex: 1 },
+});

@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react-native';
-import { EstadoBadge, type Estado } from '../EstadoBadge';
+import { EstadoBadge, iconesEstado, type Estado } from '../EstadoBadge';
 
 const casos: { estado: Estado; texto: string }[] = [
   { estado: 'aberta', texto: 'Aberta' },
@@ -24,13 +24,8 @@ describe('EstadoBadge', () => {
     expect(screen.getByLabelText(new RegExp(texto))).toBeTruthy();
   });
 
-  it('cada estado tem ícone próprio', async () => {
-    const icones = new Set<string>();
-    for (const { estado } of casos) {
-      const r = await render(<EstadoBadge estado={estado} />);
-      icones.add(String(screen.getByTestId(`estado-icone-${estado}`).props.children));
-      await r.unmount();
-    }
-    expect(icones.size).toBe(casos.length);
+  it('cada estado tem ícone vetorial próprio', () => {
+    const icones = casos.map(({ estado }) => iconesEstado[estado]);
+    expect(new Set(icones).size).toBe(casos.length);
   });
 });
