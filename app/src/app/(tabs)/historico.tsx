@@ -106,6 +106,7 @@ const estilos = StyleSheet.create({
   bloco: { gap: espacos.p },
   linha: {
     minHeight: tamanhos.alvoMin,
+    minWidth: tamanhos.alvoMin,
     gap: espacos.p,
     padding: espacos.m,
     borderWidth: 2,

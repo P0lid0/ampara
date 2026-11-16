@@ -121,6 +121,7 @@ const estilos = StyleSheet.create({
   tela: { padding: espacos.m, gap: espacos.m },
   cartao: {
     minHeight: tamanhos.alvoMin,
+    minWidth: tamanhos.alvoMin,
     borderWidth: 2,
     borderColor: cores.petroleo,
     borderRadius: 12,

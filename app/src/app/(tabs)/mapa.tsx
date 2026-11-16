@@ -9,7 +9,7 @@ import {
   celulasDoMapa, consultaRisco, idadeRelato, PINHEIROS, relatoVisivel, ROTULO_SEM_DADO, ROTULO_TIPO_RELATO, rotuloClasse,
   type ClasseRisco,
 } from '../../mapa/risco';
-import { cores, espacos, tamanhos } from '../../theme/tokens';
+import { cores, coresApoio, espacos, tamanhos } from '../../theme/tokens';
 import { Botao } from '../../ui/Botao';
 import {
   CelulasNoMapa, COR_CELULA, MapaBase, PontoRotulado, type CelulaNoMapa, type ClasseCelula,
@@ -231,7 +231,7 @@ export default function Mapa() {
               accessibilityRole="switch"
               value={ligadas[c.tipo]}
               onValueChange={(v) => alternar(c.tipo, v)}
-              trackColor={{ true: cores.petroleo, false: '#767676' }}
+              trackColor={{ true: cores.petroleo, false: coresApoio.cinzaChave }}
             />
           </View>
         ))}

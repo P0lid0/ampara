@@ -3,7 +3,7 @@
 import { Camera, GeoJSONSource, Layer, Map, Marker } from '@maplibre/maplibre-react-native';
 import type { ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { cores, espacos } from '../theme/tokens';
+import { cores, coresRisco, espacos } from '../theme/tokens';
 import type { Bbox } from '../api/tipos';
 import { Texto } from './Texto';
 
@@ -131,12 +131,7 @@ export function CelulasNoMapa({ celulas }: { celulas: readonly CelulaNoMapa[] })
   );
 }
 
-export const COR_CELULA: Record<ClasseCelula, string> = {
-  baixo: '#14B88A',
-  medio: '#F2B84B',
-  alto: '#E5484D',
-  sem: '#9AA3A2',
-};
+export const COR_CELULA: Record<ClasseCelula, string> = coresRisco;
 
 /** Marcador com ícone (uma letra num distintivo) e o nome em texto. */
 export function PontoRotulado({ ponto, icone, nome }: { ponto: Coordenada; icone: string; nome: string }) {

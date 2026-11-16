@@ -204,6 +204,7 @@ const estilos = StyleSheet.create({
   fluxo: { flex: 1 },
   tipo: {
     minHeight: tamanhos.alvoMin + 16,
+    minWidth: tamanhos.alvoMin,
     borderWidth: 2,
     borderColor: cores.petroleo,
     borderRadius: 12,

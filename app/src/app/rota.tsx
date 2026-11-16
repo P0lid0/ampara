@@ -178,6 +178,7 @@ export default function Rota() {
               minimumTrackTintColor={cores.petroleo}
               maximumTrackTintColor={cores.tinta}
               thumbTintColor={cores.petroleo}
+              accessibilityRole="adjustable"
               accessibilityLabel="Horário na rota"
               accessibilityValue={{ text: `Às ${formatarHora(ponto.em)}` }}
               style={estilos.slider}
@@ -253,6 +254,7 @@ const estilos = StyleSheet.create({
   subtitulo: { fontSize: 20, lineHeight: 28 },
   item: {
     minHeight: tamanhos.alvoMin,
+    minWidth: tamanhos.alvoMin,
     justifyContent: 'center',
     paddingHorizontal: espacos.m,
     borderWidth: 2,

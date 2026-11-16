@@ -292,6 +292,7 @@ const estilos = StyleSheet.create({
     alignItems: 'center',
     gap: espacos.p,
     minHeight: tamanhos.alvoMin,
+    minWidth: tamanhos.alvoMin,
     paddingVertical: espacos.p,
   },
   marca: { fontSize: 28, lineHeight: 34 },

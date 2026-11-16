@@ -31,3 +31,18 @@ export const espacos = {
   m: 16,
   g: 24,
 } as const;
+
+// Cores de apoio fora da marca (mapa e interruptor). Hexadecimal só vive neste arquivo.
+export const coresApoio = {
+  ambar: '#F2B84B',
+  cinzaSemDado: '#9AA3A2',
+  cinzaChave: '#767676',
+} as const;
+
+// Preenchimento das células de risco: a cor só reforça, o nível sempre vem escrito e no padrão da borda.
+export const coresRisco = {
+  baixo: cores.esmeralda,
+  medio: coresApoio.ambar,
+  alto: cores.alarme,
+  sem: coresApoio.cinzaSemDado,
+} as const;
