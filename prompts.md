@@ -534,4 +534,10 @@ Resultado: 28 testes novos passando (163 no app), `tsc --noEmit` sem erros. "Faz
 
 Resultado: 42 testes novos passando, `tsc --noEmit` sem erros. `ChaveiroDto.bateria` passou a `number | null`. Câmera real (QR) e o toque do chaveiro adiados para a fase de build nativo. Sem migration de servidor.
 
+### 84. App: rota em segundo plano com fila offline (Task 8 do plano 05)
+
+> Executar a Task 8 do plano 05 (app): escrever primeiro os testes da fila (1200 pontos saem em lotes de 500, 500 e 200; falha no 2º lote mantém as 700 linhas; precisão acima de 150 m e pontos de 8 dias não são gravados; todo `em` termina em Z; saída ordenada por `em`; resposta perdida reenvia o MESMO lote inteiro) e da tarefa `ampara-rota` (`revogarConsentimento` chama `consentimentoRota(false)` e apaga a fila; `estadoRota` em `ativa`, `sem-consentimento`, `sem-permissao` e `pausada`; callback com erro de rede não perde pontos); ver falhar; implementar `rota/fila.ts` e `rota/tarefa.ts` (tarefa definida no escopo do módulo e importada em `index.ts` antes do `expo-router/entry`, `Accuracy.High`, 60 s, 50 m, serviço em primeiro plano "Ampara guardando sua rota (7 dias)", grava no SQLite antes de enviar, sincroniza a cada callback e quando o app volta ao primeiro plano) e ligar a rota na tela de consentimento, abrindo as configurações do app quando a permissão "o tempo todo" não vem. Sem build Android nesta fase.
+
+Resultado: 22 testes novos e 3 ajustados na tela de consentimento, todos passando (235 no app), `tsc --noEmit` sem erros. Precisão alta por decisão do controlador (no spike, Balanced entregou 0 pontos no emulador). A conferência no emulador com `adb emu geo fix` ficou adiada para a fase de build nativo. Sem migration de servidor.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->

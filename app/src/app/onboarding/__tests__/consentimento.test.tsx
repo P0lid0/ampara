@@ -1,10 +1,12 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import * as Location from 'expo-location';
+import { Linking } from 'react-native';
 import OnboardingConsentimento from '../consentimento';
 import { api } from '../../../api/endpoints';
 import { abrirBanco } from '../../../db/db';
 import { sessaoRepo } from '../../../db/repos';
 import { lerConcluidos } from '../../../onboarding/passos';
+import { iniciarRota } from '../../../rota/tarefa';
 
 jest.setTimeout(60000);
 
@@ -14,12 +16,15 @@ jest.mock('expo-router', () => ({
   Stack: { Screen: () => null },
 }));
 jest.mock('../../../api/endpoints', () => ({ api: { me: { consentimentoRota: jest.fn() } } }));
+jest.mock('../../../rota/tarefa', () => ({ iniciarRota: jest.fn() }));
 
 const consentir = jest.mocked(api.me.consentimentoRota);
 const primeiroPlano = jest.mocked(Location.requestForegroundPermissionsAsync);
 const segundoPlano = jest.mocked(Location.requestBackgroundPermissionsAsync);
 const concedida = { granted: true, status: 'granted', canAskAgain: true, expires: 'never' } as never;
 const negada = { granted: false, status: 'denied', canAskAgain: false, expires: 'never' } as never;
+const ligar = jest.mocked(iniciarRota);
+const abrirConfig = jest.spyOn(Linking, 'openSettings');
 
 beforeEach(async () => {
   await sessaoRepo(await abrirBanco()).apagarTudo(); // o mock de expo-sqlite guarda o banco entre testes do mesmo arquivo
@@ -27,6 +32,8 @@ beforeEach(async () => {
   consentir.mockReset().mockResolvedValue(undefined);
   primeiroPlano.mockReset().mockResolvedValue(concedida);
   segundoPlano.mockReset().mockResolvedValue(concedida);
+  ligar.mockReset().mockResolvedValue(undefined);
+  abrirConfig.mockReset().mockResolvedValue(undefined);
 });
 
 describe('onboarding: consentimento da rota', () => {
@@ -50,6 +57,8 @@ describe('onboarding: consentimento da rota', () => {
 
     await fireEvent.press(screen.getByRole('button', { name: 'Permitir em segundo plano' }));
     await waitFor(() => expect(segundoPlano).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(ligar).toHaveBeenCalledTimes(1)); // a rota liga depois das permissões
+    expect(abrirConfig).not.toHaveBeenCalled();
     expect(screen.queryByText(/Rota pausada/)).toBeNull();
 
     await fireEvent.press(await screen.findByRole('button', { name: 'Continuar' }));
@@ -64,6 +73,7 @@ describe('onboarding: consentimento da rota', () => {
     await waitFor(() => expect(mockReplace).toHaveBeenCalledWith('/'));
     expect(primeiroPlano).not.toHaveBeenCalled();
     expect(segundoPlano).not.toHaveBeenCalled();
+    expect(ligar).not.toHaveBeenCalled();
     expect(await lerConcluidos(await abrirBanco())).toEqual(new Set(['consentimento']));
   });
 
@@ -75,18 +85,32 @@ describe('onboarding: consentimento da rota', () => {
     expect(await screen.findByText(/Rota pausada: falta a permissão de localização\./)).toBeTruthy();
     expect(consentir).toHaveBeenCalledWith(true);
     expect(segundoPlano).not.toHaveBeenCalled();
+    expect(ligar).toHaveBeenCalledTimes(1); // grava o consentimento no aparelho (a tarefa não liga sem permissão)
     await fireEvent.press(screen.getByRole('button', { name: 'Continuar' }));
     await waitFor(() => expect(mockReplace).toHaveBeenCalledWith('/'));
     expect(await lerConcluidos(await abrirBanco())).toEqual(new Set(['consentimento']));
   });
 
-  it('segundo plano negado também mostra "Rota pausada"', async () => {
+  it('segundo plano negado mostra "Rota pausada", liga a rota com o app aberto e abre as configurações do app', async () => {
     segundoPlano.mockResolvedValue(negada);
     await render(<OnboardingConsentimento />);
     await fireEvent.press(screen.getByRole('button', { name: 'Aceitar' }));
     await fireEvent.press(await screen.findByRole('button', { name: 'Permitir localização' }));
     await fireEvent.press(await screen.findByRole('button', { name: 'Permitir em segundo plano' }));
     expect(await screen.findByText(/Rota pausada: falta a permissão de localização\./)).toBeTruthy();
+    expect(ligar).toHaveBeenCalledTimes(1);
+    expect(abrirConfig).toHaveBeenCalledTimes(1);
+  });
+
+  it('falha ao ligar a rota mostra "Rota pausada" e ainda deixa continuar', async () => {
+    ligar.mockRejectedValue(new Error('servico'));
+    await render(<OnboardingConsentimento />);
+    await fireEvent.press(screen.getByRole('button', { name: 'Aceitar' }));
+    await fireEvent.press(await screen.findByRole('button', { name: 'Permitir localização' }));
+    await fireEvent.press(await screen.findByRole('button', { name: 'Permitir em segundo plano' }));
+    expect(await screen.findByText(/Rota pausada: falta a permissão de localização\./)).toBeTruthy();
+    await fireEvent.press(screen.getByRole('button', { name: 'Continuar' }));
+    await waitFor(() => expect(mockReplace).toHaveBeenCalledWith('/'));
   });
 
   it('falha da API não avança nem pede permissão', async () => {

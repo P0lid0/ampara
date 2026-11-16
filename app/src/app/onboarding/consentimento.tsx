@@ -1,10 +1,11 @@
 import { Stack, useRouter } from 'expo-router';
 import * as Location from 'expo-location';
 import { useState } from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
+import { Linking, ScrollView, StyleSheet } from 'react-native';
 import { mensagemDeErro } from '../../api/cliente';
 import { api } from '../../api/endpoints';
 import { concluirPassoSeguro } from '../../onboarding/passos';
+import { iniciarRota } from '../../rota/tarefa';
 import { espacos } from '../../theme/tokens';
 import { Botao } from '../../ui/Botao';
 import { ProgressoPassos } from '../../ui/ProgressoPassos';
@@ -49,27 +50,48 @@ export default function OnboardingConsentimento() {
         setEtapa('segundoPlano');
       } else {
         setPausada(true);
+        await ligarRota(); // grava o consentimento no aparelho; sem permissão a tarefa não liga
         setEtapa('pronto');
       }
     } catch {
       setPausada(true);
+      await ligarRota();
       setEtapa('pronto');
     } finally {
       setOcupado(false);
     }
   }
 
-  async function pedirSegundoPlano() {
-    setOcupado(true);
+  // Liga a tarefa da rota; falha ao ligar vira "Rota pausada" (Início e Ajustes mostram o estado depois).
+  async function ligarRota() {
     try {
-      const r = await Location.requestBackgroundPermissionsAsync();
-      if (!r.granted) setPausada(true);
+      await iniciarRota();
     } catch {
       setPausada(true);
-    } finally {
-      setOcupado(false);
-      setEtapa('pronto');
     }
+  }
+
+  async function pedirSegundoPlano() {
+    setOcupado(true);
+    let fundo = false;
+    try {
+      fundo = (await Location.requestBackgroundPermissionsAsync()).granted;
+    } catch {
+      fundo = false;
+    }
+    // Com a permissão de primeiro plano a tarefa já liga (serviço em primeiro plano); liga antes de sair do app.
+    await ligarRota();
+    if (!fundo) {
+      setPausada(true);
+      // Android 11+ só concede "o tempo todo" nas configurações do app.
+      try {
+        await Linking.openSettings();
+      } catch {
+        // sem configurações abertas: o aviso abaixo orienta
+      }
+    }
+    setOcupado(false);
+    setEtapa('pronto');
   }
 
   return (

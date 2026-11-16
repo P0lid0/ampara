@@ -130,6 +130,11 @@ function assinar(l: () => void): () => void {
   return () => ouvintes.delete(l);
 }
 
+/** Estado atual fora de componentes (ex.: tarefa da rota em segundo plano). */
+export function sessaoAtual(): EstadoSessao {
+  return estado;
+}
+
 export function useSessao(): EstadoSessao {
   return useSyncExternalStore(assinar, () => estado, () => estado);
 }
