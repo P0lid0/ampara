@@ -4,7 +4,7 @@ import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
 import { AppState } from 'react-native';
 import { api } from '../api/endpoints';
-import { restaurar, sessaoAtual } from '../auth/sessao';
+import { aoTrocarConta, restaurar, sessaoAtual } from '../auth/sessao';
 import { abrirBanco } from '../db/db';
 import { rotaRepo, sessaoRepo, type PontoRota } from '../db/repos';
 import { enviarPendentes, registrarPontos } from './fila';
@@ -141,6 +141,9 @@ export async function revogarConsentimento(): Promise<void> {
   await pararRota(true);
   if (erroApi) throw erroApi;
 }
+
+// Outra conta entrou no aparelho (item A): a coleta da conta anterior para antes de o banco ser apagado.
+aoTrocarConta(() => pararRota(true));
 
 AppState.addEventListener('change', (estado) => {
   if (estado === 'active') void sincronizarAgora();

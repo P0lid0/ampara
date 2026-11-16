@@ -42,11 +42,14 @@ describe('tela de entrada', () => {
   });
 
   it('login com sucesso vai para a tela inicial', async () => {
-    fetchMock.mockResolvedValue(
-      new Response(JSON.stringify({ token: 't', expiraEm: new Date(Date.now() + 3_600_000).toISOString() }), {
-        status: 200,
-        headers: { 'content-type': 'application/json' },
-      }),
+    // O login consulta o GET /me (dono dos dados locais): cada chamada recebe um Response novo.
+    // SINTETICO: conta de teste.
+    const me = { usuarioId: 'u1', nome: 'Ana Teste', email: 'ana@exemplo.test', consentimentoRota: false, emergenciaConfigurada: true };
+    fetchMock.mockImplementation(async (url: string) =>
+      new Response(
+        JSON.stringify(new URL(url).pathname.endsWith('/me') ? me : { token: 't', expiraEm: new Date(Date.now() + 3_600_000).toISOString() }),
+        { status: 200, headers: { 'content-type': 'application/json' } },
+      ),
     );
     await render(<Entrar />);
     await fireEvent.changeText(screen.getByLabelText('E-mail'), 'ana@exemplo.test');

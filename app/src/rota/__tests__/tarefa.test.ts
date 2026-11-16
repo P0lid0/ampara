@@ -15,6 +15,7 @@ jest.mock('../../api/endpoints', () => ({
 jest.mock('../../auth/sessao', () => ({
   sessaoAtual: jest.fn(),
   restaurar: jest.fn(async () => undefined),
+  aoTrocarConta: jest.fn(),
 }));
 
 // Capturados no carregamento do módulo (antes de qualquer reset de mock).

@@ -13,6 +13,8 @@ export type MotivoSaida = 'expirou' | 'manual';
 export type InfoSaida = { motivo: MotivoSaida; escopo: Escopo | null };
 
 const CHAVE_TOKEN = 'ampara.token';
+/** Na tabela `sessao`: o usuarioId (GET /me) da conta dona dos dados locais (fila da rota, consentimento, guardião). */
+export const CHAVE_DONO = 'dados.dono';
 const MAX_TIMER_MS = 2 ** 31 - 1;
 const SEM_SESSAO: EstadoSessao = { autenticado: false, escopo: null, expiraEm: null };
 
@@ -20,6 +22,7 @@ let estado: EstadoSessao = SEM_SESSAO;
 let motivoSaida: MotivoSaida | null = null;
 const ouvintes = new Set<() => void>();
 const callbacksSair: ((info: InfoSaida) => void)[] = [];
+const callbacksTrocaConta: (() => Promise<void> | void)[] = [];
 let timerExpiracao: ReturnType<typeof setTimeout> | null = null;
 // Item 2 da revisão: enquanto sair() roda, restaurar() não age; e cada saída muda a geração, então um
 // restaurar() que já tinha lido o token antes da saída não reativa a sessão quando terminar.
@@ -52,8 +55,41 @@ function ativar(t: Token, escopo: Escopo): void {
   publicar({ autenticado: true, escopo, expiraEm: t.expiraEm });
 }
 
+/**
+ * Rodada pontual, item A: expirar não apaga o SQLite, então outra conta pode entrar com os dados da anterior no
+ * aparelho. Antes de a sessão nova aparecer (nada sincroniza nem retoma antes disto), confere de quem são os
+ * dados locais: outro dono → para a rota e o guardião (callbacks de aoTrocarConta) e apaga tudo; mesmo dono ou
+ * nenhum gravado (instalação antiga, primeiro login) → mantém. Depois grava quem entrou como dono.
+ * Lança se não der para saber quem entrou (GET /me falhou): sem isso os dados de outra conta poderiam sair.
+ */
+async function conferirDonoDosDados(): Promise<void> {
+  const { usuarioId } = await api.me.obter();
+  if (typeof usuarioId !== 'string' || usuarioId === '') throw new Error('sessao: GET /me sem usuarioId');
+  const repo = sessaoRepo(await abrirBanco());
+  const dono = await repo.get(CHAVE_DONO);
+  if (dono !== null && dono !== usuarioId) {
+    for (const cb of [...callbacksTrocaConta]) {
+      try {
+        await cb();
+      } catch {
+        console.warn('sessao: callback de troca de conta falhou');
+      }
+    }
+    await repo.apagarTudo();
+  }
+  await repo.set(CHAVE_DONO, usuarioId);
+}
+
 export async function entrar(email: string, senha: string): Promise<void> {
   const t = await api.auth.login({ email, senha });
+  // O GET /me precisa do token; a sessão só fica ativa (e o token só é salvo) depois da conferência do dono.
+  definirToken(t.token);
+  try {
+    await conferirDonoDosDados();
+  } catch (e) {
+    definirToken(null);
+    throw e;
+  }
   await SecureStore.setItemAsync(CHAVE_TOKEN, JSON.stringify(t));
   ativar(t, 'usuario');
 }
@@ -137,6 +173,18 @@ export function aoSair(cb: (info: InfoSaida) => void): () => void {
   return () => {
     const i = callbacksSair.indexOf(cb);
     if (i >= 0) callbacksSair.splice(i, 1);
+  };
+}
+
+/**
+ * Registra o que parar quando outra conta entra no aparelho (antes de apagar os dados da anterior): a tarefa da
+ * rota e o serviço do guardião se registram aqui. Devolve a função que remove o callback.
+ */
+export function aoTrocarConta(cb: () => Promise<void> | void): () => void {
+  callbacksTrocaConta.push(cb);
+  return () => {
+    const i = callbacksTrocaConta.indexOf(cb);
+    if (i >= 0) callbacksTrocaConta.splice(i, 1);
   };
 }
 

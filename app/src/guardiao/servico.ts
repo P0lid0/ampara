@@ -4,7 +4,7 @@
 import notifee, { AndroidForegroundServiceType } from '@notifee/react-native';
 import { tokenAtual } from '../api/cliente';
 import { api } from '../api/endpoints';
-import { aoSair } from '../auth/sessao';
+import { aoSair, aoTrocarConta } from '../auth/sessao';
 import { API_URL } from '../config';
 import { abrirBanco } from '../db/db';
 import { sessaoRepo } from '../db/repos';
@@ -215,4 +215,11 @@ async function avisarSessaoExpirada(): Promise<void> {
 aoSair(({ motivo, escopo }) => {
   if (escopo === 'emergencia') return;
   void pararServicoGuardiao().then(() => (motivo === 'expirou' ? avisarSessaoExpirada() : undefined));
+});
+
+// Outra conta entrou no aparelho (item A): o papel de guardião era da conta anterior, assim como o aviso de
+// sessão expirada dela.
+aoTrocarConta(async () => {
+  await pararServicoGuardiao();
+  await notifee.cancelNotification(ID_AVISO_SESSAO).catch(() => undefined);
 });

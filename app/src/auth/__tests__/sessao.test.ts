@@ -10,6 +10,11 @@ const fetchMock = jest.fn();
 const json = (corpo: unknown, status = 200) =>
   new Response(JSON.stringify(corpo), { status, headers: { 'content-type': 'application/json' } });
 const amanha = () => new Date(Date.now() + 86_400_000).toISOString();
+// SINTETICO: o login agora consulta o GET /me (dono dos dados locais, item A da rodada pontual).
+const ME = { usuarioId: 'u1', nome: 'Ana Teste', email: 'ana@exemplo.test', consentimentoRota: false, emergenciaConfigurada: true };
+/** Login seguido do GET /me, cada resposta um Response novo. */
+const loginComMe = (token: string, expiraEm: string) => (url: string) =>
+  Promise.resolve(new URL(url).pathname.endsWith('/me') ? json(ME) : json({ token, expiraEm }));
 
 beforeEach(async () => {
   (jest.requireMock('expo-sqlite') as { __reiniciar: () => void }).__reiniciar();
@@ -26,7 +31,7 @@ afterEach(() => {
 
 describe('sessão', () => {
   it('login grava o token no SecureStore', async () => {
-    fetchMock.mockResolvedValue(json({ token: 'jwt-1', expiraEm: amanha() }));
+    fetchMock.mockImplementation(loginComMe('jwt-1', amanha()));
     await entrar('ana@exemplo.test', 'senha-teste');
     expect(SecureStore.setItemAsync).toHaveBeenCalledWith('ampara.token', expect.stringContaining('jwt-1'));
     const { result } = await renderHook(() => useSessao());
@@ -37,9 +42,10 @@ describe('sessão', () => {
   it('criarConta faz registrar + login', async () => {
     fetchMock
       .mockResolvedValueOnce(json({ usuarioId: 'u1' }, 201))
-      .mockResolvedValueOnce(json({ token: 'jwt-2', expiraEm: amanha() }));
+      .mockResolvedValueOnce(json({ token: 'jwt-2', expiraEm: amanha() }))
+      .mockResolvedValueOnce(json(ME));
     await criarConta('Ana Teste', 'ana@exemplo.test', 'senha-teste');
-    expect(fetchMock.mock.calls.map(([u]) => new URL(u).pathname)).toEqual(['/api/v1/auth/registrar', '/api/v1/auth/login']);
+    expect(fetchMock.mock.calls.map(([u]) => new URL(u).pathname)).toEqual(['/api/v1/auth/registrar', '/api/v1/auth/login', '/api/v1/me']);
     expect(SecureStore.setItemAsync).toHaveBeenCalled();
   });
 
@@ -78,7 +84,7 @@ describe('sessão', () => {
   });
 
   it('401 em rota autenticada derruba a sessão com motivo "expirou"', async () => {
-    fetchMock.mockResolvedValueOnce(json({ token: 'jwt-1', expiraEm: amanha() }));
+    fetchMock.mockResolvedValueOnce(json({ token: 'jwt-1', expiraEm: amanha() })).mockResolvedValueOnce(json(ME));
     await entrar('ana@exemplo.test', 'senha-teste');
     fetchMock.mockResolvedValueOnce(new Response(null, { status: 401 }));
     await expect(chamar('/me')).rejects.toMatchObject({ status: 401 });
@@ -92,7 +98,7 @@ describe('sessão', () => {
   });
 
   it('sair é robusta: falha no SecureStore não impede limpar o SQLite nem rodar os callbacks', async () => {
-    fetchMock.mockResolvedValue(json({ token: 'jwt-1', expiraEm: amanha() }));
+    fetchMock.mockImplementation(loginComMe('jwt-1', amanha()));
     await entrar('ana@exemplo.test', 'senha-teste');
     const db = await abrirBanco();
     await sessaoRepo(db).set('qualquer', 'x');
@@ -110,7 +116,7 @@ describe('sessão', () => {
   });
 
   it('sair apaga SecureStore, esvazia o SQLite e executa os callbacks de aoSair', async () => {
-    fetchMock.mockResolvedValue(json({ token: 'jwt-1', expiraEm: amanha() }));
+    fetchMock.mockImplementation(loginComMe('jwt-1', amanha()));
     await entrar('ana@exemplo.test', 'senha-teste');
     const db = await abrirBanco();
     await sessaoRepo(db).set('qualquer', 'x');
@@ -125,7 +131,7 @@ describe('sessão', () => {
 
   // Decisão do controlador (itens 4 e 8): expirar não é sair.
   it('sair("expirou") tira só o token: a fila da rota, o consentimento, o papel de guardião e o onboarding ficam no SQLite', async () => {
-    fetchMock.mockResolvedValue(json({ token: 'jwt-1', expiraEm: amanha() }));
+    fetchMock.mockImplementation(loginComMe('jwt-1', amanha()));
     await entrar('ana@exemplo.test', 'senha-teste');
     const db = await abrirBanco();
     const repo = sessaoRepo(db);
@@ -148,7 +154,7 @@ describe('sessão', () => {
 
   it('timer de 8 h vencido mantém a fila da rota (não apaga o SQLite)', async () => {
     jest.useFakeTimers();
-    fetchMock.mockResolvedValue(json({ token: 'jwt-1', expiraEm: new Date(Date.now() + 8 * 3_600_000).toISOString() }));
+    fetchMock.mockImplementation(loginComMe('jwt-1', new Date(Date.now() + 8 * 3_600_000).toISOString()));
     await entrar('ana@exemplo.test', 'senha-teste');
     const db = await abrirBanco();
     await sessaoRepo(db).set('rota.consentimento', 'sim');
@@ -162,7 +168,7 @@ describe('sessão', () => {
   });
 
   it('sair("manual") avisa os callbacks com o motivo e o escopo', async () => {
-    fetchMock.mockResolvedValue(json({ token: 'jwt-1', expiraEm: amanha() }));
+    fetchMock.mockImplementation(loginComMe('jwt-1', amanha()));
     await entrar('ana@exemplo.test', 'senha-teste');
     const cb = jest.fn();
     const remover = aoSair(cb);
@@ -188,7 +194,7 @@ describe('sessão', () => {
   });
 
   it('item 2: restaurar() chamado enquanto sair() apaga o token não reativa a sessão', async () => {
-    fetchMock.mockResolvedValue(json({ token: 'jwt-1', expiraEm: amanha() }));
+    fetchMock.mockImplementation(loginComMe('jwt-1', amanha()));
     await entrar('ana@exemplo.test', 'senha-teste');
     let liberar: () => void = () => undefined;
     const original = jest.mocked(SecureStore.deleteItemAsync).getMockImplementation()!;
@@ -208,7 +214,7 @@ describe('sessão', () => {
   });
 
   it('item 2: restaurar() que já leu o token antes de sair() não reativa a sessão depois', async () => {
-    fetchMock.mockResolvedValue(json({ token: 'jwt-1', expiraEm: amanha() }));
+    fetchMock.mockImplementation(loginComMe('jwt-1', amanha()));
     await entrar('ana@exemplo.test', 'senha-teste');
     const gravado = await SecureStore.getItemAsync('ampara.token');
     let liberar: () => void = () => undefined;
@@ -227,7 +233,7 @@ describe('sessão', () => {
   });
 
   it('item 1: 401 atrasado de uma chamada feita com o token anterior não derruba a sessão nova', async () => {
-    fetchMock.mockResolvedValueOnce(json({ token: 'jwt-1', expiraEm: amanha() }));
+    fetchMock.mockResolvedValueOnce(json({ token: 'jwt-1', expiraEm: amanha() })).mockResolvedValueOnce(json(ME));
     await entrar('ana@exemplo.test', 'senha-teste');
     let responder: (r: Response) => void = () => undefined;
     fetchMock.mockImplementationOnce(
@@ -238,7 +244,7 @@ describe('sessão', () => {
     );
     const antiga = chamar('/me').catch((e) => e);
     await sair('manual');
-    fetchMock.mockResolvedValueOnce(json({ token: 'jwt-2', expiraEm: amanha() }));
+    fetchMock.mockResolvedValueOnce(json({ token: 'jwt-2', expiraEm: amanha() })).mockResolvedValueOnce(json(ME));
     await entrar('ana@exemplo.test', 'senha-teste');
     responder(new Response(null, { status: 401 }));
     expect(await antiga).toMatchObject({ status: 401 });
@@ -250,7 +256,7 @@ describe('sessão', () => {
   });
 
   it('item 1: 401 de uma chamada em voo depois do sair manual não vira "Sua sessão terminou"', async () => {
-    fetchMock.mockResolvedValueOnce(json({ token: 'jwt-1', expiraEm: amanha() }));
+    fetchMock.mockResolvedValueOnce(json({ token: 'jwt-1', expiraEm: amanha() })).mockResolvedValueOnce(json(ME));
     await entrar('ana@exemplo.test', 'senha-teste');
     let responder: (r: Response) => void = () => undefined;
     fetchMock.mockImplementationOnce(
