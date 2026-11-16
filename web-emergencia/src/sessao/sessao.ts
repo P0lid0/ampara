@@ -1,4 +1,5 @@
 // A sessão de emergência vive só na aba (sessionStorage): fechar a aba apaga tudo. Nada em localStorage.
+// Só a chave desta página é apagada: o painel de risco (/painel-risco/) usa a mesma origem e o mesmo sessionStorage.
 const CHAVE = "ampara.emergencia";
 
 export type SessaoEmergencia = { token: string; expiraEm: string };
@@ -14,16 +15,16 @@ export function lerSessao(agora: Date = new Date()): SessaoEmergencia | null {
     const s = JSON.parse(bruto) as SessaoEmergencia;
     const fim = Date.parse(s.expiraEm);
     if (typeof s.token !== "string" || Number.isNaN(fim) || fim <= agora.getTime()) {
-      sessionStorage.clear();
+      sessionStorage.removeItem(CHAVE);
       return null;
     }
     return s;
   } catch {
-    sessionStorage.clear();
+    sessionStorage.removeItem(CHAVE);
     return null;
   }
 }
 
 export function sair(): void {
-  sessionStorage.clear();
+  sessionStorage.removeItem(CHAVE);
 }

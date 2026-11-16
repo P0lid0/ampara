@@ -4,6 +4,11 @@ import type { OcorrenciaDto } from "../api/tipos";
 
 type Fase = "inicio" | "confirmando" | "enviando" | "avisado";
 
+const MSG_LISTA = "Não foi possível carregar suas ocorrências. Tente de novo.";
+const MSG_AVISAR = "Não foi possível avisar seus guardiões agora. Tente de novo.";
+/** A frase da API (detalheCidadao) quando houver; senão a mensagem da tela. */
+const frase = (x: unknown, padrao: string) => (x instanceof ApiErro && x.detalheCidadao) || padrao;
+
 const hora = (d: Date) =>
   d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", timeZone: "America/Sao_Paulo" });
 const dataHora = (iso: string) =>
@@ -25,7 +30,7 @@ export function Painel({
   const [avisadoEm, setAvisadoEm] = useState<Date | null>(null);
   const [lista, setLista] = useState<OcorrenciaDto[] | null>(null);
   const [erro, setErro] = useState<string | null>(null);
-  const [erroLista, setErroLista] = useState(false);
+  const [erroLista, setErroLista] = useState<string | null>(null);
 
   const tratar = useCallback(
     (x: unknown) => {
@@ -39,12 +44,12 @@ export function Painel({
   );
 
   const carregar = useCallback(async () => {
-    setErroLista(false);
+    setErroLista(null);
     try {
       setLista(await api.ocorrencias.listar());
     } catch (x) {
       // Falha que não é 401 não é "lista vazia": mostra erro e deixa tentar de novo.
-      if (!tratar(x)) setErroLista(true);
+      if (!tratar(x)) setErroLista(frase(x, MSG_LISTA));
     }
   }, [tratar]);
 
@@ -64,7 +69,7 @@ export function Painel({
       void carregar();
     } catch (x) {
       if (tratar(x)) return;
-      setErro("Não foi possível avisar seus guardiões agora. Tente de novo.");
+      setErro(frase(x, MSG_AVISAR));
       setFase("inicio");
     }
   }
@@ -99,7 +104,7 @@ export function Painel({
         <h2 id="titulo-lista">Suas ocorrências</h2>
         {erroLista ? (
           <div role="alert">
-            <p className="erro">Não foi possível carregar suas ocorrências. Tente de novo.</p>
+            <p className="erro">{erroLista}</p>
             <button type="button" className="secundario" onClick={() => void carregar()}>Tentar de novo</button>
           </div>
         ) : lista === null ? (

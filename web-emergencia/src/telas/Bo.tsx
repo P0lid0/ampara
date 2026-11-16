@@ -10,10 +10,12 @@ export function Bo({
   ocorrenciaId,
   aoVoltar,
   aoSessaoVencida,
+  aoSair,
 }: {
   ocorrenciaId: string | null;
   aoVoltar: () => void;
   aoSessaoVencida: () => void;
+  aoSair?: () => void;
 }) {
   // O texto do BO (traz IMEI) vive só neste estado: nunca em sessionStorage/localStorage.
   const [bo, setBo] = useState<BoDto | null>(null);
@@ -124,6 +126,9 @@ export function Bo({
       )}
 
       <button type="button" className="secundario" onClick={aoVoltar}>Voltar</button>
+      {aoSair && (
+        <button type="button" className="secundario sair" onClick={aoSair}>Sair e apagar tudo desta aba</button>
+      )}
     </main>
   );
 }

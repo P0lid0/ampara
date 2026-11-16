@@ -166,4 +166,48 @@ describe("LinhaDoTempo", () => {
     await u.click(screen.getByRole("button", { name: "Tentar de novo" }));
     expect(await screen.findByTestId("mapa")).toBeInTheDocument();
   });
+
+  // Item 14: a ocorrência que já tem momento gravado não pode sobrescrevê-lo com o ponto padrão.
+  it("item 14: com momento gravado mostra 'Momento já marcado às 17:30.' e 'Gerar o BO' direto, sem 'Foi aqui que me roubaram'", async () => {
+    vi.spyOn(api.ocorrencias, "listar").mockResolvedValue([
+      { ...oc("o1", "2026-11-12T21:00:00Z"), momento: { em: "2026-11-12T20:30:00Z", lat: -23.55, lng: -46.63 } },
+    ]);
+    const momento = vi.spyOn(api.ocorrencias, "momento").mockResolvedValue(undefined);
+    const p = props();
+    const u = userEvent.setup();
+    render(<LinhaDoTempo {...p} />);
+    expect(await screen.findByText("Momento já marcado às 17:30.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Foi aqui que me roubaram" })).not.toBeInTheDocument();
+    await u.click(screen.getByRole("button", { name: "Gerar o BO" }));
+    expect(p.aoBo).toHaveBeenCalledWith("o1");
+    expect(momento).not.toHaveBeenCalled();
+  });
+
+  it("item 14: o ponto pré-selecionado é o mais perto do momento gravado (não do início); 'Marcar de novo' libera a remarcação", async () => {
+    vi.spyOn(api.ocorrencias, "listar").mockResolvedValue([
+      { ...oc("o1", "2026-11-12T21:00:00Z"), momento: { em: "2026-11-12T20:31:00Z", lat: -23.55, lng: -46.63 } },
+    ]);
+    const momento = vi.spyOn(api.ocorrencias, "momento").mockResolvedValue(undefined);
+    const u = userEvent.setup();
+    render(<LinhaDoTempo {...props()} />);
+    await screen.findByText("Momento já marcado às 17:31.");
+    expect(screen.getByRole("button", { name: "17:30" })).toHaveAttribute("aria-pressed", "true");
+    await u.click(screen.getByRole("button", { name: "Marcar de novo" }));
+    await u.click(screen.getByRole("button", { name: "Foi aqui que me roubaram" }));
+    expect(momento).toHaveBeenCalledWith("o1", { em: "2026-11-12T20:30:00Z", lat: -23.55, lng: -46.63 });
+  });
+
+  it("item 16: erro da API ao marcar mostra o detalheCidadao (ex.: momento-invalido)", async () => {
+    vi.spyOn(api.ocorrencias, "momento").mockRejectedValue(new ApiErro(422, "O momento precisa ser até 7 dias antes do pedido de ajuda."));
+    const u = userEvent.setup();
+    render(<LinhaDoTempo {...props()} />);
+    await u.click(await screen.findByRole("button", { name: "Foi aqui que me roubaram" }));
+    expect(await screen.findByText("O momento precisa ser até 7 dias antes do pedido de ajuda.")).toBeInTheDocument();
+  });
+
+  it("item 16: erro da API ao carregar mostra o detalheCidadao", async () => {
+    vi.spyOn(api, "rota").mockRejectedValueOnce(new ApiErro(503, "A rota está indisponível agora. Tente em alguns minutos."));
+    render(<LinhaDoTempo {...props()} />);
+    expect(await screen.findByText("A rota está indisponível agora. Tente em alguns minutos.")).toBeInTheDocument();
+  });
 });

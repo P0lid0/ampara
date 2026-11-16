@@ -31,4 +31,21 @@ describe("sessão de emergência", () => {
     expect(lerSessao()).toBeNull();
     expect(sessionStorage.length).toBe(0);
   });
+
+  it("item 17: sair, sessão vencida e conteúdo corrompido apagam só a chave da emergência (o painel de risco na mesma origem fica)", () => {
+    sessionStorage.setItem("painel-risco.token", "outro");
+    salvarSessao({ token: "t", expiraEm: daqui(60_000) });
+    sair();
+    expect(sessionStorage.getItem("ampara.emergencia")).toBeNull();
+    expect(sessionStorage.getItem("painel-risco.token")).toBe("outro");
+
+    salvarSessao({ token: "t", expiraEm: daqui(-1000) });
+    expect(lerSessao()).toBeNull();
+    expect(sessionStorage.getItem("painel-risco.token")).toBe("outro");
+
+    sessionStorage.setItem("ampara.emergencia", "{quebrado");
+    expect(lerSessao()).toBeNull();
+    expect(sessionStorage.getItem("painel-risco.token")).toBe("outro");
+    expect(localStorage.length).toBe(0);
+  });
 });

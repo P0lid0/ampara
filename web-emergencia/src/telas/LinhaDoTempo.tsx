@@ -9,6 +9,10 @@ const dataHora = (iso: string) =>
 /** "2026-11-12" -> "12/11" */
 const rotuloDia = (dia: string) => `${dia.slice(8, 10)}/${dia.slice(5, 7)}`;
 const SETE_DIAS = 7 * 24 * 3600 * 1000;
+const MSG_CARGA = "Não foi possível carregar sua rota. Tente de novo.";
+const MSG_MARCAR = "Não foi possível marcar o momento. Tente de novo.";
+/** A frase da API (detalheCidadao) quando houver; senão a mensagem da tela. */
+const frase = (x: unknown, padrao: string) => (x instanceof ApiErro && x.detalheCidadao) || padrao;
 
 export function LinhaDoTempo({
   ocorrenciaId,
@@ -26,16 +30,18 @@ export function LinhaDoTempo({
   agora?: () => Date;
 }) {
   const [dados, setDados] = useState<{ ocorrencias: OcorrenciaDto[]; rota: PontoRota[] } | null>(null);
-  const [erroCarga, setErroCarga] = useState(false);
+  const [erroCarga, setErroCarga] = useState<string | null>(null);
   const [escolhida, setEscolhida] = useState<string | null>(null);
   const [dia, setDia] = useState<string | null>(null);
   const [indice, setIndice] = useState(-1); // -1 = padrão (ponto mais perto do início da ocorrência)
   const [enviando, setEnviando] = useState(false);
-  const [erroMarcar, setErroMarcar] = useState(false);
+  const [erroMarcar, setErroMarcar] = useState<string | null>(null);
   const [marcadoEm, setMarcadoEm] = useState<string | null>(null);
+  // Item 14: com momento já gravado, a tela oferece "Gerar o BO" direto; remarcar é uma escolha explícita.
+  const [remarcar, setRemarcar] = useState(false);
 
   const carregar = useCallback(async () => {
-    setErroCarga(false);
+    setErroCarga(null);
     try {
       const fim = agora();
       const [ocorrencias, rota] = await Promise.all([
@@ -45,7 +51,7 @@ export function LinhaDoTempo({
       setDados({ ocorrencias, rota });
     } catch (x) {
       if (x instanceof ApiErro && x.status === 401) aoSessaoVencida();
-      else setErroCarga(true);
+      else setErroCarga(frase(x, MSG_CARGA));
     }
     // `agora` só é lido na carga; trocá-lo não deve recarregar.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -67,16 +73,19 @@ export function LinhaDoTempo({
     ocorrencias.find((o) => o.id === escolhida) ?? ocorrencias.find((o) => o.id === ocorrenciaId) ?? ocorrencias[0] ?? null;
 
   const dias = useMemo(() => agruparPorDia(dados?.rota ?? []), [dados]);
-  // Dia padrão: o do ponto mais perto do início da ocorrência (nunca um dia sem relação com o roubo).
+  const momentoGravado = ocorrenciaAtual?.momento ?? null;
+  // Referência do ponto padrão: o momento já gravado, senão o início da ocorrência.
+  const referencia = momentoGravado?.em ?? ocorrenciaAtual?.iniciadaEm ?? null;
+  // Dia padrão: o do ponto mais perto da referência (nunca um dia sem relação com o roubo).
   const diaPadrao = useMemo(() => {
-    if (!ocorrenciaAtual) return dias[0] ?? null;
+    if (!referencia) return dias[0] ?? null;
     const todos = dias.flatMap((d) => d.pontos);
-    const i = pontoMaisProximo(todos, ocorrenciaAtual.iniciadaEm);
+    const i = pontoMaisProximo(todos, referencia);
     return (i >= 0 ? dias.find((d) => d.pontos.includes(todos[i])) : null) ?? dias[0] ?? null;
-  }, [dias, ocorrenciaAtual]);
+  }, [dias, referencia]);
   const diaAtual = dias.find((d) => d.dia === dia) ?? diaPadrao;
   const pontos = useMemo(() => diaAtual?.pontos ?? [], [diaAtual]);
-  const idxPadrao = ocorrenciaAtual ? Math.max(0, pontoMaisProximo(pontos, ocorrenciaAtual.iniciadaEm)) : 0;
+  const idxPadrao = referencia ? Math.max(0, pontoMaisProximo(pontos, referencia)) : 0;
   const idx = indice >= 0 && indice < pontos.length ? indice : idxPadrao;
   const ponto = pontos[idx];
 
@@ -84,24 +93,24 @@ export function LinhaDoTempo({
     setDia(d);
     setIndice(-1);
     setMarcadoEm(null);
-    setErroMarcar(false);
+    setErroMarcar(null);
   }
   function escolherPonto(i: number) {
     setIndice(i);
     setMarcadoEm(null);
-    setErroMarcar(false);
+    setErroMarcar(null);
   }
 
   async function marcar() {
     if (!ocorrenciaAtual || !ponto) return;
     setEnviando(true);
-    setErroMarcar(false);
+    setErroMarcar(null);
     try {
       await api.ocorrencias.momento(ocorrenciaAtual.id, { em: ponto.em, lat: ponto.lat, lng: ponto.lng });
       setMarcadoEm(ponto.em);
     } catch (x) {
       if (x instanceof ApiErro && x.status === 401) aoSessaoVencida();
-      else setErroMarcar(true);
+      else setErroMarcar(frase(x, MSG_MARCAR));
     } finally {
       setEnviando(false);
     }
@@ -113,7 +122,7 @@ export function LinhaDoTempo({
 
       {erroCarga ? (
         <div role="alert" className="bloco">
-          <p className="erro">Não foi possível carregar sua rota. Tente de novo.</p>
+          <p className="erro">{erroCarga}</p>
           <button type="button" className="secundario" onClick={() => void carregar()}>Tentar de novo</button>
         </div>
       ) : dados === null ? (
@@ -130,7 +139,8 @@ export function LinhaDoTempo({
                   setDia(null);
                   setIndice(-1);
                   setMarcadoEm(null);
-                  setErroMarcar(false);
+                  setErroMarcar(null);
+                  setRemarcar(false);
                 }}
               >
                 {ocorrencias.map((o) => (
@@ -185,9 +195,15 @@ export function LinhaDoTempo({
                   <p className="grande">Momento marcado às {formatarHora(marcadoEm)}.</p>
                   <button type="button" onClick={() => aoBo(ocorrenciaAtual.id)}>Gerar o BO</button>
                 </section>
+              ) : ocorrenciaAtual && momentoGravado && !remarcar ? (
+                <section className="confirmado" aria-live="polite">
+                  <p className="grande">Momento já marcado às {formatarHora(momentoGravado.em)}.</p>
+                  <button type="button" onClick={() => aoBo(ocorrenciaAtual.id)}>Gerar o BO</button>
+                  <button type="button" className="secundario" onClick={() => setRemarcar(true)}>Marcar de novo</button>
+                </section>
               ) : ocorrenciaAtual ? (
                 <>
-                  {erroMarcar && <p className="erro" role="alert">Não foi possível marcar o momento. Tente de novo.</p>}
+                  {erroMarcar && <p className="erro" role="alert">{erroMarcar}</p>}
                   <button type="button" className="alarme" disabled={enviando} onClick={() => void marcar()}>
                     Foi aqui que me roubaram
                   </button>

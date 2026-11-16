@@ -124,4 +124,13 @@ describe("Bo", () => {
     expect(guardado()).not.toContain("356938035643809");
     expect(guardado()).not.toContain("BOLETIM");
   });
+
+  it("item 15: com aoSair mostra 'Sair e apagar tudo desta aba' e o clique chama aoSair", async () => {
+    const aoSair = vi.fn();
+    const u = userEvent.setup();
+    render(<Bo {...props()} aoSair={aoSair} />);
+    await screen.findByText(/BOLETIM/, { selector: "pre" });
+    await u.click(screen.getByRole("button", { name: "Sair e apagar tudo desta aba" }));
+    expect(aoSair).toHaveBeenCalledTimes(1);
+  });
 });

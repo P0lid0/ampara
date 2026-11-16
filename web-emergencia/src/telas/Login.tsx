@@ -22,8 +22,13 @@ export function Login({ aoEntrar, aviso }: { aoEntrar: () => void; aviso?: strin
     } catch (x) {
       const status = x instanceof ApiErro ? x.status : 0;
       if (status === 429) setErro("Muitas tentativas erradas. Aguarde 15 minutos e tente de novo.");
+      // 400, 401 e 404 dizem a mesma frase: não revelar se o e-mail existe.
       else if (status === 401 || status === 404 || status === 400) setErro("Dados incorretos.");
-      else setErro("Não foi possível entrar agora. Confira a conexão e tente de novo.");
+      // Outros 4xx (ex.: 403, 422): a frase da API, nunca "confira a conexão", que mentiria sobre a causa.
+      else if (status >= 400 && status < 500)
+        setErro((x instanceof ApiErro && x.detalheCidadao) || "Não foi possível entrar com esses dados. Tente de novo.");
+      else if (status === 0) setErro("Não foi possível entrar agora. Confira a conexão e tente de novo.");
+      else setErro((x instanceof ApiErro && x.detalheCidadao) || "Não foi possível entrar agora. Tente de novo em instantes.");
     } finally {
       setEnviando(false);
     }

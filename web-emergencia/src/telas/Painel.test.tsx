@@ -103,6 +103,24 @@ describe("Painel", () => {
   });
 });
 
+describe("Painel: frase da API (item 16)", () => {
+  it("falha do gatilho com detalheCidadao mostra a frase da API", async () => {
+    vi.spyOn(api.ocorrencias, "gatilho").mockRejectedValue(new ApiErro(502, "Não conseguimos falar com seus guardiões agora. Ligue para eles."));
+    const u = userEvent.setup();
+    render(<Painel aoSair={vi.fn()} aoSessaoVencida={vi.fn()} aoMarcar={vi.fn()} />);
+    await u.click(screen.getByRole("button", { name: "Preciso de ajuda agora" }));
+    await u.click(screen.getByRole("button", { name: "Sim, avisar" }));
+    expect(await screen.findByText("Não conseguimos falar com seus guardiões agora. Ligue para eles.")).toBeInTheDocument();
+  });
+
+  it("falha ao listar com detalheCidadao mostra a frase da API", async () => {
+    vi.spyOn(api.ocorrencias, "listar").mockRejectedValue(new ApiErro(503, "Serviço em manutenção. Tente em alguns minutos."));
+    render(<Painel aoSair={vi.fn()} aoSessaoVencida={vi.fn()} aoMarcar={vi.fn()} />);
+    expect(await screen.findByText("Serviço em manutenção. Tente em alguns minutos.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Tentar de novo" })).toBeInTheDocument();
+  });
+});
+
 describe("App (sessão)", () => {
   const sessaoValida = () => salvarSessao({ token: "tk", expiraEm: new Date(Date.now() + 1_800_000).toISOString() });
 
