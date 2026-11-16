@@ -1,17 +1,22 @@
 // Aba Mapa (P2): risco por área e faixa horária (cor, padrão de borda e texto), relatos recentes e as
 // camadas Delegacias, Estações e PM. Área que a API não devolveu é "Sem dado", nunca "baixo".
+// Legenda, camadas e relatos em grupos (uma superfície com divisores); erro do risco tem "Tentar de novo".
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ScrollView, StyleSheet, Switch, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { api } from '../../api/endpoints';
 import type { Bbox, CamadaPontoDto, RelatoDto, RiscoDto } from '../../api/tipos';
 import {
   celulasDoMapa, consultaRisco, idadeRelato, PINHEIROS, relatoVisivel, ROTULO_SEM_DADO, ROTULO_TIPO_RELATO, rotuloClasse,
   type ClasseRisco,
 } from '../../mapa/risco';
-import { cores, coresApoio, espacos, tamanhos } from '../../theme/tokens';
+import { cores, espacos, raios, tamanhos } from '../../theme/tokens';
+import { Aviso } from '../../ui/Aviso';
 import { Botao } from '../../ui/Botao';
+import { Grupo, TituloGrupo } from '../../ui/Grupo';
+import { Icone } from '../../ui/Icone';
+import { Interruptor } from '../../ui/Interruptor';
 import {
   CelulasNoMapa, COR_CELULA, MapaBase, PontoRotulado, type CelulaNoMapa, type ClasseCelula,
 } from '../../ui/MapaBase';
@@ -49,6 +54,8 @@ export default function Mapa() {
   const [bbox, setBbox] = useState<Bbox | null>(null);
   const [risco, setRisco] = useState<RiscoDto[]>([]);
   const [erroRisco, setErroRisco] = useState(false);
+  const [carregandoRisco, setCarregandoRisco] = useState(true);
+  const [tentativa, setTentativa] = useState(0);
   const [relatos, setRelatos] = useState<RelatoDto[]>([]);
   const [erroRelatos, setErroRelatos] = useState(false);
   const [ligadas, setLigadas] = useState<Record<TipoCamada, boolean>>({ delegacias: false, estacoes: false, pm: false });
@@ -106,17 +113,20 @@ export default function Mapa() {
     if (!bbox) return;
     let ativo = true;
     const { dia, faixa } = consultaRisco(bbox, new Date());
+    setCarregandoRisco(true);
     api.risco
       .consultar(bbox, dia, faixa)
       .then((r) => {
         if (!ativo) return;
         setRisco(r);
         setErroRisco(false);
+        setCarregandoRisco(false);
       })
       .catch(() => {
         if (!ativo) return;
         setRisco([]);
         setErroRisco(true);
+        setCarregandoRisco(false);
       });
     api.relatos
       .listar(bbox)
@@ -133,7 +143,7 @@ export default function Mapa() {
     return () => {
       ativo = false;
     };
-  }, [bbox]);
+  }, [bbox, tentativa]);
 
   const aoParar = useCallback((area: Bbox) => {
     if (temporizador.current) clearTimeout(temporizador.current);
@@ -185,8 +195,12 @@ export default function Mapa() {
 
   return (
     <ScrollView contentContainerStyle={estilos.tela}>
-      <Texto variante="titulo">Mapa</Texto>
-      {aviso ? <Texto accessibilityRole="alert">{aviso}</Texto> : null}
+      {aviso ? (
+        <View style={estilos.info} accessibilityRole="alert">
+          <Icone nome="info" tamanho={20} cor={cores.petroleo} />
+          <Texto variante="legenda" style={estilos.fluxo}>{aviso}</Texto>
+        </View>
+      ) : null}
 
       {centro ? (
         <MapaBase
@@ -211,13 +225,14 @@ export default function Mapa() {
           ))}
         </MapaBase>
       ) : (
-        <Texto>Localizando…</Texto>
+        <View style={estilos.esqueletoMapa} accessibilityLiveRegion="polite">
+          <Texto>Localizando…</Texto>
+        </View>
       )}
 
       {bbox ? (
         <Botao
           rotulo="Relatar aqui"
-          variante="secundario"
           dica="Abre o relato no ponto do centro do mapa. Arraste o mapa antes para escolher outro lugar."
           onPress={() => {
             const c = centroDe(bbox);
@@ -226,66 +241,94 @@ export default function Mapa() {
         />
       ) : null}
 
-      {erroRisco ? <Texto accessibilityRole="alert">Não deu para carregar o risco agora.</Texto> : null}
+      {erroRisco ? (
+        <View style={estilos.erro}>
+          <Aviso mensagem="Não deu para carregar o risco agora." />
+          <Botao rotulo="Tentar de novo" variante="secundario" onPress={() => setTentativa((t) => t + 1)} />
+        </View>
+      ) : null}
 
-      <View accessibilityRole="summary" style={estilos.bloco}>
-        <Texto variante="titulo">Legenda</Texto>
-        {LEGENDA.map((l) => (
-          <View key={l.classe} style={estilos.linha}>
-            <View style={[estilos.amostra, l.borda, { backgroundColor: COR_CELULA[l.classe] }]} />
-            <Texto style={estilos.fluxo}>{l.texto}</Texto>
+      <TituloGrupo>Como ler o mapa</TituloGrupo>
+      <View accessibilityRole="summary">
+        <Grupo>
+          <View style={estilos.linha}>
+            <Texto variante="legenda" style={estilos.fluxo}>
+              A cor e o contorno mostram o nível de atenção para o dia e a hora de agora. O contorno vale mesmo sem enxergar as cores.
+            </Texto>
           </View>
-        ))}
+          {LEGENDA.map((l) => (
+            <View key={l.classe} style={estilos.linha}>
+              <View style={[estilos.amostra, l.borda, { backgroundColor: COR_CELULA[l.classe] }]} />
+              <Texto variante="corpoForte" style={estilos.fluxo}>{l.texto}</Texto>
+            </View>
+          ))}
+          <View style={estilos.linha}>
+            <Icone nome="info" tamanho={24} cor={cores.petroleo} />
+            <Texto variante="legenda" style={estilos.fluxo}>
+              Letras no mapa: R roubo, F furto, S atitude suspeita (últimas 2 horas).
+            </Texto>
+          </View>
+        </Grupo>
       </View>
 
-      <View style={estilos.bloco}>
-        <Texto variante="titulo">Camadas</Texto>
+      <TituloGrupo>Camadas</TituloGrupo>
+      <Grupo>
         {CAMADAS.map((c) => (
-          <View key={c.tipo} style={[estilos.linha, estilos.alvo]}>
-            <Texto style={estilos.fluxo}>{c.rotulo}</Texto>
-            <Switch
-              accessibilityLabel={c.rotulo}
-              accessibilityRole="switch"
-              value={ligadas[c.tipo]}
-              onValueChange={(v) => alternar(c.tipo, v)}
-              trackColor={{ true: cores.petroleo, false: coresApoio.cinzaChave }}
-            />
-          </View>
+          <Interruptor
+            key={c.tipo}
+            rotulo={c.rotulo}
+            dica={`Aparece no mapa com a letra ${c.icone}.`}
+            valor={ligadas[c.tipo]}
+            aoMudar={(v) => alternar(c.tipo, v)}
+          />
         ))}
-        {CAMADAS.filter((c) => errosCamada[c.tipo]).map((c) => (
-          <Texto key={c.tipo} accessibilityRole="alert">{c.falha}</Texto>
-        ))}
-      </View>
+      </Grupo>
+      {CAMADAS.filter((c) => errosCamada[c.tipo]).map((c) => (
+        <Aviso key={c.tipo} mensagem={c.falha} />
+      ))}
 
-      <View style={estilos.bloco}>
-        <Texto variante="titulo">Áreas com atenção máxima agora</Texto>
+      <TituloGrupo>Áreas com atenção máxima agora</TituloGrupo>
+      <Grupo>
         {atencaoMaxima.length === 0 ? (
-          <Texto>{erroRisco ? 'Sem informação por enquanto.' : 'Nenhuma área com atenção máxima nesta região.'}</Texto>
+          <View style={estilos.linha}>
+            <Texto style={estilos.fluxo}>{erroRisco ? 'Sem informação por enquanto.' : carregandoRisco ? 'Carregando o risco da região…' : 'Nenhuma área com atenção máxima nesta região.'}</Texto>
+          </View>
         ) : (
           atencaoMaxima.map((r) => (
-            <Texto key={r.areaId}>{`Atenção máxima perto de ${r.lat.toFixed(4)}, ${r.lng.toFixed(4)}`}</Texto>
+            <View key={r.areaId} style={estilos.linha}>
+              <Icone nome="alerta" tamanho={24} cor={cores.alarmeTexto} />
+              <Texto style={estilos.fluxo}>{`Atenção máxima perto de ${r.lat.toFixed(4)}, ${r.lng.toFixed(4)}`}</Texto>
+            </View>
           ))
         )}
-      </View>
+      </Grupo>
 
-      <View style={estilos.bloco}>
-        <Texto variante="titulo">Relatos recentes</Texto>
-        {erroRelatos ? <Texto accessibilityRole="alert">Não deu para carregar os relatos agora.</Texto> : null}
-        {!erroRelatos && relatosVisiveis.length === 0 ? <Texto>Nenhum relato nas últimas 2 horas nesta região.</Texto> : null}
+      <TituloGrupo>Relatos recentes</TituloGrupo>
+      {erroRelatos ? <Aviso mensagem="Não deu para carregar os relatos agora." /> : null}
+      {erroRelatos && relatosVisiveis.length === 0 ? null : (
+      <Grupo>
+        {!erroRelatos && relatosVisiveis.length === 0 ? (
+          <View style={estilos.linha}>
+            <Texto style={estilos.fluxo}>Nenhum relato nas últimas 2 horas nesta região.</Texto>
+          </View>
+        ) : null}
         {relatosVisiveis.map((r) => {
           const estado = confirmacao[r.id];
           return (
             <View key={r.id} style={estilos.relato}>
-              <Texto accessibilityRole="header">{ROTULO_TIPO_RELATO[r.tipo] ?? 'Relato'}</Texto>
+              <Texto variante="corpoForte" accessibilityRole="header">{ROTULO_TIPO_RELATO[r.tipo] ?? 'Relato'}</Texto>
               <Texto>{idadeRelato(r.em, agora)}</Texto>
-              <Texto variante="legenda">{`${r.confirmacoes} confirmação(ões)`}</Texto>
+              <Texto variante="legenda" style={estilos.suave}>
+                {r.confirmacoes === 1 ? '1 pessoa confirmou' : `${r.confirmacoes} pessoas confirmaram`}
+              </Texto>
               {estado === 'ok' ? (
-                <Texto accessibilityRole="alert">Obrigado, sua confirmação foi enviada.</Texto>
+                <View style={estilos.feito} accessibilityRole="alert">
+                  <Icone nome="ok" tamanho={20} cor={cores.petroleo} />
+                  <Texto variante="legenda" style={estilos.fluxo}>Obrigado, sua confirmação foi enviada.</Texto>
+                </View>
               ) : (
                 <>
-                  {estado === 'erro' ? (
-                    <Texto accessibilityRole="alert">Não deu para confirmar agora. Tente de novo.</Texto>
-                  ) : null}
+                  {estado === 'erro' ? <Aviso mensagem="Não deu para confirmar agora. Tente de novo." /> : null}
                   <Botao
                     rotulo="Confirmar que também vi"
                     variante="secundario"
@@ -297,17 +340,21 @@ export default function Mapa() {
             </View>
           );
         })}
-      </View>
+      </Grupo>
+      )}
     </ScrollView>
   );
 }
 
 const estilos = StyleSheet.create({
-  tela: { padding: espacos.m, gap: espacos.m },
-  bloco: { gap: espacos.p },
-  linha: { flexDirection: 'row', alignItems: 'center', gap: espacos.m },
-  alvo: { minHeight: tamanhos.alvoMin },
+  tela: { padding: espacos.m, paddingBottom: espacos.gg, gap: espacos.m },
   fluxo: { flex: 1 },
+  suave: { color: cores.textoSuave },
+  linha: { flexDirection: 'row', alignItems: 'center', gap: espacos.pm, padding: espacos.m, minHeight: tamanhos.alvoMin },
+  info: { flexDirection: 'row', alignItems: 'flex-start', gap: espacos.p, padding: espacos.pm, borderRadius: raios.m, backgroundColor: cores.areiaFunda },
+  esqueletoMapa: { height: 280, borderRadius: raios.g, backgroundColor: cores.areiaFunda, alignItems: 'center', justifyContent: 'center' },
+  erro: { gap: espacos.p },
   amostra: { width: 32, height: 32, borderColor: cores.tinta, borderRadius: 4 },
-  relato: { gap: espacos.p, padding: espacos.m, borderWidth: 1, borderColor: cores.petroleo, borderRadius: 8 },
+  relato: { gap: espacos.p, padding: espacos.m },
+  feito: { flexDirection: 'row', alignItems: 'center', gap: espacos.p, padding: espacos.pm, borderRadius: raios.m, backgroundColor: cores.esmeraldaSuave },
 });

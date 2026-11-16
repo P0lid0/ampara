@@ -154,6 +154,24 @@ describe('aba Ajustes', () => {
     expect(await sessaoRepo(await abrirBanco()).get('alarme_plano_b')).toBe('1');
   });
 
+  it('agrupa em seções com título e põe "Modo demonstração" em "Avançado"', async () => {
+    await render(<Ajustes />);
+    await screen.findByLabelText('Modo demonstração');
+    for (const nome of ['Seu chaveiro', 'Rota', 'Alarme e guardiões', 'Prevenção', 'Sobre', 'Avançado']) {
+      expect(screen.getByRole('header', { name: nome })).toBeTruthy();
+    }
+  });
+
+  it('interruptor desligado diz "Desligado" por escrito e ligado diz "Ligado"', async () => {
+    await render(<Ajustes />);
+    const chave = await screen.findByLabelText('Alarme sem tela cheia');
+    expect(screen.getAllByText('Desligado').length).toBe(3);
+    await fireEvent(chave, 'valueChange', true);
+    await espera();
+    expect(screen.getAllByText('Ligado').length).toBe(1);
+    expect(screen.getAllByText('Desligado').length).toBe(2);
+  });
+
   it('mostra a frase "Sobre"', async () => {
     await render(<Ajustes />);
     expect(await screen.findByText('O Ampara não bloqueia o seu celular nem as suas contas: ele avisa quem pode fazer isso.')).toBeTruthy();

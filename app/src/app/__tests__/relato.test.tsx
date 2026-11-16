@@ -40,6 +40,15 @@ describe('tela Relato', () => {
     expect(screen.getByRole('radio', { name: 'Suspeita' })).toBeTruthy();
   });
 
+  it('o tipo escolhido fica marcado (estado "checked") e só um por vez', async () => {
+    await abrirTela();
+    await escolher('Furto');
+    expect(screen.getByRole('radio', { name: 'Furto' }).props.accessibilityState).toEqual(expect.objectContaining({ checked: true }));
+    expect(screen.getByRole('radio', { name: 'Roubo' }).props.accessibilityState).toEqual(expect.objectContaining({ checked: false }));
+    await escolher('Roubo');
+    expect(screen.getByRole('radio', { name: 'Furto' }).props.accessibilityState).toEqual(expect.objectContaining({ checked: false }));
+  });
+
   it('sem tipo escolhido não chama a API e pede o tipo', async () => {
     await abrirTela();
     await enviar();

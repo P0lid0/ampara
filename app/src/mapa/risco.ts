@@ -2,28 +2,24 @@
 import type { Bbox, RiscoDto } from '../api/tipos';
 import { areaLimites, areasNoBbox, type Limites } from './area';
 
-const FUSO = 'America/Sao_Paulo';
 export const ROTULO_SEM_DADO = 'Sem dado para esta área';
 export const PINHEIROS = { lat: -23.567249, lng: -46.7019515 };
 const DUAS_HORAS_MS = 2 * 60 * 60 * 1000;
 
-function partesSp(d: Date) {
-  const fmt = new Intl.DateTimeFormat('en-US', { timeZone: FUSO, hourCycle: 'h23', hour: '2-digit', weekday: 'short' });
-  const m: Record<string, string> = {};
-  for (const p of fmt.formatToParts(d)) m[p.type] = p.value;
-  return m;
-}
+// São Paulo fica em UTC-3 o ano todo (sem horário de verão desde 2019). A conta é feita à mão, sem Intl:
+// no Hermes do release o Intl.DateTimeFormat nem sempre devolve as partes que o Node devolve, e dia ou faixa
+// inválidos fazem a API recusar o /risco com 422 (a tela mostrava "Não deu para carregar o risco agora").
+const DESLOCAMENTO_SP_MS = -3 * 60 * 60 * 1000;
+const spDe = (d: Date) => new Date(d.getTime() + DESLOCAMENTO_SP_MS);
 
 /** 0 = 00h–03h … 7 = 21h–24h, na hora de São Paulo. */
 export function faixaDe(d: Date): number {
-  const hora = Number(partesSp(d).hour) % 24;
-  return Math.floor(hora / 3);
+  return Math.floor(spDe(d).getUTCHours() / 3);
 }
 
-const DIAS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 /** 0 = segunda … 6 = domingo, no dia de São Paulo. */
 export function diaDe(d: Date): number {
-  return DIAS.indexOf(partesSp(d).weekday);
+  return (spDe(d).getUTCDay() + 6) % 7;
 }
 
 export function consultaRisco(b: Bbox, d: Date): { bbox: Bbox; dia: number; faixa: number } {

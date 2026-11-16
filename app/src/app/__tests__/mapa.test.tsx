@@ -113,6 +113,39 @@ describe('aba Mapa', () => {
     await waitFor(() => expect(poligonos()).toEqual([]));
   });
 
+  it('falha no risco oferece "Tentar de novo", que consulta outra vez e limpa o aviso', async () => {
+    consultar.mockRejectedValueOnce(new Error('rede'));
+    await render(<Mapa />);
+    await screen.findByText('Não deu para carregar o risco agora.');
+    await fireEvent.press(screen.getByRole('button', { name: 'Tentar de novo' }));
+    await waitFor(() => expect(screen.queryByText('Não deu para carregar o risco agora.')).toBeNull());
+    expect(consultar).toHaveBeenCalledTimes(2);
+    expect(await screen.findByText('Atenção máxima perto de -23.5696, -46.7019')).toBeTruthy();
+  });
+
+  it('release (Hermes): com o Intl sem as partes de data, pede o risco com dia 0..6 e faixa 0..7 e não mostra erro', async () => {
+    const original = Intl.DateTimeFormat;
+    Intl.DateTimeFormat = function () {
+      return { formatToParts: () => [], format: () => '' };
+    } as never;
+    try {
+      await render(<Mapa />);
+      await waitFor(() => expect(consultar).toHaveBeenCalled());
+      const [, dia, faixa] = consultar.mock.calls[0];
+      expect([dia, faixa]).toEqual([5, 4]);
+      expect(await screen.findByText('Atenção máxima perto de -23.5696, -46.7019')).toBeTruthy();
+      expect(screen.queryByText('Não deu para carregar o risco agora.')).toBeNull();
+    } finally {
+      Intl.DateTimeFormat = original;
+    }
+  });
+
+  it('a legenda explica a cor, o contorno e as letras do mapa', async () => {
+    await render(<Mapa />);
+    expect(await screen.findByText(/O contorno vale mesmo sem enxergar as cores/)).toBeTruthy();
+    expect(screen.getByText(/R roubo, F furto, S atitude suspeita/)).toBeTruthy();
+  });
+
   it('desenha ausente como "sem" (cinza), mantém baixo como baixo e alto como alto', async () => {
     await render(<Mapa />);
     await waitFor(() => expect(poligonos().length).toBeGreaterThan(2));

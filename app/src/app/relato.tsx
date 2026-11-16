@@ -1,6 +1,7 @@
 // Relato (P2): o cidadão conta em poucas palavras o que e onde, sem foto e sem descrever pessoas. O app
 // só limita o que é seguro limitar; o que é abuso ou dado pessoal quem decide é a API, e a resposta dela
 // aparece na tela. Sem rede o relato fica na fila local e sai quando a tela abre de novo.
+import * as Haptics from 'expo-haptics';
 import * as Location from 'expo-location';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
@@ -11,9 +12,12 @@ import type { RelatoNovo } from '../api/tipos';
 import { abrirBanco } from '../db/db';
 import { relatoRepo, sessaoRepo } from '../db/repos';
 import { enviarRelatos, limitarTexto, MAX_TEXTO, podeEnviarRelato, validarRelato, type TipoRelato } from '../relato/validacao';
-import { cores, espacos, fontes, tamanhos } from '../theme/tokens';
+import { bordas, cores, espacos, raios, tamanhos } from '../theme/tokens';
+import { Aviso } from '../ui/Aviso';
+import { BarraAcao } from '../ui/BarraAcao';
 import { Botao } from '../ui/Botao';
 import { Campo } from '../ui/Campo';
+import { Icone } from '../ui/Icone';
 import { Texto } from '../ui/Texto';
 
 const CHAVE_ULTIMO = 'relato.ultimoEm';
@@ -144,77 +148,109 @@ export default function Relato() {
   }
 
   return (
-    <ScrollView contentContainerStyle={estilos.tela} keyboardShouldPersistTaps="handled">
-      <Stack.Screen options={{ title: 'Relatar' }} />
-      <Texto variante="titulo">Relatar um problema</Texto>
-      <Texto>
-        {escolhido ? 'O relato vai para o ponto escolhido no mapa.' : 'O relato vai para o lugar onde você está agora.'}
-      </Texto>
-      <Texto accessibilityRole="alert">Não descreva pessoas. Diga só o que e onde.</Texto>
+    <View style={estilos.fundo}>
+      <ScrollView style={estilos.rolagem} contentContainerStyle={estilos.tela} keyboardShouldPersistTaps="handled">
+        <Stack.Screen options={{ title: 'Relatar' }} />
+        <Texto variante="titulo">O que você viu?</Texto>
 
-      <View accessibilityRole="radiogroup" accessibilityLabel="O que aconteceu" style={estilos.tipos}>
-        {TIPOS.map((t) => {
-          const marcado = tipo === t.tipo;
-          return (
-            <Pressable
-              key={t.tipo}
-              accessibilityRole="radio"
-              accessibilityLabel={t.rotulo}
-              accessibilityState={{ checked: marcado }}
-              onPress={() => setTipo(t.tipo)}
-              style={[estilos.tipo, marcado && estilos.tipoMarcado]}
-            >
-              <Texto style={[estilos.tipoTexto, marcado && estilos.tipoTextoMarcado]}>
-                {`${marcado ? '✓ ' : ''}${t.rotulo}`}
-              </Texto>
-            </Pressable>
-          );
-        })}
-      </View>
-
-      <Campo
-        rotulo="O que aconteceu (opcional)"
-        valor={texto}
-        onChangeText={(t) => setTexto(limitarTexto(t))}
-        maxLength={MAX_TEXTO}
-        placeholder="Ex.: moto parada na esquina"
-        autoCorrect
-      />
-      <Texto variante="legenda">{`${texto.length} de ${MAX_TEXTO} caracteres`}</Texto>
-
-      {aviso ? (
-        <View style={estilos.aviso} accessibilityRole="alert" accessibilityLiveRegion="polite">
-          {aviso.alerta ? (
-            <Texto accessibilityElementsHidden importantForAccessibility="no">
-              {'⚠'}
-            </Texto>
-          ) : null}
-          <Texto style={estilos.fluxo}>{aviso.texto}</Texto>
+        <View style={estilos.local}>
+          <Icone nome="ponto" tamanho={20} cor={cores.petroleo} />
+          <Texto style={estilos.fluxo}>
+            {escolhido ? 'O relato vai para o ponto escolhido no mapa.' : 'O relato vai para o lugar onde você está agora.'}
+          </Texto>
         </View>
-      ) : null}
 
-      <Botao rotulo="Enviar relato" onPress={() => void enviar()} carregando={enviando} />
-    </ScrollView>
+        <View style={estilos.regra}>
+          <Icone nome="info" tamanho={24} cor={cores.petroleo} />
+          <Texto variante="corpoForte" style={estilos.fluxo}>Não descreva pessoas. Diga só o que e onde.</Texto>
+        </View>
+
+        <View accessibilityRole="radiogroup" accessibilityLabel="O que aconteceu" style={estilos.tipos}>
+          {TIPOS.map((t) => {
+            const marcado = tipo === t.tipo;
+            return (
+              <Pressable
+                key={t.tipo}
+                accessibilityRole="radio"
+                accessibilityLabel={t.rotulo}
+                accessibilityState={{ checked: marcado }}
+                android_ripple={{ color: cores.bordaSuave }}
+                onPress={() => {
+                  Haptics.selectionAsync().catch(() => undefined);
+                  setTipo(t.tipo);
+                }}
+                style={({ pressed }) => [estilos.tipo, marcado && estilos.tipoMarcado, pressed && !marcado && estilos.tipoPressionado]}
+              >
+                {marcado ? <Icone nome="ok" tamanho={20} cor={cores.areia} /> : null}
+                <Texto variante="corpoForte" style={marcado ? estilos.tipoTextoMarcado : estilos.tipoTexto}>
+                  {t.rotulo}
+                </Texto>
+              </Pressable>
+            );
+          })}
+        </View>
+
+        <View>
+          <Campo
+            rotulo="O que aconteceu (opcional)"
+            valor={texto}
+            onChangeText={(t) => setTexto(limitarTexto(t))}
+            maxLength={MAX_TEXTO}
+            placeholder="Ex.: moto parada na esquina"
+            autoCorrect
+          />
+          <Texto variante="legenda" style={estilos.contador}>{`${texto.length} de ${MAX_TEXTO} caracteres`}</Texto>
+        </View>
+
+        {aviso ? (
+          aviso.alerta ? (
+            <Aviso mensagem={aviso.texto} />
+          ) : (
+            <View style={estilos.feito} accessibilityRole="alert" accessibilityLiveRegion="polite">
+              <Icone nome="ok" tamanho={20} cor={cores.petroleo} />
+              <Texto style={estilos.fluxo}>{aviso.texto}</Texto>
+            </View>
+          )
+        ) : null}
+      </ScrollView>
+
+      <BarraAcao>
+        <Botao rotulo="Enviar relato" onPress={() => void enviar()} carregando={enviando} />
+      </BarraAcao>
+    </View>
   );
 }
 
 const estilos = StyleSheet.create({
-  tela: { padding: espacos.m, gap: espacos.m },
-  tipos: { gap: espacos.p },
-  aviso: { flexDirection: 'row', gap: espacos.p, alignItems: 'flex-start' },
+  fundo: { flex: 1, backgroundColor: cores.areia },
+  rolagem: { flex: 1 },
+  tela: { padding: espacos.m, paddingBottom: espacos.g, gap: espacos.m },
   fluxo: { flex: 1 },
+  local: { flexDirection: 'row', alignItems: 'center', gap: espacos.p },
+  regra: {
+    flexDirection: 'row', alignItems: 'center', gap: espacos.pm, padding: espacos.m,
+    borderRadius: raios.m, backgroundColor: cores.areiaFunda,
+  },
+  tipos: { flexDirection: 'row', flexWrap: 'wrap', gap: espacos.p },
   tipo: {
-    minHeight: tamanhos.alvoMin + 16,
+    flexGrow: 1,
+    flexBasis: '30%',
+    minHeight: tamanhos.alvoAcao + espacos.m,
     minWidth: tamanhos.alvoMin,
-    borderWidth: 2,
+    flexDirection: 'row',
+    gap: espacos.xs,
+    borderWidth: bordas.padrao,
     borderColor: cores.petroleo,
-    borderRadius: 12,
+    borderRadius: raios.m,
     backgroundColor: cores.branco,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: espacos.m,
+    paddingHorizontal: espacos.p,
   },
-  tipoMarcado: { backgroundColor: cores.petroleo, borderWidth: 4 },
-  tipoTexto: { fontFamily: fontes.semibold, fontSize: 20 },
+  tipoMarcado: { backgroundColor: cores.petroleo },
+  tipoPressionado: { backgroundColor: cores.areiaFunda },
+  tipoTexto: { color: cores.petroleo },
   tipoTextoMarcado: { color: cores.areia },
+  contador: { color: cores.textoSuave, textAlign: 'right', marginTop: -espacos.p },
+  feito: { flexDirection: 'row', alignItems: 'center', gap: espacos.p, padding: espacos.pm, borderRadius: raios.m, backgroundColor: cores.esmeraldaSuave },
 });

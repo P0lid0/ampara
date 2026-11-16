@@ -25,6 +25,52 @@ describe('faixa e dia (São Paulo)', () => {
   });
 });
 
+describe('release (Hermes): dia e faixa não dependem do Intl', () => {
+  // Reproduz o bug do release: com a API no ar, /risco voltava 422 porque dia ou faixa saíam inválidos
+  // (NaN ou -1) quando o Intl não devolvia as partes esperadas.
+  const original = Intl.DateTimeFormat;
+  afterEach(() => {
+    Intl.DateTimeFormat = original;
+  });
+  const intlSemPartes = () => {
+    Intl.DateTimeFormat = function () {
+      return { formatToParts: () => [{ type: 'literal', value: ' ' }], format: () => '' };
+    } as never;
+  };
+  const intlQueQuebra = () => {
+    Intl.DateTimeFormat = function () {
+      throw new RangeError('Invalid time zone');
+    } as never;
+  };
+
+  it.each([
+    ['sem as partes hour e weekday', intlSemPartes],
+    ['que lança erro', intlQueQuebra],
+  ])('com um Intl %s, dia fica em 0..6 e faixa em 0..7 e batem com a hora de São Paulo', (_nome, quebrar) => {
+    quebrar();
+    const q = consultaRisco(BBOX, new Date('2026-11-14T21:30:00-03:00'));
+    expect(q.dia).toBe(5);
+    expect(q.faixa).toBe(7);
+  });
+
+  it('em qualquer instante de uma semana, dia e faixa são inteiros válidos para a API', () => {
+    intlSemPartes();
+    const inicio = new Date('2026-11-09T00:00:00Z').getTime();
+    for (let h = 0; h < 24 * 8; h++) {
+      const { dia, faixa } = consultaRisco(BBOX, new Date(inicio + h * 3600000));
+      expect(Number.isInteger(dia) && dia >= 0 && dia <= 6).toBe(true);
+      expect(Number.isInteger(faixa) && faixa >= 0 && faixa <= 7).toBe(true);
+    }
+  });
+
+  it('virada de dia em São Paulo: 02:59Z de terça ainda é segunda 23:59 (dia 0, faixa 7)', () => {
+    expect(diaDe(new Date('2026-11-17T02:59:00Z'))).toBe(0);
+    expect(faixaDe(new Date('2026-11-17T02:59:00Z'))).toBe(7);
+    expect(diaDe(new Date('2026-11-17T03:00:00Z'))).toBe(1);
+    expect(faixaDe(new Date('2026-11-17T03:00:00Z'))).toBe(0);
+  });
+});
+
 describe('rótulos', () => {
   it('rotuloClasse não contém "perigos" e os 3 rótulos são distintos', () => {
     const r = (['baixo', 'medio', 'alto'] as const).map(rotuloClasse);
