@@ -11,7 +11,7 @@ import { sessaoRepo } from '../db/repos';
 import type { Efeito } from './alarmeEstado';
 import { criarHub } from './hub';
 import { emitirPasso } from './passosAoVivo';
-import { CANAL_SERVICO, cancelarAlarme, criarCanais, exibirAlarme, exibirAviso, permissaoNotificacao } from './notificacao';
+import { CANAL_ALARME, CANAL_SERVICO, cancelarAlarme, criarCanais, exibirAlarme, exibirAviso, permissaoNotificacao } from './notificacao';
 import { useAlarmes } from './store';
 
 export const ID_NOTIFICACAO_SERVICO = 'ampara-guardiao-servico';
@@ -48,10 +48,28 @@ notifee.onBackgroundEvent(async () => undefined);
 
 async function buscarAtivos(): Promise<void> {
   try {
+    const pedidoEm = Date.now();
     const lista = await api.alertas.ativos();
-    await executarEfeitos(useAlarmes.getState().carregarAtivos(lista));
+    // A lista é a verdade (item 7): o que sumiu dela foi encerrado enquanto o hub estava fora.
+    await executarEfeitos(useAlarmes.getState().reconciliarAtivos(lista, pedidoEm));
+    await cancelarAlarmesOrfaos(new Set(lista.map((a) => a.alertaId)));
   } catch {
     console.warn('guardiao: falha ao buscar alertas ativos');
+  }
+}
+
+/** Notificação de alarme que ficou na bandeja (ex.: de antes de o processo reiniciar) sem alerta ativo. */
+async function cancelarAlarmesOrfaos(ativosNoServidor: Set<string>): Promise<void> {
+  try {
+    const locais = useAlarmes.getState().estado.ativos;
+    for (const n of await notifee.getDisplayedNotifications()) {
+      if (n.notification.android?.channelId !== CANAL_ALARME) continue;
+      const alertaId = String(n.notification.data?.alertaId ?? n.id ?? '');
+      if (!alertaId || ativosNoServidor.has(alertaId) || alertaId in locais) continue;
+      await cancelarAlarme(n.id ?? alertaId);
+    }
+  } catch {
+    console.warn('guardiao: falha ao limpar alarmes antigos');
   }
 }
 

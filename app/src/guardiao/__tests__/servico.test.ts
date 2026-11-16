@@ -161,6 +161,31 @@ describe('efeitos do hub', () => {
     expect(jest.mocked(notifee.displayNotification).mock.calls.map((c) => c[0].id)).toEqual(['a1']);
   });
 
+  it('item 7: na reconexão, o alerta encerrado durante a queda (sumiu da lista) para a sirene', async () => {
+    opcoes.aoEvento({ tipo: 'AlertaDisparado', dado: disparo });
+    await drenar();
+    ativos.mockResolvedValue([]);
+    opcoes.aoReconectar();
+    await drenar();
+    expect(notifee.cancelNotification).toHaveBeenCalledWith('a1');
+    expect(useAlarmes.getState().estado.ativos.a1).toBeUndefined();
+  });
+
+  it('item 7: notificação de alarme que ficou de uma vida anterior do processo é cancelada; as outras não', async () => {
+    jest.mocked(notifee.getDisplayedNotifications).mockResolvedValueOnce([
+      { id: 'velho', date: '', notification: { id: 'velho', data: { alertaId: 'velho' }, android: { channelId: 'ampara-alarme' } } },
+      { id: 'a2', date: '', notification: { id: 'a2', data: { alertaId: 'a2' }, android: { channelId: 'ampara-alarme' } } },
+      { id: ID_NOTIFICACAO_SERVICO, date: '', notification: { id: ID_NOTIFICACAO_SERVICO, android: { channelId: 'ampara-servico' } } },
+    ] as never);
+    ativos.mockResolvedValue([{ ...disparo, alertaId: 'a2' }]);
+    opcoes.aoReconectar();
+    await drenar();
+    const cancelados = jest.mocked(notifee.cancelNotification).mock.calls.map((c) => c[0]);
+    expect(cancelados).toContain('velho');
+    expect(cancelados).not.toContain('a2');
+    expect(cancelados).not.toContain(ID_NOTIFICACAO_SERVICO);
+  });
+
   it('aoReconectar busca os ativos', async () => {
     opcoes.aoReconectar();
     await drenar();

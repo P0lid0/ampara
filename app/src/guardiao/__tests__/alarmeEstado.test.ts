@@ -163,6 +163,36 @@ describe('useAlarmes', () => {
     expect(useAlarmes.getState().carregarAtivos([dto('a', '2026-11-15T12:00:00Z'), dto('b', '2026-11-15T12:01:00Z')])).toEqual([]);
   });
 
+  // Item 7: o AlertaEncerrado perdido durante a queda da rede não pode deixar a sirene tocando para sempre.
+  it('item 7: reconciliarAtivos encerra (efeito "parar") o ativo local que sumiu da lista do servidor', () => {
+    useAlarmes.getState().aplicar(disparado('a'));
+    const pedidoEm = Date.now() + 1;
+    const efeitos = useAlarmes.getState().reconciliarAtivos([], pedidoEm);
+    expect(efeitos).toEqual([{ tipo: 'parar', alertaId: 'a', motivo: 'encerrado' }]);
+    expect(useAlarmes.getState().estado.ativos).toEqual({});
+    // e um disparo repetido depois não volta a tocar
+    expect(useAlarmes.getState().aplicar(disparado('a'))).toEqual([]);
+  });
+
+  it('item 7: reconciliarAtivos preserva o alerta que chegou depois de o pedido sair, o já ciente e o de demonstração', () => {
+    const pedidoEm = Date.now() - 1;
+    useAlarmes.getState().aplicar(disparado('novo')); // chegou pelo hub enquanto o GET estava no ar
+    useAlarmes.getState().aplicar({
+      tipo: 'AlertaDisparado',
+      dado: { alertaId: 'demo-a1', ocorrenciaId: 'demo-oc1', vitimaNome: 'Pessoa Demo', origem: 'chaveiro', em: '2026-11-15T12:00:00Z' },
+    });
+    expect(useAlarmes.getState().reconciliarAtivos([], pedidoEm)).toEqual([]);
+    const pedido2 = Date.now() + 1;
+    useAlarmes.getState().marcarCienteEnviado('novo');
+    expect(useAlarmes.getState().reconciliarAtivos([], pedido2)).toEqual([]);
+    expect(Object.keys(useAlarmes.getState().estado.ativos).sort()).toEqual(['demo-a1', 'novo']);
+  });
+
+  it('item 7: reconciliarAtivos também toca o que veio novo na lista (como carregarAtivos)', () => {
+    const efeitos = useAlarmes.getState().reconciliarAtivos([dto('b', '2026-11-15T12:01:00Z')], Date.now());
+    expect(efeitos).toEqual([{ tipo: 'tocar', alerta: expect.objectContaining({ alertaId: 'b' }) }]);
+  });
+
   it('carregarAtivos não ressuscita um alerta já encerrado', () => {
     useAlarmes.getState().aplicar(disparado('a'));
     useAlarmes.getState().aplicar(encerrado('a', 'ciente'));
