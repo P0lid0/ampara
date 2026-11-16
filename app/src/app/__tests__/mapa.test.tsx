@@ -46,6 +46,11 @@ beforeEach(() => {
 });
 afterEach(() => jest.useRealTimers());
 
+const poligonos = (): { areaId: string; classe: string }[] => {
+  const fonte = screen.queryAllByTestId('maplibre-GeoJSONSource').find((n) => n.props.id === 'risco-fonte');
+  return (fonte?.props.data.features ?? []).map((f: { properties: { areaId: string; classe: string } }) => f.properties);
+};
+
 describe('aba Mapa', () => {
   it('legenda com os 3 níveis em texto, mais "Sem dado", e lista "Áreas com atenção máxima agora"', async () => {
     await render(<Mapa />);
@@ -54,8 +59,8 @@ describe('aba Mapa', () => {
     expect(screen.getByText('Atenção redobrada')).toBeTruthy();
     expect(screen.getAllByText('Atenção máxima neste horário').length).toBeGreaterThan(0);
     expect(screen.getByText('Sem dado para esta área')).toBeTruthy();
-    expect(await screen.findByText(/g051_026/)).toBeTruthy(); // a área de atenção máxima aparece na lista
-    expect(screen.queryByText(/g051_027/)).toBeNull(); // baixo não entra
+    expect(await screen.findByText('Atenção máxima perto de -23.5696, -46.7019')).toBeTruthy();
+    expect(screen.queryByText(/-46\.6970/)).toBeNull(); // baixo não entra
   });
 
   it('consulta o risco com o dia e a faixa de agora (sábado 12:00 em São Paulo: dia 5, faixa 4)', async () => {
@@ -102,6 +107,33 @@ describe('aba Mapa', () => {
     await render(<Mapa />);
     expect(await screen.findByText('Não deu para carregar o risco agora.')).toBeTruthy();
     expect(screen.getByText('Sem dado para esta área')).toBeTruthy();
+    // falha de rede não desenha nenhuma célula (nem 'sem'): não afirmar "sem dado" sem saber
+    await waitFor(() => expect(poligonos()).toEqual([]));
+  });
+
+  it('desenha ausente como "sem" (cinza), mantém baixo como baixo e alto como alto', async () => {
+    await render(<Mapa />);
+    await waitFor(() => expect(poligonos().length).toBeGreaterThan(2));
+    const f = poligonos();
+    expect(f.find((x) => x.areaId === 'g051_026')?.classe).toBe('alto');
+    expect(f.find((x) => x.areaId === 'g051_027')?.classe).toBe('baixo');
+    expect(f.filter((x) => x.classe === 'sem').length).toBeGreaterThan(0);
+    expect(f.filter((x) => x.classe === 'sem').every((x) => !['g051_026', 'g051_027'].includes(x.areaId))).toBe(true);
+  });
+
+  it('sem GPS (promise que nunca resolve) cai em Pinheiros com aviso depois de 8 s', async () => {
+    jest.useRealTimers();
+    jest.useFakeTimers({ now: NOW, doNotFake: ['nextTick', 'setImmediate'] });
+    jest.mocked(Location.getCurrentPositionAsync).mockReturnValueOnce(new Promise(() => {}) as never);
+    await render(<Mapa />);
+    expect(screen.getByText('Localizando…')).toBeTruthy();
+    await act(async () => {
+      jest.advanceTimersByTime(8100);
+    });
+    expect(await screen.findByText(/Não deu para achar sua localização/)).toBeTruthy();
+    await waitFor(() => expect(consultar).toHaveBeenCalled());
+    const bbox = consultar.mock.calls[0][0];
+    expect((bbox.minLat + bbox.maxLat) / 2).toBeCloseTo(-23.567249, 3);
   });
 });
 

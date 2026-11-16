@@ -1,5 +1,5 @@
 import {
-  celulasComDado, consultaRisco, diaDe, faixaDe, idadeRelato, relatoVisivel, rotuloClasse, semDado,
+  celulasComDado, celulasDoMapa, consultaRisco, diaDe, faixaDe, idadeRelato, relatoVisivel, rotuloClasse, semDado,
 } from '../risco';
 import type { RiscoDto } from '../../api/tipos';
 
@@ -56,5 +56,27 @@ describe('sem dado', () => {
     expect(semDado('g051_026', resp)).toBe(false);
     expect(semDado('g051_027', resp)).toBe(true);
     expect(celulasComDado(resp).has('g051_026')).toBe(true);
+  });
+});
+
+describe('celulasDoMapa', () => {
+  const pequeno = { minLat: -23.5700, minLng: -46.7030, maxLat: -23.5650, maxLng: -46.6960 };
+  const resp: RiscoDto[] = [
+    { areaId: 'g051_026', lat: -23.5696, lng: -46.7019, classe: 'baixo', probAlto: 0.01 },
+  ];
+  it('id ausente vira "sem"; id devolvido como baixo continua baixo', () => {
+    const r = celulasDoMapa(pequeno, resp, false);
+    expect(r.find((c) => c.areaId === 'g051_026')?.classe).toBe('baixo');
+    expect(r.some((c) => c.classe === 'sem')).toBe(true);
+    expect(r.filter((c) => c.areaId === 'g051_026')).toHaveLength(1);
+  });
+  it('erro de rede devolve só as de dado (nenhuma "sem")', () => {
+    const r = celulasDoMapa(pequeno, resp, true);
+    expect(r.map((c) => c.classe)).toEqual(['baixo']);
+  });
+  it('mais de 400 células visíveis: não desenha "sem", só as com dado', () => {
+    const enorme = { minLat: -23.8, minLng: -46.9, maxLat: -23.4, maxLng: -46.4 };
+    const r = celulasDoMapa(enorme, resp, false);
+    expect(r.map((c) => c.classe)).toEqual(['baixo']);
   });
 });

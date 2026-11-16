@@ -5,9 +5,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Switch, View } from 'react-native';
 import { api } from '../../api/endpoints';
 import type { Bbox, CamadaPontoDto, RelatoDto, RiscoDto } from '../../api/tipos';
-import { areaLimites, areasNoBbox } from '../../mapa/area';
 import {
-  consultaRisco, idadeRelato, PINHEIROS, relatoVisivel, ROTULO_SEM_DADO, ROTULO_TIPO_RELATO, rotuloClasse,
+  celulasDoMapa, consultaRisco, idadeRelato, PINHEIROS, relatoVisivel, ROTULO_SEM_DADO, ROTULO_TIPO_RELATO, rotuloClasse,
   type ClasseRisco,
 } from '../../mapa/risco';
 import { cores, espacos, tamanhos } from '../../theme/tokens';
@@ -26,7 +25,7 @@ const CAMADAS: { tipo: TipoCamada; rotulo: string; icone: string; falha: string 
 const ICONE_RELATO: Record<string, string> = { roubo: 'R', furto: 'F', suspeita: 'S' };
 
 const DEBOUNCE_MS = 500;
-const MAX_CELULAS_SEM_DADO = 400;
+const TEMPO_GPS_MS = 8000;
 
 const bboxAoRedor = (c: { lat: number; lng: number }): Bbox => ({
   minLat: c.lat - 0.02, maxLat: c.lat + 0.02, minLng: c.lng - 0.022, maxLng: c.lng + 0.022,
@@ -63,8 +62,20 @@ export default function Mapa() {
       try {
         const perm = await Location.requestForegroundPermissionsAsync();
         if (perm.granted) {
-          const p = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
-          ponto = { lat: p.coords.latitude, lng: p.coords.longitude };
+          // Sem fix (GPS frio, dentro de predio) a promise pode nunca resolver: limita a espera.
+          let relogio: ReturnType<typeof setTimeout> | undefined;
+          const limite = new Promise<never>((_, rejeita) => {
+            relogio = setTimeout(() => rejeita(new Error('gps')), TEMPO_GPS_MS);
+          });
+          try {
+            const p = await Promise.race([
+              Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced }),
+              limite,
+            ]);
+            ponto = { lat: p.coords.latitude, lng: p.coords.longitude };
+          } finally {
+            if (relogio) clearTimeout(relogio);
+          }
         } else {
           texto = 'Sem permissão de localização: mostrando a região de Pinheiros.';
         }
@@ -154,27 +165,10 @@ export default function Mapa() {
     }
   }, []);
 
-  const celulas = useMemo<CelulaNoMapa[]>(() => {
-    if (!bbox) return [];
-    const lista: CelulaNoMapa[] = [];
-    const comDado = new Set<string>();
-    for (const r of risco) {
-      const limites = areaLimites(r.areaId);
-      if (!limites) continue;
-      comDado.add(r.areaId);
-      lista.push({ areaId: r.areaId, classe: r.classe, limites });
-    }
-    if (!erroRisco) {
-      const ids = areasNoBbox(bbox);
-      if (ids.length <= MAX_CELULAS_SEM_DADO) {
-        for (const id of ids) {
-          const limites = areaLimites(id);
-          if (limites && !comDado.has(id)) lista.push({ areaId: id, classe: 'sem', limites });
-        }
-      }
-    }
-    return lista;
-  }, [bbox, risco, erroRisco]);
+  const celulas = useMemo<CelulaNoMapa[]>(
+    () => (bbox ? celulasDoMapa(bbox, risco, erroRisco) : []),
+    [bbox, risco, erroRisco],
+  );
 
   const atencaoMaxima = useMemo(
     () => risco.filter((r) => r.classe === 'alto').sort((a, b) => b.probAlto - a.probAlto).slice(0, 10),
@@ -252,7 +246,7 @@ export default function Mapa() {
           <Texto>{erroRisco ? 'Sem informação por enquanto.' : 'Nenhuma área com atenção máxima nesta região.'}</Texto>
         ) : (
           atencaoMaxima.map((r) => (
-            <Texto key={r.areaId}>{`Área ${r.areaId}, perto de ${r.lat.toFixed(4)}, ${r.lng.toFixed(4)}`}</Texto>
+            <Texto key={r.areaId}>{`Atenção máxima perto de ${r.lat.toFixed(4)}, ${r.lng.toFixed(4)}`}</Texto>
           ))
         )}
       </View>

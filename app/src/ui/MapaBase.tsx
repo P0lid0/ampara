@@ -101,8 +101,7 @@ export function CelulasNoMapa({ celulas }: { celulas: readonly CelulaNoMapa[] })
     type: 'FeatureCollection' as const,
     features: celulas.map((c) => ({
       type: 'Feature' as const,
-      id: c.areaId,
-      properties: { classe: c.classe },
+      properties: { classe: c.classe, areaId: c.areaId },
       geometry: {
         type: 'Polygon' as const,
         coordinates: [[

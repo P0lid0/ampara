@@ -1,5 +1,6 @@
 // Risco por área e faixa horária, relatos no mapa. Puro: o relógio entra sempre como parâmetro.
 import type { Bbox, RiscoDto } from '../api/tipos';
+import { areaLimites, areasNoBbox, type Limites } from './area';
 
 const FUSO = 'America/Sao_Paulo';
 export const ROTULO_SEM_DADO = 'Sem dado para esta área';
@@ -42,6 +43,31 @@ export function celulasComDado(resp: RiscoDto[]): Set<string> {
   return new Set(resp.map((r) => r.areaId));
 }
 export const semDado = (areaId: string, resp: RiscoDto[]): boolean => !celulasComDado(resp).has(areaId);
+
+export type CelulaDoMapa = { areaId: string; classe: ClasseRisco | 'sem'; limites: Limites };
+export const MAX_CELULAS_SEM_DADO = 400;
+
+/**
+ * Celulas a desenhar. As que a API devolveu entram com a classe que vieram (baixo continua baixo);
+ * as que ela nao devolveu entram como 'sem' (cinza), nunca como baixo. Se a consulta falhou, ou se a
+ * area visivel e grande demais (> 400 celulas), nenhuma 'sem' e desenhada: nao afirmar "sem dado" sem saber.
+ */
+export function celulasDoMapa(bbox: Bbox, resp: RiscoDto[], erroRede: boolean): CelulaDoMapa[] {
+  const lista: CelulaDoMapa[] = [];
+  for (const r of resp) {
+    const limites = areaLimites(r.areaId);
+    if (limites) lista.push({ areaId: r.areaId, classe: r.classe, limites });
+  }
+  if (erroRede) return lista;
+  const ids = areasNoBbox(bbox);
+  if (ids.length > MAX_CELULAS_SEM_DADO) return lista;
+  const comDado = celulasComDado(resp);
+  for (const id of ids) {
+    const limites = areaLimites(id);
+    if (limites && !comDado.has(id)) lista.push({ areaId: id, classe: 'sem', limites });
+  }
+  return lista;
+}
 
 export function idadeRelato(emIso: string, agora: Date): string {
   const min = Math.max(0, Math.floor((agora.getTime() - new Date(emIso).getTime()) / 60000));
