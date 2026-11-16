@@ -12,6 +12,10 @@ jest.mock('expo-router', () => ({
   useRouter: () => ({ replace: mockReplace }),
   Stack: { Screen: () => null },
 }));
+jest.mock('react-native-qrcode-svg', () => {
+  const { View } = require('react-native');
+  return { __esModule: true, default: (props: { value: string }) => <View testID="qrcode" accessibilityValue={{ text: props.value }} {...props} /> };
+});
 jest.mock('../../../api/endpoints', () => ({
   api: { guardioes: { listar: jest.fn(), criarConvite: jest.fn(), ordenar: jest.fn() } },
 }));
@@ -46,7 +50,8 @@ describe('onboarding: guardiões', () => {
     await fireEvent.press(await screen.findByRole('button', { name: 'Convidar' }));
     expect(await screen.findByText('ABC123')).toBeTruthy();
     expect(screen.getByLabelText('QR do convite. Código ABC123')).toBeTruthy();
-    expect(screen.getByTestId('qr-convite').props.accessibilityHint).toBe('ampara://guardiao/aceitar?codigo=ABC123');
+    expect(screen.getByTestId('qrcode').props.value).toBe('ampara://guardiao/aceitar?codigo=ABC123');
+    expect(screen.getByTestId('qr-convite').props.accessibilityHint).toBeUndefined();
     expect(screen.getByText(/Vale por \d{2}:\d{2}/)).toBeTruthy();
   });
 

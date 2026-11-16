@@ -36,6 +36,13 @@ beforeEach(async () => {
 });
 
 describe('onboarding: bancos e operadora', () => {
+  it('o checkbox lido pelo leitor de tela traz telefone, link e data de conferência', async () => {
+    await render(<OnboardingContas />);
+    const caixa = await screen.findByRole('checkbox', { name: /Banco Teste Um/ });
+    expect(caixa.props.accessibilityLabel).toMatch(/Telefone: .*Link: .*Conferido em 12\/11\/2026/);
+    expect(screen.getAllByRole('checkbox', { name: /Conferido em 12\/11\/2026/ })).toHaveLength(3);
+  });
+
   it('mostra "Passo 4 de 7" e a lista do catálogo com tipo, telefone, link e "Conferido em 12/11/2026"', async () => {
     await render(<OnboardingContas />);
     expect(screen.getByText('Passo 4 de 7')).toBeTruthy();

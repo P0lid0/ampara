@@ -87,7 +87,7 @@ export default function OnboardingContas() {
           <Pressable
             key={c.id}
             accessibilityRole="checkbox"
-            accessibilityLabel={`${c.nome}, ${TIPO_TEXTO[c.tipo]}`}
+            accessibilityLabel={`${c.nome}, ${TIPO_TEXTO[c.tipo]}. Telefone: ${c.telefone}. Link: ${c.link}. Conferido em ${dataBr(c.conferidoEm)}`}
             accessibilityState={{ checked: marcado }}
             onPress={() => alternar(c.id)}
             style={[estilos.cartao, marcado && estilos.cartaoMarcado]}

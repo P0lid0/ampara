@@ -140,7 +140,6 @@ export default function OnboardingGuardioes() {
             testID="qr-convite"
             accessible
             accessibilityLabel={`QR do convite. Código ${convite.codigo}`}
-            accessibilityHint={payloadDoConvite(convite.codigo)}
             style={estilos.qr}
           >
             <QRCode value={payloadDoConvite(convite.codigo)} size={200} backgroundColor={cores.branco} color={cores.tinta} />

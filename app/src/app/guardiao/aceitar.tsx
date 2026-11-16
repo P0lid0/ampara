@@ -35,7 +35,11 @@ function mensagemDoAceite(e: unknown): string {
 /** Do QR lido: o payload ampara://guardiao/aceitar?codigo=XXXXXX ou o próprio código. */
 function codigoDoQr(valor: string): string | null {
   const m = /[?&]codigo=([^&#]*)/.exec(valor);
-  return normalizarCodigoConvite(m ? decodeURIComponent(m[1]) : valor);
+  try {
+    return normalizarCodigoConvite(m ? decodeURIComponent(m[1]) : valor);
+  } catch {
+    return null; // %-escape malformado vindo de um QR qualquer
+  }
 }
 
 export default function AceitarConvite() {
