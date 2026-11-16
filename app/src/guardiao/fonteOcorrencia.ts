@@ -12,10 +12,14 @@ export interface FonteOcorrencia {
   concluirPasso(id: string, passo: Passo): Promise<{ concluidoEm: string }>;
 }
 
-/** "(11) 4004-0000" -> "tel:1140040000". Só dígitos e um + inicial: nada do texto da conta vira comando. */
+/**
+ * "(11) 4004-0000" -> "tel:1140040000". Só dígitos, "*" e "#" (códigos curtos como *611) e um + inicial:
+ * nada do texto da conta vira comando. O "#" vai como %23 para não virar fragmento da URL.
+ */
 export function urlTelefone(t: string): string {
   const limpo = t.trim();
-  return `tel:${limpo.startsWith('+') ? '+' : ''}${limpo.replace(/\D/g, '')}`;
+  const numero = limpo.replace(/[^\d*#]/g, '').replace(/#/g, '%23');
+  return `tel:${limpo.startsWith('+') ? '+' : ''}${numero}`;
 }
 
 export const fonteApi: FonteOcorrencia = {

@@ -29,6 +29,11 @@ describe('urlTelefone', () => {
     expect(urlTelefone('11+4004;0000')).toBe('tel:1140040000');
     expect(urlTelefone('tel:123 && rm')).toBe('tel:123');
   });
+  it('preserva códigos curtos: *611 não vira 611, # vai como %23', () => {
+    expect(urlTelefone('*611')).toBe('tel:*611');
+    expect(urlTelefone('*#06#')).toBe('tel:*%2306%23');
+    expect(urlTelefone('+*611')).toBe('tel:+*611');
+  });
 });
 
 it('ORDEM_PASSOS segue Banco, CelularSeguro, Operadora, Senhas, Bo', () => {
