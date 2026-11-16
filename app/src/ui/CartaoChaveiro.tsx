@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { mensagemDeErro } from '../api/cliente';
 import { api } from '../api/endpoints';
 import type { ChaveiroDto } from '../api/tipos';
-import { deveAvisarBateria, rotuloStatus } from '../chaveiro/status';
+import { deveAvisarBateria, escolher, rotuloStatus } from '../chaveiro/status';
 import { cores, espacos } from '../theme/tokens';
 import { Botao } from './Botao';
 import { EstadoBadge } from './EstadoBadge';
@@ -39,10 +39,11 @@ export function CartaoChaveiro({ deviceId }: CartaoChaveiroProps) {
       setAgora(t);
       setLista(nova);
       setErro(undefined);
-      const c = nova.find((x) => x.deviceId === deviceId) ?? (deviceId ? undefined : nova[0]);
+      const c = escolher(nova, deviceId);
       if (!c) return;
       if (!pingado.current) {
         pingado.current = true;
+        // Ping é de melhor esforço: se falhar, o polling de 30 s continua mostrando o estado real.
         api.chaveiros.comando(c.deviceId, 'ping').catch(() => undefined);
       }
       if (deveAvisarBateria(c, ultimoAvisoBateria.current, t)) {
@@ -50,7 +51,10 @@ export function CartaoChaveiro({ deviceId }: CartaoChaveiroProps) {
         setAnunciarBateria(true);
       }
     } catch (e) {
-      if (ativo.current) setErro(mensagemDeErro(e));
+      if (!ativo.current) return;
+      // O relógio anda mesmo sem rede: dados velhos viram "Sem conexão" em vez de ficarem "Conectado".
+      setAgora(new Date());
+      setErro(mensagemDeErro(e));
     }
   }, [deviceId]);
 
@@ -64,7 +68,7 @@ export function CartaoChaveiro({ deviceId }: CartaoChaveiroProps) {
     };
   }, [carregar]);
 
-  const chaveiro = lista ? (lista.find((x) => x.deviceId === deviceId) ?? (deviceId ? null : (lista[0] ?? null))) : null;
+  const chaveiro = lista ? escolher(lista, deviceId) : null;
   const r = rotuloStatus(chaveiro, agora);
 
   async function achar() {

@@ -181,6 +181,53 @@ describe('CartaoChaveiro', () => {
     expect((await screen.findAllByText(/Bateria baixa \(12%\)/)).length).toBeGreaterThan(0);
   });
 
+  it('falha de rede não congela o relógio: "Conectado" vira "Sem conexão" depois de 90 s sem resposta', async () => {
+    jest.useFakeTimers();
+    listar.mockResolvedValueOnce(noAr());
+    await render(<CartaoChaveiro />);
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(0);
+    });
+    expect(screen.getByText(/^Conectado\./)).toBeTruthy();
+    listar.mockRejectedValue(new Error('sem rede'));
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(120_000);
+    });
+    expect(screen.getByText(/^Sem conexão\./)).toBeTruthy();
+    expect(screen.getByText(/Não foi possível concluir agora/)).toBeTruthy();
+  });
+
+  it('desmontar para o polling de 30 s', async () => {
+    jest.useFakeTimers();
+    listar.mockResolvedValue(noAr());
+    const tela = await render(<CartaoChaveiro />);
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(0);
+    });
+    expect(listar).toHaveBeenCalledTimes(1);
+    await tela.unmount();
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(90_000);
+    });
+    expect(listar).toHaveBeenCalledTimes(1);
+  });
+
+  it('com dois chaveiros e deviceId, mostra e pinga o escolhido, não o primeiro', async () => {
+    jest.useFakeTimers();
+    const outro = 'chaveiro-ampara-zz99';
+    listar.mockResolvedValue([
+      { deviceId: outro, online: true, bateria: 80, vistoEm: new Date().toISOString() },
+      ...noAr(),
+    ]);
+    await render(<CartaoChaveiro deviceId={ID} />);
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(0);
+    });
+    expect(comando).toHaveBeenCalledWith(ID, 'ping');
+    expect(screen.getByText(ID)).toBeTruthy();
+    expect(screen.queryByText(outro)).toBeNull();
+  });
+
   it('sem chaveiro mostra a frase e esconde "Achar meu chaveiro"', async () => {
     await render(<CartaoChaveiro />);
     expect(await screen.findByText('Nenhum chaveiro pareado.')).toBeTruthy();

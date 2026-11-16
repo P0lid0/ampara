@@ -6,7 +6,8 @@ export const INTERVALO_AVISO_BATERIA_MS = 6 * 3600_000;
 
 export type RotuloStatus = { texto: string; estado: 'online' | 'offline'; bateriaBaixa: boolean };
 
-function vistoRecente(vistoEm: string, agora: Date): boolean {
+function vistoRecente(vistoEm: string | null, agora: Date): boolean {
+  if (vistoEm === null) return false;
   const t = Date.parse(vistoEm);
   if (Number.isNaN(t)) return false;
   return agora.getTime() - t <= LIMITE_OFFLINE_S * 1000;
@@ -34,4 +35,10 @@ export function deveAvisarBateria(c: ChaveiroDto, ultimoAvisoEm: Date | null, ag
   if (bateria === null || bateria >= BATERIA_BAIXA) return false;
   if (!ultimoAvisoEm) return true;
   return agora.getTime() - ultimoAvisoEm.getTime() > INTERVALO_AVISO_BATERIA_MS;
+}
+
+/** O chaveiro do `deviceId`; sem `deviceId`, o primeiro da lista; sem nada, null. */
+export function escolher(lista: ChaveiroDto[], deviceId?: string): ChaveiroDto | null {
+  if (deviceId) return lista.find((x) => x.deviceId === deviceId) ?? null;
+  return lista[0] ?? null;
 }

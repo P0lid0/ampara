@@ -1,5 +1,5 @@
 import type { ChaveiroDto } from '../../api/tipos';
-import { deveAvisarBateria, rotuloStatus } from '../status';
+import { deveAvisarBateria, escolher, rotuloStatus } from '../status';
 
 const AGORA = new Date('2026-11-15T12:00:00Z');
 const antes = (s: number) => new Date(AGORA.getTime() - s * 1000).toISOString();
@@ -76,5 +76,28 @@ describe('deveAvisarBateria', () => {
   });
   it('bateria null não avisa', () => {
     expect(deveAvisarBateria(C({ bateria: SEM_BATERIA }), null, AGORA)).toBe(false);
+  });
+});
+
+describe('escolher', () => {
+  const A = C({ deviceId: 'chaveiro-a' });
+  const B = C({ deviceId: 'chaveiro-b' });
+  it('com deviceId, devolve o dele', () => {
+    expect(escolher([A, B], 'chaveiro-b')).toBe(B);
+  });
+  it('com deviceId ausente da lista, devolve null (não cai no primeiro)', () => {
+    expect(escolher([A, B], 'chaveiro-z')).toBeNull();
+  });
+  it('sem deviceId, devolve o primeiro; lista vazia, null', () => {
+    expect(escolher([A, B])).toBe(A);
+    expect(escolher([])).toBeNull();
+  });
+});
+
+describe('vistoEm nulo', () => {
+  it('conta como Sem conexão', () => {
+    const r = rotuloStatus(C({ vistoEm: null }), AGORA);
+    expect(r.estado).toBe('offline');
+    expect(r.texto).toContain('Sem conexão');
   });
 });
