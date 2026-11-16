@@ -173,6 +173,18 @@ describe('fila da rota', () => {
     expect(r).toEqual({ enviados: 11, restantes: 0 });
   });
 
+  // Rodada pontual, item B: dividir até o ponto único em toda recusa fazia ~2N-1 POSTs (999 para 500 pontos).
+  it('servidor recusa todo ponto: 500 pontos geram no máximo 50 POSTs e a fila termina sem os recusados', async () => {
+    await rotaRepo(db).adicionar(pontos(500));
+    const enviar = jest.fn(async (_lote: PontoRota[]) => {
+      throw new ApiErro(422, 'Regra de negócio violada');
+    });
+    const r = await enviarPendentes(db, enviar);
+    expect(enviar.mock.calls.length).toBeLessThanOrEqual(50);
+    expect(r).toEqual({ enviados: 0, restantes: 0 });
+    expect(await contarLinhas()).toBe(0);
+  });
+
   it.each([0, 401, 403, 408, 429, 500, 503])('item 20: erro %i (transitório ou de sessão/consentimento) para e mantém o lote inteiro', async (status) => {
     await registrarPontos(db, pontos(3));
     const enviar = jest.fn(async (_lote: PontoRota[]) => {

@@ -48,27 +48,36 @@ function recusaDefinitiva(e: unknown): boolean {
 type Rodada = { enviados: number; parou: boolean };
 
 /**
+ * Quantas vezes um lote recusado (400/422) pode ser dividido ao meio. Na profundidade 4 o pedaço recusado sai
+ * da fila sem dividir mais: um lote de 500 todo recusado custa no máximo 1+2+4+8+16 = 31 POSTs (sem limite
+ * eram ~2N-1 = 999), e um ponto ruim leva junto no máximo os ~31 pontos do pedaço dele.
+ */
+export const PROFUNDIDADE_MAX_DIVISAO = 4;
+
+/**
  * Envia um lote; se o servidor recusar o conteúdo, divide ao meio e tenta cada parte, até isolar o ponto
- * recusado, que sai da fila (sem dividir, um ponto ruim travaria a fila inteira). Qualquer outra falha
- * (sem rede, 401, 403, 408, 429, 5xx) para a rodada e mantém o lote para a próxima.
+ * recusado ou chegar a PROFUNDIDADE_MAX_DIVISAO; o pedaço recusado sai da fila (sem dividir, um ponto ruim
+ * travaria a fila inteira). Qualquer outra falha (sem rede, 401, 403, 408, 429, 5xx) para a rodada e mantém o
+ * lote para a próxima.
  */
 async function enviarOuDividir(
   repo: ReturnType<typeof rotaRepo>,
   lote: PontoRotaComId[],
   enviar: (lote: PontoRota[]) => Promise<void>,
+  profundidade = 0,
 ): Promise<Rodada> {
   try {
     await enviar(lote.map(({ lat, lng, precisao, em }) => ({ lat, lng, precisao, em })));
   } catch (e) {
     if (!recusaDefinitiva(e)) return { enviados: 0, parou: true };
-    if (lote.length === 1) {
-      await repo.remover([lote[0].id]);
+    if (lote.length === 1 || profundidade >= PROFUNDIDADE_MAX_DIVISAO) {
+      await repo.remover(lote.map((p) => p.id));
       return { enviados: 0, parou: false };
     }
     const meio = Math.ceil(lote.length / 2);
-    const a = await enviarOuDividir(repo, lote.slice(0, meio), enviar);
+    const a = await enviarOuDividir(repo, lote.slice(0, meio), enviar, profundidade + 1);
     if (a.parou) return a;
-    const b = await enviarOuDividir(repo, lote.slice(meio), enviar);
+    const b = await enviarOuDividir(repo, lote.slice(meio), enviar, profundidade + 1);
     return { enviados: a.enviados + b.enviados, parou: b.parou };
   }
   await repo.remover(lote.map((p) => p.id));
