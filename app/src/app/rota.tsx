@@ -3,15 +3,18 @@
 // mapa e ao controle deslizante para leitor de tela.
 import Slider from '@react-native-community/slider';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { FlatList, Pressable, StyleSheet, View } from 'react-native';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ActivityIndicator, FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { ApiErro, mensagemDeErro } from '../api/cliente';
 import { api } from '../api/endpoints';
 import type { PontoRotaDto } from '../api/tipos';
 import { useSessao } from '../auth/sessao';
 import { agruparPorDia, formatarHora } from '../rota/linhaDoTempo';
-import { cores, espacos, tamanhos } from '../theme/tokens';
+import { bordas, cores, espacos, raios, tamanhos } from '../theme/tokens';
+import { Aviso } from '../ui/Aviso';
+import { BarraAcao } from '../ui/BarraAcao';
 import { Botao } from '../ui/Botao';
+import { Icone } from '../ui/Icone';
 import { LinhaNoMapa, MapaBase, MarcadorNoMapa } from '../ui/MapaBase';
 import { SairEmergencia } from '../ui/SairEmergencia';
 import { Texto } from '../ui/Texto';
@@ -124,17 +127,29 @@ export default function Rota() {
     <View style={estilos.cabecalho}>
       <Stack.Screen options={{ title: 'Minha rota' }} />
       <SairEmergencia />
-      <Texto variante="titulo">Onde você esteve</Texto>
-      <Texto>Escolha o dia e o horário em que aconteceu.</Texto>
+      <View style={estilos.titulos}>
+        <Texto variante="titulo">Onde você esteve</Texto>
+        <Texto>Escolha o dia e o horário em que aconteceu.</Texto>
+      </View>
 
       {erroTela ? (
         <>
-          <Texto accessibilityRole="alert" accessibilityLiveRegion="polite">{`⚠ ${erroTela}`}</Texto>
+          <Aviso mensagem={erroTela} />
           <Botao rotulo="Tentar de novo" variante="secundario" onPress={() => void carregar()} />
         </>
       ) : null}
-      {!pontos && !erroTela ? <Texto accessibilityLiveRegion="polite">Carregando...</Texto> : null}
-      {pontos && pontos.length === 0 ? <Texto accessibilityLiveRegion="polite">{SEM_ROTA}</Texto> : null}
+      {!pontos && !erroTela ? (
+        <View style={estilos.carregando} accessibilityLiveRegion="polite">
+          <ActivityIndicator color={cores.petroleo} />
+          <Texto>Carregando...</Texto>
+        </View>
+      ) : null}
+      {pontos && pontos.length === 0 ? (
+        <View style={estilos.vazio} accessibilityLiveRegion="polite">
+          <Icone nome="rota" tamanho={32} cor={cores.petroleo} />
+          <Texto>{SEM_ROTA}</Texto>
+        </View>
+      ) : null}
 
       {dia && ponto ? (
         <>
@@ -149,9 +164,10 @@ export default function Rota() {
                   accessibilityLabel={`Dia ${rotulo}`}
                   accessibilityState={{ selected: ativo }}
                   onPress={() => escolherDia(d.dia)}
-                  style={[estilos.diaBotao, ativo && estilos.diaAtivo]}
+                  style={({ pressed }) => [estilos.diaBotao, ativo && estilos.diaAtivo, pressed && !ativo && estilos.pressionado]}
                 >
-                  <Texto variante="legenda" style={ativo ? estilos.diaTextoAtivo : undefined}>
+                  {ativo ? <Icone nome="ok" tamanho={16} cor={cores.areia} /> : null}
+                  <Texto variante="rotulo" style={ativo ? estilos.diaTextoAtivo : estilos.diaTexto}>
                     {rotulo}
                   </Texto>
                 </Pressable>
@@ -159,44 +175,49 @@ export default function Rota() {
             })}
           </View>
 
-          <MapaBase
-            centro={ponto}
-            zoom={15}
-            descricao={`Mapa da sua rota. Ponto escolhido às ${formatarHora(ponto.em)}. Use a lista de horários para escolher.`}
-          >
-            <LinhaNoMapa id="trilha" pontos={lista} />
-            <MarcadorNoMapa ponto={ponto} />
-          </MapaBase>
+          <View style={estilos.mapa}>
+            <MapaBase
+              centro={ponto}
+              zoom={15}
+              descricao={`Mapa da sua rota. Ponto escolhido às ${formatarHora(ponto.em)}. Use a lista de horários para escolher.`}
+            >
+              <LinhaNoMapa id="trilha" pontos={lista} />
+              <MarcadorNoMapa ponto={ponto} />
+            </MapaBase>
+          </View>
 
-          <Texto accessibilityLiveRegion="polite">{`Horário escolhido: ${formatarHora(ponto.em)}`}</Texto>
-          {lista.length > 1 ? (
-            <Slider
-              testID="controle-horario"
-              minimumValue={0}
-              maximumValue={lista.length - 1}
-              step={1}
-              value={i}
-              onValueChange={(v: number) => setIndice(Math.round(v))}
-              minimumTrackTintColor={cores.petroleo}
-              maximumTrackTintColor={cores.tinta}
-              thumbTintColor={cores.petroleo}
-              accessibilityRole="adjustable"
-              accessibilityLabel="Horário na rota"
-              accessibilityValue={{ text: `Às ${formatarHora(ponto.em)}` }}
-              style={estilos.slider}
-            />
-          ) : null}
+          <View style={estilos.cartao}>
+            <View
+              style={estilos.horario}
+              accessible
+              accessibilityLiveRegion="polite"
+              accessibilityLabel={`Horário escolhido: ${formatarHora(ponto.em)}`}
+            >
+              <Texto variante="legenda" style={estilos.suave}>
+                Horário escolhido
+              </Texto>
+              <Texto variante="exibicao">{formatarHora(ponto.em)}</Texto>
+            </View>
+            {lista.length > 1 ? (
+              <Slider
+                testID="controle-horario"
+                minimumValue={0}
+                maximumValue={lista.length - 1}
+                step={1}
+                value={i}
+                onValueChange={(v: number) => setIndice(Math.round(v))}
+                minimumTrackTintColor={cores.petroleo}
+                maximumTrackTintColor={cores.textoSuave}
+                thumbTintColor={cores.petroleo}
+                accessibilityRole="adjustable"
+                accessibilityLabel="Horário na rota"
+                accessibilityValue={{ text: `Às ${formatarHora(ponto.em)}` }}
+                style={estilos.slider}
+              />
+            ) : null}
+          </View>
 
-          <Botao
-            rotulo="Foi aqui que me roubaram"
-            carregando={marcando}
-            onPress={() => void marcar()}
-            dica="Marca este horário e este lugar na ocorrência"
-          />
-          {erroMarcar ? (
-            <Texto accessibilityRole="alert" accessibilityLiveRegion="polite">{`⚠ ${erroMarcar}`}</Texto>
-          ) : null}
-          <Texto variante="titulo" style={estilos.subtitulo}>
+          <Texto variante="secao" style={estilos.secao}>
             Horários do dia
           </Texto>
         </>
@@ -204,66 +225,145 @@ export default function Rota() {
     </View>
   );
 
+  const escolherHorario = useCallback((index: number) => {
+    setIndice(index);
+    setErroMarcar(undefined);
+  }, []);
+
+  const renderItem = useCallback(
+    ({ item, index }: { item: PontoRotaDto; index: number }) => (
+      <LinhaHorario
+        hora={formatarHora(item.em)}
+        ativo={index === i}
+        primeira={index === 0}
+        ultima={index === lista.length - 1}
+        aoEscolher={() => escolherHorario(index)}
+      />
+    ),
+    [i, lista.length, escolherHorario],
+  );
+
   return (
-    <FlatList
-      testID="lista-horarios"
-      data={lista}
-      keyExtractor={(p) => p.em}
-      ListHeaderComponent={cabecalho}
-      contentContainerStyle={estilos.tela}
-      extraData={i}
-      initialNumToRender={20}
-      renderItem={({ item, index }) => {
-        const hora = formatarHora(item.em);
-        const ativo = index === i;
-        return (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={`Às ${hora}`}
-            accessibilityState={{ selected: ativo }}
-            onPress={() => {
-              setIndice(index);
-              setErroMarcar(undefined);
-            }}
-            style={[estilos.item, ativo && estilos.itemAtivo]}
-          >
-            <Texto style={ativo ? estilos.itemTextoAtivo : undefined}>{hora}</Texto>
-          </Pressable>
-        );
-      }}
-    />
+    <View style={estilos.fundo}>
+      <FlatList
+        testID="lista-horarios"
+        style={estilos.rolagem}
+        data={lista}
+        keyExtractor={(p) => p.em}
+        ListHeaderComponent={cabecalho}
+        contentContainerStyle={estilos.tela}
+        extraData={i}
+        initialNumToRender={20}
+        renderItem={renderItem}
+      />
+      {dia && ponto ? (
+        <BarraAcao>
+          {erroMarcar ? <Aviso mensagem={erroMarcar} /> : null}
+          <Botao
+            rotulo="Foi aqui que me roubaram"
+            carregando={marcando}
+            onPress={() => void marcar()}
+            dica="Marca este horário e este lugar na ocorrência"
+          />
+        </BarraAcao>
+      ) : null}
+    </View>
   );
 }
 
+// Linha de horário: preenchimento (esmeraldaSuave), ícone e peso bold marcam o escolhido, sem depender de cor.
+// Memoizada: tocar num horário não redesenha as outras linhas.
+const LinhaHorario = memo(function LinhaHorario({
+  hora,
+  ativo,
+  primeira,
+  ultima,
+  aoEscolher,
+}: {
+  hora: string;
+  ativo: boolean;
+  primeira: boolean;
+  ultima: boolean;
+  aoEscolher: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`Às ${hora}`}
+      accessibilityState={{ selected: ativo }}
+      onPress={aoEscolher}
+      style={({ pressed }) => [
+        estilos.item,
+        primeira && estilos.itemPrimeira,
+        ultima && estilos.itemUltima,
+        ativo && estilos.itemAtivo,
+        pressed && !ativo && estilos.pressionado,
+      ]}
+    >
+      <Texto variante={ativo ? 'corpoForte' : 'corpo'}>{hora}</Texto>
+      {ativo ? <Icone nome="ok" tamanho={20} cor={cores.petroleo} /> : null}
+    </Pressable>
+  );
+});
+
 const estilos = StyleSheet.create({
-  tela: { padding: espacos.m, gap: espacos.p },
+  fundo: { flex: 1, backgroundColor: cores.areia },
+  rolagem: { flex: 1 },
+  tela: { padding: espacos.m, paddingBottom: espacos.g },
   cabecalho: { gap: espacos.m, marginBottom: espacos.p },
+  titulos: { gap: espacos.p },
+  carregando: { flexDirection: 'row', alignItems: 'center', gap: espacos.pm },
+  vazio: {
+    gap: espacos.pm,
+    padding: espacos.m,
+    borderRadius: raios.m,
+    borderWidth: bordas.fina,
+    borderColor: cores.bordaSuave,
+    backgroundColor: cores.branco,
+  },
   dias: { flexDirection: 'row', flexWrap: 'wrap', gap: espacos.p },
   diaBotao: {
     minHeight: tamanhos.alvoMin,
     minWidth: tamanhos.alvoMin,
+    flexDirection: 'row',
+    gap: espacos.xs,
     paddingHorizontal: espacos.m,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: cores.petroleo,
-    borderRadius: 12,
-    backgroundColor: cores.areia,
+    borderRadius: raios.m,
+    backgroundColor: cores.areiaFunda,
   },
   diaAtivo: { backgroundColor: cores.petroleo },
+  diaTexto: { color: cores.petroleo },
   diaTextoAtivo: { color: cores.areia },
+  mapa: { borderRadius: raios.m, overflow: 'hidden', borderWidth: bordas.fina, borderColor: cores.bordaSuave },
+  cartao: {
+    gap: espacos.p,
+    padding: espacos.m,
+    borderRadius: raios.m,
+    borderWidth: bordas.fina,
+    borderColor: cores.bordaSuave,
+    backgroundColor: cores.branco,
+  },
+  horario: { gap: espacos.xs },
+  suave: { color: cores.textoSuave },
   slider: { height: tamanhos.alvoMin, width: '100%' },
-  subtitulo: { fontSize: 20, lineHeight: 28 },
+  secao: { marginTop: espacos.p },
   item: {
     minHeight: tamanhos.alvoMin,
     minWidth: tamanhos.alvoMin,
-    justifyContent: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: espacos.m,
-    borderWidth: 2,
-    borderColor: cores.petroleo,
-    borderRadius: 12,
+    borderLeftWidth: bordas.fina,
+    borderRightWidth: bordas.fina,
+    borderBottomWidth: bordas.fina,
+    borderColor: cores.bordaSuave,
     backgroundColor: cores.branco,
   },
-  itemAtivo: { backgroundColor: cores.petroleo },
-  itemTextoAtivo: { color: cores.areia },
+  itemPrimeira: { borderTopWidth: bordas.fina, borderTopLeftRadius: raios.m, borderTopRightRadius: raios.m },
+  itemUltima: { borderBottomLeftRadius: raios.m, borderBottomRightRadius: raios.m },
+  itemAtivo: { backgroundColor: cores.esmeraldaSuave },
+  pressionado: { backgroundColor: cores.areiaFunda },
 });

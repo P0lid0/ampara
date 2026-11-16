@@ -1,18 +1,22 @@
 // BO (P1): o app só monta o texto; quem registra é a própria pessoa, na Delegacia Eletrônica. O texto
 // contém o IMEI: fica só em memória (estado desta tela), nunca no SQLite, no SecureStore nem em log.
+// Tela de tarefa longa e decisão calma: seções em superfícies brancas, "Enviar à polícia" ancorado na base.
 import * as Clipboard from 'expo-clipboard';
 import { Stack, useLocalSearchParams } from 'expo-router';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { ApiErro, mensagemDeErro } from '../api/cliente';
 import { api } from '../api/endpoints';
 import type { BoDto, BoStatus, Recuperacao, RetornoDto } from '../api/tipos';
 import { acompanhamentoLembrado, lembrarAcompanhamento } from '../prevencao/acompanhamentoMemoria';
 import { MSG_BO_NUMERO, rotuloBoStatus, rotuloRecuperacao, rotuloRetorno, TEXTO_ORIENTACAO, validarBoNumero } from '../prevencao/retorno';
 import { formatarHora } from '../rota/linhaDoTempo';
-import { cores, espacos, tamanhos } from '../theme/tokens';
+import { bordas, cores, espacos, raios, tamanhos } from '../theme/tokens';
+import { Aviso } from '../ui/Aviso';
+import { BarraAcao } from '../ui/BarraAcao';
 import { Botao } from '../ui/Botao';
 import { Campo } from '../ui/Campo';
+import { Icone } from '../ui/Icone';
 import { SairEmergencia } from '../ui/SairEmergencia';
 import { Texto } from '../ui/Texto';
 
@@ -20,6 +24,23 @@ const ATUALIZA_RETORNO_MS = 60_000;
 const OPCOES_BO: BoStatus[] = ['nao_registrado', 'registrado'];
 const OPCOES_RECUPERACAO: Recuperacao[] = ['sem_noticia', 'localizado', 'recuperado'];
 
+const MARCA = 28;
+
+/** Caixa de seleção: preenchida com "ok" quando marcada (a forma muda, não só a cor). */
+function CaixaMarca({ marcada }: { marcada: boolean }) {
+  return (
+    <View style={[estilos.caixaMarca, marcada && estilos.caixaMarcada]}>
+      {marcada ? <Icone nome="ok" tamanho={20} cor={cores.areia} /> : null}
+    </View>
+  );
+}
+
+/** Botão de opção: anel com miolo cheio quando marcado. */
+function RadioMarca({ marcada }: { marcada: boolean }) {
+  return <View style={estilos.radioMarca}>{marcada ? <View style={estilos.radioMiolo} /> : null}</View>;
+}
+
+/** Linha inteira tocável (48 dp): marca à esquerda, texto à direita; marcada ganha preenchimento e peso. */
 function Opcao({ rotulo, marcada, aoEscolher }: { rotulo: string; marcada: boolean; aoEscolher: () => void }) {
   return (
     <Pressable
@@ -27,16 +48,28 @@ function Opcao({ rotulo, marcada, aoEscolher }: { rotulo: string; marcada: boole
       accessibilityLabel={rotulo}
       accessibilityState={{ selected: marcada }}
       onPress={aoEscolher}
-      style={estilos.consentimento}
+      style={({ pressed }) => [estilos.opcao, marcada && estilos.opcaoMarcada, pressed && !marcada && estilos.pressionado]}
     >
-      <Texto style={estilos.marca}>{marcada ? '◉' : '○'}</Texto>
-      <Texto style={estilos.consentimentoTexto}>{rotulo}</Texto>
+      <RadioMarca marcada={marcada} />
+      <Texto variante={marcada ? 'corpoForte' : 'corpo'} style={estilos.opcaoTexto}>
+        {rotulo}
+      </Texto>
     </Pressable>
+  );
+}
+
+function Secao({ titulo, children }: { titulo: string; children: ReactNode }) {
+  return (
+    <View style={estilos.secao}>
+      <Texto variante="secao">{titulo}</Texto>
+      {children}
+    </View>
   );
 }
 
 const CONSENTIMENTO = 'Autorizo enviar esta ocorrência, sem meus dados pessoais, à polícia';
 const AVISO_SUBSTITUI = 'Salvar substitui o acompanhamento anterior. Se você já salvou um número de BO, digite de novo.';
+const MOTIVO_ENVIO = 'Marque a autorização acima para poder enviar.';
 
 /** geo:lat,lng?q=lat,lng(nome): o Android abre no app de mapa. O nome vai codificado. */
 export function urlMapa(d: BoDto['delegacia']): string {
@@ -195,121 +228,212 @@ export default function Bo() {
   }
 
   return (
-    <ScrollView contentContainerStyle={estilos.tela}>
-      <Stack.Screen options={{ title: 'Boletim de ocorrência' }} />
-      <SairEmergencia />
-      <Texto variante="titulo">Boletim de ocorrência</Texto>
-      <Texto>Copie o texto e registre o BO na Delegacia Eletrônica, em outro aparelho.</Texto>
+    <View style={estilos.fundo}>
+      <ScrollView style={estilos.rolagem} contentContainerStyle={estilos.tela} keyboardShouldPersistTaps="handled">
+        <Stack.Screen options={{ title: 'Boletim de ocorrência' }} />
+        <SairEmergencia />
+        <View style={estilos.titulos}>
+          <Texto variante="titulo">Registre o seu boletim</Texto>
+          <Texto>Copie o texto e registre o BO na Delegacia Eletrônica, em outro aparelho.</Texto>
+        </View>
 
-      {erro ? (
-        <>
-          <Texto accessibilityRole="alert" accessibilityLiveRegion="polite">{`⚠ ${erro}`}</Texto>
-          <Botao rotulo="Tentar de novo" variante="secundario" onPress={() => void carregar()} />
-        </>
-      ) : null}
-      {!bo && !erro ? <Texto accessibilityLiveRegion="polite">Preparando o texto...</Texto> : null}
-
-      {bo ? (
-        <>
-          <View style={estilos.caixa}>
-            <Texto selectable>{bo.texto}</Texto>
+        {erro ? (
+          <>
+            <Aviso mensagem={erro} />
+            <Botao rotulo="Tentar de novo" variante="secundario" onPress={() => void carregar()} />
+          </>
+        ) : null}
+        {!bo && !erro ? (
+          <View style={estilos.carregando} accessibilityLiveRegion="polite">
+            <ActivityIndicator color={cores.petroleo} />
+            <Texto>Preparando o texto...</Texto>
           </View>
-          <Botao rotulo="Copiar texto" onPress={() => void copiar()} />
-          {copiado ? <Texto accessibilityLiveRegion="polite">Texto copiado.</Texto> : null}
-          <Botao
-            rotulo="Abrir a Delegacia Eletrônica"
-            variante="secundario"
-            onPress={() => void abrir(bo.linkDelegaciaEletronica)}
-          />
+        ) : null}
 
-          <Texto variante="titulo" style={estilos.subtitulo}>
-            Delegacia mais perto
-          </Texto>
-          <Texto>{bo.delegacia.nome}</Texto>
-          <Texto>{bo.delegacia.endereco}</Texto>
-          <Botao rotulo="Ver no mapa" variante="secundario" onPress={() => void abrir(urlMapa(bo.delegacia))} />
+        {bo ? (
+          <>
+            <Secao titulo="Texto do boletim">
+              <View style={estilos.texto}>
+                <Texto selectable>{bo.texto}</Texto>
+              </View>
+              <Botao rotulo="Copiar texto" onPress={() => void copiar()} />
+              {copiado ? (
+                <View style={estilos.confirmacao} accessibilityLiveRegion="polite">
+                  <Icone nome="ok" tamanho={20} cor={cores.petroleo} />
+                  <Texto variante="corpoForte">Texto copiado.</Texto>
+                </View>
+              ) : null}
+              <Botao
+                rotulo="Abrir a Delegacia Eletrônica"
+                variante="secundario"
+                onPress={() => void abrir(bo.linkDelegaciaEletronica)}
+              />
+              {aviso ? <Aviso mensagem={aviso} /> : null}
+            </Secao>
 
-          <Texto variante="titulo" style={estilos.subtitulo}>
-            Compartilhar com a polícia
-          </Texto>
-          <Pressable
-            accessibilityRole="checkbox"
-            accessibilityLabel={CONSENTIMENTO}
-            accessibilityState={{ checked: consentiu, disabled: Boolean(protocolo) }}
-            disabled={Boolean(protocolo)}
-            onPress={() => setConsentiu((v) => !v)}
-            style={estilos.consentimento}
-          >
-            <Texto style={estilos.marca}>{consentiu ? '☑' : '☐'}</Texto>
-            <Texto style={estilos.consentimentoTexto}>{CONSENTIMENTO}</Texto>
-          </Pressable>
-          {protocolo ? (
-            <Texto accessibilityLiveRegion="polite">{`Protocolo ${protocolo}`}</Texto>
-          ) : (
-            <Botao rotulo="Enviar à polícia" carregando={enviando} desabilitado={!consentiu} onPress={() => void enviar()} />
-          )}
-          {erroEnvio ? <Texto accessibilityRole="alert" accessibilityLiveRegion="polite">{`⚠ ${erroEnvio}`}</Texto> : null}
-          {aviso ? <Texto accessibilityRole="alert" accessibilityLiveRegion="polite">{`⚠ ${aviso}`}</Texto> : null}
+            <Secao titulo="Delegacia mais perto">
+              <View style={estilos.delegacia}>
+                <Texto variante="corpoForte">{bo.delegacia.nome}</Texto>
+                <Texto>{bo.delegacia.endereco}</Texto>
+              </View>
+              <Botao rotulo="Ver no mapa" variante="secundario" onPress={() => void abrir(urlMapa(bo.delegacia))} />
+            </Secao>
 
-          <Texto variante="titulo" style={estilos.subtitulo}>
-            Retorno da polícia
-          </Texto>
-          {ret === null && !protocolo ? (
-            <Texto accessibilityLiveRegion="polite">Ainda não enviado à polícia.</Texto>
-          ) : ret ? (
-            <View accessibilityLiveRegion="polite" style={estilos.caixa}>
-              <Texto>{`Retorno do protocolo ${ret.protocolo}`}</Texto>
-              <Texto variante="titulo" style={estilos.subtitulo}>
-                {rotuloRetorno(ret.status)}
+            <Secao titulo="Compartilhar com a polícia">
+              <Pressable
+                accessibilityRole="checkbox"
+                accessibilityLabel={CONSENTIMENTO}
+                accessibilityState={{ checked: consentiu, disabled: Boolean(protocolo) }}
+                disabled={Boolean(protocolo)}
+                onPress={() => setConsentiu((v) => !v)}
+                style={({ pressed }) => [estilos.opcao, consentiu && estilos.opcaoMarcada, pressed && !consentiu && estilos.pressionado]}
+              >
+                <CaixaMarca marcada={consentiu} />
+                <Texto variante={consentiu ? 'corpoForte' : 'corpo'} style={estilos.opcaoTexto}>
+                  {CONSENTIMENTO}
+                </Texto>
+              </Pressable>
+              {protocolo ? (
+                <View style={estilos.confirmacao} accessibilityLiveRegion="polite">
+                  <Icone nome="ok" tamanho={20} cor={cores.petroleo} />
+                  <Texto variante="corpoForte">{`Protocolo ${protocolo}`}</Texto>
+                </View>
+              ) : null}
+            </Secao>
+
+            <Secao titulo="Retorno da polícia">
+              {ret === null && !protocolo ? (
+                <View style={estilos.linhaInfo} accessibilityLiveRegion="polite">
+                  <Icone nome="relogio" tamanho={20} cor={cores.petroleo} />
+                  <Texto style={estilos.opcaoTexto}>Ainda não enviado à polícia.</Texto>
+                </View>
+              ) : ret ? (
+                <View accessibilityLiveRegion="polite" style={estilos.retorno}>
+                  <Texto variante="legenda" style={estilos.suave}>{`Retorno do protocolo ${ret.protocolo}`}</Texto>
+                  <Texto variante="secao">{rotuloRetorno(ret.status)}</Texto>
+                  <Texto>{ret.mensagem}</Texto>
+                  <Texto variante="legenda" style={estilos.suave}>{`Atualizado às ${formatarHora(ret.atualizadoEm)}`}</Texto>
+                </View>
+              ) : (
+                <Texto style={estilos.suave}>Consultando o retorno...</Texto>
+              )}
+              {erroRetorno ? <Aviso mensagem={erroRetorno} /> : null}
+              <Texto variante="legenda" style={estilos.suave}>
+                {TEXTO_ORIENTACAO}
               </Texto>
-              <Texto>{ret.mensagem}</Texto>
-              <Texto variante="legenda">{`Atualizado às ${formatarHora(ret.atualizadoEm)}`}</Texto>
-            </View>
-          ) : (
-            <Texto>Consultando o retorno...</Texto>
-          )}
-          {erroRetorno ? <Texto accessibilityRole="alert" accessibilityLiveRegion="polite">{`⚠ ${erroRetorno}`}</Texto> : null}
-          <Texto>{TEXTO_ORIENTACAO}</Texto>
+            </Secao>
 
-          <Texto variante="titulo" style={estilos.subtitulo}>
-            Acompanhamento
-          </Texto>
-          {!conhecido ? <Texto>{AVISO_SUBSTITUI}</Texto> : null}
-          <Campo
-            rotulo="Número do BO (opcional)"
-            valor={boNumero}
-            onChangeText={editar(setBoNumero)}
-            autoCapitalize="characters"
-            autoCorrect={false}
-            erro={erroNumero}
-          />
-          {OPCOES_BO.map((o) => (
-            <Opcao key={o} rotulo={rotuloBoStatus(o)} marcada={boStatus === o} aoEscolher={() => editar(setBoStatus)(o)} />
-          ))}
-          {OPCOES_RECUPERACAO.map((o) => (
-            <Opcao key={o} rotulo={rotuloRecuperacao(o)} marcada={recuperacao === o} aoEscolher={() => editar(setRecuperacao)(o)} />
-          ))}
-          <Botao rotulo="Salvar acompanhamento" variante="secundario" carregando={salvando} onPress={() => void salvarAcompanhamento()} />
-          {salvo ? <Texto accessibilityLiveRegion="polite">Salvo.</Texto> : null}
-          {erroSalvar ? <Texto accessibilityRole="alert" accessibilityLiveRegion="polite">{`⚠ ${erroSalvar}`}</Texto> : null}
-        </>
+            <Secao titulo="Acompanhamento">
+              {!conhecido ? <Texto variante="legenda" style={estilos.suave}>{AVISO_SUBSTITUI}</Texto> : null}
+              <Campo
+                rotulo="Número do BO (opcional)"
+                valor={boNumero}
+                onChangeText={editar(setBoNumero)}
+                autoCapitalize="characters"
+                autoCorrect={false}
+                erro={erroNumero}
+              />
+              <View accessibilityRole="radiogroup" accessibilityLabel="Situação do BO" style={estilos.grupo}>
+                <Texto variante="rotulo">Situação do BO</Texto>
+                {OPCOES_BO.map((o) => (
+                  <Opcao key={o} rotulo={rotuloBoStatus(o)} marcada={boStatus === o} aoEscolher={() => editar(setBoStatus)(o)} />
+                ))}
+              </View>
+              <View accessibilityRole="radiogroup" accessibilityLabel="Situação do celular" style={estilos.grupo}>
+                <Texto variante="rotulo">Situação do celular</Texto>
+                {OPCOES_RECUPERACAO.map((o) => (
+                  <Opcao key={o} rotulo={rotuloRecuperacao(o)} marcada={recuperacao === o} aoEscolher={() => editar(setRecuperacao)(o)} />
+                ))}
+              </View>
+              <Botao rotulo="Salvar acompanhamento" variante="secundario" carregando={salvando} onPress={() => void salvarAcompanhamento()} />
+              {salvo ? (
+                <View style={estilos.confirmacao} accessibilityLiveRegion="polite">
+                  <Icone nome="ok" tamanho={20} cor={cores.petroleo} />
+                  <Texto variante="corpoForte">Salvo.</Texto>
+                </View>
+              ) : null}
+              {erroSalvar ? <Aviso mensagem={erroSalvar} /> : null}
+            </Secao>
+          </>
+        ) : null}
+      </ScrollView>
+
+      {bo && !protocolo ? (
+        <BarraAcao>
+          {erroEnvio ? <Aviso mensagem={erroEnvio} /> : null}
+          {!consentiu ? (
+            <Texto variante="legenda" style={estilos.suave}>
+              {MOTIVO_ENVIO}
+            </Texto>
+          ) : null}
+          <Botao rotulo="Enviar à polícia" carregando={enviando} desabilitado={!consentiu} onPress={() => void enviar()} />
+        </BarraAcao>
       ) : null}
-    </ScrollView>
+    </View>
   );
 }
 
 const estilos = StyleSheet.create({
-  tela: { padding: espacos.m, gap: espacos.m },
-  caixa: { padding: espacos.m, borderWidth: 2, borderColor: cores.petroleo, borderRadius: 12, backgroundColor: cores.branco },
-  subtitulo: { fontSize: 20, lineHeight: 28 },
-  consentimento: {
+  fundo: { flex: 1, backgroundColor: cores.areia },
+  rolagem: { flex: 1 },
+  tela: { padding: espacos.m, gap: espacos.m, paddingBottom: espacos.g },
+  titulos: { gap: espacos.p },
+  carregando: { flexDirection: 'row', alignItems: 'center', gap: espacos.pm },
+  secao: {
+    gap: espacos.pm,
+    padding: espacos.m,
+    borderRadius: raios.m,
+    borderWidth: bordas.fina,
+    borderColor: cores.bordaSuave,
+    backgroundColor: cores.branco,
+  },
+  texto: { padding: espacos.m, borderRadius: raios.p, backgroundColor: cores.areia },
+  delegacia: { gap: espacos.xs },
+  suave: { color: cores.textoSuave },
+  confirmacao: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: espacos.p,
+    padding: espacos.pm,
+    borderRadius: raios.m,
+    backgroundColor: cores.esmeraldaSuave,
+  },
+  linhaInfo: { flexDirection: 'row', alignItems: 'center', gap: espacos.p, minHeight: tamanhos.alvoMin },
+  retorno: { gap: espacos.xs, padding: espacos.m, borderRadius: raios.m, backgroundColor: cores.areia },
+  grupo: { gap: espacos.xs },
+  opcao: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: espacos.pm,
     minHeight: tamanhos.alvoMin,
     minWidth: tamanhos.alvoMin,
     paddingVertical: espacos.p,
+    paddingHorizontal: espacos.pm,
+    borderRadius: raios.m,
   },
-  marca: { fontSize: 28, lineHeight: 34 },
-  consentimentoTexto: { flex: 1 },
+  opcaoMarcada: { backgroundColor: cores.esmeraldaSuave },
+  pressionado: { backgroundColor: cores.areiaFunda },
+  opcaoTexto: { flex: 1 },
+  caixaMarca: {
+    width: MARCA,
+    height: MARCA,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: raios.p,
+    borderWidth: bordas.padrao,
+    borderColor: cores.petroleo,
+    backgroundColor: cores.branco,
+  },
+  caixaMarcada: { backgroundColor: cores.petroleo },
+  radioMarca: {
+    width: MARCA,
+    height: MARCA,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: raios.pilula,
+    borderWidth: bordas.padrao,
+    borderColor: cores.petroleo,
+    backgroundColor: cores.branco,
+  },
+  radioMiolo: { width: 14, height: 14, borderRadius: raios.pilula, backgroundColor: cores.petroleo },
 });

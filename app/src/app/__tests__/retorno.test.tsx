@@ -140,7 +140,7 @@ describe('acompanhamento no BO', () => {
     await render(<Bo />);
     await screen.findByText(NAO_ENVIADO);
     await fireEvent.press(screen.getByLabelText('Salvar acompanhamento'));
-    expect(await screen.findByText('⚠ Tente de novo em instantes.')).toBeTruthy();
+    expect(await screen.findByText('Tente de novo em instantes.')).toBeTruthy();
     expect(screen.queryByText('Salvo.')).toBeNull();
   });
 
