@@ -56,6 +56,7 @@ export default function Ajustes() {
   const [msgChaveiro, setMsgChaveiro] = useState<string | undefined>();
   const [msgRota, setMsgRota] = useState<string | undefined>();
   const [msgDemo, setMsgDemo] = useState<string | undefined>();
+  const [msgAlarme, setMsgAlarme] = useState<string | undefined>();
   const [ocupado, setOcupado] = useState(false);
   const aviso = useAvisoChaveiro((s) => s.mensagem);
   const acks = useRef(0);
@@ -93,27 +94,27 @@ export default function Ajustes() {
     await sessaoRepo(await abrirBanco()).set(chave, valor ? '1' : '0');
   }
 
-  async function mudarGuardiao(v: boolean) {
-    setChaves((c) => ({ ...c, guardiao: v }));
+  // Mostra o estado desejado, grava e, se algo falhar, volta ao estado real e avisa por escrito.
+  async function gravarInterruptor(campo: keyof Chaves, chave: string, valor: boolean, depois?: () => Promise<unknown>) {
+    const anterior = chaves[campo];
+    setMsgAlarme(undefined);
+    setChaves((c) => ({ ...c, [campo]: valor }));
     try {
-      await gravar(CHAVE_GUARDIAO, v);
-      if (v) await iniciarServicoGuardiao();
-      else await pararServicoGuardiao();
+      await gravar(chave, valor);
+      await depois?.();
     } catch {
-      console.warn('ajustes: falha ao mudar o modo guardiao');
+      setChaves((c) => ({ ...c, [campo]: anterior }));
+      await gravar(chave, anterior).catch(() => undefined);
+      setMsgAlarme(`⚠ Não foi possível ${valor ? 'ligar' : 'desligar'} esta opção. Ela continua ${anterior ? 'ligada' : 'desligada'}. Tente de novo.`);
     }
   }
 
-  async function mudarPlanoB(v: boolean) {
-    setChaves((c) => ({ ...c, planoB: v }));
-    await gravar(CHAVE_PLANO_B, v).catch(() => undefined);
-  }
-
-  async function mudarDemo(v: boolean) {
-    setChaves((c) => ({ ...c, demo: v }));
+  const mudarGuardiao = (v: boolean) => gravarInterruptor('guardiao', CHAVE_GUARDIAO, v, () => (v ? iniciarServicoGuardiao() : pararServicoGuardiao()));
+  const mudarPlanoB = (v: boolean) => gravarInterruptor('planoB', CHAVE_PLANO_B, v);
+  const mudarDemo = (v: boolean) => {
     setMsgDemo(undefined);
-    await gravar(CHAVE_DEMO, v).catch(() => undefined);
-  }
+    return gravarInterruptor('demo', CHAVE_DEMO, v);
+  };
 
   async function achar() {
     if (!chaveiro) return;
@@ -152,7 +153,7 @@ export default function Ajustes() {
   function confirmarSaida() {
     Alert.alert('Sair e apagar dados?', 'Os dados do Ampara saem deste aparelho. Para voltar, entre de novo com e-mail e senha.', [
       { text: 'Cancelar', style: 'cancel' },
-      { text: 'Sair e apagar', style: 'destructive', onPress: () => void sair() },
+      { text: 'Sair e apagar', style: 'destructive', onPress: () => void sair().catch(() => Alert.alert('Não foi possível sair', 'Tente de novo.')) },
     ]);
   }
 
@@ -271,6 +272,11 @@ export default function Ajustes() {
           valor={chaves.planoB}
           aoMudar={(v) => void mudarPlanoB(v)}
         />
+        {msgAlarme ? (
+          <Texto accessibilityRole="alert" accessibilityLiveRegion="assertive">
+            {msgAlarme}
+          </Texto>
+        ) : null}
       </View>
 
       <View style={estilos.caixa}>

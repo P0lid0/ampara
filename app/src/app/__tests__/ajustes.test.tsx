@@ -3,6 +3,7 @@ import { Alert } from 'react-native';
 import Ajustes from '../(tabs)/ajustes';
 import { api } from '../../api/endpoints';
 import { sair } from '../../auth/sessao';
+import * as dbModulo from '../../db/db';
 import { abrirBanco } from '../../db/db';
 import { ocorrenciaRepo, sessaoRepo } from '../../db/repos';
 import { useAlarmes } from '../../guardiao/store';
@@ -114,6 +115,28 @@ describe('aba Ajustes', () => {
     await espera();
     expect(await sessaoRepo(await abrirBanco()).get('guardiao_ativo')).toBe('0');
     expect(pararServicoGuardiao).toHaveBeenCalled();
+  });
+
+  it('"Sou guardião" volta a desligado e avisa por escrito quando o serviço falha', async () => {
+    jest.mocked(iniciarServicoGuardiao).mockRejectedValueOnce(new Error('falhou'));
+    await render(<Ajustes />);
+    await fireEvent(await screen.findByLabelText('Sou guardião: receber alarmes'), 'valueChange', true);
+    await espera();
+    expect(screen.getByLabelText('Sou guardião: receber alarmes').props.value).toBe(false);
+    expect(await sessaoRepo(await abrirBanco()).get('guardiao_ativo')).toBe('0');
+    expect(screen.getByText(/Não foi possível ligar esta opção\. Ela continua desligada/)).toBeTruthy();
+  });
+
+  it('"Alarme sem tela cheia" volta ao estado real e avisa quando a gravação falha', async () => {
+    await render(<Ajustes />);
+    const chave = await screen.findByLabelText('Alarme sem tela cheia');
+    const real = await abrirBanco();
+    const quebrado = { ...real, run: async () => { throw new Error('disco cheio'); } };
+    jest.spyOn(dbModulo, 'abrirBanco').mockResolvedValue(quebrado);
+    await fireEvent(chave, 'valueChange', true);
+    await espera();
+    expect(screen.getByLabelText('Alarme sem tela cheia').props.value).toBe(false);
+    expect(screen.getByText(/Não foi possível ligar esta opção/)).toBeTruthy();
   });
 
   it('"Alarme sem tela cheia" grava alarme_plano_b', async () => {
