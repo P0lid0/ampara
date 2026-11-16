@@ -55,6 +55,20 @@ describe('onboarding: guardiões', () => {
     expect(screen.getByText(/Vale por \d{2}:\d{2}/)).toBeTruthy();
   });
 
+  it('o prazo de 24 h aparece em horas (23:59:52), não em 1439 minutos', async () => {
+    criarConvite.mockResolvedValue({ codigo: 'ABC123', expiraEm: new Date(Date.now() + 86_392_500).toISOString() });
+    await render(<OnboardingGuardioes />);
+    await fireEvent.press(await screen.findByRole('button', { name: 'Convidar' }));
+    expect(await screen.findByText('Vale por 23:59:52')).toBeTruthy();
+  });
+
+  it('abaixo de uma hora o prazo continua em mm:ss (09:05)', async () => {
+    criarConvite.mockResolvedValue({ codigo: 'ABC123', expiraEm: new Date(Date.now() + 545_500).toISOString() });
+    await render(<OnboardingGuardioes />);
+    await fireEvent.press(await screen.findByRole('button', { name: 'Convidar' }));
+    expect(await screen.findByText('Vale por 09:05')).toBeTruthy();
+  });
+
   it('convite vencido mostra a frase de vencido', async () => {
     criarConvite.mockResolvedValue({ codigo: 'ABC123', expiraEm: new Date(Date.now() - 1000).toISOString() });
     await render(<OnboardingGuardioes />);

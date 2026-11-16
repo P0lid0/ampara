@@ -22,10 +22,13 @@ function restante(expiraEm: string, agora: number): number {
   return Math.max(0, Math.floor((Date.parse(expiraEm) - agora) / 1000));
 }
 
-function mmss(segundos: number): string {
-  const m = Math.floor(segundos / 60);
+/** mm:ss abaixo de 1 h; h:mm:ss a partir de 1 h (um convite de 24 h não pode ler "1439:52"). */
+export function mmss(segundos: number): string {
+  const dois = (n: number) => String(n).padStart(2, '0');
+  const h = Math.floor(segundos / 3600);
+  const m = Math.floor((segundos % 3600) / 60);
   const s = segundos % 60;
-  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  return h > 0 ? `${h}:${dois(m)}:${dois(s)}` : `${dois(m)}:${dois(s)}`;
 }
 
 export default function OnboardingGuardioes() {

@@ -76,6 +76,13 @@ describe('aba Início', () => {
     expect(mockPush).toHaveBeenCalledWith('/relato');
   });
 
+  it('mostra "Tenho um código de convite" mesmo com guardiões e leva à tela de aceitar convite', async () => {
+    mockPush.mockClear();
+    await render(<Inicio />);
+    await fireEvent.press(await screen.findByRole('button', { name: 'Tenho um código de convite' }));
+    expect(mockPush).toHaveBeenCalledWith('/guardiao/aceitar');
+  });
+
   it('GET /guardioes vazio mostra "Você ainda não tem guardiões"', async () => {
     jest.mocked(api.guardioes.listar).mockResolvedValue([]);
     await render(<Inicio />);

@@ -630,4 +630,10 @@ Resultado: 61 testes novos no app (625 no total) e 15 na web (69 no total); `tsc
 
 Resultado: 9 testes novos (638 no app), `tsc --noEmit` sem erros. O login consulta o GET /me antes de a sessão aparecer e grava `dados.dono`; com outro dono, a rota e o guardião param (`aoTrocarConta`), o aviso de sessão expirada da conta anterior é cancelado e o banco é apagado; se o GET /me falha, o login falha sem salvar o token. A fila divide o lote recusado até a profundidade 4 (no máximo 31 POSTs por lote de 500; um ponto ruim leva junto no máximo o pedaço dele). Regras do R8 no `app.config.ts` com teste; o build de release fica para a fase nativa.
 
+### 100. Correção pontual: entrada do código de convite e contador em horas
+
+> Corrija 2 defeitos achados no teste ponta a ponta do app Expo do Ampara (app/), com TDD: (1) a tela "Aceitar convite" só abria pelo deep link, e o guardião que recebia o código não tinha botão para digitá-lo; adicione "Tenho um código de convite" (secundário, leva a /guardiao/aceitar) em Ajustes, na caixa Alarme, e no Início, sempre visível; (2) o prazo do convite de 24 h aparecia como "Vale por 1439:52"; formate em h:mm:ss a partir de 1 h e mantenha mm:ss abaixo disso.
+
+Resultado: 4 testes novos (642 no app), `tsc --noEmit` sem erros. Ajustes e Início têm o botão; o contador mostra "Vale por 23:59:52" e "Vale por 09:05". Na suíte completa 5 suítes sem relação estouraram o tempo por disputa de CPU com outra sessão e passaram ao rodar de novo.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->

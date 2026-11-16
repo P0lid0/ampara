@@ -156,6 +156,12 @@ export default function Inicio() {
 
       <CartaoChaveiro />
 
+      <View style={estilos.caixa} accessibilityLabel="Proteger alguém">
+        <Texto variante="titulo">Proteger alguém</Texto>
+        <Texto>Recebeu um código de convite de alguém? Toque abaixo para virar guardião.</Texto>
+        <Botao rotulo="Tenho um código de convite" variante="secundario" onPress={() => router.push('/guardiao/aceitar' as never)} />
+      </View>
+
       <View style={estilos.caixa} accessibilityLabel="Rota">
         <Texto variante="titulo">Rota</Texto>
         <Texto accessibilityLiveRegion="polite">{rota ? FRASE_ROTA[rota] : 'Conferindo a rota...'}</Texto>

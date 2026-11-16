@@ -11,10 +11,11 @@ import { iniciarServicoGuardiao, pararServicoGuardiao } from '../../guardiao/ser
 
 jest.setTimeout(60000);
 
+const mockPush = jest.fn();
 jest.mock('expo-router', () => {
   const React = require('react');
   return {
-    useRouter: () => ({ replace: jest.fn(), push: jest.fn() }),
+    useRouter: () => ({ replace: jest.fn(), push: mockPush }),
     useFocusEffect: (cb: () => void | (() => void)) => React.useEffect(cb, [cb]),
     Stack: { Screen: () => null },
   };
@@ -49,6 +50,13 @@ beforeEach(async () => {
 afterEach(() => jest.restoreAllMocks());
 
 describe('aba Ajustes', () => {
+  it('mostra "Tenho um código de convite" e leva à tela de aceitar convite', async () => {
+    mockPush.mockClear();
+    await render(<Ajustes />);
+    await fireEvent.press(await screen.findByRole('button', { name: 'Tenho um código de convite' }));
+    expect(mockPush).toHaveBeenCalledWith('/guardiao/aceitar');
+  });
+
   it('Ajustes: modo demonstração só aparece ligado; "Repetir 5 vezes" resulta em 1 alerta no histórico', async () => {
     await render(<Ajustes />);
     const chave = await screen.findByLabelText('Modo demonstração');

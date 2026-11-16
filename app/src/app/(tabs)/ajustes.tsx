@@ -260,6 +260,7 @@ export default function Ajustes() {
 
       <View style={estilos.caixa}>
         <Texto variante="titulo">Alarme</Texto>
+        <Botao rotulo="Tenho um código de convite" variante="secundario" onPress={() => router.push('/guardiao/aceitar' as never)} />
         <Interruptor
           rotulo="Sou guardião: receber alarmes"
           dica="Mantém um aviso fixo e toca o alarme quando alguém que você protege pedir ajuda."
