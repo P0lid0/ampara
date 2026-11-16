@@ -2,6 +2,7 @@
 // disco ou aparelho. Importe este arquivo ANTES das telas, para os mocks abaixo valerem para elas.
 //   - expo-router: navegação falsa; os parâmetros da rota vêm de `renderTela(Tela, { params })`.
 //   - api: cada função de `api.*` é um jest.fn com a resposta mínima de `respostaMinima`.
+//   - sessao: useSessao devolve um usuario autenticado (as telas protegidas renderizam de verdade).
 //   - banco: o SQLite em memória do `__mocks__/expo-sqlite`; `o.db` troca por outro banco.
 import { render, type RenderResult } from '@testing-library/react-native';
 import type { ComponentType } from 'react';
@@ -22,6 +23,12 @@ jest.mock('expo-router', () => {
     Stack: { Screen: () => null },
   };
 });
+
+// Sessão de usuário autenticado: sem ela telas como Início, Histórico e Rota ficam em branco e a suíte nada inspeciona.
+jest.mock('../auth/sessao', () => ({
+  ...jest.requireActual('../auth/sessao'),
+  useSessao: () => ({ autenticado: true, escopo: 'usuario', expiraEm: null }),
+}));
 
 jest.mock('../api/endpoints', () => {
   const { respostaMinima } = require('./respostasMinimas');
