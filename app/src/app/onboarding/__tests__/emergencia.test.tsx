@@ -29,9 +29,9 @@ beforeEach(async () => {
 });
 
 describe('onboarding: código de emergência', () => {
-  it('mostra "Passo 7 de 7"', async () => {
+  it('mostra "Passo 8 de 8"', async () => {
     await render(<OnboardingEmergencia />);
-    expect(screen.getByText('Passo 7 de 7')).toBeTruthy();
+    expect(screen.getByText('Passo 8 de 8')).toBeTruthy();
   });
 
   it('"123" mostra erro "O código tem 6 números." e não chama a API', async () => {

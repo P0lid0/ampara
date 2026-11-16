@@ -15,11 +15,12 @@ jest.mock('expo-router', () => ({
   Stack: { Screen: () => null },
 }));
 jest.mock('../../api/endpoints', () => ({
-  api: { ocorrencias: { bo: jest.fn(), compartilharPolicia: jest.fn() } },
+  api: { ocorrencias: { bo: jest.fn(), compartilharPolicia: jest.fn(), retorno: jest.fn() } },
 }));
 
 const bo = jest.mocked(api.ocorrencias.bo);
 const compartilhar = jest.mocked(api.ocorrencias.compartilharPolicia);
+const retorno = jest.mocked(api.ocorrencias.retorno);
 const setString = jest.mocked(Clipboard.setStringAsync);
 
 // SINTETICO: IMEI e texto de BO de teste.
@@ -36,6 +37,7 @@ beforeEach(() => {
   mockParams = { ocorrenciaId: 'oc-1' };
   bo.mockReset().mockResolvedValue(BO);
   compartilhar.mockReset().mockResolvedValue({ protocolo: 'PP-2026-000001' });
+  retorno.mockReset().mockRejectedValue(new ApiErro(404, 'não encontrado'));
   setString.mockClear();
   abrirUrl = jest.spyOn(Linking, 'openURL').mockResolvedValue(undefined);
 });

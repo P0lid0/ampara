@@ -41,7 +41,9 @@ beforeEach(async () => {
 
 describe('proximoPasso', () => {
   it('proximoPasso segue a ordem e devolve "fim" com tudo concluído', () => {
-    expect(PASSOS).toEqual(['conta', 'consentimento', 'imei', 'contas', 'guardioes', 'chaveiro', 'emergencia']);
+    expect(PASSOS).toEqual(['conta', 'consentimento', 'imei', 'contas', 'guardioes', 'chaveiro', 'checklist', 'emergencia']);
+    expect(PASSOS).toHaveLength(8);
+    expect(PASSOS.indexOf('checklist')).toBe(PASSOS.indexOf('emergencia') - 1);
     const feitos = new Set<PassoOnboarding>();
     const visitados: string[] = [];
     for (let i = 0; i < 10; i++) {

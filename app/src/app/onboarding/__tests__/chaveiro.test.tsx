@@ -49,9 +49,9 @@ async function digitarEParear(id = ID) {
 }
 
 describe('onboarding: chaveiro', () => {
-  it('mostra "Passo 6 de 7" e a ajuda do código de demonstração', async () => {
+  it('mostra "Passo 6 de 8" e a ajuda do código de demonstração', async () => {
     await render(<OnboardingChaveiro />);
-    expect(screen.getByText('Passo 6 de 7')).toBeTruthy();
+    expect(screen.getByText('Passo 6 de 8')).toBeTruthy();
     expect(screen.getByText(/chaveiro-ampara-xxxxxx/)).toBeTruthy();
   });
 

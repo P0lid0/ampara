@@ -37,10 +37,10 @@ beforeEach(async () => {
 });
 
 describe('onboarding: guardiões', () => {
-  it('mostra "Passo 5 de 7" e busca a lista ao abrir', async () => {
+  it('mostra "Passo 5 de 8" e busca a lista ao abrir', async () => {
     listar.mockResolvedValue([G(1)]);
     await render(<OnboardingGuardioes />);
-    expect(screen.getByText('Passo 5 de 7')).toBeTruthy();
+    expect(screen.getByText('Passo 5 de 8')).toBeTruthy();
     expect(await screen.findByText('Guardião 1')).toBeTruthy();
     expect(listar).toHaveBeenCalledTimes(1);
   });

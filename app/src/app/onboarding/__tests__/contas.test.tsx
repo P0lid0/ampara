@@ -43,9 +43,9 @@ describe('onboarding: bancos e operadora', () => {
     expect(screen.getAllByRole('checkbox', { name: /Conferido em 12\/11\/2026/ })).toHaveLength(3);
   });
 
-  it('mostra "Passo 4 de 7" e a lista do catálogo com tipo, telefone, link e "Conferido em 12/11/2026"', async () => {
+  it('mostra "Passo 4 de 8" e a lista do catálogo com tipo, telefone, link e "Conferido em 12/11/2026"', async () => {
     await render(<OnboardingContas />);
-    expect(screen.getByText('Passo 4 de 7')).toBeTruthy();
+    expect(screen.getByText('Passo 4 de 8')).toBeTruthy();
     expect(await screen.findByText('Banco Teste Um')).toBeTruthy();
     expect(screen.getAllByText(/Conferido em 12\/11\/2026/)).toHaveLength(3);
     expect(screen.getAllByText('Banco')).toHaveLength(2);

@@ -2,7 +2,7 @@ import { api } from '../api/endpoints';
 import { abrirBanco, type Banco } from '../db/db';
 import { sessaoRepo } from '../db/repos';
 
-export const PASSOS = ['conta', 'consentimento', 'imei', 'contas', 'guardioes', 'chaveiro', 'emergencia'] as const;
+export const PASSOS = ['conta', 'consentimento', 'imei', 'contas', 'guardioes', 'chaveiro', 'checklist', 'emergencia'] as const;
 export type PassoOnboarding = (typeof PASSOS)[number];
 
 const CHAVE = 'onboarding.concluidos';

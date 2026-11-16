@@ -305,6 +305,12 @@ export default function Ajustes() {
       </View>
 
       <View style={estilos.caixa}>
+        <Texto variante="titulo">Prevenção</Texto>
+        <Texto>Três cuidados simples para deixar um roubo menos grave.</Texto>
+        <Botao rotulo="Checklist de prevenção" variante="secundario" onPress={() => router.push('/onboarding/checklist' as never)} />
+      </View>
+
+      <View style={estilos.caixa}>
         <Texto variante="titulo">Conta</Texto>
         <Botao rotulo="Sair e apagar dados deste aparelho" variante="perigo" onPress={confirmarSaida} />
       </View>

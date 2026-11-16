@@ -37,9 +37,9 @@ beforeEach(async () => {
 });
 
 describe('onboarding: consentimento da rota', () => {
-  it('mostra o texto simples e a barra "Passo 2 de 7"', async () => {
+  it('mostra o texto simples e a barra "Passo 2 de 8"', async () => {
     await render(<OnboardingConsentimento />);
-    expect(screen.getByText('Passo 2 de 7')).toBeTruthy();
+    expect(screen.getByText('Passo 2 de 8')).toBeTruthy();
     expect(screen.getByText(/Guardamos por 7 dias por onde você andou, só para você marcar onde foi o roubo e gerar o BO\. Só você vê\. Pode desligar quando quiser em Ajustes\./)).toBeTruthy();
   });
 
