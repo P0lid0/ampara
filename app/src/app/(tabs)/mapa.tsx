@@ -1,6 +1,7 @@
 // Aba Mapa (P2): risco por área e faixa horária (cor, padrão de borda e texto), relatos recentes e as
 // camadas Delegacias, Estações e PM. Área que a API não devolveu é "Sem dado", nunca "baixo".
 import * as Location from 'expo-location';
+import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Switch, View } from 'react-native';
 import { api } from '../../api/endpoints';
@@ -38,7 +39,11 @@ const LEGENDA: { classe: ClasseCelula; texto: string; borda: object }[] = [
   { classe: 'sem', texto: ROTULO_SEM_DADO, borda: { borderWidth: 2, borderStyle: 'dotted' } },
 ];
 
+/** Centro da área visível: é o ponto do relato quando a pessoa usa "Relatar aqui" (item 6). */
+const centroDe = (b: Bbox) => ({ lat: (b.minLat + b.maxLat) / 2, lng: (b.minLng + b.maxLng) / 2 });
+
 export default function Mapa() {
+  const router = useRouter();
   const [centro, setCentro] = useState<{ lat: number; lng: number } | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
   const [bbox, setBbox] = useState<Bbox | null>(null);
@@ -208,6 +213,18 @@ export default function Mapa() {
       ) : (
         <Texto>Localizando…</Texto>
       )}
+
+      {bbox ? (
+        <Botao
+          rotulo="Relatar aqui"
+          variante="secundario"
+          dica="Abre o relato no ponto do centro do mapa. Arraste o mapa antes para escolher outro lugar."
+          onPress={() => {
+            const c = centroDe(bbox);
+            router.push(`/relato?lat=${c.lat.toFixed(5)}&lng=${c.lng.toFixed(5)}` as never);
+          }}
+        />
+      ) : null}
 
       {erroRisco ? <Texto accessibilityRole="alert">Não deu para carregar o risco agora.</Texto> : null}
 

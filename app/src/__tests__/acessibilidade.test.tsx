@@ -4,7 +4,7 @@ import { screen } from '@testing-library/react-native';
 import fs from 'node:fs';
 import path from 'node:path';
 import { StyleSheet } from 'react-native';
-import { renderTela } from '../testing/renderTela'; // primeiro: registra os mocks antes das telas
+import { definirEscopoTela, renderTela } from '../testing/renderTela'; // primeiro: registra os mocks antes das telas
 import { abrir, ehTocavel, nos, TELAS, type No } from '../testing/telas';
 import { EstadoBadge, type Estado } from '../ui/EstadoBadge';
 
@@ -32,37 +32,64 @@ describe('telas: lista completa', () => {
   });
 });
 
+// Os três critérios, aplicados à árvore renderizada de uma tela.
+function semRotulo(todos: No[]): string[] {
+  return todos
+    .filter(ehTocavel)
+    .filter((n) => {
+      const rotulo = n.props.accessibilityLabel;
+      const papel = n.props.accessibilityRole ?? n.props.role;
+      return typeof rotulo !== 'string' || rotulo.trim() === '' || !papel;
+    })
+    .map(descrever);
+}
+
+function textosRuins(todos: No[]): { travados: string[]; pequenos: string[] } {
+  const textos = todos.filter((n) => n.type === 'Text' || n.type === 'TextInput');
+  return {
+    travados: textos.filter((n) => n.props.allowFontScaling === false).map(descrever),
+    pequenos: textos
+      .filter((n) => !(typeof estilo(n).fontSize === 'number' && (estilo(n).fontSize as number) >= 16))
+      .map((n) => `${descrever(n)} (${String(estilo(n).fontSize)})`),
+  };
+}
+
+function alvosPequenos(todos: No[]): string[] {
+  return todos
+    .filter((n) => typeof n.props.onClick === 'function')
+    .filter((n) => !((estilo(n).minHeight as number) >= 48 && (estilo(n).minWidth as number) >= 48))
+    .map(descrever);
+}
+
 describe.each(TELAS)('%s', (_nome, Tela) => {
   it('todo elemento com onPress tem accessibilityLabel não vazio e accessibilityRole', async () => {
-    const todos = await abrir(Tela);
-    const falhas = todos
-      .filter(ehTocavel)
-      .filter((n) => {
-        const rotulo = n.props.accessibilityLabel;
-        const papel = n.props.accessibilityRole ?? n.props.role;
-        return typeof rotulo !== 'string' || rotulo.trim() === '' || !papel;
-      })
-      .map(descrever);
-    expect(falhas).toEqual([]);
+    expect(semRotulo(await abrir(Tela))).toEqual([]);
   });
 
   it('nenhum Text tem allowFontScaling=false e todo fontSize achatado é >= 16', async () => {
-    const todos = await abrir(Tela);
-    const textos = todos.filter((n) => n.type === 'Text' || n.type === 'TextInput');
-    expect(textos.filter((n) => n.props.allowFontScaling === false).map(descrever)).toEqual([]);
-    const pequenos = textos
-      .filter((n) => !(typeof estilo(n).fontSize === 'number' && (estilo(n).fontSize as number) >= 16))
-      .map((n) => `${descrever(n)} (${String(estilo(n).fontSize)})`);
+    const { travados, pequenos } = textosRuins(await abrir(Tela));
+    expect(travados).toEqual([]);
     expect(pequenos).toEqual([]);
   });
 
   it('todo botão tem minHeight >= 48 e minWidth >= 48 no estilo achatado', async () => {
+    expect(alvosPequenos(await abrir(Tela))).toEqual([]);
+  });
+});
+
+// Modo emergência (aparelho emprestado): as telas que esse escopo abre mostram outros botões (ex.: "Sair deste aparelho").
+const TELAS_EMERGENCIA = TELAS.filter(([n]) => ['(tabs)/historico', 'ocorrencia/[id]', 'rota', 'bo'].includes(n));
+
+describe.each(TELAS_EMERGENCIA)('%s (modo emergência)', (_nome, Tela) => {
+  beforeEach(() => definirEscopoTela('emergencia'));
+  afterEach(() => definirEscopoTela('usuario'));
+
+  it('tem "Sair deste aparelho" e passa nos três critérios (rótulo e papel, fonte >= 16, alvo >= 48)', async () => {
     const todos = await abrir(Tela);
-    const falhas = todos
-      .filter((n) => typeof n.props.onClick === 'function')
-      .filter((n) => !((estilo(n).minHeight as number) >= 48 && (estilo(n).minWidth as number) >= 48))
-      .map(descrever);
-    expect(falhas).toEqual([]);
+    expect(todos.filter(ehTocavel).some((n) => n.props.accessibilityLabel === 'Sair deste aparelho')).toBe(true);
+    expect(semRotulo(todos)).toEqual([]);
+    expect(textosRuins(todos)).toEqual({ travados: [], pequenos: [] });
+    expect(alvosPequenos(todos)).toEqual([]);
   });
 });
 

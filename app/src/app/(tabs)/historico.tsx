@@ -15,6 +15,7 @@ import { horaLocal } from '../../guardiao/notificacao';
 import { cores, espacos, tamanhos } from '../../theme/tokens';
 import { Botao } from '../../ui/Botao';
 import { EstadoBadge, type Estado } from '../../ui/EstadoBadge';
+import { SairEmergencia } from '../../ui/SairEmergencia';
 import { Texto } from '../../ui/Texto';
 
 type Linha = { id: string; estado: string; iniciadaEm: string };
@@ -63,6 +64,7 @@ export default function Historico() {
   return (
     <ScrollView contentContainerStyle={estilos.tela}>
       <Texto variante="titulo">Histórico</Texto>
+      <SairEmergencia />
       {erro ? (
         <>
           <Texto accessibilityRole="alert" accessibilityLiveRegion="polite">{`⚠ ${erro}`}</Texto>

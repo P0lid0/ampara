@@ -13,6 +13,7 @@ import { agruparPorDia, formatarHora } from '../rota/linhaDoTempo';
 import { cores, espacos, tamanhos } from '../theme/tokens';
 import { Botao } from '../ui/Botao';
 import { LinhaNoMapa, MapaBase, MarcadorNoMapa } from '../ui/MapaBase';
+import { SairEmergencia } from '../ui/SairEmergencia';
 import { Texto } from '../ui/Texto';
 
 const DIAS_DE_HISTORICO = 7;
@@ -122,6 +123,7 @@ export default function Rota() {
   const cabecalho = (
     <View style={estilos.cabecalho}>
       <Stack.Screen options={{ title: 'Minha rota' }} />
+      <SairEmergencia />
       <Texto variante="titulo">Onde você esteve</Texto>
       <Texto>Escolha o dia e o horário em que aconteceu.</Texto>
 

@@ -119,4 +119,28 @@ describe('tela do BO', () => {
     expect(await screen.findByText(/A polícia não respondeu/)).toBeTruthy();
     expect(screen.getByLabelText('Enviar à polícia').props.accessibilityState.disabled).toBe(false);
   });
+
+  it('item 10: depois de enviar à polícia a tela não diz "Ainda não enviado à polícia." junto do protocolo', async () => {
+    await render(<Bo />);
+    await screen.findByText('Ainda não enviado à polícia.');
+    await fireEvent.press(screen.getByLabelText(AUTORIZO));
+    await fireEvent.press(screen.getByLabelText('Enviar à polícia'));
+    expect(await screen.findByText('Protocolo PP-2026-000001')).toBeTruthy();
+    await waitFor(() => expect(retorno).toHaveBeenCalledTimes(2)); // consulta o retorno logo depois do envio
+    expect(screen.queryByText('Ainda não enviado à polícia.')).toBeNull();
+    expect(screen.getByText('Consultando o retorno...')).toBeTruthy();
+  });
+
+  it('item 10: com o retorno já disponível logo após o envio, ele aparece sem esperar 1 minuto', async () => {
+    await render(<Bo />);
+    await screen.findByText('Ainda não enviado à polícia.');
+    retorno.mockResolvedValue({
+      protocolo: 'PP-2026-000001', status: 'recebida', mensagem: 'Recebemos sua ocorrência.',
+      atualizadoEm: '2026-11-14T18:30:00Z', boStatus: 'nao_registrado', recuperacao: 'sem_noticia',
+    });
+    await fireEvent.press(screen.getByLabelText(AUTORIZO));
+    await fireEvent.press(screen.getByLabelText('Enviar à polícia'));
+    expect(await screen.findByText('Recebida pela polícia')).toBeTruthy();
+    expect(screen.queryByText('Ainda não enviado à polícia.')).toBeNull();
+  });
 });

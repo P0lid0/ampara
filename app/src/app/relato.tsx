@@ -24,7 +24,8 @@ const TIPOS: { tipo: TipoRelato; rotulo: string }[] = [
   { tipo: 'suspeita', rotulo: 'Suspeita' },
 ];
 
-const SEM_LOCAL = 'Não deu para achar o local. Ligue a localização do celular ou escolha o ponto no mapa e tente de novo.';
+// Sem GPS, o caminho que existe é o botão "Relatar aqui" do Mapa (centro do mapa visível).
+const SEM_LOCAL = 'Não deu para achar o local. Ligue a localização do celular e tente de novo, ou abra o Mapa e toque em "Relatar aqui".';
 const AGUARDE = 'Espere 2 minutos entre um relato e outro.';
 
 type Ponto = { lat: number; lng: number };

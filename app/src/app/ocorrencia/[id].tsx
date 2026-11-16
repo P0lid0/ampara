@@ -1,6 +1,6 @@
 // Detalhe da ocorrência: linha do tempo (iniciada em, momento marcado e cada passo com o horário).
 // Passos não feitos aparecem como "Pendente" (em texto, nunca só por cor).
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { mensagemDeErro } from '../../api/cliente';
@@ -13,6 +13,7 @@ import { horaLocal } from '../../guardiao/notificacao';
 import { espacos } from '../../theme/tokens';
 import { Botao } from '../../ui/Botao';
 import { EstadoBadge } from '../../ui/EstadoBadge';
+import { SairEmergencia } from '../../ui/SairEmergencia';
 import { Texto } from '../../ui/Texto';
 import { BADGE } from '../(tabs)/historico';
 
@@ -49,9 +50,13 @@ export default function DetalheOcorrencia() {
     }
   }, [id]);
 
-  useEffect(() => {
-    void carregar();
-  }, [carregar]);
+  // Recarrega sempre que a tela volta ao foco (item 11): o Stack mantém o detalhe montado enquanto a pessoa
+  // marca o momento na rota e vê o BO, e na volta o momento e os passos precisam estar atualizados.
+  useFocusEffect(
+    useCallback(() => {
+      void carregar();
+    }, [carregar]),
+  );
 
   const feitos = new Map((ocorrencia?.passos ?? []).map((p) => [p.passo, p.concluidoEm]));
   const badge = ocorrencia ? BADGE[ocorrencia.estado] : undefined;
@@ -61,6 +66,7 @@ export default function DetalheOcorrencia() {
     <ScrollView contentContainerStyle={estilos.tela}>
       <Stack.Screen options={{ title: 'Ocorrência' }} />
       <Texto variante="titulo">Linha do tempo</Texto>
+      <SairEmergencia />
       {erro ? (
         <>
           <Texto accessibilityRole="alert" accessibilityLiveRegion="polite">{`⚠ ${erro}`}</Texto>

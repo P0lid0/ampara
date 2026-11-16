@@ -45,13 +45,17 @@ export function fonteLocal(db: Banco): FonteOcorrencia {
   return {
     async carregar(id) {
       const feitos = new Map((await repo.passos(id)).map((p) => [p.passo, p.concluidoEm]));
+      // Item 12: a linha gravada pela demonstração é a mesma que o Histórico lista; só sem ela vale o padrão.
+      const linha = await repo.obter(id);
+      const estado = (linha?.estado ?? 'Aberta') as OcorrenciaDto['estado'];
       return {
         ocorrencia: {
           id,
-          estado: 'Aberta',
-          origem: 'chaveiro',
-          iniciadaEm: new Date().toISOString(),
-          momento: null,
+          estado,
+          origem: linha?.origem ?? 'chaveiro',
+          iniciadaEm: linha?.iniciadaEm ?? new Date().toISOString(),
+          // O banco local guarda só o horário do momento (sem coordenada); a tela mostra só o horário.
+          momento: linha?.momentoEm ? { em: linha.momentoEm, lat: Number.NaN, lng: Number.NaN } : null,
           passos: ORDEM_PASSOS.map((passo) => ({ passo, concluidoEm: feitos.get(passo) ?? null })),
           alertas: [],
           contas: CONTAS_DEMO,

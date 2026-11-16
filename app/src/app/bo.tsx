@@ -7,11 +7,13 @@ import { Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { ApiErro, mensagemDeErro } from '../api/cliente';
 import { api } from '../api/endpoints';
 import type { BoDto, BoStatus, Recuperacao, RetornoDto } from '../api/tipos';
+import { acompanhamentoLembrado, lembrarAcompanhamento } from '../prevencao/acompanhamentoMemoria';
 import { MSG_BO_NUMERO, rotuloBoStatus, rotuloRecuperacao, rotuloRetorno, TEXTO_ORIENTACAO, validarBoNumero } from '../prevencao/retorno';
 import { formatarHora } from '../rota/linhaDoTempo';
 import { cores, espacos, tamanhos } from '../theme/tokens';
 import { Botao } from '../ui/Botao';
 import { Campo } from '../ui/Campo';
+import { SairEmergencia } from '../ui/SairEmergencia';
 import { Texto } from '../ui/Texto';
 
 const ATUALIZA_RETORNO_MS = 60_000;
@@ -34,6 +36,7 @@ function Opcao({ rotulo, marcada, aoEscolher }: { rotulo: string; marcada: boole
 }
 
 const CONSENTIMENTO = 'Autorizo enviar esta ocorrência, sem meus dados pessoais, à polícia';
+const AVISO_SUBSTITUI = 'Salvar substitui o acompanhamento anterior. Se você já salvou um número de BO, digite de novo.';
 
 /** geo:lat,lng?q=lat,lng(nome): o Android abre no app de mapa. O nome vai codificado. */
 export function urlMapa(d: BoDto['delegacia']): string {
@@ -55,9 +58,13 @@ export default function Bo() {
   // Retorno da polícia: undefined = ainda não consultou; null = 404 (não enviado).
   const [ret, setRet] = useState<RetornoDto | null | undefined>();
   const [erroRetorno, setErroRetorno] = useState<string | undefined>();
-  const [boNumero, setBoNumero] = useState('');
-  const [boStatus, setBoStatus] = useState<BoStatus>('nao_registrado');
-  const [recuperacao, setRecuperacao] = useState<Recuperacao>('sem_noticia');
+  // Item 19: sem envio à polícia o servidor não devolve o acompanhamento; o último salvo nesta execução
+  // do app (memória, por ocorrência) preenche o formulário para o próximo PUT não apagar o que já foi salvo.
+  const [lembrado] = useState(() => acompanhamentoLembrado(id));
+  const [boNumero, setBoNumero] = useState(lembrado?.boNumero ?? '');
+  const [boStatus, setBoStatus] = useState<BoStatus>(lembrado?.boStatus ?? 'nao_registrado');
+  const [recuperacao, setRecuperacao] = useState<Recuperacao>(lembrado?.recuperacao ?? 'sem_noticia');
+  const [conhecido, setConhecido] = useState(Boolean(lembrado));
   const [erroNumero, setErroNumero] = useState<string | undefined>();
   const [salvando, setSalvando] = useState(false);
   const [salvo, setSalvo] = useState(false);
@@ -91,6 +98,7 @@ export default function Bo() {
       if (!montada.current) return;
       setRet(r);
       setErroRetorno(undefined);
+      setConhecido(true);
       if (!editou.current) {
         setBoNumero(r.boNumero ?? '');
         setBoStatus(r.boStatus);
@@ -125,7 +133,9 @@ export default function Bo() {
     setSalvando(true);
     try {
       await api.ocorrencias.acompanhamento(id, { ...(boNumero ? { boNumero } : {}), boStatus, recuperacao });
+      lembrarAcompanhamento(id, { boNumero, boStatus, recuperacao });
       if (!montada.current) return;
+      setConhecido(true);
       setSalvo(true);
       editou.current = false; // o próximo retorno é a verdade do servidor
       void carregarRetorno();
@@ -173,7 +183,10 @@ export default function Bo() {
     setEnviando(true);
     try {
       const r = await api.ocorrencias.compartilharPolicia(id);
-      if (montada.current) setProtocolo(r.protocolo);
+      if (!montada.current) return;
+      setProtocolo(r.protocolo);
+      // Item 10: o retorno passa a existir agora; consulta já, sem esperar o próximo ciclo de 60 s.
+      void carregarRetorno();
     } catch (e) {
       if (montada.current) setErroEnvio(mensagemDeErro(e));
     } finally {
@@ -184,6 +197,7 @@ export default function Bo() {
   return (
     <ScrollView contentContainerStyle={estilos.tela}>
       <Stack.Screen options={{ title: 'Boletim de ocorrência' }} />
+      <SairEmergencia />
       <Texto variante="titulo">Boletim de ocorrência</Texto>
       <Texto>Copie o texto e registre o BO na Delegacia Eletrônica, em outro aparelho.</Texto>
 
@@ -240,7 +254,7 @@ export default function Bo() {
           <Texto variante="titulo" style={estilos.subtitulo}>
             Retorno da polícia
           </Texto>
-          {ret === null ? (
+          {ret === null && !protocolo ? (
             <Texto accessibilityLiveRegion="polite">Ainda não enviado à polícia.</Texto>
           ) : ret ? (
             <View accessibilityLiveRegion="polite" style={estilos.caixa}>
@@ -260,6 +274,7 @@ export default function Bo() {
           <Texto variante="titulo" style={estilos.subtitulo}>
             Acompanhamento
           </Texto>
+          {!conhecido ? <Texto>{AVISO_SUBSTITUI}</Texto> : null}
           <Campo
             rotulo="Número do BO (opcional)"
             valor={boNumero}

@@ -82,6 +82,23 @@ describe('fonteLocal', () => {
     expect(obter).not.toHaveBeenCalled();
     expect(api.contas.catalogo).not.toHaveBeenCalled();
   });
+  it('item 12: usa o estado, a origem, o início e o momento gravados na linha local (os mesmos do Histórico)', async () => {
+    const db = await abrirBanco();
+    // SINTETICO: ocorrência de demonstração.
+    await ocorrenciaRepo(db).upsert({
+      id: 'demo-7', estado: 'Cancelada', origem: 'impacto', iniciadaEm: '2026-11-14T17:00:00.000Z',
+      momentoEm: '2026-11-14T16:55:00.000Z', vitimaNome: 'Pessoa Demo', atualizadoEm: '2026-11-14T17:05:00.000Z',
+    });
+    const f = fonteLocal(db);
+    const a = (await f.carregar('demo-7')).ocorrencia;
+    expect(a.estado).toBe('Cancelada');
+    expect(a.origem).toBe('impacto');
+    expect(a.iniciadaEm).toBe('2026-11-14T17:00:00.000Z');
+    expect(a.momento?.em).toBe('2026-11-14T16:55:00.000Z');
+    // abrir de novo não muda o horário
+    expect((await f.carregar('demo-7')).ocorrencia.iniciadaEm).toBe('2026-11-14T17:00:00.000Z');
+  });
+
   it('concluirPasso grava na tabela passo e o próximo carregar traz o horário', async () => {
     const db = await abrirBanco();
     const f = fonteLocal(db);

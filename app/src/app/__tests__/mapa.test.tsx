@@ -6,6 +6,8 @@ import type { RelatoDto, RiscoDto } from '../../api/tipos';
 
 jest.setTimeout(60000);
 
+const mockPush = jest.fn();
+jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush, replace: jest.fn() }) }));
 jest.mock('../../api/endpoints', () => ({
   api: {
     risco: { consultar: jest.fn() },
@@ -189,5 +191,24 @@ describe('relatos no mapa', () => {
     expect(await screen.findByText('Não deu para confirmar agora. Tente de novo.')).toBeTruthy();
     await fireEvent.press(screen.getByLabelText('Confirmar que também vi'));
     await waitFor(() => expect(confirmar).toHaveBeenCalledTimes(2));
+  });
+
+  it('item 6: "Relatar aqui" abre o relato no centro do mapa visível (caminho sem GPS)', async () => {
+    mockPush.mockReset();
+    await render(<Mapa />);
+    await fireEvent.press(await screen.findByLabelText('Relatar aqui'));
+    // centro inicial = posição do mock de expo-location (-23.5614, -46.6559)
+    expect(mockPush).toHaveBeenCalledWith('/relato?lat=-23.56140&lng=-46.65590');
+  });
+
+  it('item 6: sem permissão de localização, "Relatar aqui" usa o centro de Pinheiros mostrado no mapa', async () => {
+    mockPush.mockReset();
+    jest.mocked(Location.requestForegroundPermissionsAsync).mockResolvedValueOnce({
+      granted: false, status: 'denied', canAskAgain: true, expires: 'never',
+    } as never);
+    await render(<Mapa />);
+    await screen.findByText('Sem permissão de localização: mostrando a região de Pinheiros.');
+    await fireEvent.press(await screen.findByLabelText('Relatar aqui'));
+    expect(mockPush.mock.calls[0][0]).toMatch(/^\/relato\?lat=-23\.\d{5}&lng=-46\.\d{5}$/);
   });
 });

@@ -167,4 +167,17 @@ describe('tela Relato', () => {
     expect(await screen.findByText(/Não deu para achar o local/)).toBeTruthy();
     expect(criar).not.toHaveBeenCalled();
   });
+
+  it('item 6: o aviso sem local aponta um caminho que existe ("Relatar aqui" no Mapa), não "escolher o ponto no mapa"', async () => {
+    jest.mocked(Location.requestForegroundPermissionsAsync).mockResolvedValueOnce({
+      granted: false, status: 'denied', canAskAgain: true, expires: 'never',
+    } as never);
+    await abrirTela();
+    await escolher('Roubo');
+    await enviar();
+    expect(
+      await screen.findByText('Não deu para achar o local. Ligue a localização do celular e tente de novo, ou abra o Mapa e toque em "Relatar aqui".'),
+    ).toBeTruthy();
+    expect(screen.queryByText(/escolha o ponto no mapa/)).toBeNull();
+  });
 });

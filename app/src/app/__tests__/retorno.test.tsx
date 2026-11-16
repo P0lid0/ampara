@@ -3,6 +3,8 @@ import Bo from '../bo';
 import { ApiErro } from '../../api/cliente';
 import { api } from '../../api/endpoints';
 import type { RetornoDto } from '../../api/tipos';
+import { sair } from '../../auth/sessao';
+import { esquecerAcompanhamentos } from '../../prevencao/acompanhamentoMemoria';
 
 jest.setTimeout(60000);
 
@@ -36,12 +38,14 @@ const RET: RetornoDto = {
 };
 const NUMERO = 'Número do BO (opcional)';
 const NAO_ENVIADO = 'Ainda não enviado à polícia.';
+const AVISO_SUBSTITUI = 'Salvar substitui o acompanhamento anterior. Se você já salvou um número de BO, digite de novo.';
 
 beforeEach(() => {
   mockParams = { ocorrenciaId: 'oc-1' };
   bo.mockReset().mockResolvedValue(BO);
   retorno.mockReset().mockRejectedValue(new ApiErro(404, 'não encontrado'));
   acompanhamento.mockReset().mockResolvedValue(undefined);
+  esquecerAcompanhamentos();
 });
 afterEach(() => {
   jest.useRealTimers();
@@ -138,5 +142,59 @@ describe('acompanhamento no BO', () => {
     await fireEvent.press(screen.getByLabelText('Salvar acompanhamento'));
     expect(await screen.findByText('⚠ Tente de novo em instantes.')).toBeTruthy();
     expect(screen.queryByText('Salvo.')).toBeNull();
+  });
+
+  // Item 19: sem envio à polícia o GET /retorno dá 404 e o servidor não devolve o acompanhamento salvo.
+  it('item 19: o acompanhamento salvo sem enviar à polícia volta preenchido ao reabrir a tela', async () => {
+    const tela = await render(<Bo />);
+    await screen.findByText(NAO_ENVIADO);
+    await fireEvent.changeText(screen.getByLabelText(NUMERO), 'AB123/2026');
+    await fireEvent.press(screen.getByLabelText('BO registrado'));
+    await fireEvent.press(screen.getByLabelText('Salvar acompanhamento'));
+    await screen.findByText('Salvo.');
+    await tela.unmount();
+
+    await render(<Bo />);
+    await screen.findByText(NAO_ENVIADO);
+    expect(screen.getByLabelText(NUMERO).props.value).toBe('AB123/2026');
+    expect(screen.getByLabelText('BO registrado').props.accessibilityState.selected).toBe(true);
+  });
+
+  it('item 19: ao reabrir e mudar só a recuperação, o PUT leva o número já salvo (não apaga o BO)', async () => {
+    const tela = await render(<Bo />);
+    await screen.findByText(NAO_ENVIADO);
+    await fireEvent.changeText(screen.getByLabelText(NUMERO), 'AB123/2026');
+    await fireEvent.press(screen.getByLabelText('BO registrado'));
+    await fireEvent.press(screen.getByLabelText('Salvar acompanhamento'));
+    await screen.findByText('Salvo.');
+    await tela.unmount();
+    acompanhamento.mockClear();
+
+    await render(<Bo />);
+    await screen.findByText(NAO_ENVIADO);
+    await fireEvent.press(screen.getByLabelText('Celular localizado'));
+    await fireEvent.press(screen.getByLabelText('Salvar acompanhamento'));
+    expect(acompanhamento).toHaveBeenCalledWith('oc-1', { boNumero: 'AB123/2026', boStatus: 'registrado', recuperacao: 'localizado' });
+  });
+
+  it('item 19: sem nada conhecido, a tela avisa que salvar substitui o acompanhamento anterior', async () => {
+    await render(<Bo />);
+    await screen.findByText(NAO_ENVIADO);
+    expect(screen.getByText(AVISO_SUBSTITUI)).toBeTruthy();
+  });
+
+  it('item 19: a memória do acompanhamento fica só no processo e some ao sair', async () => {
+    const tela = await render(<Bo />);
+    await screen.findByText(NAO_ENVIADO);
+    await fireEvent.changeText(screen.getByLabelText(NUMERO), 'AB123/2026');
+    await fireEvent.press(screen.getByLabelText('Salvar acompanhamento'));
+    await screen.findByText('Salvo.');
+    await tela.unmount();
+    await act(async () => {
+      await sair('manual');
+    });
+    await render(<Bo />);
+    await screen.findByText(NAO_ENVIADO);
+    expect(screen.getByLabelText(NUMERO).props.value).toBe('');
   });
 });
