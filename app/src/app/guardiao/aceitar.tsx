@@ -5,6 +5,7 @@ import { ApiErro, MSG_PADRAO } from '../../api/cliente';
 import { api } from '../../api/endpoints';
 import { abrirBanco } from '../../db/db';
 import { sessaoRepo } from '../../db/repos';
+import { iniciarServicoGuardiao } from '../../guardiao/servico';
 import { espacos } from '../../theme/tokens';
 import { Botao } from '../../ui/Botao';
 import { Campo } from '../../ui/Campo';
@@ -85,6 +86,8 @@ export default function AceitarConvite() {
     }
     try {
       await sessaoRepo(await abrirBanco()).set('guardiao_ativo', '1');
+      // já passa a escutar os alarmes, sem esperar a próxima abertura do app
+      iniciarServicoGuardiao().catch(() => console.warn('guardiao: servico nao subiu'));
     } catch {
       // o convite já foi aceito no servidor; sem o SQLite o app descobre o papel na próxima abertura
     }

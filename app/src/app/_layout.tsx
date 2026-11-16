@@ -3,6 +3,9 @@ import { useFonts, Manrope_400Regular, Manrope_600SemiBold, Manrope_700Bold } fr
 import { useEffect, useState } from 'react';
 import { destinoGuard } from '../auth/guard';
 import { restaurar, useSessao } from '../auth/sessao';
+import { useRedirecionarParaAlarme } from '../guardiao/redirecionar';
+import { iniciarServicoGuardiao } from '../guardiao/servico';
+import { useAlarmes } from '../guardiao/store';
 import { cores, fontes } from '../theme/tokens';
 
 export default function Layout() {
@@ -29,6 +32,13 @@ export default function Layout() {
     const destino = destinoGuard(autenticado, escopo, chave ? chave.split('/') : []);
     if (destino) router.replace(destino as never);
   }, [pronto, autenticado, escopo, chave, router]);
+
+  // Guardião (sessão de usuário): serviço em primeiro plano com o hub; o alerta em destaque abre a tela de alarme.
+  const guardiaoPronto = pronto && autenticado && escopo === 'usuario';
+  useEffect(() => {
+    if (guardiaoPronto) iniciarServicoGuardiao().catch(() => console.warn('guardiao: servico nao subiu'));
+  }, [guardiaoPronto]);
+  useRedirecionarParaAlarme(useAlarmes, router as { push(href: string): void }, guardiaoPronto);
 
   if ((!carregadas && !erro) || !sessaoPronta) return null;
 

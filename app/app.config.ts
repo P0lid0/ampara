@@ -75,6 +75,8 @@ const config: ExpoConfig = {
       },
     ],
     '@maplibre/maplibre-react-native',
+    // Serviço em primeiro plano do notifee como dataSync (Android 14 encerra o shortService da biblioteca).
+    './plugins/with-notifee-fgs-type',
   ],
 };
 

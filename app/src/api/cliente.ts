@@ -32,6 +32,11 @@ export function definirToken(t: string | null): void {
   token = t;
 }
 
+/** Token atual em memória (o hub do guardião o passa no accessTokenFactory). */
+export function tokenAtual(): string | null {
+  return token;
+}
+
 export function aoExpirar(cb: () => void): void {
   aoExpirarCb = cb;
 }

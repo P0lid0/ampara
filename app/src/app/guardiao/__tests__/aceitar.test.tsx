@@ -4,6 +4,7 @@ import { ApiErro } from '../../../api/cliente';
 import { api } from '../../../api/endpoints';
 import { abrirBanco } from '../../../db/db';
 import { sessaoRepo } from '../../../db/repos';
+import { iniciarServicoGuardiao } from '../../../guardiao/servico';
 
 jest.setTimeout(60000);
 
@@ -15,6 +16,7 @@ jest.mock('expo-router', () => ({
   Stack: { Screen: () => null },
 }));
 jest.mock('../../../api/endpoints', () => ({ api: { guardioes: { aceitar: jest.fn() } } }));
+jest.mock('../../../guardiao/servico', () => ({ iniciarServicoGuardiao: jest.fn(async () => undefined) }));
 
 const aceitar = jest.mocked(api.guardioes.aceitar);
 const PADRAO = 'Não foi possível concluir agora. Tente de novo.';
@@ -78,6 +80,7 @@ describe('aceitar convite de guardião', () => {
     await espera();
     expect(aceitar).toHaveBeenCalledWith('ABC123');
     expect(await sessaoRepo(await abrirBanco()).get('guardiao_ativo')).toBe('1');
+    expect(iniciarServicoGuardiao).toHaveBeenCalled();
     expect(mockReplace).toHaveBeenCalledWith('/');
   });
 
