@@ -1,7 +1,7 @@
 import type { Escopo } from './sessao';
 
 // No modo emergência (aparelho de outra pessoa) só existem Histórico, rota e BO.
-const ROTAS_EMERGENCIA = ['historico', 'rota', 'bo'];
+const ROTAS_EMERGENCIA = ['historico', 'ocorrencia', 'rota', 'bo'];
 
 /** Primeiro segmento que não é grupo do Expo Router: ['(tabs)','historico'] -> 'historico'. */
 function rotaReal(segmentos: readonly string[]): string {

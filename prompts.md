@@ -570,4 +570,10 @@ Resultado: 26 testes novos passando (358 no app), `tsc --noEmit` sem erros. A te
 
 Resultado: 25 testes novos passando (383 no app), `tsc --noEmit` sem erros. `@react-native-community/slider` 5.2.1 instalado com `npx expo install`. A rota `/bo` ainda não existe (tarefa posterior); o `push` usa a URL em texto. Mapa e controle deslizante reais no aparelho adiados para a fase de build nativo. Sem migration de servidor.
 
+### 90. App: histórico, BO e compartilhar com a polícia (Task 14 do plano 05)
+
+> Executar a Task 14 do plano 05 (app): escrever primeiro os testes do histórico (lista do mais novo ao mais antigo, estado em texto Aberta/Cancelada/Encerrada além do ícone, vazio "Nenhuma ocorrência. Quando algo acontecer, aparece aqui."), do detalhe (linha do tempo com iniciada em, momento marcado e cada passo com horário "Banco — 14:32", passos não feitos como "Pendente") e da tela `bo` ("Copiar texto" chama `Clipboard.setStringAsync` com exatamente o texto da API; "Enviar à polícia" desabilitado até marcar o consentimento, depois `compartilharPolicia(id)` e "Protocolo PP-2026-000001"; RF5: o texto do BO, com IMEI, não vai ao SQLite, ao SecureStore nem ao `console.*` e some ao sair da tela; erro 5xx mostra o `detalheCidadao` da IA em vez de "Error 500"); ver falhar; implementar `(tabs)/historico.tsx`, `ocorrencia/[id].tsx` e `bo.tsx` (texto selecionável, "Abrir a Delegacia Eletrônica", delegacia com "Ver no mapa" via `geo:lat,lng?q=lat,lng(nome)`, checkbox de consentimento). No modo emergência o Histórico mostra só as ocorrências do dono e a ação "Marcar onde foi (rota)" leva a `rota` com o `ocorrenciaId`. Sem build Android nesta fase.
+
+Resultado: 13 testes novos passando (401 no app), `tsc --noEmit` sem erros. Em demonstração o Histórico lista as ocorrências locais, sem chamar a API. O guard do modo emergência passou a liberar `ocorrencia/[id]`, para o detalhe abrir nesse modo. Abertura do mapa e da Delegacia Eletrônica e a cópia no aparelho adiadas para a fase de build nativo. Sem migration de servidor.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->

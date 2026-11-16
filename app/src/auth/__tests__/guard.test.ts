@@ -13,6 +13,7 @@ describe('guard de rotas', () => {
     expect(destinoGuard(true, 'emergencia', ['(tabs)', 'historico'])).toBeNull();
     expect(destinoGuard(true, 'emergencia', ['rota'])).toBeNull();
     expect(destinoGuard(true, 'emergencia', ['bo'])).toBeNull();
+    expect(destinoGuard(true, 'emergencia', ['ocorrencia', '[id]'])).toBeNull();
     expect(destinoGuard(true, 'emergencia', ['(tabs)'])).toBe('/historico');
     expect(destinoGuard(true, 'emergencia', ['(tabs)', 'mapa'])).toBe('/historico');
     expect(destinoGuard(true, 'emergencia', ['(tabs)', 'ajustes'])).toBe('/historico');
