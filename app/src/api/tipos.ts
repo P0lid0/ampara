@@ -30,7 +30,7 @@ export type ContaDto = { id: string; nome: string; tipo: string; telefone: strin
 export type GuardiaoDto = { guardiaoId: string; nome: string; ordem: number };
 export type ConviteDto = { codigo: string; expiraEm: string };
 
-export type ChaveiroDto = { deviceId: string; online: boolean; bateria: number; vistoEm: string };
+export type ChaveiroDto = { deviceId: string; online: boolean; bateria: number | null; vistoEm: string };
 
 export type PontoRota = { lat: number; lng: number; precisao: number; em: string };
 export type PontoRotaDto = { lat: number; lng: number; em: string };

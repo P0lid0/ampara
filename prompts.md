@@ -528,4 +528,10 @@ Resultado: 32 testes novos passando (133 no app), `tsc --noEmit` sem erros. A te
 
 Resultado: 28 testes novos passando (163 no app), `tsc --noEmit` sem erros. "Fazer depois" marca o passo como concluído no SQLite para o onboarding seguir. Câmera real (leitura do QR) adiada para a fase de build nativo. Sem migration de servidor.
 
+### 83. App: chaveiro, parear, status por polling e achar (Task 7 do plano 05)
+
+> Executar a Task 7 do plano 05 (app): escrever primeiro os testes de `deviceIdValido` (aceita `chaveiro-ampara-ab12cd` e `chaveiro-0001`, rejeita vazio, maiúscula, hífen solto, espaço e mais de 40 caracteres), de `rotuloStatus` (offline se `online === false` ou visto há mais de 90 s, "Bateria baixa (12%)", bateria nula como "Bateria: não informada") e `deveAvisarBateria` (abaixo de 15% e sem aviso nas últimas 6 h), da tela `onboarding/chaveiro` (QR ou digitação, `criar` e espera de 20 s em `listar`, frase "Ainda não ouvi o chaveiro. Confira se ele está ligado." e continuar permitido, código inválido sem chamar a API) e do `CartaoChaveiro` (lista a cada 30 s, ping ao abrir, "Achar meu chaveiro" com `find` e o aviso de 6 segundos, "Como testar"); ver falhar; implementar `chaveiro/{pareamento,status}.ts`, `ui/CartaoChaveiro.tsx` e a tela. Aviso de bateria só no cartão até o canal de notificação da Task 10. Sem build Android nesta fase.
+
+Resultado: 42 testes novos passando, `tsc --noEmit` sem erros. `ChaveiroDto.bateria` passou a `number | null`. Câmera real (QR) e o toque do chaveiro adiados para a fase de build nativo. Sem migration de servidor.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->
