@@ -74,6 +74,13 @@ const config: ExpoConfig = {
         android: {
           // Permite http://10.0.2.2:5080 (API local) e :8080 (VM) no emulador.
           usesCleartextTraffic: true,
+          // Release com minificação: o R8 removia o construtor de androidx.work.impl.WorkDatabase (Room), que o
+          // notifee usa, e o app fechava ao abrir.
+          extraProguardRules: [
+            '-keep class androidx.work.** { *; }',
+            '-keep class * extends androidx.room.RoomDatabase { <init>(); }',
+            '-keep class androidx.room.** { *; }',
+          ].join('\n'),
         },
       },
     ],
