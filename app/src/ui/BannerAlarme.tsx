@@ -2,8 +2,9 @@ import notifee from '@notifee/react-native';
 import { useEffect, useState } from 'react';
 import { AppState, StyleSheet, View } from 'react-native';
 import { permissaoNotificacao } from '../guardiao/notificacao';
-import { cores, espacos } from '../theme/tokens';
+import { cores, espacos, raios } from '../theme/tokens';
 import { Botao } from './Botao';
+import { Icone } from './Icone';
 import { Texto } from './Texto';
 
 export const MSG_ALARME_DESATIVADO = 'Alarme desativado: permita notificações em Ajustes.';
@@ -35,19 +36,18 @@ export function BannerAlarme() {
   if (!negada) return null;
   return (
     <View style={estilos.faixa} accessibilityRole="alert" accessibilityLiveRegion="assertive">
-      <Texto>{MSG_ALARME_DESATIVADO}</Texto>
+      <View style={estilos.linha}>
+        <Icone nome="alerta" tamanho={24} cor={cores.alarmeTexto} />
+        <Texto style={estilos.texto}>{MSG_ALARME_DESATIVADO}</Texto>
+      </View>
       <Botao rotulo="Abrir Ajustes" variante="secundario" onPress={() => void notifee.openNotificationSettings()} />
     </View>
   );
 }
 
+// Aviso de erro em tela clara: fundo alarmeSuave, texto e ícone alarmeTexto (nunca só cor: ícone e frase).
 const estilos = StyleSheet.create({
-  faixa: {
-    backgroundColor: cores.areia,
-    borderColor: cores.tinta,
-    borderWidth: 2,
-    borderRadius: 12,
-    padding: espacos.m,
-    gap: espacos.p,
-  },
+  faixa: { backgroundColor: cores.alarmeSuave, borderRadius: raios.m, padding: espacos.m, gap: espacos.pm },
+  linha: { flexDirection: 'row', alignItems: 'flex-start', gap: espacos.pm },
+  texto: { flex: 1, color: cores.alarmeTexto },
 });

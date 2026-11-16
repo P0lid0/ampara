@@ -1,8 +1,8 @@
 // Aba Início: reconcilia o onboarding com o servidor (leva ao próximo passo, se faltar algum) e mostra
-// o chaveiro, a rota, as permissões, o último alerta e o aviso de quem ainda não tem guardiões.
+// o chaveiro (bloco herói), a rota, o último alerta e o aviso de quem ainda não tem guardiões.
 import { useFocusEffect, useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
-import { Linking, ScrollView, StyleSheet, View } from 'react-native';
+import { useCallback, useEffect, useState, type ReactNode } from 'react';
+import { Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { api } from '../../api/endpoints';
 import { useSessao } from '../../auth/sessao';
 import { abrirBanco } from '../../db/db';
@@ -10,11 +10,12 @@ import { ocorrenciaRepo, sessaoRepo } from '../../db/repos';
 import { rotuloEstado } from '../../guardiao/eventos';
 import { concluirPassoSeguro, proximoPasso, reconciliarComServidor, rotaDoPasso } from '../../onboarding/passos';
 import { estadoRota, iniciarRota, retomarRotaAposEntrar, type EstadoRota } from '../../rota/tarefa';
-import { cores, espacos } from '../../theme/tokens';
+import { bordas, cores, espacos, raios, tamanhos } from '../../theme/tokens';
 import { BannerAlarme } from '../../ui/BannerAlarme';
 import { Botao } from '../../ui/Botao';
 import { CartaoChaveiro } from '../../ui/CartaoChaveiro';
 import { EstadoBadge, type Estado } from '../../ui/EstadoBadge';
+import { Icone, type NomeIcone } from '../../ui/Icone';
 import { Texto } from '../../ui/Texto';
 
 /** Estado da rota sempre por escrito, com o motivo (nunca só por cor). */
@@ -40,6 +41,18 @@ function dataHora(iso: string): string {
     minute: '2-digit',
     hour12: false,
   });
+}
+
+/** Linha da lista agrupada: ícone à esquerda, conteúdo à direita; divisor de 1 px, menos na última. */
+function Linha({ icone, ultima, children }: { icone: NomeIcone; ultima?: boolean; children: ReactNode }) {
+  return (
+    <View style={[estilos.linha, ultima ? null : estilos.divisor]}>
+      <View style={estilos.icone}>
+        <Icone nome={icone} tamanho={24} cor={cores.petroleo} />
+      </View>
+      <View style={estilos.conteudo}>{children}</View>
+    </View>
+  );
 }
 
 const maisRecente = <T extends { iniciadaEm: string }>(l: T[]): T | null =>
@@ -137,6 +150,7 @@ export default function Inicio() {
   if (!verificado) {
     return (
       <ScrollView contentContainerStyle={estilos.tela}>
+        <View style={estilos.esqueleto} />
         <Texto>Carregando...</Texto>
       </ScrollView>
     );
@@ -146,60 +160,86 @@ export default function Inicio() {
     <ScrollView contentContainerStyle={estilos.tela}>
       <BannerAlarme />
 
+      <CartaoChaveiro ocultarCodigo />
+
       {semGuardioes ? (
-        <View style={estilos.caixa} accessibilityRole="alert">
-          <Texto variante="titulo">Você ainda não tem guardiões</Texto>
+        <View style={estilos.aviso} accessibilityRole="alert">
+          <Texto variante="secao">Você ainda não tem guardiões</Texto>
           <Texto>Guardiões são as pessoas avisadas quando você pede ajuda.</Texto>
-          <Botao rotulo="Convidar um guardião" onPress={() => router.push('/onboarding/guardioes' as never)} />
+          <Botao rotulo="Convidar um guardião" variante="secundario" onPress={() => router.push('/onboarding/guardioes' as never)} />
         </View>
       ) : null}
 
-      <CartaoChaveiro />
+      <View style={estilos.grupo}>
+        <Linha icone="rota">
+          <Texto variante="corpoForte">Rota</Texto>
+          <Texto accessibilityLiveRegion="polite">{rota ? FRASE_ROTA[rota] : 'Conferindo a rota...'}</Texto>
+          {rota === 'pausada' ? <Botao rotulo="Retomar a rota" variante="secundario" onPress={() => void retomar()} carregando={retomando} /> : null}
+          {rota === 'sem-permissao' ? (
+            <Botao
+              rotulo="Abrir configurações do celular"
+              variante="secundario"
+              onPress={() => void Linking.openSettings().catch(() => undefined)}
+            />
+          ) : null}
+        </Linha>
 
-      <View style={estilos.caixa} accessibilityLabel="Proteger alguém">
-        <Texto variante="titulo">Proteger alguém</Texto>
-        <Texto>Recebeu um código de convite de alguém? Toque abaixo para virar guardião.</Texto>
-        <Botao rotulo="Tenho um código de convite" variante="secundario" onPress={() => router.push('/guardiao/aceitar' as never)} />
+        <Linha icone="relogio">
+          {ultimo ? (
+            <>
+              {BADGE[ultimo.estado] ? <EstadoBadge estado={BADGE[ultimo.estado]} /> : null}
+              <Texto>{`Último alerta: ${rotuloEstado(ultimo.estado)}${dataHora(ultimo.iniciadaEm) ? `, em ${dataHora(ultimo.iniciadaEm)}` : ''}`}</Texto>
+            </>
+          ) : erroUltimo ? (
+            <Texto>Não foi possível carregar o último alerta.</Texto>
+          ) : ultimo === null ? (
+            <Texto>Nenhum alerta até agora.</Texto>
+          ) : (
+            <Texto>Carregando o último alerta...</Texto>
+          )}
+        </Linha>
+
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Tenho um código de convite"
+          accessibilityHint="Para virar guardião de alguém que enviou um código"
+          android_ripple={{ color: cores.bordaSuave }}
+          onPress={() => router.push('/guardiao/aceitar' as never)}
+          style={({ pressed }) => [estilos.navega, pressed && estilos.pressionada]}
+        >
+          <View style={estilos.icone}>
+            <Icone nome="link" tamanho={24} cor={cores.petroleo} />
+          </View>
+          <Texto variante="corpoForte" style={estilos.rotuloNavega}>
+            Tenho um código de convite
+          </Texto>
+          <View style={estilos.seta}>
+            <Icone nome="voltar" tamanho={20} cor={cores.petroleo} />
+          </View>
+        </Pressable>
       </View>
 
-      <View style={estilos.caixa} accessibilityLabel="Rota">
-        <Texto variante="titulo">Rota</Texto>
-        <Texto accessibilityLiveRegion="polite">{rota ? FRASE_ROTA[rota] : 'Conferindo a rota...'}</Texto>
-        {rota === 'pausada' ? <Botao rotulo="Retomar a rota" onPress={() => void retomar()} carregando={retomando} /> : null}
-        {rota === 'sem-permissao' ? (
-          <Botao
-            rotulo="Abrir configurações do celular"
-            variante="secundario"
-            onPress={() => void Linking.openSettings().catch(() => undefined)}
-          />
-        ) : null}
-      </View>
-
-      <View style={estilos.caixa} accessibilityLabel="Relatar">
-        <Texto variante="titulo">Viu algo na rua?</Texto>
-        <Texto>Conte em poucas palavras o que e onde, sem descrever pessoas. Ajuda quem passa por perto.</Texto>
+      <View style={estilos.relatar} accessibilityLabel="Relatar">
+        <Texto variante="secao">Viu algo na rua?</Texto>
+        <Texto>Conte em poucas palavras o que é e onde, sem descrever pessoas. Ajuda quem passa por perto.</Texto>
         <Botao rotulo="Relatar um problema" variante="secundario" onPress={() => router.push('/relato' as never)} />
-      </View>
-
-      <View style={estilos.caixa} accessibilityLabel="Último alerta">
-        {ultimo ? (
-          <>
-            {BADGE[ultimo.estado] ? <EstadoBadge estado={BADGE[ultimo.estado]} /> : null}
-            <Texto>{`Último alerta: ${rotuloEstado(ultimo.estado)}${dataHora(ultimo.iniciadaEm) ? `, em ${dataHora(ultimo.iniciadaEm)}` : ''}`}</Texto>
-          </>
-        ) : erroUltimo ? (
-          <Texto>Não foi possível carregar o último alerta.</Texto>
-        ) : ultimo === null ? (
-          <Texto>Nenhum alerta até agora.</Texto>
-        ) : (
-          <Texto>Carregando o último alerta...</Texto>
-        )}
       </View>
     </ScrollView>
   );
 }
 
 const estilos = StyleSheet.create({
-  tela: { padding: espacos.m, gap: espacos.m },
-  caixa: { gap: espacos.p, borderWidth: 2, borderColor: cores.petroleo, borderRadius: 12, padding: espacos.m, backgroundColor: cores.branco },
+  tela: { padding: espacos.m, paddingBottom: espacos.g, gap: espacos.m },
+  esqueleto: { height: 200, borderRadius: raios.g, backgroundColor: cores.areiaFunda },
+  aviso: { gap: espacos.pm, borderRadius: raios.m, padding: espacos.m, backgroundColor: cores.branco, borderWidth: bordas.fina, borderColor: cores.bordaSuave },
+  grupo: { borderRadius: raios.m, backgroundColor: cores.branco, borderWidth: bordas.fina, borderColor: cores.bordaSuave, overflow: 'hidden' },
+  linha: { flexDirection: 'row', gap: espacos.pm, padding: espacos.m, minHeight: tamanhos.alvoMin },
+  divisor: { borderBottomWidth: bordas.fina, borderBottomColor: cores.bordaSuave },
+  icone: { width: 24, paddingTop: espacos.xs },
+  conteudo: { flex: 1, gap: espacos.p },
+  navega: { flexDirection: 'row', alignItems: 'center', gap: espacos.pm, padding: espacos.m, minHeight: tamanhos.alvoMin, minWidth: tamanhos.alvoMin },
+  pressionada: { backgroundColor: cores.areiaFunda },
+  rotuloNavega: { flex: 1, color: cores.petroleo },
+  seta: { transform: [{ rotate: '180deg' }] },
+  relatar: { gap: espacos.pm, paddingTop: espacos.p },
 });
