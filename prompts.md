@@ -576,4 +576,10 @@ Resultado: 25 testes novos passando (383 no app), `tsc --noEmit` sem erros. `@re
 
 Resultado: 13 testes novos passando (401 no app), `tsc --noEmit` sem erros. Em demonstração o Histórico lista as ocorrências locais, sem chamar a API. O guard do modo emergência passou a liberar `ocorrencia/[id]`, para o detalhe abrir nesse modo. Abertura do mapa e da Delegacia Eletrônica e a cópia no aparelho adiadas para a fase de build nativo. Sem migration de servidor.
 
+### 91. App: mapa de risco por área e faixa, relatos e camadas no mapa (Task 18 do plano 05)
+
+> Executar a Task 18 do plano 05 (app, P2): escrever primeiro os testes de `area` (`areaId(-23.5672490, -46.7019515)` é `g051_026`; fora dos limites é `fora`; `areaCentro` cai dentro da própria célula; `areaLimites` com 0.0045 de altura e 0.0049 de largura), de `risco` (`faixaDe` e `diaDe` no horário de São Paulo; `consultaRisco`; `rotuloClasse` sem "perigos" e com 3 rótulos distintos; `relatoVisivel` 119 min sim e 121 min não; `idadeRelato` "há 12 min"; área ausente na resposta é "sem dado", nunca "baixo") e da aba Mapa (legenda com os 3 níveis e "Sem dado" em texto; lista "Áreas com atenção máxima agora"; sem permissão de localização centraliza em Pinheiros e avisa; consulta com debounce de 500 ms ao parar de mover o mapa; interruptores Delegacias, Estações e PM que chamam `api.camadas.obter` uma vez, com falha "Não deu para carregar as delegacias agora." sem esconder o risco; relato visível com tipo, "há 12 min" e "Confirmar que também vi" chamando `relatos.confirmar(id)`); ver falhar; implementar `mapa/{area,risco}.ts`, as células como polígonos em `ui/MapaBase.tsx` (cor e padrão de borda, cinza pontilhado para sem dado) e a aba `(tabs)/mapa.tsx`. Sem build Android nesta fase.
+
+Resultado: 24 testes novos passando (425 no app), `tsc --noEmit` sem erros. O centro de `g051_026` pela fórmula do contrato é (-23.56825, -46.70015); o valor aproximado do brief foi corrigido no teste. Mapa e camadas reais no aparelho adiados para a fase de build nativo. Sem migration de servidor.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->
