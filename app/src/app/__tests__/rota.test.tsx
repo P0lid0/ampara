@@ -159,6 +159,39 @@ describe('tela da rota', () => {
     await waitFor(() => expect(mockPush).toHaveBeenCalledTimes(1));
   });
 
+  it('emergência sem ocorrência: falha em momento e nova tentativa não abre segunda ocorrência', async () => {
+    mockParams = {};
+    mockEscopo = 'emergencia';
+    momento.mockRejectedValueOnce(new ApiErro(0, 'rede'));
+    await abrirDia12();
+    await fireEvent.press(screen.getByText('Foi aqui que me roubaram'));
+    expect(await screen.findByRole('alert')).toBeTruthy();
+    await fireEvent.press(screen.getByText('Foi aqui que me roubaram'));
+    await waitFor(() => expect(mockPush).toHaveBeenCalledWith('/bo?ocorrenciaId=oc-novo'));
+    expect(gatilho).toHaveBeenCalledTimes(1);
+    expect(momento).toHaveBeenCalledTimes(2);
+    expect(momento).toHaveBeenLastCalledWith('oc-novo', expect.anything());
+  });
+
+  it('emergência com erro de rede no listar não abre ocorrência', async () => {
+    mockParams = {};
+    mockEscopo = 'emergencia';
+    listar.mockRejectedValueOnce(new ApiErro(0, 'rede'));
+    await abrirDia12();
+    await fireEvent.press(screen.getByText('Foi aqui que me roubaram'));
+    expect(await screen.findByRole('alert')).toBeTruthy();
+    expect(gatilho).not.toHaveBeenCalled();
+  });
+
+  it('emergência com listar negado (403) abre a ocorrência pelo gatilho', async () => {
+    mockParams = {};
+    mockEscopo = 'emergencia';
+    listar.mockRejectedValueOnce(new ApiErro(403, 'negado'));
+    await abrirDia12();
+    await fireEvent.press(screen.getByText('Foi aqui que me roubaram'));
+    await waitFor(() => expect(gatilho).toHaveBeenCalledWith('web'));
+  });
+
   it('falha ao carregar a rota mostra o erro e permite tentar de novo', async () => {
     obterRota.mockRejectedValueOnce(new ApiErro(0, 'rede'));
     await render(<Rota />);

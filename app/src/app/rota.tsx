@@ -5,7 +5,7 @@ import Slider from '@react-native-community/slider';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
-import { mensagemDeErro } from '../api/cliente';
+import { ApiErro, mensagemDeErro } from '../api/cliente';
 import { api } from '../api/endpoints';
 import type { PontoRotaDto } from '../api/tipos';
 import { useSessao } from '../auth/sessao';
@@ -37,6 +37,8 @@ export default function Rota() {
   const [marcando, setMarcando] = useState(false);
   const [erroMarcar, setErroMarcar] = useState<string | undefined>();
   const montada = useRef(true);
+  // Ocorrência já resolvida (ou aberta pelo gatilho): nova tentativa reaproveita, nunca abre outra.
+  const ocorrenciaResolvida = useRef<string | null>(null);
 
   useEffect(() => {
     montada.current = true;
@@ -76,16 +78,25 @@ export default function Rota() {
   /** Ocorrência do parâmetro, ou a mais recente; só no modo emergência abre uma nova (lacuna L9). */
   async function resolverOcorrencia(): Promise<string | null> {
     if (typeof param === 'string' && param) return param;
+    if (ocorrenciaResolvida.current) return ocorrenciaResolvida.current;
     let existentes: { id: string; iniciadaEm: string }[] = [];
     try {
       existentes = await api.ocorrencias.listar();
     } catch (e) {
-      if (escopo !== 'emergencia') throw e;
+      // No modo emergência só 401/403 (token que não lista) segue para o gatilho; erro de rede não abre ocorrência.
+      const semPermissao = e instanceof ApiErro && (e.status === 401 || e.status === 403);
+      if (escopo !== 'emergencia' || !semPermissao) throw e;
     }
     if (existentes.length > 0) {
-      return [...existentes].sort((a, b) => Date.parse(b.iniciadaEm) - Date.parse(a.iniciadaEm))[0].id;
+      const id = [...existentes].sort((a, b) => Date.parse(b.iniciadaEm) - Date.parse(a.iniciadaEm))[0].id;
+      ocorrenciaResolvida.current = id;
+      return id;
     }
-    if (escopo === 'emergencia') return (await api.ocorrencias.gatilho('web')).ocorrenciaId;
+    if (escopo === 'emergencia') {
+      const id = (await api.ocorrencias.gatilho('web')).ocorrenciaId;
+      ocorrenciaResolvida.current = id;
+      return id;
+    }
     return null;
   }
 

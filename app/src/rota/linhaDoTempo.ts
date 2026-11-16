@@ -35,7 +35,7 @@ export function diaNoFuso(emIso: string, tz: string = FUSO_PADRAO): string {
 
 /** Agrupa por dia do fuso: dias do mais novo ao mais antigo, pontos em ordem de `em`. Não altera a entrada. */
 export function agruparPorDia(pts: readonly PontoDaRota[], tz: string = FUSO_PADRAO): DiaDaRota[] {
-  const ordenados = [...pts].sort((a, b) => Date.parse(a.em) - Date.parse(b.em));
+  const ordenados = pts.filter((p) => !Number.isNaN(Date.parse(p.em))).sort((a, b) => Date.parse(a.em) - Date.parse(b.em));
   const porDia = new Map<string, PontoDaRota[]>();
   for (const p of ordenados) {
     const dia = diaNoFuso(p.em, tz);

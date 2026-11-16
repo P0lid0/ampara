@@ -30,6 +30,12 @@ describe('linha do tempo da rota', () => {
     expect(entrada[0].em).toBe('2026-11-12T20:00:00Z');
   });
 
+  it('ignora ponto com data inválida em vez de lançar', () => {
+    const r = agruparPorDia([p('lixo'), p('2026-11-12T20:00:00Z')]);
+    expect(r).toHaveLength(1);
+    expect(r[0].pontos).toHaveLength(1);
+  });
+
   describe('pontoMaisProximo', () => {
     const pts = [p('2026-11-12T10:00:00Z'), p('2026-11-12T10:10:00Z'), p('2026-11-12T10:30:00Z')];
     it('instante exato', () => expect(pontoMaisProximo(pts, '2026-11-12T10:10:00Z')).toBe(1));
@@ -39,6 +45,7 @@ describe('linha do tempo da rota', () => {
     });
     it('antes do primeiro devolve 0', () => expect(pontoMaisProximo(pts, '2026-11-12T08:00:00Z')).toBe(0));
     it('depois do último devolve o último', () => expect(pontoMaisProximo(pts, '2026-11-12T23:00:00Z')).toBe(2));
+    it('empate fica com o mais antigo', () => expect(pontoMaisProximo(pts, '2026-11-12T10:05:00Z')).toBe(0));
     it('lista vazia devolve -1', () => expect(pontoMaisProximo([], '2026-11-12T10:00:00Z')).toBe(-1));
   });
 
