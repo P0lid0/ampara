@@ -7,10 +7,10 @@ import { restaurar, sessaoAtual } from '../../auth/sessao';
 import { abrirBanco } from '../../db/db';
 import { rotaRepo, sessaoRepo } from '../../db/repos';
 import { registrarPontos } from '../fila';
-import { estadoRota, iniciarRota, NOME_TAREFA, pararRota, revogarConsentimento, sincronizarAgora } from '../tarefa';
+import { estadoRota, iniciarRota, NOME_TAREFA, pararRota, retomarRotaAposEntrar, revogarConsentimento, sincronizarAgora } from '../tarefa';
 
 jest.mock('../../api/endpoints', () => ({
-  api: { me: { consentimentoRota: jest.fn() }, rota: { enviarPontos: jest.fn() } },
+  api: { me: { consentimentoRota: jest.fn(), obter: jest.fn() }, rota: { enviarPontos: jest.fn() } },
 }));
 jest.mock('../../auth/sessao', () => ({
   sessaoAtual: jest.fn(),
@@ -22,6 +22,7 @@ const executor = jest.mocked(TaskManager.defineTask).mock.calls.find(([nome]) =>
 const ouvinteApp = jest.mocked(AppState.addEventListener).mock.calls.find(([tipo]) => tipo === 'change')?.[1];
 
 const consentir = jest.mocked(api.me.consentimentoRota);
+const obterMe = jest.mocked(api.me.obter);
 const enviarPontos = jest.mocked(api.rota.enviarPontos);
 const sessao = jest.mocked(sessaoAtual);
 const concedida = { granted: true, status: 'granted', canAskAgain: true, expires: 'never' } as never;
@@ -41,6 +42,7 @@ beforeEach(async () => {
   await sessaoRepo(await abrirBanco()).apagarTudo(); // o mock de expo-sqlite guarda o banco entre testes do mesmo arquivo
   await sessaoRepo(await abrirBanco()).set('rota.consentimento', 'sim');
   consentir.mockReset().mockResolvedValue(undefined);
+  obterMe.mockReset().mockResolvedValue({ usuarioId: 'u1', nome: 'Ana Teste', email: 'ana@exemplo.test', consentimentoRota: true, emergenciaConfigurada: true });
   enviarPontos.mockReset().mockResolvedValue(undefined);
   sessao.mockReset().mockReturnValue(USUARIO);
   jest.mocked(restaurar).mockClear();
@@ -197,5 +199,61 @@ describe('tarefa da rota', () => {
     await sincronizarAgora(); // reaproveita a sincronização disparada pelo ouvinte
     expect(enviarPontos).toHaveBeenCalledTimes(1);
     expect(await contar()).toBe(0);
+  });
+
+  // Item 4: sessão expirada (8 h ou 401) não para a rota nem apaga a fila.
+  it('item 4: sem token (sessão expirada) o callback grava os pontos, não desliga a coleta e não envia', async () => {
+    sessao.mockReturnValue(SEM_SESSAO);
+    jest.mocked(TaskManager.isTaskRegisteredAsync).mockResolvedValue(true);
+    await executor!({ data: { locations: [local(60_000), local(0)] }, error: null, executionInfo: { eventId: '10', taskName: 'ampara-rota' } });
+    expect(Location.stopLocationUpdatesAsync).not.toHaveBeenCalled();
+    expect(enviarPontos).not.toHaveBeenCalled();
+    expect(await contar()).toBe(2);
+  });
+
+  it('item 4: 401 no envio mantém a fila e a coleta', async () => {
+    jest.mocked(TaskManager.isTaskRegisteredAsync).mockResolvedValue(true);
+    const aviso = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+    enviarPontos.mockRejectedValue(new ApiErro(401, 'Sessão vencida'));
+    await executor!({ data: { locations: [local(0)] }, error: null, executionInfo: { eventId: '11', taskName: 'ampara-rota' } });
+    aviso.mockRestore();
+    expect(Location.stopLocationUpdatesAsync).not.toHaveBeenCalled();
+    expect(await contar()).toBe(1);
+  });
+
+  it('item 4: retomarRotaAposEntrar envia a fila guardada enquanto a sessão estava vencida', async () => {
+    await registrarPontos(await abrirBanco(), [{ lat: -23.56, lng: -46.7, precisao: 10, em: new Date().toISOString() }]);
+    await retomarRotaAposEntrar();
+    await sincronizarAgora(); // reaproveita o envio disparado sem espera
+    expect(enviarPontos).toHaveBeenCalledTimes(1);
+    expect(await contar()).toBe(0);
+    expect(obterMe).not.toHaveBeenCalled(); // o aparelho já sabe que a pessoa consentiu
+  });
+
+  it('item 4: servidor com consentimento e aparelho sem decisão local (depois de "Sair") religa a coleta', async () => {
+    await sessaoRepo(await abrirBanco()).apagarTudo();
+    await retomarRotaAposEntrar();
+    expect(obterMe).toHaveBeenCalledTimes(1);
+    expect(await sessaoRepo(await abrirBanco()).get('rota.consentimento')).toBe('sim');
+    expect(Location.startLocationUpdatesAsync).toHaveBeenCalledWith('ampara-rota', expect.anything());
+  });
+
+  it('item 4: quem desligou a rota neste aparelho, ou não consentiu no servidor, não tem a coleta religada', async () => {
+    await sessaoRepo(await abrirBanco()).set('rota.consentimento', 'nao');
+    await retomarRotaAposEntrar();
+    expect(Location.startLocationUpdatesAsync).not.toHaveBeenCalled();
+
+    await sessaoRepo(await abrirBanco()).apagarTudo();
+    obterMe.mockResolvedValue({ usuarioId: 'u1', nome: 'Ana Teste', email: 'ana@exemplo.test', consentimentoRota: false, emergenciaConfigurada: true });
+    await retomarRotaAposEntrar();
+    expect(Location.startLocationUpdatesAsync).not.toHaveBeenCalled();
+    expect(await sessaoRepo(await abrirBanco()).get('rota.consentimento')).toBeNull();
+  });
+
+  it('item 4: sem rede ao consultar o servidor, retomarRotaAposEntrar não lança e não religa', async () => {
+    await sessaoRepo(await abrirBanco()).apagarTudo();
+    obterMe.mockRejectedValue(new ApiErro(0, 'Sem conexão com a internet.'));
+    await expect(retomarRotaAposEntrar()).resolves.toBeUndefined();
+    expect(Location.startLocationUpdatesAsync).not.toHaveBeenCalled();
   });
 });

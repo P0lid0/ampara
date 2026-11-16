@@ -65,6 +65,7 @@ describe('cliente da API', () => {
   it('401 em /me/consentimento-rota chama aoExpirar; 401 em /auth/login NÃO chama', async () => {
     const cb = jest.fn();
     aoExpirar(cb);
+    definirToken('tok-atual');
     fetchMock.mockImplementation(async () => new Response(null, { status: 401 }));
     await api.me.consentimentoRota(true).catch(() => undefined);
     expect(cb).toHaveBeenCalledTimes(1);
@@ -102,5 +103,35 @@ describe('cliente da API', () => {
     } finally {
       jest.useRealTimers();
     }
+  });
+
+  it('item 1: 401 de uma chamada que saiu com outro token (ou sem token) não chama aoExpirar', async () => {
+    const cb = jest.fn();
+    aoExpirar(cb);
+    let responder: (r: Response) => void = () => undefined;
+    const pendente = () =>
+      new Promise<Response>((r) => {
+        responder = r;
+      });
+    fetchMock.mockImplementationOnce(pendente);
+    definirToken('tok-velho');
+    const p = chamar('/me').catch((e) => e);
+    definirToken('tok-novo');
+    responder(new Response(null, { status: 401 }));
+    expect(((await p) as ApiErro).status).toBe(401);
+    expect(cb).not.toHaveBeenCalled();
+
+    // depois do logout (token null) o 401 da chamada antiga também não conta
+    fetchMock.mockImplementationOnce(pendente);
+    const q = chamar('/me').catch((e) => e);
+    definirToken(null);
+    responder(new Response(null, { status: 401 }));
+    await q;
+    expect(cb).not.toHaveBeenCalled();
+
+    // chamada feita sem token nenhum: não há sessão para expirar
+    fetchMock.mockResolvedValueOnce(new Response(null, { status: 401 }));
+    await chamar('/me').catch(() => undefined);
+    expect(cb).not.toHaveBeenCalled();
   });
 });

@@ -11,10 +11,14 @@ import { sessaoRepo } from '../db/repos';
 import type { Efeito } from './alarmeEstado';
 import { criarHub } from './hub';
 import { emitirPasso } from './passosAoVivo';
-import { CANAL_SERVICO, cancelarAlarme, criarCanais, exibirAlarme, permissaoNotificacao } from './notificacao';
+import { CANAL_SERVICO, cancelarAlarme, criarCanais, exibirAlarme, exibirAviso, permissaoNotificacao } from './notificacao';
 import { useAlarmes } from './store';
 
 export const ID_NOTIFICACAO_SERVICO = 'ampara-guardiao-servico';
+/** Aviso deixado quando a sessão expira com o papel de guardião ligado (item 8 da revisão). */
+export const ID_AVISO_SESSAO = 'ampara-guardiao-sessao-expirada';
+export const AVISO_SESSAO_TITULO = 'Entre de novo para receber alarmes';
+const AVISO_SESSAO_CORPO = 'Sua sessão terminou. O alarme de guardião fica desligado até você entrar de novo no Ampara.';
 /** Espera antes de abrir uma conexão nova quando o hub não conecta ou desiste de reconectar. */
 export const ESPERAS_NOVA_CONEXAO_MS = [2000, 5000, 10000, 30000];
 
@@ -93,6 +97,8 @@ async function iniciar(): Promise<void> {
   const g = geracao;
   if ((await sessaoRepo(await abrirBanco()).get('guardiao_ativo')) !== '1') return;
   if (g !== geracao) return;
+  // Entrou de novo: o aviso de sessão expirada não vale mais.
+  await notifee.cancelNotification(ID_AVISO_SESSAO).catch(() => undefined);
   // Android 13+: sem POST_NOTIFICATIONS nem o alarme nem o aviso fixo aparecem. Negada não impede o
   // serviço (o BannerAlarme avisa e leva a Ajustes).
   await permissaoNotificacao(true).catch(() => undefined);
@@ -175,6 +181,20 @@ export async function pararServicoGuardiao(): Promise<void> {
   await derrubarServico();
 }
 
-aoSair(() => {
-  void pararServicoGuardiao();
+/** Sessão expirada com o papel de guardião ligado: avisa em vez de desligar em silêncio. */
+async function avisarSessaoExpirada(): Promise<void> {
+  try {
+    if ((await sessaoRepo(await abrirBanco()).get('guardiao_ativo')) !== '1') return;
+    await exibirAviso(ID_AVISO_SESSAO, AVISO_SESSAO_TITULO, AVISO_SESSAO_CORPO);
+  } catch {
+    console.warn('guardiao: falha ao avisar a sessao expirada');
+  }
+}
+
+// Saída manual: para tudo (o SQLite já foi apagado, guardiao_ativo junto). Expirou: sem token o hub não
+// conecta, então o serviço para, mas guardiao_ativo fica e o novo login sobe tudo de novo; até lá, o aviso.
+// Sessão de emergência (aparelho emprestado) nunca subiu o serviço: nada a fazer.
+aoSair(({ motivo, escopo }) => {
+  if (escopo === 'emergencia') return;
+  void pararServicoGuardiao().then(() => (motivo === 'expirou' ? avisarSessaoExpirada() : undefined));
 });

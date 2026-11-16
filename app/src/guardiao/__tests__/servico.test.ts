@@ -7,7 +7,7 @@ import { abrirBanco } from '../../db/db';
 import { sessaoRepo } from '../../db/repos';
 import { criarHub, type OpcoesHub } from '../hub';
 import { ouvirPassos } from '../passosAoVivo';
-import { ESPERAS_NOVA_CONEXAO_MS, ID_NOTIFICACAO_SERVICO, iniciarServicoGuardiao, pararServicoGuardiao } from '../servico';
+import { ESPERAS_NOVA_CONEXAO_MS, ID_AVISO_SESSAO, ID_NOTIFICACAO_SERVICO, iniciarServicoGuardiao, pararServicoGuardiao } from '../servico';
 import { useAlarmes } from '../store';
 
 jest.setTimeout(60000);
@@ -221,4 +221,47 @@ it('sair() (logout) para o serviço do guardião', async () => {
   await drenar();
   expect(hub.parar).toHaveBeenCalled();
   expect(notifee.stopForegroundService).toHaveBeenCalled();
+});
+
+describe('item 8: sessão expirada não desliga o guardião em silêncio', () => {
+  it('sair("expirou") para o serviço, mantém guardiao_ativo e mostra "Entre de novo para receber alarmes"', async () => {
+    await ligarGuardiao();
+    await iniciarServicoGuardiao();
+    jest.mocked(notifee.displayNotification).mockClear();
+    await sair('expirou');
+    await drenar();
+    expect(hub.parar).toHaveBeenCalled();
+    expect(await sessaoRepo(await abrirBanco()).get('guardiao_ativo')).toBe('1');
+    const aviso = jest.mocked(notifee.displayNotification).mock.calls.map((c) => c[0]).find((n) => n.id === ID_AVISO_SESSAO);
+    expect(aviso?.title).toBe('Entre de novo para receber alarmes');
+  });
+
+  it('depois de expirar, o novo login sobe o serviço e o hub de novo e tira o aviso', async () => {
+    await ligarGuardiao();
+    await iniciarServicoGuardiao();
+    await sair('expirou');
+    await drenar();
+    jest.mocked(criarHub).mockClear();
+    await iniciarServicoGuardiao();
+    expect(criarHub).toHaveBeenCalledTimes(1);
+    expect(hub.iniciar).toHaveBeenCalled();
+    expect(notifee.cancelNotification).toHaveBeenCalledWith(ID_AVISO_SESSAO);
+  });
+
+  it('quem não é guardião não recebe o aviso ao expirar', async () => {
+    await sair('expirou');
+    await drenar();
+    const ids = jest.mocked(notifee.displayNotification).mock.calls.map((c) => c[0].id);
+    expect(ids).not.toContain(ID_AVISO_SESSAO);
+  });
+
+  it('sair("manual") apaga guardiao_ativo e não mostra o aviso', async () => {
+    await ligarGuardiao();
+    await iniciarServicoGuardiao();
+    jest.mocked(notifee.displayNotification).mockClear();
+    await sair('manual');
+    await drenar();
+    expect(await sessaoRepo(await abrirBanco()).get('guardiao_ativo')).toBeNull();
+    expect(jest.mocked(notifee.displayNotification).mock.calls.map((c) => c[0].id)).not.toContain(ID_AVISO_SESSAO);
+  });
 });

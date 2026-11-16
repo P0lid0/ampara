@@ -1,7 +1,7 @@
 import * as SecureStore from 'expo-secure-store';
 import { renderHook, act } from '@testing-library/react-native';
 import { abrirBanco } from '../../db/db';
-import { sessaoRepo } from '../../db/repos';
+import { rotaRepo, sessaoRepo } from '../../db/repos';
 import { definirToken } from '../../api/cliente';
 import { chamar } from '../../api/cliente';
 import { aoSair, criarConta, entrar, entrarComoEmergencia, limparMotivoSaida, restaurar, sair, useMotivoSaida, useSessao } from '../sessao';
@@ -121,5 +121,151 @@ describe('sessão', () => {
     expect(await sessaoRepo(db).get('qualquer')).toBeNull();
     expect(cb).toHaveBeenCalledTimes(1);
     expect((await renderHook(() => useSessao())).result.current.autenticado).toBe(false);
+  });
+
+  // Decisão do controlador (itens 4 e 8): expirar não é sair.
+  it('sair("expirou") tira só o token: a fila da rota, o consentimento, o papel de guardião e o onboarding ficam no SQLite', async () => {
+    fetchMock.mockResolvedValue(json({ token: 'jwt-1', expiraEm: amanha() }));
+    await entrar('ana@exemplo.test', 'senha-teste');
+    const db = await abrirBanco();
+    const repo = sessaoRepo(db);
+    await repo.set('rota.consentimento', 'sim');
+    await repo.set('guardiao_ativo', '1');
+    await repo.set('onboarding.concluidos', '["conta"]');
+    await rotaRepo(db).adicionar([{ lat: -23.56, lng: -46.7, precisao: 10, em: new Date().toISOString() }]);
+    const cb = jest.fn();
+    const remover = aoSair(cb);
+    await sair('expirou');
+    remover();
+    expect(await SecureStore.getItemAsync('ampara.token')).toBeNull();
+    expect((await renderHook(() => useSessao())).result.current.autenticado).toBe(false);
+    expect(await repo.get('rota.consentimento')).toBe('sim');
+    expect(await repo.get('guardiao_ativo')).toBe('1');
+    expect(await repo.get('onboarding.concluidos')).toBe('["conta"]');
+    expect(await rotaRepo(db).contar()).toBe(1);
+    expect(cb).toHaveBeenCalledWith({ motivo: 'expirou', escopo: 'usuario' });
+  });
+
+  it('timer de 8 h vencido mantém a fila da rota (não apaga o SQLite)', async () => {
+    jest.useFakeTimers();
+    fetchMock.mockResolvedValue(json({ token: 'jwt-1', expiraEm: new Date(Date.now() + 8 * 3_600_000).toISOString() }));
+    await entrar('ana@exemplo.test', 'senha-teste');
+    const db = await abrirBanco();
+    await sessaoRepo(db).set('rota.consentimento', 'sim');
+    await rotaRepo(db).adicionar([{ lat: -23.56, lng: -46.7, precisao: 10, em: new Date().toISOString() }]);
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(8 * 3_600_000 + 1);
+    });
+    expect((await renderHook(() => useMotivoSaida())).result.current).toBe('expirou');
+    expect(await rotaRepo(db).contar()).toBe(1);
+    expect(await sessaoRepo(db).get('rota.consentimento')).toBe('sim');
+  });
+
+  it('sair("manual") avisa os callbacks com o motivo e o escopo', async () => {
+    fetchMock.mockResolvedValue(json({ token: 'jwt-1', expiraEm: amanha() }));
+    await entrar('ana@exemplo.test', 'senha-teste');
+    const cb = jest.fn();
+    const remover = aoSair(cb);
+    await sair('manual');
+    remover();
+    expect(cb).toHaveBeenCalledWith({ motivo: 'manual', escopo: 'usuario' });
+  });
+
+  it('sair da sessão de emergência só limpa a memória: não apaga o SQLite nem o SecureStore do aparelho emprestado', async () => {
+    const db = await abrirBanco();
+    await sessaoRepo(db).set('dado-do-dono-do-aparelho', 'x');
+    fetchMock.mockResolvedValue(json({ token: 'jwt-emerg', expiraEm: new Date(Date.now() + 1_800_000).toISOString() }));
+    await entrarComoEmergencia('ana@exemplo.test', '123456', 'palavra-teste');
+    jest.mocked(SecureStore.deleteItemAsync).mockClear();
+    const cb = jest.fn();
+    const remover = aoSair(cb);
+    await sair('manual');
+    remover();
+    expect((await renderHook(() => useSessao())).result.current.autenticado).toBe(false);
+    expect(SecureStore.deleteItemAsync).not.toHaveBeenCalled();
+    expect(await sessaoRepo(db).get('dado-do-dono-do-aparelho')).toBe('x');
+    expect(cb).toHaveBeenCalledWith({ motivo: 'manual', escopo: 'emergencia' });
+  });
+
+  it('item 2: restaurar() chamado enquanto sair() apaga o token não reativa a sessão', async () => {
+    fetchMock.mockResolvedValue(json({ token: 'jwt-1', expiraEm: amanha() }));
+    await entrar('ana@exemplo.test', 'senha-teste');
+    let liberar: () => void = () => undefined;
+    const original = jest.mocked(SecureStore.deleteItemAsync).getMockImplementation()!;
+    jest.mocked(SecureStore.deleteItemAsync).mockImplementationOnce(
+      (k: string) =>
+        new Promise<void>((r) => {
+          liberar = () => void original(k).then(r);
+        }),
+    );
+    const saindo = sair('manual');
+    await restaurar();
+    liberar();
+    await saindo;
+    await restaurar();
+    expect((await renderHook(() => useSessao())).result.current.autenticado).toBe(false);
+    expect(await SecureStore.getItemAsync('ampara.token')).toBeNull();
+  });
+
+  it('item 2: restaurar() que já leu o token antes de sair() não reativa a sessão depois', async () => {
+    fetchMock.mockResolvedValue(json({ token: 'jwt-1', expiraEm: amanha() }));
+    await entrar('ana@exemplo.test', 'senha-teste');
+    const gravado = await SecureStore.getItemAsync('ampara.token');
+    let liberar: () => void = () => undefined;
+    // a leitura começa com o token ainda gravado e só termina depois do logout
+    jest.mocked(SecureStore.getItemAsync).mockImplementationOnce(
+      () =>
+        new Promise<string | null>((r) => {
+          liberar = () => r(gravado);
+        }),
+    );
+    const lendo = restaurar();
+    await sair('manual');
+    liberar();
+    await lendo;
+    expect((await renderHook(() => useSessao())).result.current.autenticado).toBe(false);
+  });
+
+  it('item 1: 401 atrasado de uma chamada feita com o token anterior não derruba a sessão nova', async () => {
+    fetchMock.mockResolvedValueOnce(json({ token: 'jwt-1', expiraEm: amanha() }));
+    await entrar('ana@exemplo.test', 'senha-teste');
+    let responder: (r: Response) => void = () => undefined;
+    fetchMock.mockImplementationOnce(
+      () =>
+        new Promise<Response>((r) => {
+          responder = r;
+        }),
+    );
+    const antiga = chamar('/me').catch((e) => e);
+    await sair('manual');
+    fetchMock.mockResolvedValueOnce(json({ token: 'jwt-2', expiraEm: amanha() }));
+    await entrar('ana@exemplo.test', 'senha-teste');
+    responder(new Response(null, { status: 401 }));
+    expect(await antiga).toMatchObject({ status: 401 });
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 0));
+    });
+    expect((await renderHook(() => useSessao())).result.current.autenticado).toBe(true);
+    expect((await renderHook(() => useMotivoSaida())).result.current).toBeNull();
+  });
+
+  it('item 1: 401 de uma chamada em voo depois do sair manual não vira "Sua sessão terminou"', async () => {
+    fetchMock.mockResolvedValueOnce(json({ token: 'jwt-1', expiraEm: amanha() }));
+    await entrar('ana@exemplo.test', 'senha-teste');
+    let responder: (r: Response) => void = () => undefined;
+    fetchMock.mockImplementationOnce(
+      () =>
+        new Promise<Response>((r) => {
+          responder = r;
+        }),
+    );
+    const antiga = chamar('/me').catch((e) => e);
+    await sair('manual');
+    responder(new Response(null, { status: 401 }));
+    await antiga;
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 0));
+    });
+    expect((await renderHook(() => useMotivoSaida())).result.current).toBe('manual');
   });
 });

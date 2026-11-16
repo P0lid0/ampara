@@ -60,7 +60,9 @@ async function lerErro(resp: Response): Promise<ApiErro> {
 export async function chamar<T>(rota: string, o: OpcoesChamada = {}): Promise<T> {
   const headers: Record<string, string> = { Accept: 'application/json, application/problem+json' };
   if (o.corpo !== undefined) headers['Content-Type'] = 'application/json';
-  if (token && !o.semAuth) headers.Authorization = `Bearer ${token}`;
+  // Token com que esta chamada saiu: um 401 só derruba a sessão se ela ainda for a mesma (item 1 da revisão).
+  const usado = o.semAuth ? null : token;
+  if (usado) headers.Authorization = `Bearer ${usado}`;
 
   const controle = new AbortController();
   const timer = setTimeout(() => controle.abort(), TIMEOUT_MS);
@@ -80,7 +82,8 @@ export async function chamar<T>(rota: string, o: OpcoesChamada = {}): Promise<T>
 
   if (!resp.ok) {
     const erro = await lerErro(resp);
-    if (resp.status === 401 && !rota.startsWith('/auth/')) aoExpirarCb?.();
+    // 401 de uma chamada antiga (feita antes de um sair ou de um novo login) não derruba a sessão atual.
+    if (resp.status === 401 && !rota.startsWith('/auth/') && usado !== null && usado === token) aoExpirarCb?.();
     throw erro;
   }
   if (resp.status === 204) return undefined as T;

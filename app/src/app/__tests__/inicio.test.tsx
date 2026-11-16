@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
+import * as Location from 'expo-location';
 import Inicio from '../(tabs)/index';
 import { api } from '../../api/endpoints';
 import { abrirBanco } from '../../db/db';
@@ -109,5 +110,17 @@ describe('aba Início', () => {
     await screen.findByText('Carregando...');
     await new Promise((r) => setTimeout(r, 50));
     expect(mockReplace).toHaveBeenCalledWith('/onboarding/consentimento');
+  });
+
+  it('item 4: ao entrar de novo, com o consentimento no servidor e nenhum neste aparelho, a rota volta a ser registrada', async () => {
+    jest.mocked(api.me.obter).mockResolvedValue({
+      usuarioId: 'u1', nome: 'Ana Teste', email: 'ana@exemplo.test', consentimentoRota: true, emergenciaConfigurada: true,
+    });
+    jest.mocked(Location.startLocationUpdatesAsync).mockClear();
+    await render(<Inicio />);
+    await screen.findByText(/^Rota /);
+    expect(Location.startLocationUpdatesAsync).toHaveBeenCalledWith('ampara-rota', expect.anything());
+    expect(await sessaoRepo(await abrirBanco()).get('rota.consentimento')).toBe('sim');
+    expect(screen.queryByText('Rota desligada: você não autorizou guardar a rota neste aparelho.')).toBeNull();
   });
 });

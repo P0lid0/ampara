@@ -1,6 +1,8 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import Entrar from '../entrar';
 import { sair } from '../../auth/sessao';
+import { abrirBanco } from '../../db/db';
+import { sessaoRepo } from '../../db/repos';
 
 jest.setTimeout(60000);
 const mockReplace = jest.fn();
@@ -74,5 +76,25 @@ describe('tela de entrada', () => {
       await sair('expirou');
     });
     expect(await screen.findByText('Sua sessão terminou. Entre de novo.')).toBeTruthy();
+  });
+
+  it('item 8: guardião com a sessão expirada vê "Entre de novo para receber alarmes."', async () => {
+    await sessaoRepo(await abrirBanco()).set('guardiao_ativo', '1');
+    await render(<Entrar />);
+    await act(async () => {
+      await sair('expirou');
+    });
+    expect(await screen.findByText('Você é guardião: entre de novo para receber alarmes.')).toBeTruthy();
+    await sessaoRepo(await abrirBanco()).apagarTudo();
+  });
+
+  it('quem não é guardião não vê o aviso de alarme ao expirar', async () => {
+    await sessaoRepo(await abrirBanco()).apagarTudo();
+    await render(<Entrar />);
+    await act(async () => {
+      await sair('expirou');
+    });
+    await screen.findByText('Sua sessão terminou. Entre de novo.');
+    expect(screen.queryByText(/receber alarmes/)).toBeNull();
   });
 });

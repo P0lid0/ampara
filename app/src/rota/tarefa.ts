@@ -34,7 +34,8 @@ TaskManager.defineTask<DadosTarefa>(NOME_TAREFA, async ({ data, error }) => {
     return;
   }
   try {
-    // Sem consentimento local (logout apagou o banco, revogação): não grava nada e desliga a coleta.
+    // Sem consentimento local (logout manual apagou o banco, revogação): não grava nada e desliga a coleta.
+    // Sessão expirada não chega aqui: o consentimento fica e os pontos esperam o novo login na fila.
     if (!(await temConsentimento())) {
       await pararRota(true);
       return;
@@ -93,6 +94,22 @@ export async function iniciarRota(): Promise<void> {
       notificationBody: 'Só você vê. Desligue quando quiser em Ajustes.',
     },
   });
+}
+
+/**
+ * Depois de entrar (item 4 da revisão): se este aparelho não tem decisão local sobre a rota (logout manual,
+ * aparelho novo) e o servidor guarda o consentimento, religa a coleta; depois envia a fila guardada enquanto
+ * a sessão estava vencida (sem esperar o envio). 'nao' local (a pessoa desligou aqui) nunca é desfeito. Nunca lança.
+ */
+export async function retomarRotaAposEntrar(): Promise<void> {
+  try {
+    const local = await sessaoRepo(await abrirBanco()).get(CHAVE_CONSENTIMENTO);
+    if (local === null && (await api.me.obter()).consentimentoRota === true) await iniciarRota();
+  } catch {
+    console.warn('rota: falha ao retomar a rota depois de entrar');
+  }
+  // Sem esperar: a tela não fica parada enquanto a fila sobe (sem rede, só no timeout).
+  void sincronizarAgora();
 }
 
 export async function pararRota(apagarFila: boolean): Promise<void> {

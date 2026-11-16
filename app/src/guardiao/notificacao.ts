@@ -7,6 +7,8 @@ import type { AlertaAtivo } from './alarmeEstado';
 
 export const CANAL_ALARME = 'ampara-alarme';
 export const CANAL_SERVICO = 'ampara-servico';
+/** Avisos que a pessoa precisa ver (ex.: sessão expirada desligou o alarme), sem sirene. */
+export const CANAL_AVISO = 'ampara-aviso';
 
 /** Chave em `sessao`: '1' = "Alarme sem tela cheia" (plano B, toggle em Ajustes). */
 export const CHAVE_PLANO_B = 'alarme_plano_b';
@@ -120,4 +122,20 @@ export async function cancelarAlarme(alertaId: string): Promise<void> {
 export async function permissaoNotificacao(pedir = true): Promise<'ok' | 'negada'> {
   const s = pedir ? await notifee.requestPermission() : await notifee.getNotificationSettings();
   return s.authorizationStatus >= AuthorizationStatus.AUTHORIZED ? 'ok' : 'negada';
+}
+
+/** Notificação comum (sem sirene) com um aviso que a pessoa precisa ver. */
+export async function exibirAviso(id: string, titulo: string, corpo: string): Promise<void> {
+  await notifee.createChannel({
+    id: CANAL_AVISO,
+    name: 'Avisos do Ampara',
+    description: 'Avisos importantes, como o alarme de guardião desligado.',
+    importance: AndroidImportance.DEFAULT,
+  });
+  await notifee.displayNotification({
+    id,
+    title: titulo,
+    body: corpo,
+    android: { channelId: CANAL_AVISO, pressAction: ABRIR_APP },
+  });
 }

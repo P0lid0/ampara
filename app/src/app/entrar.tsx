@@ -1,8 +1,10 @@
 import { Stack, useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 import { ApiErro, MSG_PADRAO } from '../api/cliente';
 import { criarConta, entrar, entrarComoEmergencia, limparMotivoSaida, useMotivoSaida } from '../auth/sessao';
+import { abrirBanco } from '../db/db';
+import { sessaoRepo } from '../db/repos';
 import { espacos } from '../theme/tokens';
 import { Botao } from '../ui/Botao';
 import { Campo } from '../ui/Campo';
@@ -39,6 +41,27 @@ export default function Entrar() {
   const [palavra, setPalavra] = useState('');
   const [erro, setErro] = useState<string | undefined>();
   const [carregando, setCarregando] = useState(false);
+  // Item 8: a sessão expirou com o papel de guardião ligado; o alarme só volta depois de entrar de novo.
+  const [guardiaoSemSessao, setGuardiaoSemSessao] = useState(false);
+
+  useEffect(() => {
+    if (motivoSaida !== 'expirou') {
+      setGuardiaoSemSessao(false);
+      return;
+    }
+    let vivo = true;
+    (async () => {
+      try {
+        const ativo = (await sessaoRepo(await abrirBanco()).get('guardiao_ativo')) === '1';
+        if (vivo) setGuardiaoSemSessao(ativo);
+      } catch {
+        // sem banco: fica só a frase geral
+      }
+    })();
+    return () => {
+      vivo = false;
+    };
+  }, [motivoSaida]);
 
   function trocar(m: Modo) {
     setModo(m);
@@ -74,6 +97,11 @@ export default function Entrar() {
       {motivoSaida === 'expirou' ? (
         <Texto accessibilityRole="alert" accessibilityLiveRegion="polite">
           Sua sessão terminou. Entre de novo.
+        </Texto>
+      ) : null}
+      {motivoSaida === 'expirou' && guardiaoSemSessao ? (
+        <Texto accessibilityRole="alert" accessibilityLiveRegion="polite">
+          Você é guardião: entre de novo para receber alarmes.
         </Texto>
       ) : null}
 

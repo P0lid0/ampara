@@ -9,7 +9,7 @@ import { abrirBanco } from '../../db/db';
 import { ocorrenciaRepo, sessaoRepo } from '../../db/repos';
 import { rotuloEstado } from '../../guardiao/eventos';
 import { concluirPassoSeguro, proximoPasso, reconciliarComServidor, rotaDoPasso } from '../../onboarding/passos';
-import { estadoRota, iniciarRota, type EstadoRota } from '../../rota/tarefa';
+import { estadoRota, iniciarRota, retomarRotaAposEntrar, type EstadoRota } from '../../rota/tarefa';
 import { cores, espacos } from '../../theme/tokens';
 import { BannerAlarme } from '../../ui/BannerAlarme';
 import { Botao } from '../../ui/Botao';
@@ -68,6 +68,8 @@ export default function Inicio() {
         await concluirPassoSeguro('conta'); // quem chegou aqui autenticado já tem conta
         const db = await abrirBanco();
         const proximo = proximoPasso(await reconciliarComServidor(db));
+        // Depois de entrar: religa a rota consentida no servidor e envia a fila guardada (item 4).
+        await retomarRotaAposEntrar();
         if (ativo && proximo !== 'fim') {
           router.replace(rotaDoPasso(proximo) as never);
           return;

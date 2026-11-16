@@ -14,6 +14,9 @@ const config: ExpoConfig = {
   },
   android: {
     package: 'br.fiap.ampara',
+    // Sem Auto Backup: o ampara.db (histórico, fila da rota, onboarding) não vai para o backup do Google
+    // nem volta em outro aparelho; "Sair" apaga tudo de verdade.
+    allowBackup: false,
     adaptiveIcon: {
       backgroundColor: '#F4EFE6',
       foregroundImage: './assets/android-icon-foreground.png',
