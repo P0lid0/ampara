@@ -172,4 +172,21 @@ describe('passo a passo do guardião', () => {
       f.mockRestore();
     }
   });
+
+  it('item 18: conta do catálogo real sem telefone (null) não mostra "Ligar" e mantém o site; nada quebra', async () => {
+    obter.mockResolvedValue({
+      ...base(),
+      contas: [
+        { nome: 'Banco Sem Fone', tipo: 'banco', telefone: null, link: 'https://semfone.example/bloquear' },
+        { nome: 'Banco Alfa', tipo: 'banco', telefone: '(11) 4004-0001', link: 'https://alfa.example/bloquear' },
+      ],
+    });
+    await montar();
+    expect(screen.queryByLabelText('Ligar para Banco Sem Fone')).toBeNull();
+    expect(cartao('Banco').getByText('Banco Sem Fone')).toBeTruthy();
+    await fireEvent.press(screen.getByLabelText('Abrir site de Banco Sem Fone'));
+    expect(abrir).toHaveBeenCalledWith('https://semfone.example/bloquear');
+    await fireEvent.press(screen.getByLabelText('Ligar para Banco Alfa'));
+    expect(abrir).toHaveBeenCalledWith('tel:1140040001');
+  });
 });

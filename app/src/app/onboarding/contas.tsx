@@ -18,6 +18,11 @@ export function dataBr(iso: string): string {
 
 const TIPO_TEXTO: Record<ContaCatalogo['tipo'], string> = { banco: 'Banco', operadora: 'Operadora' };
 
+/** O catálogo real traz telefone null na maioria das contas: diz isso em vez de mostrar "null". */
+function linhaTelefone(t: string | null): string {
+  return t && t.trim() ? `Telefone: ${t.trim()}` : 'Telefone não informado; use o link';
+}
+
 export default function OnboardingContas() {
   const router = useRouter();
   const [lista, setLista] = useState<ContaCatalogo[] | null>(null);
@@ -87,7 +92,12 @@ export default function OnboardingContas() {
           <Pressable
             key={c.id}
             accessibilityRole="checkbox"
-            accessibilityLabel={`${c.nome}, ${TIPO_TEXTO[c.tipo]}. Telefone: ${c.telefone}. Link: ${c.link}. Conferido em ${dataBr(c.conferidoEm)}`}
+            accessibilityLabel={[
+              `${c.nome}, ${TIPO_TEXTO[c.tipo]}`,
+              linhaTelefone(c.telefone),
+              `Link: ${c.link}`,
+              ...(c.conferidoEm ? [`Conferido em ${dataBr(c.conferidoEm)}`] : []),
+            ].join('. ')}
             accessibilityState={{ checked: marcado }}
             onPress={() => alternar(c.id)}
             style={[estilos.cartao, marcado && estilos.cartaoMarcado]}
@@ -99,9 +109,9 @@ export default function OnboardingContas() {
                   {c.nome}
                 </Texto>
                 <Texto variante="legenda">{TIPO_TEXTO[c.tipo]}</Texto>
-                <Texto variante="legenda">{`Telefone: ${c.telefone}`}</Texto>
+                <Texto variante="legenda">{linhaTelefone(c.telefone)}</Texto>
                 <Texto variante="legenda">{`Link: ${c.link}`}</Texto>
-                <Texto variante="legenda">{`Conferido em ${dataBr(c.conferidoEm)}`}</Texto>
+                {c.conferidoEm ? <Texto variante="legenda">{`Conferido em ${dataBr(c.conferidoEm)}`}</Texto> : null}
               </View>
             </View>
           </Pressable>

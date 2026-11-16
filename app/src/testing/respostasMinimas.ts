@@ -18,6 +18,8 @@ const ocorrencia = {
   contas: [
     { nome: 'Banco Demo', tipo: 'banco', telefone: '4004 0000', link: 'https://banco.exemplo.test' },
     { nome: 'Operadora Demo', tipo: 'operadora', telefone: '*611', link: 'https://operadora.exemplo.test' },
+    // como no catálogo real (item 18): a maioria das contas vem sem telefone
+    { nome: 'Banco Sem Telefone', tipo: 'banco', telefone: null, link: 'https://banco2.exemplo.test' },
   ],
 };
 
@@ -27,6 +29,7 @@ const respostas: Record<string, unknown> = {
   'contas.catalogo': [
     { id: 'c-1', nome: 'Banco Demo', tipo: 'banco', telefone: '4004 0000', link: 'https://banco.exemplo.test', conferidoEm: '2026-11-01' },
     { id: 'c-2', nome: 'Operadora Demo', tipo: 'operadora', telefone: '*611', link: 'https://operadora.exemplo.test', conferidoEm: '2026-11-01' },
+    { id: 'c-3', nome: 'Banco Sem Telefone', tipo: 'banco', telefone: null, link: 'https://banco2.exemplo.test', conferidoEm: null },
   ],
   'contas.listar': [{ id: 'c-1', nome: 'Banco Demo', tipo: 'banco', telefone: '4004 0000', link: 'https://banco.exemplo.test' }],
   'guardioes.listar': [{ guardiaoId: 'g-1', nome: 'Guardiã Demo', ordem: 0 }],

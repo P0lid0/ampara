@@ -20,6 +20,13 @@ beforeEach(async () => {
 });
 
 describe('urlTelefone', () => {
+  it('item 18: telefone nulo, vazio ou sem dígitos (catálogo real) devolve null em vez de quebrar', () => {
+    expect(urlTelefone(null)).toBeNull();
+    expect(urlTelefone(undefined)).toBeNull();
+    expect(urlTelefone('   ')).toBeNull();
+    expect(urlTelefone('ligue já')).toBeNull();
+  });
+
   it('urlTelefone("(11) 4004-0000") === "tel:1140040000"; mantém o + inicial', () => {
     expect(urlTelefone('(11) 4004-0000')).toBe('tel:1140040000');
     expect(urlTelefone('+55 (11) 4004-0000')).toBe('tel:+551140040000');

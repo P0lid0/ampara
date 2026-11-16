@@ -153,13 +153,17 @@ export default function PassoAPasso() {
                 <Texto>{TEXTOS[passo]}</Texto>
 
                 {tipo && contas.length === 0 ? <Texto>{SEM_CONTA[passo]}</Texto> : null}
-                {contas.map((c) => (
-                  <View key={`${c.nome}-${c.telefone}`} style={estilos.conta}>
-                    <Texto variante="legenda">{c.nome}</Texto>
-                    <Botao rotulo={`Ligar para ${c.nome}`} variante="secundario" onPress={() => abrir(urlTelefone(c.telefone))} />
-                    <Botao rotulo={`Abrir site de ${c.nome}`} variante="secundario" onPress={() => abrir(c.link)} />
-                  </View>
-                ))}
+                {contas.map((c) => {
+                  // Sem telefone no catálogo (null na maioria das contas reais): só o site.
+                  const tel = urlTelefone(c.telefone);
+                  return (
+                    <View key={c.nome} style={estilos.conta}>
+                      <Texto variante="legenda">{c.nome}</Texto>
+                      {tel ? <Botao rotulo={`Ligar para ${c.nome}`} variante="secundario" onPress={() => abrir(tel)} /> : null}
+                      <Botao rotulo={`Abrir site de ${c.nome}`} variante="secundario" onPress={() => abrir(c.link)} />
+                    </View>
+                  );
+                })}
                 {passo === 'CelularSeguro' ? (
                   <Botao rotulo="Abrir o Celular Seguro" variante="secundario" onPress={() => abrir(CELULAR_SEGURO)} />
                 ) : null}

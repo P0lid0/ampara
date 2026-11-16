@@ -14,11 +14,13 @@ export interface FonteOcorrencia {
 
 /**
  * "(11) 4004-0000" -> "tel:1140040000". Só dígitos, "*" e "#" (códigos curtos como *611) e um + inicial:
- * nada do texto da conta vira comando. O "#" vai como %23 para não virar fragmento da URL.
+ * nada do texto da conta vira comando. O "#" vai como %23 para não virar fragmento da URL. Telefone ausente
+ * (o catálogo real traz null na maioria das contas) ou sem nenhum dígito devolve null: não há o que ligar.
  */
-export function urlTelefone(t: string): string {
-  const limpo = t.trim();
+export function urlTelefone(t: string | null | undefined): string | null {
+  const limpo = (t ?? '').trim();
   const numero = limpo.replace(/[^\d*#]/g, '').replace(/#/g, '%23');
+  if (!/\d/.test(numero)) return null;
   return `tel:${limpo.startsWith('+') ? '+' : ''}${numero}`;
 }
 

@@ -105,4 +105,18 @@ describe('onboarding: bancos e operadora', () => {
     await fireEvent.press(screen.getByRole('button', { name: 'Tentar de novo' }));
     expect(await screen.findByText('Banco Teste Um')).toBeTruthy();
   });
+
+  it('item 18: telefone e conferidoEm nulos (catálogo real) nunca aparecem como "null", na tela nem no leitor de tela', async () => {
+    catalogo.mockResolvedValue([
+      { id: 'b9', nome: 'Banco Sem Fone', tipo: 'banco', telefone: null, link: 'https://exemplo.test/nove', conferidoEm: null },
+      ...CATALOGO,
+    ]);
+    await render(<OnboardingContas />);
+    const caixa = await screen.findByRole('checkbox', { name: /Banco Sem Fone/ });
+    expect(caixa.props.accessibilityLabel).not.toMatch(/null/);
+    expect(caixa.props.accessibilityLabel).toMatch(/Telefone não informado; use o link\. Link: https:\/\/exemplo\.test\/nove/);
+    expect(screen.queryByText(/null/)).toBeNull();
+    expect(screen.getByText('Telefone não informado; use o link')).toBeTruthy();
+    expect(screen.getAllByText(/Conferido em/)).toHaveLength(3);
+  });
 });

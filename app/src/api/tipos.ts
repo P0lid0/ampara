@@ -17,15 +17,16 @@ export type MeDto = {
 // imeiMascarado vem pronto do servidor (ex.: ***********7518); o app nunca monta nem guarda o IMEI.
 export type AparelhoDto = { id: string; marca: string; modelo: string; imeiMascarado: string };
 
+// A API serializa Telefone e ConferidoEm como `string?`: o catálogo real tem null na maioria (item 18).
 export type ContaCatalogo = {
   id: string;
   nome: string;
   tipo: 'banco' | 'operadora';
-  telefone: string;
+  telefone: string | null;
   link: string;
-  conferidoEm: string;
+  conferidoEm: string | null;
 };
-export type ContaDto = { id: string; nome: string; tipo: string; telefone: string; link: string };
+export type ContaDto = { id: string; nome: string; tipo: string; telefone: string | null; link: string };
 
 export type GuardiaoDto = { guardiaoId: string; nome: string; ordem: number };
 export type ConviteDto = { codigo: string; expiraEm: string };
@@ -43,7 +44,7 @@ export type OcorrenciaDto = {
   momento: { em: string; lat: number; lng: number } | null;
   passos: { passo: Passo; concluidoEm: string | null }[];
   alertas: { alertaId: string; guardiaoId: string; enviadoEm: string; cienteEm: string | null }[];
-  contas: { nome: string; tipo: string; telefone: string; link: string }[];
+  contas: { nome: string; tipo: string; telefone: string | null; link: string }[];
 };
 
 export type BoDto = {
