@@ -1,23 +1,10 @@
 // Único lugar que importa `leaflet`. Tiles do OpenStreetMap.
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import iconeUrl from "leaflet/dist/images/marker-icon.png";
-import icone2xUrl from "leaflet/dist/images/marker-icon-2x.png";
-import sombraUrl from "leaflet/dist/images/marker-shadow.png";
 import { useEffect, useRef } from "react";
+import { formatarHora } from "../lib/agruparPorDia";
 
 export type PontoMapa = { lat: number; lng: number; em: string };
-
-// O Vite não resolve os caminhos de imagem que o Leaflet monta sozinho; as URLs entram de forma explícita.
-const iconeMarcador = L.icon({
-  iconUrl: iconeUrl,
-  iconRetinaUrl: icone2xUrl,
-  shadowUrl: sombraUrl,
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
-});
 
 export function Mapa({
   pontos,
@@ -70,14 +57,21 @@ export function Mapa({
       { color: "#0f4c4a", weight: 4 },
     ).addTo(g);
     pontos.forEach((p, i) => {
-      // Raio de 14 px: alvo de toque confortável no iPhone (sem hover).
-      L.circleMarker([p.lat, p.lng], { radius: 24, color: "#0f4c4a", fillColor: "#14b88a", fillOpacity: 0.85, weight: 2 })
+      if (i === selecionado) return;
+      // Ponto pequeno e visível (não esconde a rota) + área de toque invisível de 48 px.
+      L.circleMarker([p.lat, p.lng], { radius: 6, color: "#0f4c4a", fillColor: "#f4efe6", fillOpacity: 1, weight: 2, interactive: false }).addTo(g);
+      L.circleMarker([p.lat, p.lng], { radius: 24, stroke: false, fillOpacity: 0, fillColor: "#0f4c4a" })
         .on("click", () => aoSelRef.current(i))
         .addTo(g);
     });
+    // O escolhido: esmeralda com anel petróleo e a hora ao lado (o estado não depende só da cor).
     const sel = pontos[selecionado];
-    if (sel) L.marker([sel.lat, sel.lng], { icon: iconeMarcador, keyboard: false, interactive: false }).addTo(g);
+    if (sel) {
+      L.circleMarker([sel.lat, sel.lng], { radius: 11, color: "#0f4c4a", weight: 4, fillColor: "#14b88a", fillOpacity: 1, interactive: false })
+        .bindTooltip(formatarHora(sel.em), { permanent: true, direction: "auto", offset: [14, 0], className: "hora-escolhida" })
+        .addTo(g);
+    }
   }, [pontos, selecionado]);
 
-  return <div ref={el} className="mapa" role="application" aria-label="Mapa do seu trajeto" />;
+  return <div ref={el} className="mapa" role="group" aria-label="Mapa do seu trajeto. Para escolher um ponto sem o mapa, use a lista de horários" />;
 }

@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ApiErro, api } from "../api/cliente";
 import type { OcorrenciaDto, PontoRota } from "../api/tipos";
+import { Etapas } from "../componentes/Etapas";
+import { FaixaDeMarca } from "../componentes/FaixaDeMarca";
+import { IconeAlerta, IconeCheck, IconeVoltar } from "../componentes/Icones";
 import { Mapa } from "../componentes/Mapa";
 import { agruparPorDia, formatarHora, pontoMaisProximo } from "../lib/agruparPorDia";
 
@@ -116,110 +119,161 @@ export function LinhaDoTempo({
     }
   }
 
+  const podeMarcar = !!ocorrenciaAtual && !marcadoEm && !(momentoGravado && !remarcar);
+  const temBarra = !!ocorrenciaAtual && dias.length > 0 && dados !== null;
+
   return (
-    <main className="tela">
-      <h1>Onde foi roubado</h1>
-
-      {erroCarga ? (
-        <div role="alert" className="bloco">
-          <p className="erro">{erroCarga}</p>
-          <button type="button" className="secundario" onClick={() => void carregar()}>Tentar de novo</button>
+    <>
+      <FaixaDeMarca aoSair={aoSair} />
+      <main className={temBarra ? "tela tela-barra" : "tela"}>
+        <div className="cabeca">
+          <button type="button" className="texto-botao voltar" onClick={aoVoltar}>
+            <IconeVoltar />
+            Voltar
+          </button>
+          <Etapas passo={2} />
+          <h1>Onde foi roubado</h1>
+          <p className="apoio">Escolha o dia e o horário em que você estava no lugar do roubo.</p>
         </div>
-      ) : dados === null ? (
-        <p>Carregando…</p>
-      ) : (
-        <>
-          {ocorrencias.length > 1 && (
-            <label>
-              Qual ocorrência?
-              <select
-                value={ocorrenciaAtual?.id}
-                onChange={(e) => {
-                  setEscolhida(e.target.value);
-                  setDia(null);
-                  setIndice(-1);
-                  setMarcadoEm(null);
-                  setErroMarcar(null);
-                  setRemarcar(false);
-                }}
-              >
-                {ocorrencias.map((o) => (
-                  <option key={o.id} value={o.id}>{dataHora(o.iniciadaEm)} — {o.estado}</option>
-                ))}
-              </select>
-            </label>
-          )}
 
-          {dias.length === 0 ? (
-            <p className="vazio">Nenhuma rota nos últimos 7 dias.</p>
-          ) : (
-            <>
-              <section aria-labelledby="titulo-dias">
-                <h2 id="titulo-dias">Dia</h2>
-                <div className="chips">
-                  {dias.map((d) => (
-                    <button
-                      key={d.dia}
-                      type="button"
-                      className={d.dia === diaAtual?.dia ? "" : "secundario"}
-                      aria-pressed={d.dia === diaAtual?.dia}
-                      onClick={() => trocarDia(d.dia)}
-                    >
-                      {rotuloDia(d.dia)}
-                    </button>
+        {erroCarga ? (
+          <div role="alert" className="cartao">
+            <p className="erro">
+              <IconeAlerta />
+              <span>{erroCarga}</span>
+            </p>
+            <button type="button" className="secundario" onClick={() => void carregar()}>Tentar de novo</button>
+          </div>
+        ) : dados === null ? (
+          <p className="carregando" role="status">Carregando…</p>
+        ) : (
+          <>
+            {ocorrencias.length > 1 && (
+              <div className="campo">
+                <label htmlFor="campo-ocorrencia">Qual ocorrência?</label>
+                <select
+                  id="campo-ocorrencia"
+                  value={ocorrenciaAtual?.id}
+                  onChange={(e) => {
+                    setEscolhida(e.target.value);
+                    setDia(null);
+                    setIndice(-1);
+                    setMarcadoEm(null);
+                    setErroMarcar(null);
+                    setRemarcar(false);
+                  }}
+                >
+                  {ocorrencias.map((o) => (
+                    <option key={o.id} value={o.id}>{dataHora(o.iniciadaEm)} — {o.estado}</option>
                   ))}
-                </div>
-              </section>
+                </select>
+              </div>
+            )}
 
-              <Mapa pontos={pontos} selecionado={idx} aoSelecionar={escolherPonto} />
-
-              <section aria-labelledby="titulo-horas">
-                <h2 id="titulo-horas">Horário</h2>
-                <div className="chips">
-                  {pontos.map((p, i) => (
-                    <button
-                      key={`${p.em}-${i}`}
-                      type="button"
-                      className={i === idx ? "" : "secundario"}
-                      aria-pressed={i === idx}
-                      onClick={() => escolherPonto(i)}
-                    >
-                      {formatarHora(p.em)}
-                    </button>
-                  ))}
-                </div>
-              </section>
-
-              {ocorrenciaAtual && marcadoEm ? (
-                <section className="confirmado" aria-live="polite">
-                  <p className="grande">Momento marcado às {formatarHora(marcadoEm)}.</p>
-                  <button type="button" onClick={() => aoBo(ocorrenciaAtual.id)}>Gerar o BO</button>
+            {dias.length === 0 ? (
+              <p className="vazio">Nenhuma rota nos últimos 7 dias.</p>
+            ) : (
+              <>
+                <section className="bloco-titulo" aria-labelledby="titulo-dias">
+                  <h2 id="titulo-dias">Dia</h2>
+                  <div className="chips">
+                    {dias.map((d) => (
+                      <button
+                        key={d.dia}
+                        type="button"
+                        className={d.dia === diaAtual?.dia ? "" : "secundario"}
+                        aria-pressed={d.dia === diaAtual?.dia}
+                        onClick={() => trocarDia(d.dia)}
+                      >
+                        {d.dia === diaAtual?.dia && <IconeCheck tamanho={20} />}
+                        {rotuloDia(d.dia)}
+                      </button>
+                    ))}
+                  </div>
                 </section>
-              ) : ocorrenciaAtual && momentoGravado && !remarcar ? (
-                <section className="confirmado" aria-live="polite">
-                  <p className="grande">Momento já marcado às {formatarHora(momentoGravado.em)}.</p>
-                  <button type="button" onClick={() => aoBo(ocorrenciaAtual.id)}>Gerar o BO</button>
-                  <button type="button" className="secundario" onClick={() => setRemarcar(true)}>Marcar de novo</button>
+
+                <Mapa pontos={pontos} selecionado={idx} aoSelecionar={escolherPonto} />
+
+                <section className="bloco-titulo" aria-labelledby="titulo-horas">
+                  <h2 id="titulo-horas">Horário</h2>
+                  <div className="chips-rolagem">
+                    {pontos.map((p, i) => (
+                      <button
+                        key={`${p.em}-${i}`}
+                        type="button"
+                        className={i === idx ? "" : "secundario"}
+                        aria-pressed={i === idx}
+                        onClick={() => escolherPonto(i)}
+                      >
+                        {i === idx && <IconeCheck tamanho={20} />}
+                        {formatarHora(p.em)}
+                      </button>
+                    ))}
+                  </div>
                 </section>
-              ) : ocorrenciaAtual ? (
-                <>
-                  {erroMarcar && <p className="erro" role="alert">{erroMarcar}</p>}
-                  <button type="button" className="alarme" disabled={enviando} onClick={() => void marcar()}>
-                    Foi aqui que me roubaram
-                  </button>
-                </>
-              ) : null}
-            </>
-          )}
 
-          {!ocorrenciaAtual && <p className="aviso">Primeiro avise seus guardiões (botão Preciso de ajuda agora)</p>}
-        </>
-      )}
+                {erroMarcar && (
+                  <p className="erro" role="alert">
+                    <IconeAlerta />
+                    <span>{erroMarcar}</span>
+                  </p>
+                )}
 
-      <button type="button" className="secundario" onClick={aoVoltar}>Voltar</button>
-      {aoSair && (
-        <button type="button" className="secundario sair" onClick={aoSair}>Sair e apagar tudo desta aba</button>
+                {ocorrenciaAtual && marcadoEm ? (
+                  <section className="confirmado" aria-live="polite">
+                    <div className="selo">
+                      <span className="selo-icone"><IconeCheck tamanho={28} /></span>
+                      <p className="grande">Momento marcado às {formatarHora(marcadoEm)}.</p>
+                    </div>
+                  </section>
+                ) : ocorrenciaAtual && momentoGravado && !remarcar ? (
+                  <section className="confirmado" aria-live="polite">
+                    <div className="selo">
+                      <span className="selo-icone"><IconeCheck tamanho={28} /></span>
+                      <p className="grande">Momento já marcado às {formatarHora(momentoGravado.em)}.</p>
+                    </div>
+                    <div className="botoes">
+                      <button type="button" className="secundario" onClick={() => setRemarcar(true)}>Marcar de novo</button>
+                    </div>
+                  </section>
+                ) : null}
+              </>
+            )}
+
+            {!ocorrenciaAtual && (
+              <div className="aviso">
+                <div className="aviso-linha">
+                  <IconeAlerta />
+                  <p>Primeiro avise seus guardiões (botão Preciso de ajuda agora)</p>
+                </div>
+                <button type="button" onClick={aoVoltar}>Voltar e avisar guardiões</button>
+              </div>
+            )}
+          </>
+        )}
+      </main>
+
+      {temBarra && ocorrenciaAtual && (
+        <div className="acao-fixa">
+          <div className="acao-fixa-miolo">
+            {podeMarcar ? (
+              <>
+                {ponto && (
+                  <p className="escolhido">
+                    <span>Ponto escolhido</span>
+                    <strong>{formatarHora(ponto.em)}</strong>
+                  </p>
+                )}
+                <button type="button" className="destaque" disabled={enviando || !ponto} onClick={() => void marcar()}>
+                  Foi aqui que me roubaram
+                </button>
+              </>
+            ) : (
+              <button type="button" onClick={() => aoBo(ocorrenciaAtual.id)}>Gerar o BO</button>
+            )}
+          </div>
+        </div>
       )}
-    </main>
+    </>
   );
 }

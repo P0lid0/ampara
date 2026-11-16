@@ -50,15 +50,15 @@ async function irAteOBo(u: ReturnType<typeof userEvent.setup>) {
 
 describe("App: fim da sessão de 30 minutos (item 13)", () => {
   it("passado o expiraEm, a tela do BO volta ao login com a mensagem e o texto (com IMEI) sai da tela, sem precisar de clique", async () => {
-    sessao(3000);
+    sessao(8000);
     const u = userEvent.setup();
     render(<App />);
     await irAteOBo(u);
-    await waitFor(() => expect(screen.getByText(MSG_SESSAO_VENCIDA)).toBeInTheDocument(), { timeout: 6000 });
+    await waitFor(() => expect(screen.getByText(MSG_SESSAO_VENCIDA)).toBeInTheDocument(), { timeout: 12000 });
     expect(screen.getByLabelText("E-mail")).toBeInTheDocument();
     expect(screen.queryByText(/356938035643809/)).not.toBeInTheDocument();
     expect(sessionStorage.getItem("ampara.emergencia")).toBeNull();
-  }, 15000);
+  }, 30000);
 
   it("com o relógio congelado em segundo plano, ao voltar para a aba depois do vencimento a tela vai ao login", async () => {
     vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "Date"] });

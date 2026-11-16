@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { ApiErro, api } from "../api/cliente";
-import type { OcorrenciaDto } from "../api/tipos";
+import type { EstadoOcorrencia, OcorrenciaDto } from "../api/tipos";
+import { Etapas } from "../componentes/Etapas";
+import { FaixaDeMarca } from "../componentes/FaixaDeMarca";
+import { IconeAlerta, IconeCheck, IconeFechar } from "../componentes/Icones";
 
 type Fase = "inicio" | "confirmando" | "enviando" | "avisado";
 
@@ -13,6 +16,12 @@ const hora = (d: Date) =>
   d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", timeZone: "America/Sao_Paulo" });
 const dataHora = (iso: string) =>
   new Date(iso).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Sao_Paulo" });
+
+const ICONE_ESTADO: Record<EstadoOcorrencia, () => JSX.Element> = {
+  Aberta: () => <IconeAlerta tamanho={18} />,
+  Cancelada: () => <IconeFechar tamanho={18} />,
+  Encerrada: () => <IconeCheck tamanho={18} />,
+};
 
 export function Painel({
   aoSair,
@@ -75,54 +84,82 @@ export function Painel({
   }
 
   return (
-    <main className="tela">
-      <h1>Ampara — Emergência</h1>
+    <>
+      <FaixaDeMarca aoSair={aoSair} />
+      <main className="tela">
+        <div className="cabeca">
+          <Etapas passo={1} />
+          <h1>Avise seus guardiões</h1>
+        </div>
 
-      {fase === "avisado" && ocorrenciaId ? (
-        <section className="confirmado" aria-live="polite">
-          <p className="grande">Seus guardiões foram avisados. <span>({avisadoEm ? hora(avisadoEm) : ""})</span></p>
-          <button type="button" onClick={() => aoMarcar(ocorrenciaId)}>Marcar onde foi roubado</button>
-        </section>
-      ) : fase === "confirmando" ? (
-        <section className="confirmar" role="alertdialog" aria-labelledby="pergunta">
-          <p id="pergunta" className="grande">Avisar meus guardiões agora?</p>
-          <div className="linha">
-            <button type="button" className="alarme" onClick={avisar}>Sim, avisar</button>
-            <button type="button" className="secundario" onClick={() => setFase("inicio")}>Não</button>
-          </div>
-        </section>
-      ) : (
-        <>
-          {erro && <p className="erro" role="alert">{erro}</p>}
-          <button type="button" className="alarme gigante" disabled={fase === "enviando"} onClick={() => setFase("confirmando")}>
-            Preciso de ajuda agora
-          </button>
-        </>
-      )}
-
-      <section className="lista" aria-labelledby="titulo-lista">
-        <h2 id="titulo-lista">Suas ocorrências</h2>
-        {erroLista ? (
-          <div role="alert">
-            <p className="erro">{erroLista}</p>
-            <button type="button" className="secundario" onClick={() => void carregar()}>Tentar de novo</button>
-          </div>
-        ) : lista === null ? (
-          <p>Carregando…</p>
-        ) : lista.length === 0 ? (
-          <p className="vazio">Nenhuma ocorrência ainda.</p>
+        {fase === "avisado" && ocorrenciaId ? (
+          <section className="confirmado" aria-live="polite">
+            <div className="selo">
+              <span className="selo-icone"><IconeCheck tamanho={28} /></span>
+              <p className="grande">Seus guardiões foram avisados.</p>
+            </div>
+            <p className="apoio">
+              Às <time>{avisadoEm ? hora(avisadoEm) : ""}</time>. Agora marque no mapa onde o celular foi roubado: isso ajuda no BO.
+            </p>
+            <div className="botoes">
+              <button type="button" onClick={() => aoMarcar(ocorrenciaId)}>Marcar onde foi roubado</button>
+            </div>
+          </section>
+        ) : fase === "confirmando" ? (
+          <section className="confirmar" role="alertdialog" aria-labelledby="pergunta">
+            <p id="pergunta" className="grande">Avisar meus guardiões agora?</p>
+            <div className="botoes">
+              <button type="button" className="alarme sim" onClick={avisar}>Sim, avisar</button>
+              <button type="button" className="secundario" onClick={() => setFase("inicio")}>Não</button>
+            </div>
+          </section>
         ) : (
-          <ul>
-            {lista.map((o) => (
-              <li key={o.id}>
-                <strong>{o.estado}</strong> <span>{dataHora(o.iniciadaEm)}</span>
-              </li>
-            ))}
-          </ul>
+          <>
+            <p className="apoio">Se o seu celular foi roubado, toque no botão. Seus guardiões recebem o alarme.</p>
+            {erro && (
+              <p className="erro" role="alert">
+                <IconeAlerta />
+                <span>{erro}</span>
+              </p>
+            )}
+            <button type="button" className="alarme gigante" disabled={fase === "enviando"} onClick={() => setFase("confirmando")}>
+              Preciso de ajuda agora
+            </button>
+          </>
         )}
-      </section>
 
-      <button type="button" className="secundario sair" onClick={aoSair}>Sair e apagar tudo desta aba</button>
-    </main>
+        <section className="lista" aria-labelledby="titulo-lista">
+          <h2 id="titulo-lista">Suas ocorrências</h2>
+          {erroLista ? (
+            <div role="alert" className="cartao">
+              <p className="erro">
+                <IconeAlerta />
+                <span>{erroLista}</span>
+              </p>
+              <button type="button" className="secundario" onClick={() => void carregar()}>Tentar de novo</button>
+            </div>
+          ) : lista === null ? (
+            <p className="carregando" role="status">Carregando…</p>
+          ) : lista.length === 0 ? (
+            <p className="vazio">Nenhuma ocorrência ainda.</p>
+          ) : (
+            <ul>
+              {lista.map((o) => {
+                const Icone = ICONE_ESTADO[o.estado] ?? ICONE_ESTADO.Cancelada;
+                return (
+                  <li key={o.id}>
+                    <span className={`etiqueta etiqueta-${String(o.estado).toLowerCase()}`}>
+                      <Icone />
+                      {o.estado}
+                    </span>
+                    <span className="apoio num">{dataHora(o.iniciadaEm)}</span>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </section>
+      </main>
+    </>
   );
 }
