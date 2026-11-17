@@ -636,4 +636,34 @@ Resultado: 9 testes novos (638 no app), `tsc --noEmit` sem erros. O login consul
 
 Resultado: 4 testes novos (642 no app), `tsc --noEmit` sem erros. Ajustes e Início têm o botão; o contador mostra "Vale por 23:59:52" e "Vale por 09:05". Na suíte completa 5 suítes sem relação estouraram o tempo por disputa de CPU com outra sessão e passaram ao rodar de novo.
 
+### 101. Etapa de design: auditoria do app e das páginas
+
+> Há uma nova etapa de design: analise o app e as páginas e siga as regras de design do projeto (skill de design obrigatória, DESIGN.md mostrado antes de codar, prints reais e crítica antes de dar uma tela por pronta). Audite o app Expo com a rubrica de dez categorias e o teste do tronco, critique web-emergencia e web-painel-risco e revise a página de apresentação; proponha tokens sem mexer em rotas, campos nem contratos.
+
+Resultado: auditoria do app (Design B, AI Slop A-), sistema proposto em `app/MOBILE-DESIGN.md` com tokens aditivos, `DESIGN.md` da web ("A mão no ombro") e três críticas em `*/docs/design/`. Quatro decisões de risco foram aprovadas pelo Pedro (botão de alarme ancorado, área segura, aba ativa sem depender de cor, onboarding com voltar).
+
+### 102. Sistema de design e telas do app
+
+> Aplique o sistema de design aprovado no app: base primeiro (tokens, Texto, Botão, Campo, Ícone, BarraAcao, haptics, reanimated, gesture-handler), depois uma tela por vez na ordem do alarme do guardião, início da vítima, rota e BO, onboarding e ajustes, mapa e relato. Não mude rotas, nomes de campo nem contratos; mantenha os textos que os testes usam; corrija o aviso de risco do mapa.
+
+Resultado: base e cinco telas em commits separados (b9adc3f a ff22d65), 688 testes e `tsc --noEmit` sem erros. Aviso de risco do mapa corrigido (a causa estava no código e foi confirmada no aparelho). Quedas intermitentes de teste sob carga foram tratadas com folga de tempo.
+
+### 103. Páginas web e apresentação na marca
+
+> Faça o polish da web-emergencia e do painel de risco com a skill de design para interface de produto, seguindo o DESIGN.md (Manrope empacotada, vermelho só no alarme, foco visível, alvos de 48 px), e refaça a página de apresentação na marca do app, com a simulação do alarme.
+
+Resultado: web-emergencia 22/40 para 28/40 e painel 24/40 para 28/40 na crítica independente, testes 69 e 67 passando; apresentação de 6,9 para 7,9 na revisão.
+
+### 104. Prints reais e crítica visual
+
+> Compile o APK de release com as libs nativas novas, instale no emulador, tire os prints de cada tela com conta sintética, rode uma crítica independente por duas lentes sobre os prints reais, verifique cada achado no código e corrija só os confirmados.
+
+Resultado: 24 prints do APK real; 15 achados confirmados e 4 falsos; correções em três lotes (0d1f989, df09a7c, 3d31daf) e prints refeitos. Descobertas do teste ponta a ponta: o mapa fica vazio fora da capital (agora cai em Pinheiros com aviso, 00f8f6e) e o interruptor de guardião volta desligado ao reabrir a conta.
+
+### 105. README final do app e entrega do Mobile
+
+> Escreva o README final do app (ficha da CitizenTech, como rodar, APK, prints, acessibilidade, limites), registre os prompts da etapa de design e atualize a pasta de entrega de Mobile com o que existe de verdade, conferindo cada caminho citado.
+
+Resultado: `app/README.md` final, entradas 101 a 105 neste arquivo e `entrega/05-mobile/ENVIAR.md` reescrito com os caminhos conferidos. Falta o vídeo de 3 minutos, os RMs e a decisão sobre publicar o APK em release.
+
 <!-- Acrescente aqui os próximos prompts usados pela equipe. -->

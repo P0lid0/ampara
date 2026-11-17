@@ -45,3 +45,6 @@ ml/dados/processados/
 .ipynb_checkpoints/
 .taste-skill/
 ml/saida/*.log
+
+# APK de release (99 MB): fora do Git; entrega por release do GitHub so com decisao da equipe
+app/apk/
