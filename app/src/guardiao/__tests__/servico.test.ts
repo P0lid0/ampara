@@ -165,6 +165,8 @@ describe('efeitos do hub', () => {
     opcoes.aoEvento({ tipo: 'AlertaDisparado', dado: disparo });
     await drenar();
     ativos.mockResolvedValue([]);
+    // a chegada precisa ser anterior ao pedido (o código compara em milissegundos)
+    await new Promise((r) => setTimeout(r, 5));
     opcoes.aoReconectar();
     await drenar();
     expect(notifee.cancelNotification).toHaveBeenCalledWith('a1');
