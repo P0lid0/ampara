@@ -2,7 +2,7 @@
 // senhas, BO), cada um com o horário em que foi feito. A ordem é sugestão, não trava nada. As contas
 // vêm da ocorrência (as da vítima); o app não baixa o catálogo.
 // Desenho: cartões brancos (verde-claro quando feitos), ações de contato com ícone, e o próximo passo
-// ancorado na base, sob o polegar (BarraAcao).
+// a barra da base só aparece com tudo feito (BarraAcao).
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
@@ -124,8 +124,7 @@ export default function PassoAPasso() {
   const abrir = (url: string) => void Linking.openURL(url).catch(() => undefined);
   const total = ORDEM_PASSOS.length;
   const feitosN = ORDEM_PASSOS.filter((p) => feitos[p]).length;
-  // O primeiro passo ainda aberto vai para a barra da base, sob o polegar; a ordem segue sendo sugestão.
-  const proximo = ocorrencia ? ORDEM_PASSOS.find((p) => !feitos[p]) : undefined;
+  const todosFeitos = Boolean(ocorrencia) && feitosN === total;
 
   return (
     <View style={estilos.fundo}>
@@ -214,16 +213,7 @@ export default function PassoAPasso() {
           : null}
       </ScrollView>
 
-      {proximo ? (
-        <BarraAcao>
-          <Botao
-            rotulo={`Marcar ${TITULOS[proximo]} como feito`}
-            carregando={enviando.has(proximo)}
-            onPress={() => void marcar(proximo)}
-          />
-        </BarraAcao>
-      ) : null}
-      {ocorrencia && !proximo ? (
+      {todosFeitos ? (
         <BarraAcao>
           <View style={estilos.tudoFeito} accessibilityLiveRegion="polite">
             <Icone nome="ok" cor={cores.tinta} />
@@ -271,8 +261,8 @@ const estilos = StyleSheet.create({
   fundo: { flex: 1, backgroundColor: cores.areia },
   tela: { padding: espacos.m, gap: espacos.m },
   progresso: { gap: espacos.p },
-  trilho: { height: 8, borderRadius: 4, backgroundColor: cores.areiaFunda, overflow: 'hidden' },
-  cheio: { height: '100%', backgroundColor: cores.petroleo, borderRadius: 4 },
+  trilho: { height: 8, borderRadius: 4, backgroundColor: cores.bordaSuave, overflow: 'hidden' },
+  cheio: { height: '100%', backgroundColor: cores.esmeralda, borderRadius: 4 },
   cartao: {
     borderWidth: bordas.fina,
     borderColor: cores.bordaSuave,

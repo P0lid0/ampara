@@ -56,6 +56,7 @@ export default function Layout() {
     >
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+      <Stack.Screen name="entrar" options={{ title: 'Ampara' }} />
     </Stack>
     </GestureHandlerRootView>
   );

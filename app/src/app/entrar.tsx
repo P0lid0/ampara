@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Keyboard, Platform, StyleSheet, View } from 'react-native';
 import { ApiErro, MSG_PADRAO } from '../api/cliente';
 import { criarConta, entrar, entrarComoEmergencia, limparMotivoSaida, useMotivoSaida } from '../auth/sessao';
 import { abrirBanco } from '../db/db';
@@ -44,6 +44,17 @@ export default function Entrar() {
   const [palavra, setPalavra] = useState('');
   const [erro, setErro] = useState<string | undefined>();
   const [carregando, setCarregando] = useState(false);
+  // Com o teclado aberto a barra de ação ocuparia metade do campo: só o botão primário fica.
+  const [tecladoAberto, setTecladoAberto] = useState(false);
+  useEffect(() => {
+    const ios = Platform.OS === 'ios';
+    const a = Keyboard.addListener(ios ? 'keyboardWillShow' : 'keyboardDidShow', () => setTecladoAberto(true));
+    const f = Keyboard.addListener(ios ? 'keyboardWillHide' : 'keyboardDidHide', () => setTecladoAberto(false));
+    return () => {
+      a.remove();
+      f.remove();
+    };
+  }, []);
   const refSenha = useRef<InstanciaCampo>(null);
   const refEmail = useRef<InstanciaCampo>(null);
   const refCodigo = useRef<InstanciaCampo>(null);
@@ -96,8 +107,8 @@ export default function Entrar() {
   const acao = (
     <>
       <Botao rotulo={rotuloEnviar} onPress={enviar} carregando={carregando} />
-      {modo !== 'entrar' ? <Botao rotulo="Já tenho conta" variante="texto" onPress={() => trocar('entrar')} /> : null}
-      {modo === 'entrar' ? <Botao rotulo="Criar conta" variante="texto" onPress={() => trocar('criar')} /> : null}
+      {!tecladoAberto && modo !== 'entrar' ? <Botao rotulo="Já tenho conta" variante="texto" onPress={() => trocar('entrar')} /> : null}
+      {!tecladoAberto && modo === 'entrar' ? <Botao rotulo="Criar conta" variante="texto" onPress={() => trocar('criar')} /> : null}
     </>
   );
 

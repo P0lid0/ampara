@@ -36,6 +36,17 @@ const MSG_ENCERRADO: Record<MotivoEncerramento, string> = {
 /** O que o toque faz, dito antes do toque (também é a frase anunciada ao leitor de tela). */
 export const FRASE_ACAO = 'Toque em Estou ciente para avisar que você vai ajudar.';
 
+/** Há quanto tempo o alerta saiu, em palavras curtas (calculado no cliente). */
+export function tempoRelativo(em: string, agora: number): string {
+  const t = new Date(em).getTime();
+  if (Number.isNaN(t)) return '';
+  const min = Math.max(0, Math.floor((agora - t) / 60000));
+  if (min < 1) return 'agora mesmo';
+  if (min < 60) return `há ${min} min`;
+  const h = Math.floor(min / 60);
+  return h < 24 ? `há ${h} h` : `há ${Math.floor(h / 24)} d`;
+}
+
 type Fase = 'tocando' | 'enviando' | 'erro' | 'encerrado' | 'confirmado' | 'ausente';
 
 /** 408 e 429 são transitórios: tratados como rede, com nova tentativa. */
@@ -206,6 +217,13 @@ export default function Alarme() {
 
 
   const hora = alerta ? horaLocal(alerta.em) : '';
+  const [agora, setAgora] = useState(() => Date.now());
+  useEffect(() => {
+    const i = setInterval(() => setAgora(Date.now()), 30000);
+    return () => clearInterval(i);
+  }, []);
+  const relativo = alerta ? tempoRelativo(alerta.em, agora) : '';
+  const voltarTravado = fase === 'tocando' || fase === 'enviando';
   const fimDeLinha = fase === 'encerrado' || fase === 'ausente';
 
   // Uma ação por fase, sempre no mesmo lugar (base, 64 dp): o polegar não procura o botão.
@@ -248,10 +266,15 @@ export default function Alarme() {
           </>
         ) : (
           <>
-            <Icone nome="alerta" tamanho={40} cor={cores.sobreAlarme} />
+            <Icone nome="alerta" tamanho={64} cor={cores.sobreAlarme} />
             <Texto variante="exibicao" style={estilos.sobre}>
               {alerta ? `${nome} precisa de ajuda` : 'Alerta'}
             </Texto>
+            {relativo ? (
+              <Texto variante="corpoForte" style={estilos.sobre}>
+                {relativo}
+              </Texto>
+            ) : null}
 
             {fase === 'tocando' ? (
               <Texto variante="corpoForte" style={estilos.sobre}>
@@ -277,9 +300,8 @@ export default function Alarme() {
               </Texto>
             ) : null}
 
-            {alerta ? <Texto style={estilos.sobre}>{`Origem do aviso: ${rotuloOrigem(alerta.origem)}.`}</Texto> : null}
-            {fase === 'tocando' || fase === 'enviando' ? (
-              <Texto style={estilos.sobre}>O botão voltar fica travado até você confirmar.</Texto>
+            {alerta ? (
+              <Texto variante="legenda" style={estilos.sobre}>{`Origem do aviso: ${rotuloOrigem(alerta.origem)}.`}</Texto>
             ) : null}
           </>
         )}
@@ -287,6 +309,11 @@ export default function Alarme() {
 
       {/* Faixa de baixo: a ação, ancorada sob o polegar e acima da barra de gestos. */}
       <BarraAcao semSombra>
+        {voltarTravado ? (
+          <Texto variante="legenda" style={estilos.sobre}>
+            O botão voltar fica travado até você confirmar.
+          </Texto>
+        ) : null}
         <Botao
           rotulo={acao.rotulo}
           variante="sobreAlarme"
@@ -310,7 +337,7 @@ const estilos = StyleSheet.create({
     paddingBottom: espacos.p,
   },
   meio: { flex: 1 },
-  conteudo: { flexGrow: 1, paddingHorizontal: espacos.m, paddingVertical: espacos.g, gap: espacos.m, alignItems: 'flex-start' },
+  conteudo: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: espacos.m, paddingVertical: espacos.g, gap: espacos.m, alignItems: 'flex-start' },
   linha: { flexDirection: 'row', alignItems: 'flex-start', gap: espacos.p },
   fluxo: { flex: 1 },
   sobre: { color: cores.sobreAlarme },
