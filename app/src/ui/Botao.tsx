@@ -14,15 +14,17 @@ export type BotaoProps = {
   dica?: string;
   // Batida leve ao confirmar o toque (expo-haptics). Desligue onde a tela já vibra por conta própria.
   haptica?: boolean;
+  // Rótulo falado quando difere do texto visível (ex.: "Marcar como feito" visível, com o nome do item falado).
+  rotuloFalado?: string;
 };
 
 type Aparencia = { fundo: string; texto: string; borda: number; corBorda: string; altura: number; ripple: string };
 
 // Pares texto/fundo daqui constam em paresDeTexto (contraste testado). Hierarquia por preenchimento:
-// contorno só no secundário (1 px); primário, perigo e sobreAlarme são cheios.
+// contorno só no secundário (2 dp, branco com texto petróleo: não parece desabilitado sobre cartão); primário, perigo e sobreAlarme são cheios.
 const aparencia: Record<VarianteBotao, Aparencia> = {
   primario: { fundo: cores.esmeralda, texto: cores.tinta, borda: 0, corBorda: cores.esmeralda, altura: tamanhos.alvoAcao, ripple: cores.petroleo },
-  secundario: { fundo: cores.areiaFunda, texto: cores.petroleo, borda: bordas.fina, corBorda: cores.petroleo, altura: tamanhos.alvoMin, ripple: cores.bordaSuave },
+  secundario: { fundo: cores.branco, texto: cores.petroleo, borda: bordas.padrao, corBorda: cores.petroleo, altura: tamanhos.alvoMin, ripple: cores.bordaSuave },
   perigo: { fundo: cores.alarme, texto: cores.sobreAlarme, borda: 0, corBorda: cores.alarme, altura: tamanhos.alvoAcao, ripple: cores.sobreAlarme },
   // Sobre o fundo vermelho do alarme: botão areia com texto tinta, 64 dp.
   sobreAlarme: { fundo: cores.areia, texto: cores.tinta, borda: 0, corBorda: cores.areia, altura: tamanhos.alvoAlarme, ripple: cores.bordaSuave },
@@ -37,6 +39,7 @@ export function Botao({
   carregando,
   dica,
   haptica = true,
+  rotuloFalado,
 }: BotaoProps) {
   const inativo = Boolean(desabilitado || carregando);
   const a = aparencia[variante];
@@ -50,7 +53,7 @@ export function Botao({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={rotulo}
+      accessibilityLabel={rotuloFalado ?? rotulo}
       accessibilityHint={dica}
       accessibilityState={{ disabled: inativo, busy: Boolean(carregando) }}
       disabled={inativo}

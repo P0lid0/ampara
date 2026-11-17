@@ -4,6 +4,7 @@ import type { PassoOnboarding } from '../onboarding/passos';
 import { cores, espacos } from '../theme/tokens';
 import { BarraAcao } from './BarraAcao';
 import { ProgressoPassos } from './ProgressoPassos';
+import { Icone, type NomeIcone } from './Icone';
 import { Texto } from './Texto';
 
 export type TelaPassoProps = {
@@ -11,6 +12,8 @@ export type TelaPassoProps = {
   passo?: PassoOnboarding;
   // Um título só por tela (variante `titulo`).
   titulo: string;
+  // Ícone grande (72 dp, petróleo) acima do título: ocupa o vazio das telas curtas. Decorativo (escondido do leitor).
+  icone?: NomeIcone;
   children: ReactNode;
   // Ação principal e secundárias, ancoradas na base (BarraAcao: área segura e teclado).
   acao: ReactNode;
@@ -18,11 +21,12 @@ export type TelaPassoProps = {
 
 // Moldura das telas de passo e de entrada: contador de passo, um título, conteúdo que rola e a ação
 // ancorada na base. O conteúdo rola por cima do respiro; a barra nunca some com a rolagem.
-export function TelaPasso({ passo, titulo, children, acao }: TelaPassoProps) {
+export function TelaPasso({ passo, icone, titulo, children, acao }: TelaPassoProps) {
   return (
     <View style={estilos.fundo}>
       <ScrollView style={estilos.rolagem} contentContainerStyle={estilos.conteudo} keyboardShouldPersistTaps="handled">
         {passo ? <ProgressoPassos passo={passo} /> : null}
+        {icone ? <Icone nome={icone} tamanho={72} cor={cores.petroleo} /> : null}
         <Texto variante="titulo">{titulo}</Texto>
         {children}
       </ScrollView>

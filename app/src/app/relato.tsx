@@ -154,7 +154,9 @@ export default function Relato() {
         <Texto variante="titulo">O que você viu?</Texto>
 
         <View style={estilos.local}>
-          <Icone nome="ponto" tamanho={20} cor={cores.petroleo} />
+          <View style={estilos.iconeLocal}>
+            <Icone nome="ponto" tamanho={20} cor={cores.petroleo} />
+          </View>
           <Texto style={estilos.fluxo}>
             {escolhido ? 'O relato vai para o ponto escolhido no mapa.' : 'O relato vai para o lugar onde você está agora.'}
           </Texto>
@@ -226,7 +228,9 @@ const estilos = StyleSheet.create({
   rolagem: { flex: 1 },
   tela: { padding: espacos.m, paddingBottom: espacos.g, gap: espacos.m },
   fluxo: { flex: 1 },
-  local: { flexDirection: 'row', alignItems: 'center', gap: espacos.p },
+  local: { flexDirection: 'row', alignItems: 'flex-start', gap: espacos.p },
+  // O ícone de 20 dp alinha com a primeira linha do texto (altura de linha 26).
+  iconeLocal: { marginTop: 3 },
   regra: {
     flexDirection: 'row', alignItems: 'center', gap: espacos.pm, padding: espacos.m,
     borderRadius: raios.m, backgroundColor: cores.areiaFunda,

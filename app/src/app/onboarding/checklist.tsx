@@ -54,6 +54,7 @@ export default function OnboardingChecklist() {
   return (
     <TelaPasso
       passo="checklist"
+      icone="ok"
       titulo="Antes que aconteça"
       acao={<Botao rotulo="Continuar" onPress={() => void continuar()} />}
     >
@@ -72,7 +73,8 @@ export default function OnboardingChecklist() {
               <Texto variante="rotulo">{feito ? 'Feito' : 'Falta fazer'}</Texto>
             </View>
             <Botao
-              rotulo={`${feito ? 'Desmarcar' : 'Marcar como feito'}: ${i.titulo}`}
+              rotulo={feito ? 'Desmarcar' : 'Marcar como feito'}
+              rotuloFalado={`${feito ? 'Desmarcar' : 'Marcar como feito'}: ${i.titulo}`}
               variante="secundario"
               onPress={() => void alternar(i.id)}
             />

@@ -132,7 +132,7 @@ export default function OnboardingChaveiro() {
   }
 
   return (
-    <TelaPasso passo="chaveiro" titulo="Seu chaveiro" acao={acao}>
+    <TelaPasso passo="chaveiro" icone="chaveiro" titulo="Seu chaveiro" acao={acao}>
       <Texto variante="corpoForte">O chaveiro é um botão que você leva com você.</Texto>
       <Texto>Um clique dispara o alerta aos seus guardiões. Leia o QR dele ou digite o código para parear. Pode fazer isso depois.</Texto>
 

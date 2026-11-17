@@ -18,6 +18,6 @@ export function ProgressoPassos({ passo }: { passo: PassoOnboarding }) {
 
 const estilos = StyleSheet.create({
   bloco: { gap: 4 },
-  trilho: { height: 8, borderRadius: 4, backgroundColor: cores.branco, borderWidth: 1, borderColor: cores.petroleo },
-  cheio: { height: '100%', backgroundColor: cores.petroleo, borderRadius: 4 },
+  trilho: { height: 4, borderRadius: 2, backgroundColor: cores.bordaSuave, overflow: 'hidden' },
+  cheio: { height: '100%', backgroundColor: cores.petroleo, borderRadius: 2 },
 });

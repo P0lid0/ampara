@@ -2,7 +2,7 @@
 // Estilo raster inline (tiles do OpenStreetMap), sem chave e sem download de estilo.
 import { Camera, GeoJSONSource, Layer, Map, Marker } from '@maplibre/maplibre-react-native';
 import type { ReactNode } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, useWindowDimensions, View } from 'react-native';
 import { cores, coresRisco, espacos } from '../theme/tokens';
 import type { Bbox } from '../api/tipos';
 import { Texto } from './Texto';
@@ -35,9 +35,12 @@ export type MapaBaseProps = {
 };
 
 export function MapaBase({ centro, zoom, children, descricao, aoParar }: MapaBaseProps) {
+  // Altura proporcional à tela (~42%), nunca abaixo de 280.
+  const { height } = useWindowDimensions();
+  const altura = Math.max(280, Math.round(height * 0.42));
   return (
     <View
-      style={estilos.caixa}
+      style={[estilos.caixa, { height: altura }]}
       accessible={Boolean(descricao)}
       accessibilityLabel={descricao}
       importantForAccessibility={descricao ? 'yes' : 'auto'}
@@ -163,7 +166,7 @@ const estilos = StyleSheet.create({
     borderWidth: 3,
     borderColor: cores.branco,
   },
-  caixa: { height: 280, borderRadius: 12, overflow: 'hidden', borderWidth: 2, borderColor: cores.petroleo },
+  caixa: { borderRadius: 12, overflow: 'hidden', borderWidth: 2, borderColor: cores.petroleo },
   mapa: { flex: 1 },
   atribuicao: {
     position: 'absolute',

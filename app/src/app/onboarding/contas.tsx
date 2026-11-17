@@ -85,7 +85,7 @@ export default function OnboardingContas() {
   );
 
   return (
-    <TelaPasso passo="contas" titulo="Seus bancos e sua operadora" acao={acao}>
+    <TelaPasso passo="contas" icone="telefone" titulo="Seus bancos e sua operadora" acao={acao}>
       <Texto>Marque onde você tem conta e qual é a sua operadora.</Texto>
       <Texto>Se o celular for roubado, você vê aqui o telefone e o link para bloquear cada um. Pode fazer isso depois.</Texto>
 
@@ -118,7 +118,7 @@ export default function OnboardingContas() {
                 </Texto>
                 <Texto variante="legenda">{TIPO_TEXTO[c.tipo]}</Texto>
                 <Texto variante="legenda">{linhaTelefone(c.telefone)}</Texto>
-                <Texto variante="legenda">{`Link: ${c.link}`}</Texto>
+                <Texto variante="legenda">{`Link: ${c.link.replace(/^https?:\/\//, '')}`}</Texto>
                 {c.conferidoEm ? <Texto variante="legenda">{`Conferido em ${dataBr(c.conferidoEm)}`}</Texto> : null}
               </View>
             </View>

@@ -103,20 +103,20 @@ export default function OnboardingGuardioes() {
   const temGuardiao = guardioes.length > 0;
   const acao = (
     <>
-      {temGuardiao ? <Botao rotulo="Continuar" onPress={() => void seguir()} /> : null}
+      {temGuardiao || convite ? <Botao rotulo="Continuar" onPress={() => void seguir()} /> : null}
       <Botao
-        rotulo="Convidar"
-        variante={temGuardiao ? 'secundario' : 'primario'}
+        rotulo={convite ? 'Gerar outro código' : 'Convidar'}
+        variante={convite ? 'texto' : temGuardiao ? 'secundario' : 'primario'}
         desabilitado={cheio}
         carregando={ocupado}
         onPress={() => void convidar()}
       />
-      {!temGuardiao ? <Botao rotulo="Fazer depois" variante="texto" onPress={() => void seguir()} /> : null}
+      {!temGuardiao && !convite ? <Botao rotulo="Fazer depois" variante="texto" onPress={() => void seguir()} /> : null}
     </>
   );
 
   return (
-    <TelaPasso passo="guardioes" titulo="Seus guardiões" acao={acao}>
+    <TelaPasso passo="guardioes" icone="link" titulo="Seus guardiões" acao={acao}>
       <Texto variante="corpoForte">Até 3 pessoas de confiança recebem o alerta se o seu celular for roubado.</Texto>
       <Texto>Para convidar, mostre o código ou o QR a quem você escolher. Pode fazer isso depois.</Texto>
 
@@ -166,7 +166,7 @@ export default function OnboardingGuardioes() {
             <QRCode value={payloadDoConvite(convite.codigo)} size={200} backgroundColor={cores.branco} color={cores.tinta} />
           </View>
           {vencido ? (
-            <Aviso mensagem="Esse código venceu. Toque em Convidar para gerar outro." />
+            <Aviso mensagem="Esse código venceu. Toque em Gerar outro código." />
           ) : (
             <Texto variante="corpoForte" accessibilityLiveRegion="polite">{`Vale por ${mmss(segundos)}`}</Texto>
           )}

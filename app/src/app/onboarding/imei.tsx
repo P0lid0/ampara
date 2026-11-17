@@ -102,7 +102,7 @@ export default function OnboardingImei() {
   }
 
   return (
-    <TelaPasso passo="imei" titulo={titulos[passo]} acao={acao}>
+    <TelaPasso passo="imei" icone="info" titulo={titulos[passo]} acao={acao}>
       {passo === 0 ? (
         <>
           <Texto variante="corpoForte">Na hora do susto você não vai lembrar do IMEI. Guarde agora.</Texto>

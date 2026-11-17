@@ -116,7 +116,7 @@ export default function OnboardingConsentimento() {
     );
 
   return (
-    <TelaPasso passo="consentimento" titulo={TITULOS[etapa]} acao={acao}>
+    <TelaPasso passo="consentimento" icone="rota" titulo={TITULOS[etapa]} acao={acao}>
       {etapa === 'consentimento' ? (
         <>
           <Texto variante="corpoForte">Só você vê a sua rota.</Texto>
