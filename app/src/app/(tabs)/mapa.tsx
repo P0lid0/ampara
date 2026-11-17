@@ -6,6 +6,7 @@ import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { api } from '../../api/endpoints';
+import { areaId } from '../../mapa/area';
 import type { Bbox, CamadaPontoDto, RelatoDto, RiscoDto } from '../../api/tipos';
 import {
   celulasDoMapa, consultaRisco, idadeRelato, PINHEIROS, relatoVisivel, ROTULO_SEM_DADO, ROTULO_TIPO_RELATO, rotuloClasse,
@@ -84,7 +85,12 @@ export default function Mapa() {
               Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced }),
               limite,
             ]);
-            ponto = { lat: p.coords.latitude, lng: p.coords.longitude };
+            if (areaId(p.coords.latitude, p.coords.longitude) === 'fora') {
+              // Fora da grade da capital não há risco para mostrar (ex.: emulador padrão na Califórnia).
+              texto = 'Você está fora da cidade de São Paulo, onde há dados: mostrando a região de Pinheiros.';
+            } else {
+              ponto = { lat: p.coords.latitude, lng: p.coords.longitude };
+            }
           } finally {
             if (relogio) clearTimeout(relogio);
           }

@@ -86,6 +86,20 @@ describe('aba Mapa', () => {
     expect((bbox.minLng + bbox.maxLng) / 2).toBeCloseTo(-46.7019515, 3);
   });
 
+  it('localização fora da capital (emulador na Califórnia) centraliza em Pinheiros e avisa', async () => {
+    jest.mocked(Location.getCurrentPositionAsync).mockResolvedValueOnce({
+      coords: { latitude: 37.422, longitude: -122.084 },
+    } as never);
+    await render(<Mapa />);
+    expect(
+      await screen.findByText('Você está fora da cidade de São Paulo, onde há dados: mostrando a região de Pinheiros.'),
+    ).toBeTruthy();
+    await waitFor(() => expect(consultar).toHaveBeenCalled());
+    const bbox = consultar.mock.calls[0][0];
+    expect((bbox.minLat + bbox.maxLat) / 2).toBeCloseTo(-23.567249, 3);
+    expect((bbox.minLng + bbox.maxLng) / 2).toBeCloseTo(-46.7019515, 3);
+  });
+
   it('mover o mapa consulta de novo só depois de 500 ms parado (debounce)', async () => {
     await render(<Mapa />);
     await waitFor(() => expect(consultar).toHaveBeenCalledTimes(1));
