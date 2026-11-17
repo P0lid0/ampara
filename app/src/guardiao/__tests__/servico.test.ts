@@ -52,7 +52,8 @@ it('registra o serviço em primeiro plano no escopo do módulo', () => {
   expect(registrosNoImport).toBe(1);
 });
 
-it('sem guardiao_ativo = "1" não sobe serviço nem conecta', async () => {
+it('com guardiao_ativo = "0" não sobe serviço nem conecta', async () => {
+  await sessaoRepo(await abrirBanco()).set('guardiao_ativo', '0');
   await iniciarServicoGuardiao();
   expect(notifee.displayNotification).not.toHaveBeenCalled();
   expect(criarHub).not.toHaveBeenCalled();
@@ -275,7 +276,8 @@ describe('item 8: sessão expirada não desliga o guardião em silêncio', () =>
     expect(notifee.cancelNotification).toHaveBeenCalledWith(ID_AVISO_SESSAO);
   });
 
-  it('quem não é guardião não recebe o aviso ao expirar', async () => {
+  it('quem desligou o papel de guardião não recebe o aviso ao expirar', async () => {
+    await sessaoRepo(await abrirBanco()).set('guardiao_ativo', '0');
     await sair('expirou');
     await drenar();
     const ids = jest.mocked(notifee.displayNotification).mock.calls.map((c) => c[0].id);

@@ -19,7 +19,7 @@ Fim: 2:55.
 
 - API no ar (`http://10.0.2.2:5080` vista do emulador) e página de emergência em `http://localhost:5173`.
 - Permissão de tela cheia liberada no guardião (Android 14: Configurações > Apps > Ampara > Notificações em tela cheia).
-- No guardião: Ajustes > "Sou guardião: receber alarmes" LIGADO (volta desligado ao reabrir a conta); sem isso o alarme não chega.
+- No guardião: Ajustes > "Sou guardião: receber alarmes" LIGADO (já vem ligado por padrão; confira antes de gravar); sem isso o alarme não chega.
 - Um emulador por vez fora da cena do alarme: com dois abertos o computador trava (ANR em série).
 - Confira a frase de orientação do BO ("guarde o protocolo e pergunte à delegacia").
 - Nada de dado real na tela: nomes, e-mails e telefones sintéticos.

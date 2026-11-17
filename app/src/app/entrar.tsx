@@ -70,7 +70,7 @@ export default function Entrar() {
     let vivo = true;
     (async () => {
       try {
-        const ativo = (await sessaoRepo(await abrirBanco()).get('guardiao_ativo')) === '1';
+        const ativo = (await sessaoRepo(await abrirBanco()).get('guardiao_ativo')) !== '0';
         if (vivo) setGuardiaoSemSessao(ativo);
       } catch {
         // sem banco: fica só a frase geral

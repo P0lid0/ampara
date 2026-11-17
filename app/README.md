@@ -54,7 +54,7 @@ npx jest                 # 55 suítes, 688 testes
 
 Para a demonstração completa (alarme, página de emergência e BO) suba também a Ponte Polícia (`ponte-policia/`, porta 8000) e a página de emergência (`web-emergencia/`, porta 5173). No `.env` da raiz use `PONTE_URL=http://127.0.0.1:8000` (não `localhost`: no Windows ele tenta o IPv6 primeiro e estoura o tempo) e `RISCO_CSV` com o caminho absoluto de `ml/saida/risco.csv`.
 
-Para o alarme tocar, o guardião precisa ligar **Ajustes > Sou guardião: receber alarmes** e liberar notificações em tela cheia (Android 14: Configurações > Apps > Ampara > Notificações em tela cheia). Esse interruptor volta desligado quando o app é aberto de novo com uma conta.
+Para o alarme tocar, o guardião precisa estar com **Ajustes > Sou guardião: receber alarmes** ligado (já vem ligado) e liberar notificações em tela cheia (Android 14: Configurações > Apps > Ampara > Notificações em tela cheia). Quem não quiser receber alarmes desliga o interruptor, e a escolha é lembrada.
 
 ## APK
 

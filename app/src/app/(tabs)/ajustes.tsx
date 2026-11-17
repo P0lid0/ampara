@@ -89,7 +89,7 @@ export default function Ajustes() {
         const s = sessaoRepo(await abrirBanco());
         const [g, p, d, c] = await Promise.all([s.get(CHAVE_GUARDIAO), s.get(CHAVE_PLANO_B), s.get(CHAVE_DEMO), s.get(CHAVE_CONSENTIMENTO)]);
         if (!vivo) return;
-        setChaves({ guardiao: g === '1', planoB: p === '1', demo: d === '1' });
+        setChaves({ guardiao: g !== '0', planoB: p === '1', demo: d === '1' });
         setRotaLigada(c === 'sim');
       } catch {
         // sem banco: os interruptores ficam desligados

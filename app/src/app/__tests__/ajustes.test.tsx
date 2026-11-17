@@ -126,6 +126,7 @@ describe('aba Ajustes', () => {
   });
 
   it('"Sou guardião" volta a desligado e avisa por escrito quando o serviço falha', async () => {
+    await sessaoRepo(await abrirBanco()).set('guardiao_ativo', '0');
     jest.mocked(iniciarServicoGuardiao).mockRejectedValueOnce(new Error('falhou'));
     await render(<Ajustes />);
     await fireEvent(await screen.findByLabelText('Sou guardião: receber alarmes'), 'valueChange', true);
@@ -165,11 +166,13 @@ describe('aba Ajustes', () => {
   it('interruptor desligado diz "Desligado" por escrito e ligado diz "Ligado"', async () => {
     await render(<Ajustes />);
     const chave = await screen.findByLabelText('Alarme sem tela cheia');
-    expect(screen.getAllByText('Desligado').length).toBe(3);
-    await fireEvent(chave, 'valueChange', true);
-    await espera();
+    // Sem valor gravado, "Sou guardião" já vem ligado; os outros dois, desligados.
     expect(screen.getAllByText('Ligado').length).toBe(1);
     expect(screen.getAllByText('Desligado').length).toBe(2);
+    await fireEvent(chave, 'valueChange', true);
+    await espera();
+    expect(screen.getAllByText('Ligado').length).toBe(2);
+    expect(screen.getAllByText('Desligado').length).toBe(1);
   });
 
   it('mostra a frase "Sobre"', async () => {

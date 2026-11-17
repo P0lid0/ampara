@@ -98,8 +98,9 @@ describe('tela de entrada', () => {
     await sessaoRepo(await abrirBanco()).apagarTudo();
   });
 
-  it('quem não é guardião não vê o aviso de alarme ao expirar', async () => {
+  it('quem desligou o papel de guardião não vê o aviso de alarme ao expirar', async () => {
     await sessaoRepo(await abrirBanco()).apagarTudo();
+    await sessaoRepo(await abrirBanco()).set('guardiao_ativo', '0');
     await render(<Entrar />);
     await act(async () => {
       await sair('expirou');

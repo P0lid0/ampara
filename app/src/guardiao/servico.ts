@@ -113,7 +113,7 @@ async function conectar(g: number): Promise<void> {
 async function iniciar(): Promise<void> {
   if (hub) return;
   const g = geracao;
-  if ((await sessaoRepo(await abrirBanco()).get('guardiao_ativo')) !== '1') return;
+  if ((await sessaoRepo(await abrirBanco()).get('guardiao_ativo')) === '0') return;
   if (g !== geracao) return;
   // Entrou de novo: o aviso de sessão expirada não vale mais.
   await notifee.cancelNotification(ID_AVISO_SESSAO).catch(() => undefined);
@@ -151,7 +151,7 @@ async function iniciar(): Promise<void> {
   await conectar(g);
 }
 
-/** Sobe o serviço e a conexão do guardião se `sessao.guardiao_ativo === '1'`. Chamadas repetidas são inócuas. */
+/** Sobe o serviço e a conexão do guardião, a menos que `sessao.guardiao_ativo === '0'` (sem valor = ligado). Chamadas repetidas são inócuas. */
 export function iniciarServicoGuardiao(): Promise<void> {
   if (!iniciando) {
     const p: Promise<void> = iniciar().finally(() => {
@@ -202,7 +202,7 @@ export async function pararServicoGuardiao(): Promise<void> {
 /** Sessão expirada com o papel de guardião ligado: avisa em vez de desligar em silêncio. */
 async function avisarSessaoExpirada(): Promise<void> {
   try {
-    if ((await sessaoRepo(await abrirBanco()).get('guardiao_ativo')) !== '1') return;
+    if ((await sessaoRepo(await abrirBanco()).get('guardiao_ativo')) === '0') return;
     await exibirAviso(ID_AVISO_SESSAO, AVISO_SESSAO_TITULO, AVISO_SESSAO_CORPO);
   } catch {
     console.warn('guardiao: falha ao avisar a sessao expirada');
