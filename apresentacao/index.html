@@ -46,11 +46,13 @@
     </div>
   </div>
   <div class="stage" data-ui-stage>
-    <p class="stage-say">60 segundos para o guardião dizer <b>“Estou ciente”</b>. Sem resposta, o alarme passa para o próximo, até três.</p>
+    <div class="stage-txt">
+      <p class="stage-say">60 segundos para o guardião dizer <b>“Estou ciente”</b>. Sem resposta, o alarme passa para o próximo, até três.</p>
+      <p class="stage-cap">Tela do guardião no app, em emulador Android, com dados sintéticos.</p>
+    </div>
     <figure class="phone" id="hero-phone">
-      <img src="img/app-alarme.webp" width="720" height="1467" alt="Tela de alarme do app do guardião, toda vermelha: “Alerta: Ana precisa de ajuda” e o botão “Estou ciente”">
+      <img src="img/app-alarme.webp" width="720" height="873" alt="Tela de alarme do app do guardião, vermelha: “Ana SINTETICO precisa de ajuda”, há 10 minutos, e o botão “Estou ciente”">
     </figure>
-    <p class="stage-cap">Tela do guardião no app, em emulador Android, com dados sintéticos.</p>
   </div>
 </header>
 
@@ -138,7 +140,7 @@
   </div>
 
   <div class="sim-fallback">
-    <img src="img/app-alarme.webp" width="720" height="1467" alt="Tela de alarme do guardião, vermelha, com o botão “Estou ciente”" loading="lazy">
+    <img src="img/app-alarme.webp" width="720" height="873" alt="Tela de alarme do guardião, vermelha, com o botão “Estou ciente”" loading="lazy">
     <p>Esta demonstração precisa de JavaScript. Na tela real, o alarme é vermelho de ponta a ponta e só para com “Estou ciente”.</p>
   </div>
 </section>
@@ -175,76 +177,76 @@
   <div class="spine" aria-hidden="true"><i class="fill" data-spine></i></div>
   <ol class="steps">
     <li class="step s-a">
-      <div class="when" data-rv><span class="t">Antes</span></div>
+      <div class="when" data-rv><span class="t word">Antes</span></div>
       <div class="what" data-rv style="--i:1">
         <h3>O que você não lembraria na hora.</h3>
         <p>O app guarda o IMEI, os bancos, a operadora, até 3 guardiões e a rota dos últimos 7 dias, só para você.</p>
-        <p class="tag ok"><b>Roda hoje</b> no app, em emulador Android.</p>
+        <p class="st ok"><i aria-hidden="true"></i><span><b>Roda hoje</b> no app, em emulador Android.</span></p>
       </div>
-      <figure class="shot" data-rv style="--i:2"><img src="img/app-contas.webp" width="720" height="1467" alt="Tela do app “Bancos e operadora”, com Banco Inter e Banco do Brasil marcados e telefone e link de cada um" loading="lazy"></figure>
+      <figure class="shot s300" data-rv style="--i:2"><img src="img/app-contas.webp" width="720" height="817" alt="Tela do app “Bancos e operadora”, com Banco Inter e Banco do Brasil marcados e telefone e link de cada um" loading="lazy"></figure>
     </li>
-    <li class="step s-b">
+    <li class="step s-b anchor">
       <div class="when" data-rv><span class="t">0 s</span></div>
       <div class="what" data-rv style="--i:1">
         <h3>Um clique, sem celular.</h3>
         <p>O chaveiro manda um evento por MQTT. Outra opção é digitar um código de emergência em outro aparelho. No app, a vítima pareia o chaveiro lendo o QR ou digitando o código.</p>
-        <p class="tag wip"><b>Em construção</b>: o chaveiro está no repositório do Vitor. O ciclo até a API foi provado por script, com broker MQTT público.</p>
+        <p class="st wip"><i aria-hidden="true"></i><span><b>Em construção</b>: o chaveiro está no repositório do Vitor. O ciclo até a API foi provado por script, com broker MQTT público.</span></p>
       </div>
-      <figure class="shot wide" data-rv style="--i:2"><img src="img/app-chaveiro.webp" width="720" height="1467" alt="Tela do app “Seu chaveiro”, com o código para parear e o botão “Achar meu chaveiro”" loading="lazy"></figure>
+      <figure class="shot s420" data-rv style="--i:2"><img src="img/app-chaveiro.webp" width="720" height="539" alt="Tela do app “Seu chaveiro”, com o código para parear e o botão “Achar meu chaveiro”" loading="lazy"></figure>
     </li>
     <li class="step s-c">
-      <div class="when" data-rv><span class="t">0 s</span></div>
+      <div class="when" data-rv><span class="t sub">0 s</span></div>
       <div class="what" data-rv style="--i:1">
         <h3>A API cria a ocorrência uma vez só.</h3>
         <p>Mesmo que o evento chegue cinco vezes, e responde ao chaveiro com um ack.</p>
-        <p class="tag ok"><b>Roda hoje</b>: 480 testes e 14 ataques simulados passando em 15/11.</p>
+        <p class="st ok"><i aria-hidden="true"></i><span><b>Roda hoje</b>: 480 testes e 14 ataques simulados passando em 15/11.</span></p>
       </div>
-      <figure class="shot doc" data-rv style="--i:2"><img src="img/scalar-rotas.png" width="1034" height="742" alt="Documentação Scalar da API do Ampara com os grupos de rotas: alertas, aparelhos, auth, BO, chaveiros, ocorrências, polícia, risco, rota e segurança" loading="lazy"></figure>
+      <figure class="shot s240" data-rv style="--i:2"><img src="img/web-api-grupos.webp" width="575" height="1275" alt="Documentação Scalar da API do Ampara com os grupos de rotas: alertas, aparelhos, auth, BO, camadas, chaveiros, contas, guardiões, ocorrências, polícia, relatos, risco, rota e saúde" loading="lazy"></figure>
     </li>
-    <li class="step s-d">
+    <li class="step s-d anchor">
       <div class="when" data-rv><span class="t">60 s</span></div>
       <div class="what" data-rv style="--i:1">
         <h3>O guardião é acionado.</h3>
         <p>Alarme insistente, em tela cheia, com sirene e vibração até o “Estou ciente”. Sem ele em 60 segundos, a API escala ao próximo guardião.</p>
-        <p class="tag ok"><b>Roda hoje</b> no app, com dados sintéticos. Simule no topo da página.</p>
+        <p class="st ok"><i aria-hidden="true"></i><span><b>Roda hoje</b> no app, com dados sintéticos. Simule no topo da página.</span></p>
       </div>
-      <figure class="shot alarm" data-rv style="--i:2"><img src="img/app-alarme.webp" width="720" height="1467" alt="Alarme do guardião: “Alerta: Ana precisa de ajuda”, página de emergência, e o botão “Estou ciente”" loading="lazy"></figure>
+      <figure class="shot alarm s440" data-rv style="--i:2"><img src="img/app-alarme.webp" width="720" height="873" alt="Alarme do guardião: “Ana SINTETICO precisa de ajuda”, origem do aviso página de emergência, e o botão “Estou ciente”" loading="lazy"></figure>
     </li>
     <li class="step s-e">
-      <div class="when" data-rv><span class="t">minutos</span></div>
+      <div class="when" data-rv><span class="t word">minutos</span></div>
       <div class="what" data-rv style="--i:1">
         <h3>O passo a passo, carimbado.</h3>
         <p>Banco, Celular Seguro, operadora, senhas e BO. Cada passo feito ganha o horário e fica visível para os outros guardiões.</p>
-        <p class="tag ok"><b>Roda hoje</b> no app. Veja os carimbos na simulação.</p>
+        <p class="st ok"><i aria-hidden="true"></i><span><b>Roda hoje</b> no app. Veja os carimbos na simulação.</span></p>
       </div>
-      <figure class="shot" data-rv style="--i:2"><img src="img/app-passo-a-passo.webp" width="720" height="1467" alt="Tela “O que fazer agora” com o passo Banco marcado como feito às 13:49 e o passo Celular Seguro logo abaixo" loading="lazy"></figure>
+      <figure class="shot s300" data-rv style="--i:2"><img src="img/app-passo-a-passo.webp" width="720" height="1157" alt="Tela “O que fazer agora” com o passo Banco marcado como feito às 13:49 e o passo Celular Seguro logo abaixo" loading="lazy"></figure>
     </li>
-    <li class="step s-f">
+    <li class="step s-f anchor">
       <div class="when" data-rv><span class="t">90 min</span></div>
       <div class="what" data-rv style="--i:1">
         <h3>O BO, de outro aparelho.</h3>
         <p>A vítima abre a página de emergência no aparelho de um parente, marca na rota onde e quando foi roubada, e a API gera o texto com local, hora, IMEI e a delegacia mais próxima.</p>
-        <p class="tag ok"><b>Roda hoje</b>: página de emergência com 69 testes passando em 16/11.</p>
+        <p class="st ok"><i aria-hidden="true"></i><span><b>Roda hoje</b>: página de emergência com 69 testes passando em 16/11.</span></p>
       </div>
-      <figure class="shot web" data-rv style="--i:2"><img src="img/web-rota.webp" width="780" height="2272" alt="Página de emergência no celular: “Onde foi roubado”, mapa com a rota, horário 15:28 marcado e o botão “Gerar o BO”" loading="lazy"></figure>
+      <figure class="shot s300" data-rv style="--i:2"><img src="img/web-rota.webp" width="780" height="1935" alt="Página de emergência no celular: “Onde foi roubado”, mapa com a rota, horário 15:39 marcado e o botão “Gerar o BO”" loading="lazy"></figure>
     </li>
     <li class="step s-g">
-      <div class="when" data-rv><span class="t">depois</span></div>
+      <div class="when" data-rv><span class="t word">depois</span></div>
       <div class="what" data-rv style="--i:1">
         <h3>A polícia recebe o mínimo.</h3>
         <p>Com consentimento, a Ponte recebe área de cerca de 500 m, hora e tipo. Sem CPF, nome nem IMEI. O andamento volta ao cidadão.</p>
-        <p class="tag ok"><b>Roda hoje</b>: 225 testes na evidência de 14/11.</p>
+        <p class="st ok"><i aria-hidden="true"></i><span><b>Roda hoje</b>: 225 testes na evidência de 14/11.</span></p>
       </div>
-      <figure class="shot doc tall" data-rv style="--i:2"><img src="img/painel-policia.png" width="1265" height="2090" alt="Painel da polícia com mapa de pontos quentes de São Paulo e tabela de áreas" loading="lazy"></figure>
+      <figure class="shot s520" data-rv style="--i:2"><img src="img/web-policia-mapa.webp" width="1170" height="565" alt="Painel da polícia: “Mapa de hotspots” com o mapa de São Paulo e a janela de tempo “Última hora”" loading="lazy"></figure>
     </li>
     <li class="step s-h">
-      <div class="when" data-rv><span class="t">prevenção</span></div>
+      <div class="when" data-rv><span class="t word">prevenção</span></div>
       <div class="what" data-rv style="--i:1">
         <h3>O mapa avisa o risco.</h3>
         <p>Risco por área e horário, a partir de dados da SSP-SP, mais relatos das últimas 2 horas com proteção contra abuso.</p>
-        <p class="tag wip"><b>Em construção</b>: o mapa do app já existe; o modelo de risco ainda não foi treinado.</p>
+        <p class="st wip"><i aria-hidden="true"></i><span><b>Em construção</b>: o mapa do app já existe; o modelo de risco ainda não foi treinado.</span></p>
       </div>
-      <figure class="shot" data-rv style="--i:2"><img src="img/app-mapa.webp" width="720" height="1467" alt="Tela Mapa do app, com o mapa de São Paulo e a legenda de risco: atenção normal, redobrada, máxima e sem dado" loading="lazy"></figure>
+      <figure class="shot s300" data-rv style="--i:2"><img src="img/app-mapa.webp" width="720" height="953" alt="Tela Mapa do app, com o mapa de São Paulo e a legenda de risco: atenção normal, redobrada, máxima e sem dado" loading="lazy"></figure>
     </li>
   </ol>
 </section>
@@ -364,11 +366,11 @@
   <div class="roles">
     <article class="role r-g" data-rv>
       <div class="role-t"><h3>O guardião</h3><p>Parente ou amigo que age por você na hora. Recebe o alarme, segue o passo a passo e bloqueia contas e linha.</p></div>
-      <figure class="role-f"><img src="img/app-passo-a-passo.webp" width="720" height="1467" alt="Passo a passo do guardião no app" loading="lazy"></figure>
+      <figure class="role-f"><img src="img/app-passo-a-passo.webp" width="720" height="1157" alt="Passo a passo do guardião no app" loading="lazy"></figure>
     </article>
     <article class="role r-p" data-rv>
       <div class="role-t"><h3>A polícia</h3><p>Recebe a ocorrência mínima, vê os pontos quentes e devolve o andamento ao cidadão.</p></div>
-      <figure class="role-f"><img src="img/painel-policia.png" width="1265" height="2090" alt="Painel da polícia com mapa de pontos quentes" loading="lazy"></figure>
+      <figure class="role-f"><img src="img/web-policia-mapa.webp" width="1170" height="565" alt="Painel da polícia com mapa de pontos quentes" loading="lazy"></figure>
     </article>
     <article class="role r-c" data-rv>
       <div class="role-t"><h3>O cidadão</h3><p>Quem anda com o celular em São Paulo: passageiro de trem e metrô, motorista parado no trânsito. No app, vê o chaveiro, a rota e o que relatar.</p></div>

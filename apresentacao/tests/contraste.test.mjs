@@ -10,8 +10,8 @@ const lum = (hex) => {
 const razao = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
 
 const M = { petroleo: "#0F4C4A", fundo: "#0B3B39", esmeralda: "#14B88A", areia: "#F4EFE6", areiaEscura: "#E4DDCF",
-  tinta: "#12201F", apoio: "#3D6563", alarme: "#E5484D", sobreAlarme: "#111111", alarmeTexto: "#B3202A",
-  okFundo: "#EAF6F1", atencaoFundo: "#FFF6DB", atencaoTexto: "#8A5A00", branco: "#FFFFFF" };
+  tinta: "#12201F", apoio: "#2F5755", alarme: "#E5484D", sobreAlarme: "#111111", alarmeTexto: "#B3202A",
+  okFundo: "#EAF6F1", atencaoFundo: "#FFF6DB", atencaoTexto: "#7A4F00", branco: "#FFFFFF" };
 
 // [texto, fundo, mínimo, onde]
 const PARES = [
@@ -28,6 +28,7 @@ const PARES = [
   ["petroleo", "areia", 4.5, "botão Estou ciente"],
   ["petroleo", "okFundo", 4.5, "etiqueta roda hoje"],
   ["atencaoTexto", "atencaoFundo", 4.5, "etiqueta em construção"],
+  ["atencaoTexto", "areiaEscura", 4.5, "palavra \"Em construção\" na linha do tempo, sem caixa"],
   ["alarmeTexto", "areiaEscura", 4.5, "rótulo 60 s na linha do tempo"],
   ["esmeralda", "petroleo", 3, "carimbo de hora (texto grande e em negrito, só 3:1 exigido)"],
   ["esmeralda", "fundo", 3, "idem, sobre o fundo da simulação"],
