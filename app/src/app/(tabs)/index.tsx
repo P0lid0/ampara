@@ -26,7 +26,7 @@ export const FRASE_ROTA: Record<EstadoRota, string> = {
   pausada: 'Rota pausada: o registro da rota parou neste aparelho. Toque em "Retomar a rota".',
 };
 
-type UltimoAlerta = { estado: string; iniciadaEm: string };
+type UltimoAlerta = { id: string; estado: string; iniciadaEm: string };
 
 const BADGE: Record<string, Estado> = { Aberta: 'aberta', Cancelada: 'cancelada', Encerrada: 'encerrada', Teste: 'teste' };
 
@@ -118,7 +118,7 @@ export default function Inicio() {
         const lista: UltimoAlerta[] = demo ? await ocorrenciaRepo(db).listar() : await api.ocorrencias.listar();
         if (!vivo) return;
         const o = maisRecente(lista);
-        setUltimo(o ? { estado: o.estado, iniciadaEm: o.iniciadaEm } : null);
+        setUltimo(o ? { id: o.id, estado: o.estado, iniciadaEm: o.iniciadaEm } : null);
         setErroUltimo(false);
       } catch {
         if (vivo) setErroUltimo(true);
@@ -160,7 +160,7 @@ export default function Inicio() {
     <ScrollView contentContainerStyle={estilos.tela}>
       <BannerAlarme />
 
-      <CartaoChaveiro ocultarCodigo />
+      <CartaoChaveiro ocultarCodigo semFrasePresenca />
 
       {semGuardioes ? (
         <View style={estilos.aviso} accessibilityRole="alert">
@@ -189,6 +189,12 @@ export default function Inicio() {
             <>
               {BADGE[ultimo.estado] ? <EstadoBadge estado={BADGE[ultimo.estado]} /> : null}
               <Texto>{`Último alerta: ${rotuloEstado(ultimo.estado)}${dataHora(ultimo.iniciadaEm) ? `, em ${dataHora(ultimo.iniciadaEm)}` : ''}`}</Texto>
+              {ultimo.estado === 'Aberta' && ultimo.id ? (
+                <Botao
+                  rotulo="Ver o que já foi feito"
+                  onPress={() => router.push(`/ocorrencia/${encodeURIComponent(ultimo.id)}` as never)}
+                />
+              ) : null}
             </>
           ) : erroUltimo ? (
             <Texto>Não foi possível carregar o último alerta.</Texto>

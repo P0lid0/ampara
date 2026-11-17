@@ -111,7 +111,11 @@ export default function DetalheOcorrencia() {
       </ScrollView>
       {ocorrencia && !ehDemo ? (
         <BarraAcao>
-          <Botao rotulo="Ver o BO" onPress={() => router.push(`/bo?ocorrenciaId=${encodeURIComponent(id)}` as never)} />
+          <Botao
+            rotulo="Ver o BO"
+            variante={ocorrencia.estado === 'Cancelada' ? 'secundario' : 'primario'}
+            onPress={() => router.push(`/bo?ocorrenciaId=${encodeURIComponent(id)}` as never)}
+          />
           <Botao
             rotulo="Marcar onde foi (rota)"
             variante="secundario"

@@ -25,6 +25,8 @@ const OPCOES_BO: BoStatus[] = ['nao_registrado', 'registrado'];
 const OPCOES_RECUPERACAO: Recuperacao[] = ['sem_noticia', 'localizado', 'recuperado'];
 
 const MARCA = 28;
+/** Linhas do texto do BO antes de "Ver o texto completo" (o texto inteiro ocupa ~1,5 tela). */
+const LINHAS_RESUMO = 8;
 
 /** Caixa de seleção: preenchida com "ok" quando marcada (a forma muda, não só a cor). */
 function CaixaMarca({ marcada }: { marcada: boolean }) {
@@ -69,7 +71,7 @@ function Secao({ titulo, children }: { titulo: string; children: ReactNode }) {
 
 const CONSENTIMENTO = 'Autorizo enviar esta ocorrência, sem meus dados pessoais, à polícia';
 const AVISO_SUBSTITUI = 'Salvar substitui o acompanhamento anterior. Se você já salvou um número de BO, digite de novo.';
-const MOTIVO_ENVIO = 'Marque a autorização acima para poder enviar.';
+const MOTIVO_ENVIO = 'Marque a autorização em Compartilhar com a polícia para poder enviar.';
 
 /** geo:lat,lng?q=lat,lng(nome): o Android abre no app de mapa. O nome vai codificado. */
 export function urlMapa(d: BoDto['delegacia']): string {
@@ -85,6 +87,7 @@ export default function Bo() {
   const [aviso, setAviso] = useState<string | undefined>();
   const [consentiu, setConsentiu] = useState(false);
   const [enviando, setEnviando] = useState(false);
+  const [textoAberto, setTextoAberto] = useState(false);
   const [protocolo, setProtocolo] = useState<string | undefined>();
   const [erroEnvio, setErroEnvio] = useState<string | undefined>();
   const montada = useRef(true);
@@ -252,10 +255,45 @@ export default function Bo() {
 
         {bo ? (
           <>
+            <Secao titulo="Compartilhar com a polícia">
+              <Pressable
+                accessibilityRole="checkbox"
+                accessibilityLabel={CONSENTIMENTO}
+                accessibilityState={{ checked: consentiu, disabled: Boolean(protocolo) }}
+                disabled={Boolean(protocolo)}
+                onPress={() => setConsentiu((v) => !v)}
+                style={({ pressed }) => [
+                  estilos.opcao,
+                  consentiu && !protocolo && estilos.opcaoMarcada,
+                  protocolo && estilos.opcaoEnviada,
+                  pressed && !consentiu && estilos.pressionado,
+                ]}
+              >
+                <CaixaMarca marcada={consentiu} />
+                <Texto variante={consentiu && !protocolo ? 'corpoForte' : 'corpo'} style={[estilos.opcaoTexto, protocolo ? estilos.suave : null]}>
+                  {CONSENTIMENTO}
+                </Texto>
+              </Pressable>
+              {protocolo ? (
+                <View style={estilos.confirmacao} accessibilityLiveRegion="polite">
+                  <Icone nome="ok" tamanho={20} cor={cores.petroleo} />
+                  <Texto variante="secao">{`Protocolo ${protocolo}`}</Texto>
+                </View>
+              ) : null}
+            </Secao>
+
             <Secao titulo="Texto do boletim">
               <View style={estilos.texto}>
-                <Texto selectable>{bo.texto}</Texto>
+                <Texto selectable numberOfLines={textoAberto ? undefined : LINHAS_RESUMO}>
+                  {bo.texto}
+                </Texto>
               </View>
+              <Botao
+                rotulo={textoAberto ? 'Mostrar menos' : 'Ver o texto completo'}
+                variante="texto"
+                haptica={false}
+                onPress={() => setTextoAberto((v) => !v)}
+              />
               <Botao rotulo="Copiar texto" onPress={() => void copiar()} />
               {copiado ? (
                 <View style={estilos.confirmacao} accessibilityLiveRegion="polite">
@@ -277,28 +315,6 @@ export default function Bo() {
                 <Texto>{bo.delegacia.endereco}</Texto>
               </View>
               <Botao rotulo="Ver no mapa" variante="secundario" onPress={() => void abrir(urlMapa(bo.delegacia))} />
-            </Secao>
-
-            <Secao titulo="Compartilhar com a polícia">
-              <Pressable
-                accessibilityRole="checkbox"
-                accessibilityLabel={CONSENTIMENTO}
-                accessibilityState={{ checked: consentiu, disabled: Boolean(protocolo) }}
-                disabled={Boolean(protocolo)}
-                onPress={() => setConsentiu((v) => !v)}
-                style={({ pressed }) => [estilos.opcao, consentiu && estilos.opcaoMarcada, pressed && !consentiu && estilos.pressionado]}
-              >
-                <CaixaMarca marcada={consentiu} />
-                <Texto variante={consentiu ? 'corpoForte' : 'corpo'} style={estilos.opcaoTexto}>
-                  {CONSENTIMENTO}
-                </Texto>
-              </Pressable>
-              {protocolo ? (
-                <View style={estilos.confirmacao} accessibilityLiveRegion="polite">
-                  <Icone nome="ok" tamanho={20} cor={cores.petroleo} />
-                  <Texto variante="corpoForte">{`Protocolo ${protocolo}`}</Texto>
-                </View>
-              ) : null}
             </Secao>
 
             <Secao titulo="Retorno da polícia">
@@ -412,6 +428,7 @@ const estilos = StyleSheet.create({
     borderRadius: raios.m,
   },
   opcaoMarcada: { backgroundColor: cores.esmeraldaSuave },
+  opcaoEnviada: { backgroundColor: cores.areiaFunda },
   pressionado: { backgroundColor: cores.areiaFunda },
   opcaoTexto: { flex: 1 },
   caixaMarca: {

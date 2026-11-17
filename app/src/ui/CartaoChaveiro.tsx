@@ -17,13 +17,15 @@ export type CartaoChaveiroProps = {
   deviceId?: string;
   /** Esconde o código técnico do aparelho (na tela Início a pessoa não precisa dele). */
   ocultarCodigo?: boolean;
+  /** O selo já diz "Conectado"/"Sem conexão": a frase mostra só a bateria, sem repetir a presença. */
+  semFrasePresenca?: boolean;
 };
 
 const AVISO_ACHAR = 'O chaveiro vai piscar e tocar por 6 segundos.';
 
 // Status por polling (lacuna L10): lista a cada 30 s e manda um ping ao abrir para o chaveiro responder logo.
 // O aviso de bateria baixa fica aqui no cartão; a notificação local entra com o canal da Task 10.
-export function CartaoChaveiro({ deviceId, ocultarCodigo }: CartaoChaveiroProps) {
+export function CartaoChaveiro({ deviceId, ocultarCodigo, semFrasePresenca }: CartaoChaveiroProps) {
   const [lista, setLista] = useState<ChaveiroDto[] | null>(null);
   const [agora, setAgora] = useState(() => new Date());
   const [erro, setErro] = useState<string | undefined>();
@@ -103,7 +105,7 @@ export function CartaoChaveiro({ deviceId, ocultarCodigo }: CartaoChaveiroProps)
         <>
           {chaveiro || erro ? <EstadoBadge estado={r.estado} /> : null}
           <Texto style={estilos.areia} accessibilityLiveRegion="polite">
-            {r.texto}
+            {semFrasePresenca ? r.texto.replace(/^(Conectado|Sem conexão)\. /, '') : r.texto}
           </Texto>
         </>
       )}
@@ -118,7 +120,9 @@ export function CartaoChaveiro({ deviceId, ocultarCodigo }: CartaoChaveiroProps)
           <Texto style={estilos.textoAviso}>Troque a pilha do chaveiro em breve.</Texto>
         </View>
       ) : null}
-      {chaveiro ? <Botao rotulo="Achar meu chaveiro" onPress={() => void achar()} /> : null}
+      {chaveiro ? (
+        <Botao rotulo="Achar meu chaveiro" variante={r.estado === 'offline' ? 'secundario' : 'primario'} onPress={() => void achar()} />
+      ) : null}
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Como testar"
