@@ -56,5 +56,8 @@ Os prints do painel de 15/11 têm as frases reais da IA (`claude-haiku-5-5`, cha
 
 ## Integrantes
 
-- Pedro Martins (RM_____)
-- Vitor Cesarino Marchese (RM_____)
+- Guilherme (RM 554962)
+- Pedro Martins (RM 555556)
+- Fabrício (RM 558216)
+- Vitor Cesarino Marchese (RM 554893)
+- Matheus (RM 555447)

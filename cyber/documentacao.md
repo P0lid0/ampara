@@ -12,7 +12,7 @@
 
 | | |
 |---|---|
-| **Integrantes** | Pedro Martins (RM_____) · Vitor Cesarino Marchese (RM_____) |
+| **Integrantes** | Guilherme (RM 554962) · Pedro Martins (RM 555556) · Fabrício (RM 558216) · Vitor Cesarino Marchese (RM 554893) · Matheus (RM 555447) |
 | **Disciplina** | Cyber Security |
 | **Data** | 15 de novembro de 2026 |
 | **Repositório** | https://github.com/P0lid0/ampara |

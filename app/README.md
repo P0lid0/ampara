@@ -120,4 +120,4 @@ Antes e depois da etapa de design: [docs/design/antes-depois/](docs/design/antes
 
 ## Integrantes
 
-Pedro Martins e Vitor Cesarino Marchese (veja [integrantes.txt](../integrantes.txt)). Prompts de IA usados em [prompts.md](../prompts.md).
+Guilherme, Pedro Martins, Fabrício, Vitor Cesarino Marchese e Matheus (nomes e RMs em [integrantes.txt](../integrantes.txt)). Prompts de IA usados em [prompts.md](../prompts.md).

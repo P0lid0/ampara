@@ -20,8 +20,11 @@ A Ponte Polícia é um serviço FastAPI separado da API da Ampara, com banco pr�
 
 ## 3. Integrantes
 
-- Pedro Martins (RM_____, pendente)
-- Vitor Cesarino Marchese (RM_____, pendente), responsável pelo IoT (repositório em `iot/`)
+- Guilherme (RM 554962)
+- Pedro Martins (RM 555556)
+- Fabrício (RM 558216)
+- Vitor Cesarino Marchese (RM 554893), responsável pelo IoT (repositório em `iot/`)
+- Matheus (RM 555447)
 
 ## 4. Arquitetura
 

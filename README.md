@@ -44,4 +44,4 @@ Cada pasta tem o seu `README.md` com os passos: [app](app/README.md), [web-emerg
 
 ## Integrantes
 
-Pedro Martins e Vitor Cesarino Marchese (veja [integrantes.txt](integrantes.txt)). Prompts de IA em [prompts.md](prompts.md).
+Guilherme (RM 554962), Pedro Martins (RM 555556), Fabrício (RM 558216), Vitor Cesarino Marchese (RM 554893) e Matheus (RM 555447) (veja [integrantes.txt](integrantes.txt)). Prompts de IA em [prompts.md](prompts.md).

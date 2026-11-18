@@ -1,6 +1,6 @@
 # Ampara ML: risco de roubo e furto em via pública (proxy de celular) por área e horário em São Paulo
 
-Global Solution 2026.2 FIAP, CitizenTech. Pedro Martins (RM_____) e Vitor Cesarino Marchese (RM_____). Vídeo: (preencher ao publicar).
+Global Solution 2026.2 FIAP, CitizenTech. Guilherme (RM 554962), Pedro Martins (RM 555556), Fabrício (RM 558216), Vitor Cesarino Marchese (RM 554893) e Matheus (RM 555447). Vídeo: (preencher ao publicar).
 
 ## 1. Problema e dados
 
