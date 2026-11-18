@@ -368,7 +368,7 @@ chk_evento_auditoria() {
   touch "$arq" || return 1
   for _ in 1 2 3 4 5 6; do
     sleep 1
-    out=$(ausearch -k ampara_config -i --start recent 2>&1 || true)
+    out=$(ausearch -if /var/log/audit/audit.log -k ampara_config -i --start recent 2>&1 || true)
     if grep -qF -- '.teste-auditoria' <<<"$out"; then
       achou=0
       break
@@ -521,7 +521,7 @@ roda_completo() {
   checa completo "GET / responde 200 (página de emergência)" chk_http_200 http://127.0.0.1/
   checa completo "GET /painel-risco/ responde 200" chk_http_200 http://127.0.0.1/painel-risco/
   checa completo "GET /policia responde 200" chk_http_200 http://127.0.0.1/policia
-  checa completo "GET /api/v1/risco responde 200" chk_http_200 http://127.0.0.1/api/v1/risco
+  checa completo "GET /api/v1/risco responde 200" chk_http_200 "http://127.0.0.1/api/v1/risco?minLat=-23.7&minLng=-46.9&maxLat=-23.4&maxLng=-46.3"
   checa completo "GET /health (nginx) responde 200 com \"db\":true" chk_nginx_health
   checa completo "GET /ponte/health tem \"status\":\"ok\"" chk_ponte_health
   checa completo "/policia traz const API_BASE = \"/ponte\"; (X-Forwarded-Prefix)" chk_policia_prefixo

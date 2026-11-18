@@ -1,0 +1,562 @@
+# auditctl -l
+-w /etc/ampara -p wa -k ampara_config
+-w /opt/ampara/src/infra/vm -p wa -k ampara_scripts
+-w /usr/local/sbin -p wa -k ampara_scripts
+-w /etc/sudoers -p wa -k ampara_sudo
+-w /etc/sudoers.d -p wa -k ampara_sudo
+-w /usr/bin/sudo -p x -k ampara_sudo
+
+# ausearch -k ampara_config -k ampara_sudo -i
+----
+type=PROCTITLE msg=audit(11/18/26 17:37:26.657:134) : proctitle=/sbin/auditctl -R /etc/audit/audit.rules 
+type=PATH msg=audit(11/18/26 17:37:26.657:134) : item=0 name=/etc/ inode=42 dev=fd:01 mode=dir,755 ouid=root ogid=root rdev=00:00 nametype=PARENT cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:37:26.657:134) : cwd=/ 
+type=SOCKADDR msg=audit(11/18/26 17:37:26.657:134) : saddr={ saddr_fam=netlink nlnk-fam=16 nlnk-pid=0 } 
+type=SYSCALL msg=audit(11/18/26 17:37:26.657:134) : arch=x86_64 syscall=sendto success=yes exit=1080 a0=0x3 a1=0x7ffdb3119200 a2=0x438 a3=0x0 items=1 ppid=15489 pid=15503 auid=unset uid=root gid=root euid=root suid=root fsuid=root egid=root sgid=root fsgid=root tty=(none) ses=unset comm=auditctl exe=/usr/sbin/auditctl subj=unconfined key=(null) 
+type=CONFIG_CHANGE msg=audit(11/18/26 17:37:26.657:134) : auid=unset ses=unset subj=unconfined op=add_rule key=ampara_sudo list=exit res=yes 
+----
+type=PROCTITLE msg=audit(11/18/26 17:37:26.657:135) : proctitle=/sbin/auditctl -R /etc/audit/audit.rules 
+type=PATH msg=audit(11/18/26 17:37:26.657:135) : item=0 name=/etc/sudoers.d inode=1302 dev=fd:01 mode=dir,750 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:37:26.657:135) : cwd=/ 
+type=SOCKADDR msg=audit(11/18/26 17:37:26.657:135) : saddr={ saddr_fam=netlink nlnk-fam=16 nlnk-pid=0 } 
+type=SYSCALL msg=audit(11/18/26 17:37:26.657:135) : arch=x86_64 syscall=sendto success=yes exit=1084 a0=0x3 a1=0x7ffdb3119200 a2=0x43c a3=0x0 items=1 ppid=15489 pid=15503 auid=unset uid=root gid=root euid=root suid=root fsuid=root egid=root sgid=root fsgid=root tty=(none) ses=unset comm=auditctl exe=/usr/sbin/auditctl subj=unconfined key=(null) 
+type=CONFIG_CHANGE msg=audit(11/18/26 17:37:26.657:135) : auid=unset ses=unset subj=unconfined op=add_rule key=ampara_sudo list=exit res=yes 
+----
+type=PROCTITLE msg=audit(11/18/26 17:37:26.672:136) : proctitle=/sbin/auditctl -R /etc/audit/audit.rules 
+type=PATH msg=audit(11/18/26 17:37:26.672:136) : item=0 name=/usr/bin/ inode=1704 dev=fd:01 mode=dir,755 ouid=root ogid=root rdev=00:00 nametype=PARENT cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:37:26.672:136) : cwd=/ 
+type=SOCKADDR msg=audit(11/18/26 17:37:26.672:136) : saddr={ saddr_fam=netlink nlnk-fam=16 nlnk-pid=0 } 
+type=SYSCALL msg=audit(11/18/26 17:37:26.672:136) : arch=x86_64 syscall=sendto success=yes exit=1080 a0=0x3 a1=0x7ffdb3119200 a2=0x438 a3=0x0 items=1 ppid=15489 pid=15503 auid=unset uid=root gid=root euid=root suid=root fsuid=root egid=root sgid=root fsgid=root tty=(none) ses=unset comm=auditctl exe=/usr/sbin/auditctl subj=unconfined key=(null) 
+type=CONFIG_CHANGE msg=audit(11/18/26 17:37:26.672:136) : auid=unset ses=unset subj=unconfined op=add_rule key=ampara_sudo list=exit res=yes 
+----
+type=PROCTITLE msg=audit(11/18/26 17:37:37.306:229) : proctitle=sudo tail -15 /var/log/ampara/provisiona.log 
+type=PATH msg=audit(11/18/26 17:37:37.306:229) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:37:37.306:229) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:37:37.306:229) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:37:37.306:229) : argc=4 a0=sudo a1=tail a2=-15 a3=/var/log/ampara/provisiona.log 
+type=SYSCALL msg=audit(11/18/26 17:37:37.306:229) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x5f47a33a7ae0 a1=0x5f47a33a99f0 a2=0x5f47a33972c0 a3=0x1 items=2 ppid=15842 pid=15844 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=87 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:38:01.168:251) : proctitle=sudo bash /opt/ampara/src/infra/vm/verifica-vm.sh --saida /tmp/verifica.txt 
+type=PATH msg=audit(11/18/26 17:38:01.168:251) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:38:01.168:251) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:38:01.168:251) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:38:01.168:251) : argc=5 a0=sudo a1=bash a2=/opt/ampara/src/infra/vm/verifica-vm.sh a3=--saida a4=/tmp/verifica.txt 
+type=SYSCALL msg=audit(11/18/26 17:38:01.168:251) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x59be647341f0 a1=0x59be64731f80 a2=0x59be647222c0 a3=0x8 items=2 ppid=16001 pid=16002 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=88 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:38:35.355:291) : proctitle=sudo auditctl -l 
+type=PATH msg=audit(11/18/26 17:38:35.355:291) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:38:35.355:291) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:38:35.355:291) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:38:35.355:291) : argc=3 a0=sudo a1=auditctl a2=-l 
+type=SYSCALL msg=audit(11/18/26 17:38:35.355:291) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x63ac282c8020 a1=0x63ac282c8920 a2=0x63ac282b52c0 a3=0x1 items=2 ppid=16664 pid=16665 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=90 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:38:35.434:298) : proctitle=sudo touch /etc/ampara/.t2 
+type=PATH msg=audit(11/18/26 17:38:35.434:298) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:38:35.434:298) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:38:35.434:298) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:38:35.434:298) : argc=3 a0=sudo a1=touch a2=/etc/ampara/.t2 
+type=SYSCALL msg=audit(11/18/26 17:38:35.434:298) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x63ac282c7dc0 a1=0x63ac282c89a0 a2=0x63ac282b52c0 a3=0x63ac282c89a0 items=2 ppid=16664 pid=16668 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=90 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:38:37.552:306) : proctitle=sudo ausearch -k ampara_config -i 
+type=PATH msg=audit(11/18/26 17:38:37.552:306) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:38:37.552:306) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:38:37.552:306) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:38:37.552:306) : argc=5 a0=sudo a1=ausearch a2=-k a3=ampara_config a4=-i 
+type=SYSCALL msg=audit(11/18/26 17:38:37.552:306) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x63ac282c8b80 a1=0x63ac282c6bb0 a2=0x63ac282b52c0 a3=0x8 items=2 ppid=16664 pid=16690 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=90 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:38:37.622:313) : proctitle=sudo rm -f /etc/ampara/.t2 
+type=PATH msg=audit(11/18/26 17:38:37.622:313) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:38:37.622:313) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:38:37.622:313) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:38:37.622:313) : argc=4 a0=sudo a1=rm a2=-f a3=/etc/ampara/.t2 
+type=SYSCALL msg=audit(11/18/26 17:38:37.622:313) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x63ac282c8a40 a1=0x63ac282c89a0 a2=0x63ac282b52c0 a3=0x63ac282c89a0 items=2 ppid=16664 pid=16693 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=90 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:38:37.675:321) : proctitle=sudo auditctl -s 
+type=PATH msg=audit(11/18/26 17:38:37.675:321) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:38:37.675:321) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:38:37.675:321) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:38:37.675:321) : argc=3 a0=sudo a1=auditctl a2=-s 
+type=SYSCALL msg=audit(11/18/26 17:38:37.675:321) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x63ac282c8a00 a1=0x63ac282c7a40 a2=0x63ac282b52c0 a3=0x8 items=2 ppid=16664 pid=16695 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=90 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:38:50.996:343) : proctitle=sudo ls -la /var/log/audit/ 
+type=PATH msg=audit(11/18/26 17:38:50.996:343) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:38:50.996:343) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:38:50.996:343) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:38:50.996:343) : argc=4 a0=sudo a1=ls a2=-la a3=/var/log/audit/ 
+type=SYSCALL msg=audit(11/18/26 17:38:50.996:343) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x5d42c38d77b0 a1=0x5d42c38d8090 a2=0x5d42c38c32c0 a3=0x5d42c38d8090 items=2 ppid=16815 pid=16816 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=92 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:38:51.067:350) : proctitle=sudo tail -3 /var/log/audit/audit.log 
+type=PATH msg=audit(11/18/26 17:38:51.067:350) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:38:51.067:350) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:38:51.067:350) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:38:51.067:350) : argc=4 a0=sudo a1=tail a2=-3 a3=/var/log/audit/audit.log 
+type=SYSCALL msg=audit(11/18/26 17:38:51.067:350) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x5d42c38d4990 a1=0x5d42c38d81a0 a2=0x5d42c38c32c0 a3=0x1 items=2 ppid=16815 pid=16818 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=92 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:38:51.134:357) : proctitle=sudo grep -c ampara /var/log/audit/audit.log 
+type=PATH msg=audit(11/18/26 17:38:51.134:357) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:38:51.134:357) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:38:51.134:357) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:38:51.134:357) : argc=5 a0=sudo a1=grep a2=-c a3=ampara a4=/var/log/audit/audit.log 
+type=SYSCALL msg=audit(11/18/26 17:38:51.134:357) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x5d42c38d8200 a1=0x5d42c38d4af0 a2=0x5d42c38c32c0 a3=0x5d42c38d4af0 items=2 ppid=16815 pid=16821 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=92 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:38:51.240:364) : proctitle=sudo touch /etc/ampara/.t3 
+type=PATH msg=audit(11/18/26 17:38:51.240:364) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:38:51.240:364) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:38:51.240:364) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:38:51.240:364) : argc=3 a0=sudo a1=touch a2=/etc/ampara/.t3 
+type=SYSCALL msg=audit(11/18/26 17:38:51.240:364) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x5d42c38d74a0 a1=0x5d42c38d7760 a2=0x5d42c38c32c0 a3=0x5d42c38d7760 items=2 ppid=16815 pid=16824 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=92 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:38:54.317:372) : proctitle=sudo grep -c .t3 /var/log/audit/audit.log 
+type=PATH msg=audit(11/18/26 17:38:54.317:372) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:38:54.317:372) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:38:54.317:372) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:38:54.317:372) : argc=5 a0=sudo a1=grep a2=-c a3=.t3 a4=/var/log/audit/audit.log 
+type=SYSCALL msg=audit(11/18/26 17:38:54.317:372) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x5d42c38d7390 a1=0x5d42c38d4af0 a2=0x5d42c38c32c0 a3=0x5d42c38d4af0 items=2 ppid=16815 pid=16829 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=92 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:38:54.424:379) : proctitle=sudo rm /etc/ampara/.t3 
+type=PATH msg=audit(11/18/26 17:38:54.424:379) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:38:54.424:379) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:38:54.424:379) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:38:54.424:379) : argc=3 a0=sudo a1=rm a2=/etc/ampara/.t3 
+type=SYSCALL msg=audit(11/18/26 17:38:54.424:379) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x5d42c38d8260 a1=0x5d42c38d6e70 a2=0x5d42c38c32c0 a3=0x5d42c38d72b0 items=2 ppid=16815 pid=16833 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=92 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:38:54.551:387) : proctitle=sudo auditctl -s 
+type=PATH msg=audit(11/18/26 17:38:54.551:387) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:38:54.551:387) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:38:54.551:387) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:38:54.551:387) : argc=3 a0=sudo a1=auditctl a2=-s 
+type=SYSCALL msg=audit(11/18/26 17:38:54.551:387) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x5d42c38d72b0 a1=0x5d42c38d6bd0 a2=0x5d42c38c32c0 a3=0x5d42c38d82c0 items=2 ppid=16815 pid=16837 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=92 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:38:54.637:394) : proctitle=sudo ausearch -m PATH -ts recent 
+type=PATH msg=audit(11/18/26 17:38:54.637:394) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:38:54.637:394) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:38:54.637:394) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:38:54.637:394) : argc=6 a0=sudo a1=ausearch a2=-m a3=PATH a4=-ts a5=recent 
+type=SYSCALL msg=audit(11/18/26 17:38:54.637:394) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x5d42c38d83a0 a1=0x5d42c38d4c70 a2=0x5d42c38c32c0 a3=0x8 items=2 ppid=16815 pid=16841 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=92 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:39:11.778:416) : proctitle=sudo grep -c type=SYSCALL /var/log/audit/audit.log 
+type=PATH msg=audit(11/18/26 17:39:11.778:416) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:39:11.778:416) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:39:11.778:416) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:39:11.778:416) : argc=5 a0=sudo a1=grep a2=-c a3=type=SYSCALL a4=/var/log/audit/audit.log 
+type=SYSCALL msg=audit(11/18/26 17:39:11.778:416) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x6545f798cf70 a1=0x6545f7989b50 a2=0x6545f79782c0 a3=0x6545f7989b50 items=2 ppid=16989 pid=16990 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=94 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:39:11.857:423) : proctitle=sudo grep -c type=PATH /var/log/audit/audit.log 
+type=PATH msg=audit(11/18/26 17:39:11.857:423) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:39:11.857:423) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:39:11.857:423) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:39:11.857:423) : argc=5 a0=sudo a1=grep a2=-c a3=type=PATH a4=/var/log/audit/audit.log 
+type=SYSCALL msg=audit(11/18/26 17:39:11.857:423) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x6545f798cf70 a1=0x6545f7989b50 a2=0x6545f79782c0 a3=0x6545f7989b50 items=2 ppid=16989 pid=16992 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=94 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:39:11.920:430) : proctitle=sudo grep ampara_ /var/log/audit/audit.log 
+type=PATH msg=audit(11/18/26 17:39:11.920:430) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:39:11.920:430) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:39:11.920:430) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:39:11.920:430) : argc=4 a0=sudo a1=grep a2=ampara_ a3=/var/log/audit/audit.log 
+type=SYSCALL msg=audit(11/18/26 17:39:11.920:430) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x6545f79899f0 a1=0x6545f798da10 a2=0x6545f79782c0 a3=0x8 items=2 ppid=16989 pid=16994 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=94 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:39:11.990:437) : proctitle=sudo auditctl -w /tmp/wt -p wa -k tt 
+type=PATH msg=audit(11/18/26 17:39:11.990:437) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:39:11.990:437) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:39:11.990:437) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:39:11.990:437) : argc=8 a0=sudo a1=auditctl a2=-w a3=/tmp/wt a4=-p a5=wa a6=-k a7=tt 
+type=SYSCALL msg=audit(11/18/26 17:39:11.990:437) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x6545f798dda0 a1=0x6545f798dde0 a2=0x6545f79782c0 a3=0x1 items=2 ppid=16989 pid=16998 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=94 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:39:12.052:445) : proctitle=sudo touch /tmp/wt 
+type=PATH msg=audit(11/18/26 17:39:12.052:445) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:39:12.052:445) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:39:12.052:445) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:39:12.052:445) : argc=3 a0=sudo a1=touch a2=/tmp/wt 
+type=SYSCALL msg=audit(11/18/26 17:39:12.052:445) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x6545f798da60 a1=0x6545f798c980 a2=0x6545f79782c0 a3=0x6545f798ddc0 items=2 ppid=16989 pid=17001 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=94 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:39:13.137:453) : proctitle=sudo ausearch -k tt -i 
+type=PATH msg=audit(11/18/26 17:39:13.137:453) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:39:13.137:453) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:39:13.137:453) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:39:13.137:453) : argc=5 a0=sudo a1=ausearch a2=-k a3=tt a4=-i 
+type=SYSCALL msg=audit(11/18/26 17:39:13.137:453) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x6545f798cf70 a1=0x6545f7989cd0 a2=0x6545f79782c0 a3=0x8 items=2 ppid=16989 pid=17004 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=94 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:39:13.190:460) : proctitle=sudo auditctl -W /tmp/wt -p wa -k tt 
+type=PATH msg=audit(11/18/26 17:39:13.190:460) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:39:13.190:460) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:39:13.190:460) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:39:13.190:460) : argc=8 a0=sudo a1=auditctl a2=-W a3=/tmp/wt a4=-p a5=wa a6=-k a7=tt 
+type=SYSCALL msg=audit(11/18/26 17:39:13.190:460) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x6545f798c960 a1=0x6545f798dde0 a2=0x6545f79782c0 a3=0x1 items=2 ppid=16989 pid=17008 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=94 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:39:13.255:468) : proctitle=sudo grep -i audit /etc/audit/auditd.conf 
+type=PATH msg=audit(11/18/26 17:39:13.255:468) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:39:13.255:468) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:39:13.255:468) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:39:13.255:468) : argc=5 a0=sudo a1=grep a2=-i a3=audit a4=/etc/audit/auditd.conf 
+type=SYSCALL msg=audit(11/18/26 17:39:13.255:468) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x6545f79899f0 a1=0x6545f7989b50 a2=0x6545f79782c0 a3=0x8 items=2 ppid=16989 pid=17012 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=94 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:39:28.265:490) : proctitle=sudo grep -c key="ampara_config" /var/log/audit/audit.log 
+type=PATH msg=audit(11/18/26 17:39:28.265:490) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:39:28.265:490) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:39:28.265:490) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:39:28.265:490) : argc=5 a0=sudo a1=grep a2=-c a3=key="ampara_config" a4=/var/log/audit/audit.log 
+type=SYSCALL msg=audit(11/18/26 17:39:28.265:490) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x5b0d70017670 a1=0x5b0d700130f0 a2=0x5b0d700032c0 a3=0x5b0d70017f50 items=2 ppid=17143 pid=17147 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=96 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:39:28.304:497) : proctitle=sudo grep -c key="ampara_scripts" /var/log/audit/audit.log 
+type=PATH msg=audit(11/18/26 17:39:28.304:497) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:39:28.304:497) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:39:28.304:497) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:39:28.304:497) : argc=5 a0=sudo a1=grep a2=-c a3=key="ampara_scripts" a4=/var/log/audit/audit.log 
+type=SYSCALL msg=audit(11/18/26 17:39:28.304:497) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x5b0d700149f0 a1=0x5b0d70014cd0 a2=0x5b0d700032c0 a3=0x5b0d70018000 items=2 ppid=17143 pid=17152 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=96 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:39:28.344:504) : proctitle=sudo grep -c key="ampara_sudo" /var/log/audit/audit.log 
+type=PATH msg=audit(11/18/26 17:39:28.344:504) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:39:28.344:504) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:39:28.344:504) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:39:28.344:504) : argc=5 a0=sudo a1=grep a2=-c a3=key="ampara_sudo" a4=/var/log/audit/audit.log 
+type=SYSCALL msg=audit(11/18/26 17:39:28.344:504) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x5b0d70017040 a1=0x5b0d700130f0 a2=0x5b0d700032c0 a3=0x5b0d70017f50 items=2 ppid=17143 pid=17157 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=96 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:39:28.382:511) : proctitle=sudo bash -c echo x > /etc/ampara/.t4 
+type=PATH msg=audit(11/18/26 17:39:28.382:511) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:39:28.382:511) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:39:28.382:511) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:39:28.382:511) : argc=4 a0=sudo a1=bash a2=-c a3=echo x > /etc/ampara/.t4 
+type=SYSCALL msg=audit(11/18/26 17:39:28.382:511) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x5b0d70017320 a1=0x5b0d70017140 a2=0x5b0d700032c0 a3=0x5b0d70017140 items=2 ppid=17143 pid=17161 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=96 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:39:30.449:519) : proctitle=sudo grep -c t4 /var/log/audit/audit.log 
+type=PATH msg=audit(11/18/26 17:39:30.449:519) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:39:30.449:519) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:39:30.449:519) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:39:30.449:519) : argc=5 a0=sudo a1=grep a2=-c a3=t4 a4=/var/log/audit/audit.log 
+type=SYSCALL msg=audit(11/18/26 17:39:30.449:519) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x5b0d70017260 a1=0x5b0d70014c10 a2=0x5b0d700032c0 a3=0x5b0d70014c10 items=2 ppid=17143 pid=17169 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=96 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:39:30.509:526) : proctitle=sudo grep key=.ampara_config /var/log/audit/audit.log 
+type=PATH msg=audit(11/18/26 17:39:30.509:526) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:39:30.509:526) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:39:30.509:526) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:39:30.509:526) : argc=4 a0=sudo a1=grep a2=key=.ampara_config a3=/var/log/audit/audit.log 
+type=SYSCALL msg=audit(11/18/26 17:39:30.509:526) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x5b0d70016da0 a1=0x5b0d70017140 a2=0x5b0d700032c0 a3=0x8 items=2 ppid=17143 pid=17171 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=96 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:39:30.557:533) : proctitle=sudo rm /etc/ampara/.t4 
+type=PATH msg=audit(11/18/26 17:39:30.557:533) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:39:30.557:533) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:39:30.557:533) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:39:30.557:533) : argc=3 a0=sudo a1=rm a2=/etc/ampara/.t4 
+type=SYSCALL msg=audit(11/18/26 17:39:30.557:533) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x5b0d70018050 a1=0x5b0d70016c00 a2=0x5b0d700032c0 a3=0x5b0d70017320 items=2 ppid=17143 pid=17175 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=96 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:39:30.604:541) : proctitle=sudo journalctl -u auditd --no-pager 
+type=PATH msg=audit(11/18/26 17:39:30.604:541) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:39:30.604:541) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:39:30.604:541) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:39:30.604:541) : argc=5 a0=sudo a1=journalctl a2=-u a3=auditd a4=--no-pager 
+type=SYSCALL msg=audit(11/18/26 17:39:30.604:541) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x5b0d70017040 a1=0x5b0d700130f0 a2=0x5b0d700032c0 a3=0x8 items=2 ppid=17143 pid=17177 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=96 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:39:43.054:563) : proctitle=sudo ausearch -k ampara_config -i 
+type=PATH msg=audit(11/18/26 17:39:43.054:563) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:39:43.054:563) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:39:43.054:563) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:39:43.054:563) : argc=5 a0=sudo a1=ausearch a2=-k a3=ampara_config a4=-i 
+type=SYSCALL msg=audit(11/18/26 17:39:43.054:563) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x60834c52b3c0 a1=0x60834c52bca0 a2=0x60834c5172c0 a3=0x1 items=2 ppid=17296 pid=17297 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=98 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:39:43.105:570) : proctitle=sudo ausearch -k ampara_config -i --start recent 
+type=PATH msg=audit(11/18/26 17:39:43.105:570) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:39:43.105:570) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:39:43.105:570) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:39:43.105:570) : argc=7 a0=sudo a1=ausearch a2=-k a3=ampara_config a4=-i a5=--start a6=recent 
+type=SYSCALL msg=audit(11/18/26 17:39:43.105:570) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x60834c52c6d0 a1=0x60834c52cf80 a2=0x60834c5172c0 a3=0x1 items=2 ppid=17296 pid=17301 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=98 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:39:43.146:577) : proctitle=sudo ausearch -k ampara_config -i -ts today 
+type=PATH msg=audit(11/18/26 17:39:43.146:577) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:39:43.146:577) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:39:43.146:577) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:39:43.146:577) : argc=7 a0=sudo a1=ausearch a2=-k a3=ampara_config a4=-i a5=-ts a6=today 
+type=SYSCALL msg=audit(11/18/26 17:39:43.146:577) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x60834c52c690 a1=0x60834c52cf40 a2=0x60834c5172c0 a3=0x1 items=2 ppid=17296 pid=17305 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=98 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:39:43.195:584) : proctitle=sudo ausearch -k ampara_config -i -ts yesterday 
+type=PATH msg=audit(11/18/26 17:39:43.195:584) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:39:43.195:584) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:39:43.195:584) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:39:43.195:584) : argc=7 a0=sudo a1=ausearch a2=-k a3=ampara_config a4=-i a5=-ts a6=yesterday 
+type=SYSCALL msg=audit(11/18/26 17:39:43.195:584) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x60834c52cf00 a1=0x60834c52cf80 a2=0x60834c5172c0 a3=0x1 items=2 ppid=17296 pid=17309 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=98 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:39:52.970:598) : proctitle=sudo ausearch -k ampara_sudo -i 
+type=PATH msg=audit(11/18/26 17:39:52.970:598) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:39:52.970:598) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:39:52.970:598) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:39:52.970:598) : argc=5 a0=sudo a1=ausearch a2=-k a3=ampara_sudo a4=-i 
+type=SYSCALL msg=audit(11/18/26 17:39:52.970:598) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x6133f859f4e0 a1=0x6133f859cab0 a2=0x6133f858b2c0 a3=0x8 items=2 ppid=17383 pid=17384 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=100 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:39:53.057:605) : proctitle=sudo ausearch -f .t4 -i 
+type=PATH msg=audit(11/18/26 17:39:53.057:605) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:39:53.057:605) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:39:53.057:605) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:39:53.057:605) : argc=5 a0=sudo a1=ausearch a2=-f a3=.t4 a4=-i 
+type=SYSCALL msg=audit(11/18/26 17:39:53.057:605) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x6133f85a0530 a1=0x6133f859cab0 a2=0x6133f858b2c0 a3=0x8 items=2 ppid=17383 pid=17388 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=100 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:39:53.119:612) : proctitle=sudo ausearch -i 
+type=PATH msg=audit(11/18/26 17:39:53.119:612) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:39:53.119:612) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:39:53.119:612) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:39:53.119:612) : argc=3 a0=sudo a1=ausearch a2=-i 
+type=SYSCALL msg=audit(11/18/26 17:39:53.119:612) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x6133f85a0370 a1=0x6133f859f1f0 a2=0x6133f858b2c0 a3=0x8 items=2 ppid=17383 pid=17392 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=100 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:39:53.170:619) : proctitle=sudo grep ampara_config /var/log/audit/audit.log 
+type=PATH msg=audit(11/18/26 17:39:53.170:619) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:39:53.170:619) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:39:53.170:619) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:39:53.170:619) : argc=4 a0=sudo a1=grep a2=ampara_config a3=/var/log/audit/audit.log 
+type=SYSCALL msg=audit(11/18/26 17:39:53.170:619) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x6133f85a0390 a1=0x6133f859f0e0 a2=0x6133f858b2c0 a3=0x8 items=2 ppid=17383 pid=17396 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=100 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:40:22.619:643) : proctitle=sudo ausearch -if /var/log/audit/audit.log -k ampara_config -i 
+type=PATH msg=audit(11/18/26 17:40:22.619:643) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:40:22.619:643) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:40:22.619:643) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:40:22.619:643) : argc=7 a0=sudo a1=ausearch a2=-if a3=/var/log/audit/audit.log a4=-k a5=ampara_config a6=-i 
+type=SYSCALL msg=audit(11/18/26 17:40:22.619:643) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x5ab32efdf1b0 a1=0x5ab32efdfa90 a2=0x5ab32efcb2c0 a3=0x1 items=2 ppid=17590 pid=17593 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=101 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:40:22.831:650) : proctitle=sudo grep -E ^(log_format|log_file|name_format) /etc/audit/auditd.conf 
+type=PATH msg=audit(11/18/26 17:40:22.831:650) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:40:22.831:650) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:40:22.831:650) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:40:22.831:650) : argc=5 a0=sudo a1=grep a2=-E a3=^(log_format|log_file|name_format) a4=/etc/audit/auditd.conf 
+type=SYSCALL msg=audit(11/18/26 17:40:22.831:650) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x5ab32efe0000 a1=0x5ab32efdcb90 a2=0x5ab32efcb2c0 a3=0x5ab32efe08b0 items=2 ppid=17590 pid=17601 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=101 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:40:23.062:657) : proctitle=sudo sed -n 1,2p /var/log/audit/audit.log 
+type=PATH msg=audit(11/18/26 17:40:23.062:657) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:40:23.062:657) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:40:23.062:657) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:40:23.062:657) : argc=5 a0=sudo a1=sed a2=-n a3=1,2p a4=/var/log/audit/audit.log 
+type=SYSCALL msg=audit(11/18/26 17:40:23.062:657) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x5ab32efdec80 a1=0x5ab32efe0930 a2=0x5ab32efcb2c0 a3=0x1 items=2 ppid=17590 pid=17604 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=101 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:40:23.210:664) : proctitle=sudo ls -l /var/log/audit 
+type=PATH msg=audit(11/18/26 17:40:23.210:664) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:40:23.210:664) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:40:23.210:664) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:40:23.210:664) : argc=4 a0=sudo a1=ls a2=-l a3=/var/log/audit 
+type=SYSCALL msg=audit(11/18/26 17:40:23.210:664) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x5ab32efdc970 a1=0x5ab32efdec50 a2=0x5ab32efcb2c0 a3=0x5ab32efdec50 items=2 ppid=17590 pid=17607 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=101 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:40:23.316:671) : proctitle=sudo ausearch -m USER_CMD -i 
+type=PATH msg=audit(11/18/26 17:40:23.316:671) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:40:23.316:671) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:40:23.316:671) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:40:23.316:671) : argc=5 a0=sudo a1=ausearch a2=-m a3=USER_CMD a4=-i 
+type=SYSCALL msg=audit(11/18/26 17:40:23.316:671) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x5ab32efe0890 a1=0x5ab32efdcb90 a2=0x5ab32efcb2c0 a3=0x8 items=2 ppid=17590 pid=17609 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=101 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:42:44.649:723) : proctitle=sudo mkdir -p /opt/ampara/src/infra/vm 
+type=PATH msg=audit(11/18/26 17:42:44.649:723) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:42:44.649:723) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:42:44.649:723) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:42:44.649:723) : argc=4 a0=sudo a1=mkdir a2=-p a3=/opt/ampara/src/infra/vm 
+type=SYSCALL msg=audit(11/18/26 17:42:44.649:723) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x607f7bb5c990 a1=0x607f7bb5d270 a2=0x607f7bb4a2c0 a3=0x607f7bb5d270 items=2 ppid=18350 pid=18351 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=108 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:42:44.763:730) : proctitle=sudo cp -a /tmp/vm-sync/. /opt/ampara/src/infra/vm/ 
+type=PATH msg=audit(11/18/26 17:42:44.763:730) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:42:44.763:730) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:42:44.763:730) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:42:44.763:730) : argc=5 a0=sudo a1=cp a2=-a a3=/tmp/vm-sync/. a4=/opt/ampara/src/infra/vm/ 
+type=SYSCALL msg=audit(11/18/26 17:42:44.763:730) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x607f7bb5d400 a1=0x607f7bb5baf0 a2=0x607f7bb4a2c0 a3=0x607f7bb5baf0 items=2 ppid=18350 pid=18353 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=108 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:42:45.017:834) : proctitle=sudo find /opt/ampara/src/infra/vm -name *.sh -exec chmod 0755 {} + 
+type=PATH msg=audit(11/18/26 17:42:45.017:834) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:42:45.017:834) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:42:45.017:834) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:42:45.017:834) : argc=10 a0=sudo a1=find a2=/opt/ampara/src/infra/vm a3=-name a4=*.sh a5=-exec a6=chmod a7=0755 a8={} a9=+ 
+type=SYSCALL msg=audit(11/18/26 17:42:45.017:834) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x607f7bb5da60 a1=0x607f7bb5afe0 a2=0x607f7bb4a2c0 a3=0x8 items=2 ppid=18349 pid=18350 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=108 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:42:46.376:861) : proctitle=sudo bash /opt/ampara/src/infra/vm/verifica-vm.sh --saida /tmp/verifica.txt 
+type=PATH msg=audit(11/18/26 17:42:46.376:861) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:42:46.376:861) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:42:46.376:861) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:42:46.376:861) : argc=5 a0=sudo a1=bash a2=/opt/ampara/src/infra/vm/verifica-vm.sh a3=--saida a4=/tmp/verifica.txt 
+type=SYSCALL msg=audit(11/18/26 17:42:46.376:861) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x5b71282d91f0 a1=0x5b71282d6f80 a2=0x5b71282c72c0 a3=0x8 items=2 ppid=18404 pid=18405 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=109 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:43:10.209:885) : proctitle=sudo bash -c bash /opt/ampara/src/infra/vm/stress.sh todos 40 2>&1 | tee /tmp/stress.txt 
+type=PATH msg=audit(11/18/26 17:43:10.209:885) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:43:10.209:885) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:43:10.209:885) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:43:10.209:885) : argc=4 a0=sudo a1=bash a2=-c a3=bash /opt/ampara/src/infra/vm/stress.sh todos 40 2>&1 | tee /tmp/stress.txt 
+type=SYSCALL msg=audit(11/18/26 17:43:10.209:885) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x5b48beaec4e0 a1=0x5b48beaecdc0 a2=0x5b48beada2c0 a3=0x1 items=2 ppid=18988 pid=18989 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=110 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:45:17.809:914) : proctitle=sudo bash -c bash /opt/ampara/src/infra/vm/teste-falha.sh todos 2>&1 | tee /tmp/falha.txt 
+type=PATH msg=audit(11/18/26 17:45:17.809:914) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:45:17.809:914) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:45:17.809:914) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:45:17.809:914) : argc=4 a0=sudo a1=bash a2=-c a3=bash /opt/ampara/src/infra/vm/teste-falha.sh todos 2>&1 | tee /tmp/falha.txt 
+type=SYSCALL msg=audit(11/18/26 17:45:17.809:914) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x5a88af6c3590 a1=0x5a88af6c3e70 a2=0x5a88af6b12c0 a3=0x1 items=2 ppid=19590 pid=19591 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=112 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:47:22.523:956) : proctitle=sudo grep -E MEMORIA|CPU|DISCO /var/log/ampara/alertas.log 
+type=PATH msg=audit(11/18/26 17:47:22.523:956) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:47:22.523:956) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:47:22.523:956) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:47:22.523:956) : argc=5 a0=sudo a1=grep a2=-E a3=MEMORIA|CPU|DISCO a4=/var/log/ampara/alertas.log 
+type=SYSCALL msg=audit(11/18/26 17:47:22.523:956) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x5c822e3273a0 a1=0x5c822e324000 a2=0x5c822e3142c0 a3=0x8 items=2 ppid=20790 pid=20791 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=113 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:47:22.628:963) : proctitle=sudo grep -E MemTotal|MemAvailable /proc/meminfo 
+type=PATH msg=audit(11/18/26 17:47:22.628:963) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:47:22.628:963) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:47:22.628:963) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:47:22.628:963) : argc=5 a0=sudo a1=grep a2=-E a3=MemTotal|MemAvailable a4=/proc/meminfo 
+type=SYSCALL msg=audit(11/18/26 17:47:22.628:963) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x5c822e327290 a1=0x5c822e325a60 a2=0x5c822e3142c0 a3=0x5c822e325a60 items=2 ppid=20790 pid=20797 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=113 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:47:37.042:985) : proctitle=sudo systemctl kill --kill-whom=main -s KILL ampara-api 
+type=PATH msg=audit(11/18/26 17:47:37.042:985) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:47:37.042:985) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:47:37.042:985) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:47:37.042:985) : argc=7 a0=sudo a1=systemctl a2=kill a3=--kill-whom=main a4=-s a5=KILL a6=ampara-api 
+type=SYSCALL msg=audit(11/18/26 17:47:37.042:985) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x597f12fff290 a1=0x597f12ffda10 a2=0x597f12fe92c0 a3=0x597f12ffd520 items=2 ppid=20918 pid=20920 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=115 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:47:57.170:998) : proctitle=sudo ss -tn 
+type=PATH msg=audit(11/18/26 17:47:57.170:998) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:47:57.170:998) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:47:57.170:998) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:47:57.170:998) : argc=3 a0=sudo a1=ss a2=-tn 
+type=SYSCALL msg=audit(11/18/26 17:47:57.170:998) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x597f12ffdb70 a1=0x597f12ffcda0 a2=0x597f12fe92c0 a3=0x8 items=2 ppid=20918 pid=21070 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=115 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:47:57.375:1005) : proctitle=sudo ufw status numbered 
+type=PATH msg=audit(11/18/26 17:47:57.375:1005) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:47:57.375:1005) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:47:57.375:1005) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:47:57.375:1005) : argc=4 a0=sudo a1=ufw a2=status a3=numbered 
+type=SYSCALL msg=audit(11/18/26 17:47:57.375:1005) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x597f12ffff80 a1=0x597f12ffce80 a2=0x597f12fe92c0 a3=0x8 items=2 ppid=20918 pid=21075 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=115 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:48:12.510:1019) : proctitle=sudo ufw insert 1 deny out 1883/tcp 
+type=PATH msg=audit(11/18/26 17:48:12.510:1019) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:48:12.510:1019) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:48:12.510:1019) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:48:12.510:1019) : argc=7 a0=sudo a1=ufw a2=insert a3=1 a4=deny a5=out a6=1883/tcp 
+type=SYSCALL msg=audit(11/18/26 17:48:12.510:1019) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x55acb9f4dab0 a1=0x55acb9f4bb60 a2=0x55acb9f392c0 a3=0x55acb9f4e390 items=2 ppid=21176 pid=21177 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=117 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:48:12.921:1031) : proctitle=sudo ufw status numbered 
+type=PATH msg=audit(11/18/26 17:48:12.921:1031) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:48:12.921:1031) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:48:12.921:1031) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:48:12.921:1031) : argc=4 a0=sudo a1=ufw a2=status a3=numbered 
+type=SYSCALL msg=audit(11/18/26 17:48:12.921:1031) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x55acb9f4d680 a1=0x55acb9f4e450 a2=0x55acb9f392c0 a3=0x1 items=2 ppid=21176 pid=21185 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=117 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:48:13.191:1038) : proctitle=sudo systemctl restart ampara-api 
+type=PATH msg=audit(11/18/26 17:48:13.191:1038) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:48:13.191:1038) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:48:13.191:1038) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:48:13.191:1038) : argc=4 a0=sudo a1=systemctl a2=restart a3=ampara-api 
+type=SYSCALL msg=audit(11/18/26 17:48:13.191:1038) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x55acb9f4d620 a1=0x55acb9f4e3f0 a2=0x55acb9f392c0 a3=0x55acb9f4e3f0 items=2 ppid=21176 pid=21192 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=117 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:48:46.388:1051) : proctitle=sudo ss -tn 
+type=PATH msg=audit(11/18/26 17:48:46.388:1051) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:48:46.388:1051) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:48:46.388:1051) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:48:46.388:1051) : argc=3 a0=sudo a1=ss a2=-tn 
+type=SYSCALL msg=audit(11/18/26 17:48:46.388:1051) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x55acb9f4e440 a1=0x55acb9f50e10 a2=0x55acb9f392c0 a3=0x8 items=2 ppid=21176 pid=21354 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=117 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:48:46.434:1058) : proctitle=sudo iptables -S ufw-user-output 
+type=PATH msg=audit(11/18/26 17:48:46.434:1058) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:48:46.434:1058) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:48:46.434:1058) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:48:46.434:1058) : argc=4 a0=sudo a1=iptables a2=-S a3=ufw-user-output 
+type=SYSCALL msg=audit(11/18/26 17:48:46.434:1058) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x55acb9f4e4a0 a1=0x55acb9f51800 a2=0x55acb9f392c0 a3=0x8 items=2 ppid=21176 pid=21357 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=117 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:48:46.468:1065) : proctitle=sudo ufw delete deny out 1883/tcp 
+type=PATH msg=audit(11/18/26 17:48:46.468:1065) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:48:46.468:1065) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:48:46.468:1065) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:48:46.468:1065) : argc=6 a0=sudo a1=ufw a2=delete a3=deny a4=out a5=1883/tcp 
+type=SYSCALL msg=audit(11/18/26 17:48:46.468:1065) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x55acb9f4e440 a1=0x55acb9f4aba0 a2=0x55acb9f392c0 a3=0x55acb9f51950 items=2 ppid=21176 pid=21360 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=117 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:48:46.749:1077) : proctitle=sudo ufw status 
+type=PATH msg=audit(11/18/26 17:48:46.749:1077) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:48:46.749:1077) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:48:46.749:1077) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:48:46.749:1077) : argc=3 a0=sudo a1=ufw a2=status 
+type=SYSCALL msg=audit(11/18/26 17:48:46.749:1077) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x55acb9f4d090 a1=0x55acb9f50e10 a2=0x55acb9f392c0 a3=0x8 items=2 ppid=21176 pid=21368 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=117 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:50:18.417:1115) : proctitle=sudo mkdir -p /opt/ampara/src/infra/vm 
+type=PATH msg=audit(11/18/26 17:50:18.417:1115) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:50:18.417:1115) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:50:18.417:1115) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:50:18.417:1115) : argc=4 a0=sudo a1=mkdir a2=-p a3=/opt/ampara/src/infra/vm 
+type=SYSCALL msg=audit(11/18/26 17:50:18.417:1115) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x5879280d7990 a1=0x5879280d8270 a2=0x5879280c52c0 a3=0x5879280d8270 items=2 ppid=21883 pid=21884 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=121 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:50:18.446:1122) : proctitle=sudo cp -a /tmp/vm-sync/. /opt/ampara/src/infra/vm/ 
+type=PATH msg=audit(11/18/26 17:50:18.446:1122) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:50:18.446:1122) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:50:18.446:1122) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:50:18.446:1122) : argc=5 a0=sudo a1=cp a2=-a a3=/tmp/vm-sync/. a4=/opt/ampara/src/infra/vm/ 
+type=SYSCALL msg=audit(11/18/26 17:50:18.446:1122) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x5879280d8400 a1=0x5879280d6af0 a2=0x5879280c52c0 a3=0x5879280d6af0 items=2 ppid=21883 pid=21886 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=121 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:50:18.527:1176) : proctitle=sudo find /opt/ampara/src/infra/vm -name *.sh -exec chmod 0755 {} + 
+type=PATH msg=audit(11/18/26 17:50:18.527:1176) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:50:18.527:1176) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:50:18.527:1176) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:50:18.527:1176) : argc=10 a0=sudo a1=find a2=/opt/ampara/src/infra/vm a3=-name a4=*.sh a5=-exec a6=chmod a7=0755 a8={} a9=+ 
+type=SYSCALL msg=audit(11/18/26 17:50:18.527:1176) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x5879280d8a60 a1=0x5879280d5fe0 a2=0x5879280c52c0 a3=0x8 items=2 ppid=21882 pid=21883 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=121 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:50:26.047:1203) : proctitle=sudo bash -c bash /opt/ampara/src/infra/vm/stress.sh todos 40 2>&1 | tee /tmp/stress.txt 
+type=PATH msg=audit(11/18/26 17:50:26.047:1203) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:50:26.047:1203) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:50:26.047:1203) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:50:26.047:1203) : argc=4 a0=sudo a1=bash a2=-c a3=bash /opt/ampara/src/infra/vm/stress.sh todos 40 2>&1 | tee /tmp/stress.txt 
+type=SYSCALL msg=audit(11/18/26 17:50:26.047:1203) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x594e5f05e4e0 a1=0x594e5f05edc0 a2=0x594e5f04c2c0 a3=0x1 items=2 ppid=21960 pid=21961 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=122 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:52:28.750:1217) : proctitle=sudo bash -c bash /opt/ampara/src/infra/vm/teste-falha.sh todos 2>&1 | tee /tmp/falha.txt 
+type=PATH msg=audit(11/18/26 17:52:28.750:1217) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:52:28.750:1217) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:52:28.750:1217) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:52:28.750:1217) : argc=4 a0=sudo a1=bash a2=-c a3=bash /opt/ampara/src/infra/vm/teste-falha.sh todos 2>&1 | tee /tmp/falha.txt 
+type=SYSCALL msg=audit(11/18/26 17:52:28.750:1217) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x5d0850105590 a1=0x5d0850105e70 a2=0x5d08500f32c0 a3=0x1 items=2 ppid=22528 pid=22529 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=123 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:54:51.118:1279) : proctitle=sudo mkdir -p /opt/ampara/src/infra/vm 
+type=PATH msg=audit(11/18/26 17:54:51.118:1279) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:54:51.118:1279) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:54:51.118:1279) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:54:51.118:1279) : argc=4 a0=sudo a1=mkdir a2=-p a3=/opt/ampara/src/infra/vm 
+type=SYSCALL msg=audit(11/18/26 17:54:51.118:1279) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x638248282990 a1=0x638248283270 a2=0x6382482702c0 a3=0x638248283270 items=2 ppid=23660 pid=23661 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=127 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:54:51.150:1286) : proctitle=sudo cp -a /tmp/vm-sync/. /opt/ampara/src/infra/vm/ 
+type=PATH msg=audit(11/18/26 17:54:51.150:1286) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:54:51.150:1286) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:54:51.150:1286) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:54:51.150:1286) : argc=5 a0=sudo a1=cp a2=-a a3=/tmp/vm-sync/. a4=/opt/ampara/src/infra/vm/ 
+type=SYSCALL msg=audit(11/18/26 17:54:51.150:1286) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x638248283400 a1=0x638248281af0 a2=0x6382482702c0 a3=0x638248281af0 items=2 ppid=23660 pid=23663 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=127 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:54:51.301:1340) : proctitle=sudo find /opt/ampara/src/infra/vm -name *.sh -exec chmod 0755 {} + 
+type=PATH msg=audit(11/18/26 17:54:51.301:1340) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:54:51.301:1340) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:54:51.301:1340) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:54:51.301:1340) : argc=10 a0=sudo a1=find a2=/opt/ampara/src/infra/vm a3=-name a4=*.sh a5=-exec a6=chmod a7=0755 a8={} a9=+ 
+type=SYSCALL msg=audit(11/18/26 17:54:51.301:1340) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x638248283a60 a1=0x638248280fe0 a2=0x6382482702c0 a3=0x8 items=2 ppid=23659 pid=23660 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=127 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:54:51.950:1367) : proctitle=sudo bash -c bash /opt/ampara/src/infra/vm/stress.sh cpu 40 2>&1 | tee /tmp/stress-cpu.txt 
+type=PATH msg=audit(11/18/26 17:54:51.950:1367) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:54:51.950:1367) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:54:51.950:1367) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:54:51.950:1367) : argc=4 a0=sudo a1=bash a2=-c a3=bash /opt/ampara/src/infra/vm/stress.sh cpu 40 2>&1 | tee /tmp/stress-cpu.txt 
+type=SYSCALL msg=audit(11/18/26 17:54:51.950:1367) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x59aa7e4aea90 a1=0x59aa7e4af3e0 a2=0x59aa7e49c2c0 a3=0x1 items=2 ppid=23718 pid=23719 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=128 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:55:32.352:1381) : proctitle=sudo grep ALERTA | CPU /var/log/ampara/alertas.log 
+type=PATH msg=audit(11/18/26 17:55:32.352:1381) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:55:32.352:1381) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:55:32.352:1381) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:55:32.352:1381) : argc=4 a0=sudo a1=grep a2=ALERTA | CPU a3=/var/log/ampara/alertas.log 
+type=SYSCALL msg=audit(11/18/26 17:55:32.352:1381) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x59aa7e4ae3b0 a1=0x59aa7e4af520 a2=0x59aa7e49c2c0 a3=0x1 items=2 ppid=23718 pid=23921 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=128 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:55:43.223:1395) : proctitle=sudo bash -c bash /opt/ampara/src/infra/vm/stress.sh todos 40 2>&1 | tee /tmp/stress.txt 
+type=PATH msg=audit(11/18/26 17:55:43.223:1395) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:55:43.223:1395) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:55:43.223:1395) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:55:43.223:1395) : argc=4 a0=sudo a1=bash a2=-c a3=bash /opt/ampara/src/infra/vm/stress.sh todos 40 2>&1 | tee /tmp/stress.txt 
+type=SYSCALL msg=audit(11/18/26 17:55:43.223:1395) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x5bf7fd0c74e0 a1=0x5bf7fd0c7dc0 a2=0x5bf7fd0b52c0 a3=0x1 items=2 ppid=24000 pid=24004 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=130 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:58:04.798:1417) : proctitle=sudo bash /opt/ampara/src/infra/vm/verifica-vm.sh --saida /tmp/verifica.txt 
+type=PATH msg=audit(11/18/26 17:58:04.798:1417) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:58:04.798:1417) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:58:04.798:1417) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:58:04.798:1417) : argc=5 a0=sudo a1=bash a2=/opt/ampara/src/infra/vm/verifica-vm.sh a3=--saida a4=/tmp/verifica.txt 
+type=SYSCALL msg=audit(11/18/26 17:58:04.798:1417) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x5f800cff51c0 a1=0x5f800cff5b70 a2=0x5f800cfe22c0 a3=0x1 items=2 ppid=24674 pid=24675 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=131 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:58:23.664:1434) : proctitle=sudo rm -rf /tmp/evid 
+type=PATH msg=audit(11/18/26 17:58:23.664:1434) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:58:23.664:1434) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:58:23.664:1434) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:58:23.664:1434) : argc=4 a0=sudo a1=rm a2=-rf a3=/tmp/evid 
+type=SYSCALL msg=audit(11/18/26 17:58:23.664:1434) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x5f800cff5ba0 a1=0x5f800cff4b80 a2=0x5f800cfe22c0 a3=0x5f800cff5a80 items=2 ppid=24674 pid=25191 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=131 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 
+----
+type=PROCTITLE msg=audit(11/18/26 17:58:23.683:1441) : proctitle=sudo bash /opt/ampara/src/infra/vm/coleta-evidencias.sh /tmp/evid 
+type=PATH msg=audit(11/18/26 17:58:23.683:1441) : item=1 name=/lib64/ld-linux-x86-64.so.2 inode=6459 dev=fd:01 mode=file,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=PATH msg=audit(11/18/26 17:58:23.683:1441) : item=0 name=/usr/bin/sudo inode=2119 dev=fd:01 mode=file,suid,755 ouid=root ogid=root rdev=00:00 nametype=NORMAL cap_fp=none cap_fi=none cap_fe=0 cap_fver=0 cap_frootid=0 
+type=CWD msg=audit(11/18/26 17:58:23.683:1441) : cwd=/home/operador 
+type=EXECVE msg=audit(11/18/26 17:58:23.683:1441) : argc=4 a0=sudo a1=bash a2=/opt/ampara/src/infra/vm/coleta-evidencias.sh a3=/tmp/evid 
+type=SYSCALL msg=audit(11/18/26 17:58:23.683:1441) : arch=x86_64 syscall=execve success=yes exit=0 a0=0x5f800cff4ed0 a1=0x5f800cff5b10 a2=0x5f800cfe22c0 a3=0x8 items=2 ppid=24674 pid=25193 auid=operador uid=operador gid=operador euid=root suid=root fsuid=root egid=operador sgid=operador fsgid=operador tty=(none) ses=131 comm=sudo exe=/usr/bin/sudo subj=unconfined key=ampara_sudo 

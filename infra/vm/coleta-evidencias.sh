@@ -95,7 +95,7 @@ coleta() {
     auditctl -l 2>&1 || true
     echo
     echo "# ausearch -k ampara_config -k ampara_sudo -i"
-    ausearch -k ampara_config -k ampara_sudo -i 2>&1 || true
+    ausearch -if /var/log/audit/audit.log -k ampara_config -k ampara_sudo -i 2>&1 || true
   } >"$dest/06-auditd.txt"
 
   ampara_info "07 systemctl status"

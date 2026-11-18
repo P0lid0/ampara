@@ -1,0 +1,6 @@
+[2026-11-18T17:55:45-03:00] [INFO] CPU: stress-ng --cpu 0 --cpu-load 100 por 40s
+[OK] stress cpu: alerta CPU registrado em /var/log/ampara/alertas.log
+[2026-11-18T17:56:25-03:00] [INFO] Memoria: stress-ng --vm 1 --vm-bytes 2755244032 por 40s
+[OK] stress memoria: alerta MEMORIA registrado em /var/log/ampara/alertas.log
+[2026-11-18T17:57:06-03:00] [INFO] Disco: fallocate de 16216750080 bytes em /var/tmp/ampara-enchimento.bin por 40s
+[OK] stress disco: alerta DISCO registrado em /var/log/ampara/alertas.log

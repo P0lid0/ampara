@@ -1,0 +1,88 @@
+Verificação da VM Ampara em 2026-11-18T17:58:23-03:00
+
+== critério: infra ==
+[OK] infra: hostname estático é ampara-vm
+[OK] infra: IP 10.0.2.15/24 na interface
+[OK] infra: rota padrão via 10.0.2.2
+[OK] infra: netplan 60-ampara.yaml (modo 600, DNS 10.0.2.3)
+[OK] infra: DNS resolve archive.ubuntu.com
+[OK] infra: usuário ampara existe
+[OK] infra: usuário operador existe
+[OK] infra: shell de ampara é /usr/sbin/nologin
+[OK] infra: ufw ativo com deny incoming e deny outgoing
+[OK] infra: ufw tem exatamente 1 regra 1883 ALLOW OUT
+[OK] infra: hora sincronizada por NTP
+
+== critério: app ==
+[OK] app: dotnet tem o runtime Microsoft.AspNetCore.App
+[OK] app: python3 responde a --version
+[OK] app: psql responde a --version
+[OK] app: nginx responde a --version
+[OK] app: node responde a --version
+[OK] app: ampara.env com modo 640 e dono root:ampara
+[OK] app: ampara.env tem as 12 chaves do contrato, não vazias
+[OK] app: PONTE_CHAVE_SERVICO e PONTE_CHAVE_POLICIA diferentes
+[OK] app: AMPARA_JWT_SECRET com 64 caracteres ou mais
+[OK] app: AMPARA_CRYPTO_KEY decodifica para 32 bytes
+[OK] app: unit postgresql ativa
+[OK] app: unit ampara-api ativa
+[OK] app: unit ampara-ponte ativa
+[OK] app: unit nginx ativa
+[OK] app: ampara-migrations terminou com Result=success
+[OK] app: ordem: ampara-migrations depois de postgresql (After e Requires)
+[OK] app: ordem: ampara-api depois de ampara-migrations (After e Requires)
+[OK] app: ordem: ampara-ponte depois de ampara-api (After e Requires)
+[OK] app: ordem: nginx depois de ampara-ponte (After e Requires)
+[OK] app: HEALTH_URL responde 200 com status ok ou degradado
+[OK] app: nenhum segredo do ampara.env aparece nos logs
+
+== critério: monitor ==
+[OK] monitor: /usr/local/sbin/ampara-monitor.sh é executável
+[OK] monitor: monitor.conf tem CPU_LIMITE=80, MEM_LIMITE=80 e DISCO_LIMITE=85
+[OK] monitor: alerta CPU forçado (AMPARA_CPU_LIMITE=-1) vai para alertas.log e journald
+[OK] monitor: alerta MEMORIA forçado (AMPARA_MEM_LIMITE=-1) vai para alertas.log e journald
+[OK] monitor: alerta DISCO forçado (AMPARA_DISCO_LIMITE=-1) vai para alertas.log e journald
+
+== critério: tolerante ==
+[OK] tolerante: ampara-monitor ativo
+[OK] tolerante: ampara-monitor habilitado no boot
+[OK] tolerante: ampara-monitor com Restart=always
+[OK] tolerante: ampara-monitor com WatchdogUSec=1min
+[OK] tolerante: ampara-monitor sem limite de reinício (StartLimitIntervalUSec=0)
+[OK] tolerante: ampara-monitor roda como User=ampara
+[OK] tolerante: ampara-api com Restart=always
+[OK] tolerante: ampara-ponte com Restart=always
+
+== critério: logs ==
+[OK] logs: execucao.log tem INICIO e FIM codigo=0 de 01-infra.sh
+[OK] logs: execucao.log tem INICIO e FIM codigo=0 de 02-app.sh
+[OK] logs: execucao.log tem INICIO e FIM codigo=0 de 03-monitor.sh
+[OK] logs: execucao.log tem INICIO e FIM codigo=0 de 04-auditoria.sh
+[OK] logs: auditd ativo
+[OK] logs: auditctl -l tem as regras ampara_config, ampara_scripts e ampara_sudo
+[OK] logs: alteração em /etc/ampara aparece no ausearch (-k ampara_config)
+[OK] logs: /etc/logrotate.d/ampara existe
+[OK] logs: logrotate -d /etc/logrotate.d/ampara sai 0
+
+== critério: completo ==
+[OK] completo: GET / responde 200 (página de emergência)
+[OK] completo: GET /painel-risco/ responde 200
+[OK] completo: GET /policia responde 200
+[OK] completo: GET /api/v1/risco responde 200
+[OK] completo: GET /health (nginx) responde 200 com "db":true
+[OK] completo: GET /ponte/health tem "status":"ok"
+[OK] completo: /policia traz const API_BASE = "/ponte"; (X-Forwarded-Prefix)
+[OK] completo: /ponte/hotspots sem chave devolve 401
+[OK] completo: /ponte/hotspots com X-Chave-Policia devolve 200
+[OK] completo: /painel-risco/ referencia assets sob /painel-risco/
+[OK] completo: cloud-init terminou (status: done)
+[OK] completo: health com "mqtt":true e "status":"ok" (broker alcançável)
+[AVISO] completo: cloudflared ativo (túnel público)
+
+CRITERIO infra 2 pts: OK
+CRITERIO app 2 pts: OK
+CRITERIO monitor 2 pts: OK
+CRITERIO tolerante 1 pts: OK
+CRITERIO logs 1 pts: OK
+CRITERIO completo 2 pts: OK
+PONTOS: 10/10

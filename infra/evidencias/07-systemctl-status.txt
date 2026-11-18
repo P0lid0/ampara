@@ -1,0 +1,113 @@
+● postgresql.service - PostgreSQL RDBMS
+     Loaded: loaded (/usr/lib/systemd/system/postgresql.service; enabled; preset: enabled)
+     Active: active (exited) since Wed 2026-11-18 17:20:15 -03; 38min ago
+   Main PID: 9375 (code=exited, status=0/SUCCESS)
+        CPU: 50ms
+
+Nov 18 17:20:15 ampara-vm systemd[1]: Starting postgresql.service - PostgreSQL RDBMS...
+Nov 18 17:20:15 ampara-vm systemd[1]: Finished postgresql.service - PostgreSQL RDBMS.
+
+● ampara-migrations.service - Ampara - migracoes do banco (API e Ponte)
+     Loaded: loaded (/etc/systemd/system/ampara-migrations.service; enabled; preset: enabled)
+     Active: active (exited) since Wed 2026-11-18 17:36:10 -03; 22min ago
+       Docs: file:///opt/ampara/src/infra/README.md
+   Main PID: 14213 (code=exited, status=0/SUCCESS)
+        CPU: 24.309s
+
+Nov 18 17:36:06 ampara-vm ampara-migra.sh[14214]:       VALUES (@p12, @p13, @p14, @p15, @p16);
+Nov 18 17:36:06 ampara-vm ampara-migra.sh[14214]:       UPDATE "Usuarios" SET "CodigoEmergenciaHash" = @p17, "ConsentimentoEm" = @p18, "ConsentimentoRota" = @p19, "PalavraSecretaHash" = @p20
+Nov 18 17:36:06 ampara-vm ampara-migra.sh[14214]:       WHERE "Id" = @p21;
+Nov 18 17:36:06 ampara-vm ampara-migra.sh[14213]: Migrations da Ponte...
+Nov 18 17:36:09 ampara-vm ampara-migra.sh[14315]: INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+Nov 18 17:36:09 ampara-vm ampara-migra.sh[14315]: INFO  [alembic.runtime.migration] Will assume transactional DDL.
+Nov 18 17:36:09 ampara-vm ampara-migra.sh[14315]: INFO  [alembic.runtime.migration] Running upgrade  -> 0001, inicial
+Nov 18 17:36:09 ampara-vm ampara-migra.sh[14315]: INFO  [alembic.runtime.migration] Running upgrade 0001 -> 0002, retornos.mensagem de 280 para 500 caracteres
+Nov 18 17:36:10 ampara-vm ampara-migra.sh[14213]: Migrations concluidas.
+Nov 18 17:36:10 ampara-vm systemd[1]: Finished ampara-migrations.service - Ampara - migracoes do banco (API e Ponte).
+
+● ampara-api.service - Ampara - API (ASP.NET)
+     Loaded: loaded (/etc/systemd/system/ampara-api.service; enabled; preset: enabled)
+     Active: active (running) since Wed 2026-11-18 17:52:58 -03; 5min ago
+       Docs: file:///opt/ampara/src/infra/README.md
+   Main PID: 22903 (dotnet)
+      Tasks: 25 (limit: 4652)
+     Memory: 192.0M (peak: 193.9M)
+        CPU: 55.584s
+     CGroup: /system.slice/ampara-api.service
+             └─22903 /usr/local/bin/dotnet /opt/ampara/api/Ampara.Api.dll
+
+Nov 18 17:58:35 ampara-vm dotnet[22903]:       Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+Nov 18 17:58:35 ampara-vm dotnet[22903]:       SELECT 1
+Nov 18 17:58:37 ampara-vm dotnet[22903]: info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+Nov 18 17:58:37 ampara-vm dotnet[22903]:       Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+Nov 18 17:58:37 ampara-vm dotnet[22903]:       SELECT o."Id", o."AlertasLiberadosEm"
+Nov 18 17:58:37 ampara-vm dotnet[22903]:       FROM "Ocorrencias" AS o
+Nov 18 17:58:37 ampara-vm dotnet[22903]:       WHERE o."Estado" = 'Aberta'
+Nov 18 17:58:38 ampara-vm dotnet[22903]: info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+Nov 18 17:58:38 ampara-vm dotnet[22903]:       Executed DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+Nov 18 17:58:38 ampara-vm dotnet[22903]:       SELECT 1
+
+● ampara-ponte.service - Ampara - Ponte Policia (FastAPI)
+     Loaded: loaded (/etc/systemd/system/ampara-ponte.service; enabled; preset: enabled)
+     Active: active (running) since Wed 2026-11-18 17:52:58 -03; 5min ago
+       Docs: file:///opt/ampara/src/infra/README.md
+   Main PID: 22907 (uvicorn)
+      Tasks: 6 (limit: 4652)
+     Memory: 62.7M (peak: 63.2M)
+        CPU: 5.141s
+     CGroup: /system.slice/ampara-ponte.service
+             └─22907 /opt/ampara/ponte/venv/bin/python3 /opt/ampara/ponte/venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000
+
+Nov 18 17:58:18 ampara-vm uvicorn[22907]: INFO:     127.0.0.1:0 - "GET /policia HTTP/1.0" 200 OK
+Nov 18 17:58:19 ampara-vm uvicorn[22907]: INFO:     127.0.0.1:0 - "GET /health HTTP/1.0" 200 OK
+Nov 18 17:58:19 ampara-vm uvicorn[22907]: INFO:     127.0.0.1:0 - "GET /policia HTTP/1.0" 200 OK
+Nov 18 17:58:19 ampara-vm uvicorn[22907]: INFO:     127.0.0.1:0 - "GET /hotspots HTTP/1.0" 401 Unauthorized
+Nov 18 17:58:20 ampara-vm uvicorn[22907]: INFO:     127.0.0.1:0 - "GET /hotspots HTTP/1.0" 200 OK
+Nov 18 17:58:35 ampara-vm uvicorn[22907]: INFO:     127.0.0.1:0 - "GET /policia HTTP/1.0" 200 OK
+Nov 18 17:58:36 ampara-vm uvicorn[22907]: INFO:     127.0.0.1:0 - "GET /health HTTP/1.0" 200 OK
+Nov 18 17:58:36 ampara-vm uvicorn[22907]: INFO:     127.0.0.1:0 - "GET /policia HTTP/1.0" 200 OK
+Nov 18 17:58:36 ampara-vm uvicorn[22907]: INFO:     127.0.0.1:0 - "GET /hotspots HTTP/1.0" 401 Unauthorized
+Nov 18 17:58:36 ampara-vm uvicorn[22907]: INFO:     127.0.0.1:0 - "GET /hotspots HTTP/1.0" 200 OK
+
+● nginx.service - A high performance web server and a reverse proxy server
+     Loaded: loaded (/usr/lib/systemd/system/nginx.service; enabled; preset: enabled)
+    Drop-In: /etc/systemd/system/nginx.service.d
+             └─ampara.conf
+     Active: active (running) since Wed 2026-11-18 17:52:59 -03; 5min ago
+       Docs: man:nginx(8)
+    Process: 22910 ExecStartPre=/usr/sbin/nginx -t -q -g daemon on; master_process on; (code=exited, status=0/SUCCESS)
+    Process: 22913 ExecStart=/usr/sbin/nginx -g daemon on; master_process on; (code=exited, status=0/SUCCESS)
+   Main PID: 22923 (nginx)
+      Tasks: 5 (limit: 4652)
+     Memory: 3.9M (peak: 4.4M)
+        CPU: 157ms
+     CGroup: /system.slice/nginx.service
+             ├─22923 "nginx: master process /usr/sbin/nginx -g daemon on; master_process on;"
+             ├─22924 "nginx: worker process"
+             ├─22925 "nginx: worker process"
+             ├─22926 "nginx: worker process"
+             └─22927 "nginx: worker process"
+
+Nov 18 17:52:58 ampara-vm systemd[1]: Starting nginx.service - A high performance web server and a reverse proxy server...
+Nov 18 17:52:59 ampara-vm systemd[1]: Started nginx.service - A high performance web server and a reverse proxy server.
+
+● ampara-monitor.service - Ampara - monitor de CPU, memoria, disco e servicos
+     Loaded: loaded (/etc/systemd/system/ampara-monitor.service; enabled; preset: enabled)
+     Active: active (running) since Wed 2026-11-18 17:52:56 -03; 5min ago
+   Main PID: 22827 (bash)
+      Tasks: 2 (limit: 4652)
+     Memory: 1.4M (peak: 3.7M)
+        CPU: 20.861s
+     CGroup: /system.slice/ampara-monitor.service
+             ├─22827 bash /usr/local/sbin/ampara-monitor.sh
+             └─25652 sleep 5
+
+Nov 18 17:52:56 ampara-vm systemd[1]: ampara-monitor.service: Scheduled restart job, restart counter is at 2.
+Nov 18 17:52:56 ampara-vm systemd[1]: Started ampara-monitor.service - Ampara - monitor de CPU, memoria, disco e servicos.
+Nov 18 17:52:56 ampara-vm ampara-monitor[22842]: 2026-11-18T17:52:56-03:00 | INFO | MONITOR_INICIADO | pid=22827
+Nov 18 17:53:04 ampara-vm ampara-monitor[22987]: 2026-11-18T17:53:04-03:00 | ALERTA | API_HEALTH | health nao respondeu (codigo=7)
+Nov 18 17:53:16 ampara-vm ampara-monitor[23099]: 2026-11-18T17:53:16-03:00 | ALERTA | MQTT | conexao MQTT da API fora (mqtt=false)
+Nov 18 17:54:58 ampara-vm ampara-monitor[23772]: 2026-11-18T17:54:58-03:00 | ALERTA | CPU | valor=100% limite=80%
+Nov 18 17:56:04 ampara-vm ampara-monitor[24096]: 2026-11-18T17:56:04-03:00 | ALERTA | CPU | valor=100% limite=80%
+Nov 18 17:56:37 ampara-vm ampara-monitor[24236]: 2026-11-18T17:56:37-03:00 | ALERTA | MEMORIA | valor=85% limite=80%
+Nov 18 17:57:08 ampara-vm ampara-monitor[24380]: 2026-11-18T17:57:08-03:00 | ALERTA | DISCO | valor=87% limite=85%

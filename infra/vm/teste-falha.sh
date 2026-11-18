@@ -33,7 +33,7 @@ tf_falha() {
 # Chamada pelo trap de EXIT da lib (inclusive Ctrl+C): nunca deixa a regra de bloqueio do MQTT.
 ampara_limpeza() {
   if [ "$TF_REGRA_MQTT" -eq 1 ]; then
-    ufw --force delete deny out 1883/tcp >/dev/null 2>&1 || true
+    ufw allow out 1883/tcp >/dev/null 2>&1 || true
     TF_REGRA_MQTT=0
   fi
 }
@@ -137,7 +137,7 @@ cenario_api() {
   base_in=$(tf_conta "| ALERTA | SERVICO_INATIVO | $unit")
   base_rec=$(tf_conta "| INFO | SERVICO_RECUPERADO | $unit")
   ampara_info "api: matando $unit (MainPID=$antes) com SIGKILL"
-  if ! systemctl kill -s KILL "$unit"; then
+  if ! systemctl kill --kill-whom=main -s KILL "$unit"; then
     tf_falha "api: systemctl kill falhou"
     return 1
   fi
@@ -182,7 +182,7 @@ cenario_monitor() {
   fi
   base=$(tf_conta "| INFO | MONITOR_INICIADO |")
   ampara_info "monitor: matando $unit (MainPID=$antes) com SIGKILL"
-  if ! systemctl kill -s KILL "$unit"; then
+  if ! systemctl kill --kill-whom=main -s KILL "$unit"; then
     tf_falha "monitor: systemctl kill falhou"
     return 1
   fi
@@ -203,9 +203,9 @@ cenario_monitor() {
 cenario_mqtt() {
   local base rc=0 conta_1883
   base=$(tf_conta "| ALERTA | MQTT |")
-  ampara_info "mqtt: bloqueando a saida 1883 no ufw e reiniciando a API"
-  if ! ufw insert 1 deny out 1883/tcp >/dev/null; then
-    tf_falha "mqtt: nao consegui inserir a regra de bloqueio no ufw"
+  ampara_info "mqtt: retirando a regra que libera a saida 1883 (o ufw nega o resto) e reiniciando a API"
+  if ! ufw --force delete allow out 1883/tcp >/dev/null; then
+    tf_falha "mqtt: nao consegui retirar a regra de saida 1883 do ufw"
     return 1
   fi
   TF_REGRA_MQTT=1
@@ -230,7 +230,7 @@ cenario_mqtt() {
     fi
   fi
 
-  ampara_info "mqtt: removendo a regra de bloqueio"
+  ampara_info "mqtt: devolvendo a regra que libera a saida 1883"
   ampara_limpeza
   conta_1883=$(ufw status | grep -c '1883' || true)
   if [ "$conta_1883" -eq 1 ]; then

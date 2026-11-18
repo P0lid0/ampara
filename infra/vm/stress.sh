@@ -87,8 +87,8 @@ carga_cpu() { # <duracao_s>
   local d=$1 antes pid
   st_exige_stress_ng || return 1
   antes=$(st_conta_alertas CPU)
-  ampara_info "CPU: stress-ng --cpu 0 --cpu-load 95 por ${d}s"
-  stress-ng --cpu 0 --cpu-load 95 --timeout "${d}s" >/dev/null 2>&1 &
+  ampara_info "CPU: stress-ng --cpu 0 --cpu-load 100 por ${d}s"
+  stress-ng --cpu 0 --cpu-load 100 --timeout "${d}s" >/dev/null 2>&1 &
   pid=$!
   wait "$pid" || ampara_info "stress-ng terminou com erro (seguindo para a conferencia)"
   st_confere "stress cpu" CPU "$antes"
@@ -98,8 +98,15 @@ carga_mem() { # <duracao_s>
   local d=$1 antes pid
   st_exige_stress_ng || return 1
   antes=$(st_conta_alertas MEMORIA)
-  ampara_info "Memoria: stress-ng --vm 1 --vm-bytes 90% por ${d}s"
-  stress-ng --vm 1 --vm-bytes 90% --vm-keep --timeout "${d}s" >/dev/null 2>&1 &
+  # O "90%" do stress-ng conta so a memoria livre (nao chega a 80% de uso): aloca bytes
+  # suficientes para sobrar ~15% do total disponivel.
+  local total_kb disp_kb bytes
+  total_kb=$(awk '/^MemTotal:/ {print $2}' /proc/meminfo)
+  disp_kb=$(awk '/^MemAvailable:/ {print $2}' /proc/meminfo)
+  bytes=$(( (disp_kb - total_kb * 15 / 100) * 1024 ))
+  if [ "$bytes" -le 0 ]; then bytes=$(( total_kb * 1024 / 2 )); fi
+  ampara_info "Memoria: stress-ng --vm 1 --vm-bytes ${bytes} por ${d}s"
+  stress-ng --vm 1 --vm-bytes "$bytes" --vm-keep --timeout "${d}s" >/dev/null 2>&1 &
   pid=$!
   wait "$pid" || ampara_info "stress-ng terminou com erro (seguindo para a conferencia)"
   st_confere "stress memoria" MEMORIA "$antes"
