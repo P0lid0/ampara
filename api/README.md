@@ -68,8 +68,11 @@ Motor PII no `PiiRequestMiddleware` e `Sensitive<T>`; implementações reais de 
 
 ## Integrantes
 
-- Pedro Martins
-- Vitor Cesarino Marchese
+- Guilherme (RM 554962)
+- Pedro Martins (RM 555556)
+- Fabrício (RM 558216)
+- Vitor Cesarino Marchese (RM 554893)
+- Matheus (RM 555447)
 
 ## Versão do .NET
 
