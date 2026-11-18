@@ -105,7 +105,7 @@ function Get-QemuArgs {
         '-name', 'ampara-vm',
         '-machine', 'q35',
         '-accel', $accel,
-        '-cpu', 'qemu64',
+        '-cpu', 'qemu64,+ssse3,+sse4.1,+sse4.2,+popcnt',
         '-smp', "$Cpus",
         '-m', "$Memoria",
         '-drive', "file=$Disco,if=virtio,format=qcow2",

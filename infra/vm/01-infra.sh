@@ -148,6 +148,9 @@ configura_ufw() {
   ufw allow out 1883/tcp
   ufw allow out 7844/tcp
   ufw allow out 7844/udp
+  # Seed do cloud-init servido pelo host (10.0.2.2:8088): sem esta regra o cloud-init espera
+  # a rede ate estourar o tempo em todo reboot e o SSH so sobe minutos depois.
+  ufw allow out to "$VM_GATEWAY" port 8088 proto tcp
   ufw --force enable
   ampara_info "ufw ativo: deny incoming/outgoing com as liberacoes do Ampara."
 }
