@@ -1,0 +1,16 @@
+[Unit]
+Description=Ampara - migracoes do banco (API e Ponte)
+Documentation=file:///opt/ampara/src/infra/README.md
+After=postgresql.service
+Requires=postgresql.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+TimeoutStartSec=300
+WorkingDirectory=/opt/ampara/api
+EnvironmentFile=/etc/ampara/ampara.env
+ExecStart=/usr/local/sbin/ampara-migra.sh
+
+[Install]
+WantedBy=multi-user.target

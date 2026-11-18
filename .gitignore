@@ -24,7 +24,7 @@ qa/spikes/gps-background/android/
 qa/spikes/**/saida/
 ml/dados/brutos/
 ml/dados/cache/
-infra/vm/
+infra/.vm/
 *.qcow2
 *.img
 

@@ -1,0 +1,22 @@
+[Unit]
+Description=Ampara - Ponte Policia (FastAPI)
+Documentation=file:///opt/ampara/src/infra/README.md
+After=ampara-api.service
+Requires=ampara-api.service
+
+[Service]
+Type=simple
+User=ampara
+Group=ampara
+WorkingDirectory=/opt/ampara/ponte
+# PONTE_DB, PONTE_CHAVE_SERVICO e PONTE_CHAVE_POLICIA vem do ampara.env; PONTE_ASGI, do vm.conf.
+Environment=PONTE_ASGI=app.main:app
+EnvironmentFile=/etc/ampara/ampara.env
+EnvironmentFile=-/etc/ampara/vm.conf
+ExecStart=/opt/ampara/ponte/venv/bin/uvicorn $PONTE_ASGI --host 127.0.0.1 --port 8000
+Restart=always
+RestartSec=10
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=multi-user.target

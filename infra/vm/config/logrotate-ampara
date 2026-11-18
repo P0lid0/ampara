@@ -1,0 +1,26 @@
+# Instalado em /etc/logrotate.d/ampara por 03-monitor.sh.
+# Limita o tamanho dos logs do Ampara para que eles nunca encham o disco
+# (disco acima de 85% e justamente um dos alertas do monitor).
+# "su" troca o usuario da rotacao: /var/log/ampara pertence ao usuario ampara.
+
+/var/log/ampara/alertas.log {
+    su ampara ampara
+    daily
+    rotate 7
+    size 5M
+    compress
+    missingok
+    notifempty
+    copytruncate
+}
+
+/var/log/ampara/execucao.log /var/log/ampara/provisiona.log {
+    su root root
+    daily
+    rotate 7
+    size 5M
+    compress
+    missingok
+    notifempty
+    copytruncate
+}

@@ -1,0 +1,10 @@
+## Regras de auditoria do Ampara (instaladas em /etc/audit/rules.d/ampara.rules).
+## Configuracao e segredos
+-w /etc/ampara/ -p wa -k ampara_config
+## Scripts de provisionamento e executaveis do monitor
+-w /opt/ampara/src/infra/vm/ -p wa -k ampara_scripts
+-w /usr/local/sbin/ -p wa -k ampara_scripts
+## Uso e alteracao do sudo
+-w /etc/sudoers -p wa -k ampara_sudo
+-w /etc/sudoers.d/ -p wa -k ampara_sudo
+-w /usr/bin/sudo -p x -k ampara_sudo

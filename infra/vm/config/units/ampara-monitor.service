@@ -1,0 +1,29 @@
+[Unit]
+Description=Ampara - monitor de CPU, memoria, disco e servicos
+# Sem Requires= do app: o monitor existe para observar o app quebrado.
+After=network-online.target
+Wants=network-online.target
+# Reinicio sem limite: o monitor nunca pode ficar parado por excesso de tentativas.
+StartLimitIntervalSec=0
+
+[Service]
+# Type=simple (nao notify): o monitor so envia WATCHDOG=1, nunca READY=1; NotifyAccess=all
+# deixa o systemd-notify, filho do script bash, falar com o watchdog.
+Type=simple
+User=ampara
+Group=ampara
+EnvironmentFile=-/etc/ampara/vm.conf
+ExecStart=/usr/local/sbin/ampara-monitor.sh
+Restart=always
+RestartSec=3
+WatchdogSec=60
+NotifyAccess=all
+NoNewPrivileges=yes
+ProtectSystem=strict
+# Unico caminho gravavel: o monitor escreve so em alertas.log (curl, systemctl is-active e logger nao gravam em disco).
+ReadWritePaths=/var/log/ampara
+ProtectHome=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target

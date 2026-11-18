@@ -1,0 +1,35 @@
+#cloud-config
+users:
+  - name: operador
+    groups: [sudo]
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    lock_passwd: true
+    ssh_authorized_keys:
+      - __SSH_PUBKEY__
+package_update: true
+packages: [git, curl, ca-certificates, jq]
+runcmd:
+  - - bash
+    - -c
+    - |
+      set -eu -o pipefail
+      mkdir -p /opt/ampara/src /var/log/ampara
+      REPO_URL="__REPO_URL__"
+      PROVISIONAR="__PROVISIONAR__"
+      BAIXOU=0
+      if [ -n "$REPO_URL" ]; then
+        rm -rf /opt/ampara/src.git
+        if git clone --depth 1 "$REPO_URL" /opt/ampara/src.git; then
+          cp -a /opt/ampara/src.git/. /opt/ampara/src/
+          rm -rf /opt/ampara/src.git
+          BAIXOU=1
+        fi
+      fi
+      if [ "$BAIXOU" != 1 ]; then
+        curl -fsS -o /tmp/ampara.tar.gz http://10.0.2.2:__PORTA_SEED__/ampara.tar.gz
+        tar -xzf /tmp/ampara.tar.gz -C /opt/ampara/src
+      fi
+      if [ "$PROVISIONAR" = true ]; then
+        bash /opt/ampara/src/infra/vm/provisiona.sh 2>&1 | tee -a /var/log/ampara/provisiona.log
+      fi
